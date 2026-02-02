@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JEUXVIDEO.PI</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
@@ -12,7 +12,7 @@
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         /* --- Animation Néon --- */
@@ -23,34 +23,75 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 15px 5px; text-align: center; }
+        header { padding: 10px 5px; text-align: center; width: 100%; }
         
         h1 { 
             font-family: 'Orbitron', sans-serif; font-size: 1.6rem; margin: 0; 
-            color: #fff; text-transform: uppercase;
-            animation: flicker 3s infinite alternate;
+            color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
         }
         
         .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
-        .subtitle { font-size: 0.7rem; letter-spacing: 1px; color: #a2c2d0; margin-top: 5px; font-weight: bold; }
+        .subtitle { font-size: 0.7rem; color: #a2c2d0; margin-top: 2px; font-weight: bold; }
 
+        /* Bouton Paiement */
         #pay_button {
             background: linear-gradient(90deg, #ff8800, #ffcc00);
-            border: none; padding: 10px 20px; font-family: 'Orbitron'; font-size: 0.8rem;
+            border: none; padding: 12px 20px; font-family: 'Orbitron'; font-size: 0.8rem;
             clip-path: polygon(5% 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
-            margin: 10px auto; display: block; cursor: pointer; font-weight: bold; color: #000;
+            margin: 10px auto; display: block; cursor: pointer; font-weight: 800; color: #000;
+            width: 90%; max-width: 350px; transition: 0.3s;
         }
+        #pay_button:disabled { background: #555; opacity: 0.6; cursor: not-allowed; }
 
-        /* Grille Compacte */
+        /* Grille de Jeux Compacte (3 colonnes) */
         .game-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; padding: 10px; max-width: 500px; margin: 0 auto;
+            gap: 8px; padding: 10px; width: 95%; max-width: 500px;
         }
         
         .card {
-            background: rgba(10, 20, 40, 0.8); border: 1px solid rgba(0, 243, 255, 0.3);
+            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 8px; padding: 10px 5px; text-align: center;
         }
         
-        .card-icon { font-size: 1.4rem; display: block; margin-bottom: 5
-                
+        .card-icon { font-size: 1.5rem; display: block; margin-bottom: 3px; }
+        .card h3 { margin: 0; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; }
+        .empty { border: 1px dashed #444; opacity: 0.5; }
+
+        /* Formulaire de Contact Optimisé */
+        .contact-area { 
+            width: 100%; background: rgba(0,0,0,0.4); 
+            border-top: 1px solid #1a2a4a; padding: 15px 0; margin-top: auto;
+        }
+        .contact-title { font-family: 'Orbitron'; font-size: 0.75rem; margin-bottom: 8px; text-align: center; color: var(--neon-blue); }
+        
+        .form-container { width: 90%; margin: auto; }
+        .row { display: flex; gap: 6px; margin-bottom: 6px; }
+        
+        input, textarea { 
+            background: #0f1a2e; border: 1px solid #333; color: white; 
+            padding: 8px; font-size: 0.85rem; border-radius: 4px; font-family: 'Rajdhani';
+        }
+        input { flex: 1; width: 48%; }
+        textarea { width: 100%; box-sizing: border-box; resize: none; margin-bottom: 6px; }
+        
+        .btn-send { 
+            width: 100%; background: var(--neon-blue); border: none; padding: 10px; 
+            font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer;
+        }
+
+        footer { font-size: 0.65rem; color: #555; padding: 10px; text-align: center; width: 100%; }
+        .secure-icon { color: var(--neon-blue); margin-right: 3px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+        <div class="subtitle">LE MEILLEUR SITE DE JEUX DU MONDE</div>
+        <button id="pay_button">🚀 DEVENIR FONDATEUR (1 PI)</button>
+    </header>
+
+    <div class="game-grid">
+        <div class="card" onclick="window.location.href='2048/index.html'">
+            <span class="card-icon">🧩
