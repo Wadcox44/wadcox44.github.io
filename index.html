@@ -22,7 +22,13 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 25px 5px 15px; text-align: center; width: 100%; }
+        @keyframes neon-pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); border-color: var(--neon-blue); }
+            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+        }
+
+        header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
             font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
             color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
@@ -33,7 +39,7 @@
         /* Grille de Jeux */
         .game-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; padding: 10px; width: 95%; max-width: 500px; box-sizing: border-box; margin-bottom: 10px;
+            gap: 8px; padding: 10px; width: 95%; max-width: 500px; box-sizing: border-box; margin-bottom: 15px;
         }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
@@ -43,27 +49,36 @@
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
+        /* Section Don (Remontée) */
+        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; justify-content: center; }
+        .btn-don {
+            background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
+            font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
+            width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
+            animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
+        }
+        .btn-don:hover { background: var(--neon-blue); color: #000; transform: scale(1.02); }
+
         /* Section Partenaires */
         .partner-callout {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 25px; margin: 10px auto; text-align: center; width: 90%; max-width: 800px;
+            border-radius: 15px; padding: 20px; margin: 5px auto; text-align: center; width: 90%; max-width: 800px;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 6px 18px; border-radius: 50px; font-size: 14px; letter-spacing: 3px;
-            margin-bottom: 5px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
+            padding: 8px 20px; border-radius: 50px; font-size: 15px; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
             text-transform: uppercase;
         }
-        .partner-callout h3 { font-size: 24px; margin-top: 5px; margin-bottom: 10px; }
 
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 20px; gap: 10px; }
+        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
         .offer-item { background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1; }
         .offer-item strong { display: block; font-size: 1rem; margin-bottom: 3px; }
-        .offer-item p { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin: 0; }
+        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; }
 
-        /* Section Contact - Centrée */
-        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
-        .contact-title { font-family: 'Orbitron'; font-size: 1.1rem; margin-bottom: 20px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
+        /* Section Contact */
+        .contact-area { width: 100%; padding: 20px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 15px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
         
         .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
         .row { display: flex; gap: 10px; width: 100%; }
@@ -73,23 +88,12 @@
             padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani';
             box-sizing: border-box; width: 100%;
         }
-        textarea { resize: none; }
         
         .btn-send { 
             width: 100%; background: var(--neon-blue); border: none; padding: 14px; 
             font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer;
-            text-transform: uppercase; font-family: 'Orbitron'; transition: 0.3s;
+            text-transform: uppercase; font-family: 'Orbitron';
         }
-
-        /* Section Don - Centrée et Visible */
-        .donation-section { text-align: center; padding: 50px 20px; width: 100%; display: flex; justify-content: center; }
-        .btn-don {
-            background: #fff; color: #000; padding: 18px 30px; font-weight: 800; border-radius: 4px;
-            font-family: 'Orbitron'; cursor: pointer; border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); width: 90%; max-width: 450px;
-            transition: all 0.3s ease; text-transform: uppercase;
-        }
-        .btn-don:hover { transform: translateY(-3px); box-shadow: 0 0 25px rgba(0, 243, 255, 0.4); }
 
         /* Loader */
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -105,7 +109,7 @@
         @media (max-width: 600px) {
             h1 { font-size: 2rem; }
             .offer-grid { flex-direction: column; }
-            .row { flex-direction: column; gap: 10px; }
+            .row { flex-direction: column; }
         }
     </style>
 </head>
@@ -131,10 +135,15 @@
         </div>
     </div>
 
+    <div class="donation-section">
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
+    </div>
+
     <div class="partner-callout">
         <div class="launch-badge">Offre de lancement</div>
-        <h3>PROGRAMME PIONNIERS</h3>
-        <p style="color: rgba(255,255,255,0.8); margin-bottom: 0;">Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.</p>
+        <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
+            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.
+        </p>
         
         <div class="offer-grid">
             <div class="offer-item">
@@ -143,7 +152,7 @@
             </div>
             <div class="offer-item">
                 <strong>0% Commission *</strong>
-                <p>Offre de bienvenue</p>
+                <p>Sur les transactions In-Game</p>
             </div>
             <div class="offer-item">
                 <strong>Slot Premium</strong>
@@ -153,19 +162,15 @@
     </div>
 
     <div class="contact-area">
-        <div class="contact-title">REJOINDRE L'AVENTURE / CONTACT</div>
+        <div class="contact-title">COLLABORATIONS & DEMANDES DE PARTENARIAT</div>
         <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container" id="contactForm">
             <div class="row">
                 <input type="text" name="name" placeholder="Nom" required>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
-            <textarea name="message" rows="4" placeholder="Parlez-nous de votre projet ou posez vos questions ici..." required></textarea>
+            <textarea name="message" rows="4" placeholder="Décrivez votre projet ou votre demande de partenariat..." required></textarea>
             <button type="submit" class="btn-send" id="btnText">ENVOYER LE MESSAGE</button>
         </form>
-    </div>
-
-    <div class="donation-section">
-        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
     </div>
 
     <footer>
@@ -177,58 +182,3 @@
         const btnContact = document.getElementById('btnText');
 
         form.onsubmit = function() {
-            btnContact.innerHTML = '<span class="loader"></span> PATIENTEZ...';
-            btnContact.style.opacity = '0.7';
-            btnContact.style.pointerEvents = 'none';
-        };
-
-        Pi.init({ version: "2.0", sandbox: false });
-
-        async function clorePaiementsBloqués(payment) {
-            try {
-                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId: payment.identifier })
-                });
-                await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error(e); }
-        }
-
-        async function donnerPi() {
-            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
-            if (montant === null || isNaN(montant) || parseFloat(montant) < 1) {
-                alert("Veuillez entrer un montant valide (minimum 1 Pi).");
-                return;
-            }
-
-            try {
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-                await Pi.createPayment({
-                    amount: parseFloat(montant),
-                    memo: "Don de soutien JeuxVideo.Pi",
-                    metadata: { type: "don_libre" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        Pi.completePayment(paymentId);
-                        alert("Un immense merci pour votre soutien de " + montant + " Pi !");
-                    },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) {
-                        if(payment) { clorePaiementsBloqués(payment); }
-                    }
-                });
-            } catch (err) { console.error(err); }
-        }
-
-        document.getElementById('pay_button').onclick = donnerPi;
-    </script>
-</body>
-</html>
