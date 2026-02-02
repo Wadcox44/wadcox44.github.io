@@ -33,61 +33,57 @@
     </div>
 
     <script>
-        // Initialisation
-        Pi.init({ version: "2.0", sandbox: false });
+  Pi.init({ version: "2.0", sandbox: false });
 
-        async function donnerPi() {
-            const btn = document.getElementById('pay_button');
-            
-            try {
-                // Authentification + Nettoyage automatique des paiements bloqués
-                const user = await Pi.authenticate(['username', 'payments'], function(payment) {
-                    fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId: payment.identifier })
-                    });
-                });
+  // FONCTION DE SECOURS : Pour finaliser les paiements bloqués
+  async function handleIncompletePayments(payment) {
+    console.log("Paiement incomplet trouvé, finalisation...");
+    await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentId: payment.identifier })
+    });
+    // On peut ajouter ici un appel à Pi.completePayment si nécessaire selon ta version du SDK
+  }
 
-                // Création du paiement
-                await Pi.createPayment({
-                    amount: 1,
-                    memo: "Don Membre Fondateur - JeuxVideo.Pi",
-                    metadata: { productId: "fondateur-001" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        btn.disabled = true;
-                        btn.innerText = "VALIDATION RÉSEAU...";
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        // ON COUPE LA BOUCLE : Redirection directe vers le jeu
-                        btn.innerText = "MERCI ! REDIRECTION...";
-                        setTimeout(() => {
-                            window.location.href = "2048/index.html";
-                        }, 1500);
-                    },
-                    onCancel: function(paymentId) {
-                        btn.disabled = false;
-                        btn.innerText = "🚀 DEVENIR MEMBRE FONDATEUR (1 PI)";
-                    },
-                    onError: function(error, payment) {
-                        btn.disabled = false;
-                        btn.innerText = "RÉESSAYER";
-                        alert("Erreur : " + error.message);
-                    }
-                });
-            } catch (err) {
-                alert("Erreur d'accès au SDK : " + err.message);
-            }
+  async function donnerPi() {
+    const btn = document.getElementById('pay_button');
+    try {
+      // 1. Authentification avec capture des paiements incomplets
+      const user = await Pi.authenticate(['username', 'payments'], handleIncompletePayments);
+
+      // 2. Création du paiement normal
+      await Pi.createPayment({
+        amount: 1,
+        memo: "Validation Étape 10 - Membre Fondateur",
+        metadata: { productId: "fondateur-001" }
+      }, {
+        onReadyForServerApproval: function(paymentId) {
+          btn.disabled = true;
+          btn.innerText = "VALIDATION...";
+          return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId: paymentId })
+          }).then(res => res.json());
+        },
+        onReadyForServerCompletion: function(paymentId, txid) {
+          btn.innerText = "SUCCÈS !";
+          setTimeout(() => { window.location.href = "2048/index.html"; }, 1500);
+        },
+        onCancel: function(paymentId) { btn.disabled = false; },
+        onError: function(error, payment) { 
+          alert("Erreur : " + error.message);
+          btn.disabled = false;
         }
+      });
+    } catch (err) {
+      alert("Erreur SDK : " + err.message);
+    }
+  }
 
-        // Liaison du bouton
-        document.getElementById('pay_button').onclick = donnerPi;
-    </script>
+  document.getElementById('pay_button').onclick = donnerPi;
+</script>
 </body>
 </html>
+
