@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   const { paymentId } = req.body;
   
   // ICI : Remplace par ta clé secrète (Server API Key) du portail Pi
-  const PI_API_KEY = "TA_CLE_API_DU_PORTAIL_DEVELOP_PI"; 
+  const PI_API_KEY = process.env.PI_API_KEY;
 
   try {
     // On demande au réseau Pi d'approuver le paiement
