@@ -111,17 +111,17 @@
         </div>
     </div>
 
-    <section class="contact-area">
+   <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-area">
         <div class="contact-title">PARTENAIRES & STUDIOS</div>
         <div class="form-container">
             <div class="row">
-                <input type="text" placeholder="Nom">
-                <input type="email" placeholder="Email">
+                <input type="text" name="nom" placeholder="Nom" required>
+                <input type="email" name="email" placeholder="Email" required>
             </div>
-            <textarea rows="3" placeholder="Parlez-nous de votre projet..."></textarea>
-            <button class="btn-send">ENVOYER</button>
+            <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet..." required></textarea>
+            <button type="submit" class="btn-send">ENVOYER</button>
         </div>
-    </section>
+    </form>
 
     <footer>
         <span class="secure-icon">✔</span> Certifié WadCox | Écosystème Pi Network
@@ -178,3 +178,4 @@
     </script>
 </body>
 </html>
+
