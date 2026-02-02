@@ -140,12 +140,10 @@
 
   async function donnerPi() {
     try {
-      // 1. Authentification simplifiée
       const user = await Pi.authenticate(['username', 'payments'], function(p) {
           console.log("Incomplet", p);
       });
 
-      // 2. Création du paiement avec structure stricte
       await Pi.createPayment({
         amount: 1,
         memo: "Soutien projet",
@@ -159,26 +157,23 @@
           }).then(function(res) { return res.json(); });
         },
         onReadyForServerCompletion: function(paymentId, txid) {
-          alert("Paiement réussi !");
+          // On arrête l'alerte infinie en changeant de page
+          window.location.href = "https://wadcox44-github-io.vercel.app/2048/index.html";
         },
-        onCancel: function(paymentId) {
-          console.log("Annulé");
-        },
-        onError: function(error, payment) {
-          alert("Erreur SDK : " + error.message);
-        }
+        onCancel: function(paymentId) { console.log("Annulé"); },
+        onError: function(error, payment) { alert("Erreur : " + error.message); }
       });
     } catch (err) {
       alert("Erreur : " + err.message);
     }
   }
 
-  // Liaison
   document.getElementById('pay_button').onclick = donnerPi;
 </script>
     
 </body>
 </html>
+
 
 
 
