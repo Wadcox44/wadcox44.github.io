@@ -3,246 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeuxvideo.pi | Future Gaming Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --pi-gold: #ffaa00;
-            --pi-glow: rgba(255, 170, 0, 0.3);
-            --bg-dark: #080808;
-            --card-bg: #111111;
-            --input-bg: #1a1a1a;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            margin: 0;
-            padding-top: 5px;
-        }
-
-        .container {
-            padding: 15px 30px 40px 30px;
-            max-width: 550px;
-            width: 100%;
-            border: 1px solid #222;
-            border-radius: 24px;
-            background: var(--card-bg);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-            text-align: center;
-        }
-
-        h1 { font-size: 2.5em; margin-top: 0 !important; margin-bottom: 15px; font-weight: 800; }
-        .pi-text { color: var(--pi-gold); }
-        p { color: #bcbcbc; line-height: 1.6; }
-
-        .contact-form {
-            margin-top: 30px;
-            text-align: left;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 25px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 170, 0, 0.2);
-        }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.8em; color: var(--pi-gold); margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-        input, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        textarea { height: 80px; resize: none; }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: var(--pi-gold);
-            border: 2px solid var(--pi-gold);
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 170, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0); }
-        }
-
-        #pay_button {
-            animation: pulse-gold 2s infinite;
-            transition: 0.3s;
-            width: 100%; padding: 12px; background: var(--pi-gold); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-        }
-
-        .social-links { display: flex; gap: 10px; margin-top: 25px; justify-content: center; }
-        .contact-btn { padding: 10px 15px; color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.8em; flex: 1; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-tg { background: #0088cc22; color: #0088cc; }
-        .btn-reddit { background: #FF450022; color: #FF4500; }
-        .btn-discord { background: #5865F222; color: #5865F2; }
-
-        .footer-info { margin-top: 20px; font-size: 0.7em; color: #444; }
-    </style>
+    <title>JeuxVideo.Pi - Hub Gaming</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a2e; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: #16213e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: #ffaa00; margin-bottom: 10px; }
+        p { font-size: 0.9em; color: #a2a2d0; line-height: 1.5; }
+        #pay_button { 
+            background: linear-gradient(45deg, #ffaa00, #ff8800); 
+            color: #000; padding: 18px; border: none; border-radius: 12px; 
+            font-weight: 800; cursor: pointer; width: 100%; font-size: 1em; 
+            text-transform: uppercase; margin-top: 20px; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+        }
+        #pay_button:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .footer { margin-top: 30px; font-size: 0.7em; opacity: 0.5; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>jeuxvideo<span class="pi-text">.pi</span></h1>
-    
-    <div style="margin-bottom: 25px;">
-        <a href="2048/index.html" style="display: inline-block; padding: 12px 25px; background-color: #6c5ce7; color: white; text-decoration: none; border-radius: 12px; font-weight: bold;">
-            🎮 CLIQUE ICI POUR JOUER (BETA)
-        </a>
-    </div>
-    
-    <p><strong>Portail Gaming Pi Network</strong></p>
-    <p style="font-size: 0.9em;">Développeurs, studios ou partenaires ? <br>Envoyez-moi un message direct ci-dessous.</p>
-
-    <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-form">
-        <div class="form-group">
-            <label>Votre Email</label>
-            <input type="email" name="email" placeholder="email@exemple.com" required>
-        </div>
-        <div class="form-group">
-            <label>Message / Projet</label>
-            <textarea name="message" placeholder="Parlez-moi de votre projet..." required></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Envoyer la proposition</button>
-    </form>
-
-    <div style="margin-top: 20px; border: 1px dashed #ffaa00; padding: 15px; border-radius: 15px; background: rgba(255,170,0,0.05);">
-        <p style="font-size: 0.8em; color: #ffaa00; margin-bottom: 10px;">Soutenez le développement du Hub</p>
-        <button id="pay_button" style="background-color: #ffaa00; color: #000; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1.1em; text-transform: uppercase; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.4);">
-    🚀 Faire un don (1 Pi) pour le projet
-</button>
+    <div class="container">
+        <h1>🎮 JeuxVideo.Pi</h1>
+        <p>Aidez-nous à construire le premier hub de jeux indépendant sur Pi Network. Votre contribution permet d'héberger les serveurs et d'ajouter de nouveaux titres chaque mois.</p>
+        
+        <button id="pay_button">🚀 DEVENIR MEMBRE FONDATEUR (1 PI)</button>
+        
+        <div class="footer">Étape 10 : Validation Mainnet en cours...</div>
     </div>
 
-    <p style="font-size: 0.85em; color: #777; font-style: italic; margin-top: 20px;">
-        Building the ultimate gaming hub. Open for partnerships.
-    </p>
+    <script>
+        // Initialisation
+        Pi.init({ version: "2.0", sandbox: false });
 
-    <div class="social-links">
-        <a href="https://t.me/Wadcox" target="_blank" class="contact-btn btn-tg">Telegram</a>
-        <a href="https://www.reddit.com/user/WadCox" target="_blank" class="contact-btn btn-reddit">Reddit</a>
-        <a href="https://discord.gg/6hzZuv3bxR" target="_blank" class="contact-btn btn-discord">Discord</a>
-    </div>
+        async function donnerPi() {
+            const btn = document.getElementById('pay_button');
+            
+            try {
+                // Authentification + Nettoyage automatique des paiements bloqués
+                const user = await Pi.authenticate(['username', 'payments'], function(payment) {
+                    fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId: payment.identifier })
+                    });
+                });
 
-    <div class="footer-info">
-        Verified Owner: @WadCox
-    </div>
-</div>
-<script>
-  // 1. Initialisation du SDK Pi
-  Pi.init({ version: "2.0", sandbox: false });
-
-  async function donnerPi() {
-    const bouton = document.getElementById('pay_button');
-    
-    try {
-      // 2. Authentification + Gestion des paiements en attente (évite les blocages)
-      const user = await Pi.authenticate(['username', 'payments'], function(payment) {
-        // Si un paiement était resté bloqué, on tente de le valider discrètement
-        fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentId: payment.identifier })
-        });
-      });
-
-      console.log("Utilisateur : " + user.user.username);
-
-      // 3. Lancement du nouveau paiement
-      await Pi.createPayment({
-        amount: 1,
-        memo: "Soutien au projet jeuxvideo.pi",
-        metadata: { productId: "don-001" }
-      }, {
-        onReadyForServerApproval: function(paymentId) {
-          // On désactive le bouton pour éviter les clics multiples
-          bouton.disabled = true;
-          bouton.innerText = "Validation en cours...";
-
-          return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId: paymentId })
-          }).then(res => res.json());
-        },
-        onReadyForServerCompletion: function(paymentId, txid) {
-          // ARRÊT DE LA BOUCLE : On redirige l'utilisateur
-          alert("Merci ! Redirection vers l'espace gaming...");
-          window.location.href = "https://wadcox44-github-io.vercel.app/2048/index.html";
-        },
-        onCancel: function(paymentId) {
-          bouton.disabled = false;
-          bouton.innerText = "Donner 1 pi pour soutenir le projet";
-          console.log("Paiement annulé.");
-        },
-        onError: function(error, payment) {
-          bouton.disabled = false;
-          bouton.innerText = "Réessayer le don";
-          alert("Erreur Pi : " + error.message);
+                // Création du paiement
+                await Pi.createPayment({
+                    amount: 1,
+                    memo: "Don Membre Fondateur - JeuxVideo.Pi",
+                    metadata: { productId: "fondateur-001" }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        btn.disabled = true;
+                        btn.innerText = "VALIDATION RÉSEAU...";
+                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId })
+                        }).then(res => res.json());
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        // ON COUPE LA BOUCLE : Redirection directe vers le jeu
+                        btn.innerText = "MERCI ! REDIRECTION...";
+                        setTimeout(() => {
+                            window.location.href = "2048/index.html";
+                        }, 1500);
+                    },
+                    onCancel: function(paymentId) {
+                        btn.disabled = false;
+                        btn.innerText = "🚀 DEVENIR MEMBRE FONDATEUR (1 PI)";
+                    },
+                    onError: function(error, payment) {
+                        btn.disabled = false;
+                        btn.innerText = "RÉESSAYER";
+                        alert("Erreur : " + error.message);
+                    }
+                });
+            } catch (err) {
+                alert("Erreur d'accès au SDK : " + err.message);
+            }
         }
-      });
 
-    } catch (err) {
-      alert("Erreur d'authentification : " + err.message);
-    }
-  }
-
-  // 4. Liaison du bouton au clic
-  window.onload = function() {
-    const btn = document.getElementById('pay_button');
-    if (btn) {
-      btn.onclick = donnerPi;
-    }
-  };
-</script>
-    
+        // Liaison du bouton
+        document.getElementById('pay_button').onclick = donnerPi;
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
