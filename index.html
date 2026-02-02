@@ -22,18 +22,18 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 20px 5px 10px; text-align: center; }
+        header { padding: 25px 5px 15px; text-align: center; }
         h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 1.7rem; margin: 0; 
+            font-family: 'Orbitron', sans-serif; font-size: 2.2rem; margin: 0; 
             color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
         .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
 
         /* Grille de Jeux */
         .game-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; padding: 10px; width: 95%; margin: 0 auto 30px auto; box-sizing: border-box;
+            gap: 8px; padding: 10px; width: 95%; margin: 0 auto; box-sizing: border-box;
         }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
@@ -46,21 +46,22 @@
         /* Section Partenaires */
         .partner-callout {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 40px; margin: 20px auto; text-align: center; max-width: 850px;
+            border-radius: 15px; padding: 30px; margin: 15px auto; text-align: center; max-width: 850px;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 5px 15px; border-radius: 50px; font-size: 11px; letter-spacing: 2px;
+            padding: 8px 20px; border-radius: 50px; font-size: 14px; letter-spacing: 3px;
             margin-bottom: 20px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
+            text-transform: uppercase;
         }
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 30px; gap: 15px; }
+        .offer-grid { display: flex; justify-content: space-around; margin-top: 25px; gap: 15px; }
         .offer-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; flex: 1; }
         .offer-item strong { display: block; font-size: 1.1rem; margin-bottom: 5px; }
         .offer-item p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
 
         /* Section Contact */
-        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); }
-        .contact-title { font-family: 'Orbitron'; font-size: 0.9rem; margin-bottom: 20px; text-align: center; color: var(--neon-blue); }
+        .contact-area { width: 100%; padding: 25px 0; background: rgba(0,0,0,0.3); }
+        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 20px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; }
         .form-container { width: 90%; max-width: 600px; margin: auto; }
         .row { display: flex; gap: 8px; margin-bottom: 8px; }
         input, textarea { 
@@ -75,13 +76,15 @@
             text-transform: uppercase; font-family: 'Orbitron'; transition: 0.3s;
         }
 
-        /* Section Fondateur */
-        .founder-section { text-align: center; margin: 40px auto; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; }
-        .btn-founder {
-            background: #fff; color: #000; max-width: 320px; margin: 0 auto;
+        /* Section Don */
+        .donation-section { text-align: center; padding: 40px 20px; width: 100%; margin-top: 20px; }
+        .btn-don {
+            background: #fff; color: #000; max-width: 350px; margin: 0 auto;
             border: none; padding: 15px 30px; font-weight: bold; border-radius: 4px;
             font-family: 'Orbitron'; cursor: pointer; display: block; width: 90%;
+            transition: transform 0.2s;
         }
+        .btn-don:active { transform: scale(0.95); }
 
         /* Loader */
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -92,12 +95,12 @@
             margin-right: 10px; vertical-align: middle;
         }
 
-        footer { font-size: 0.7rem; color: #555; padding: 25px; text-align: center; }
+        footer { font-size: 0.7rem; color: #555; padding: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
         
         @media (max-width: 600px) {
             .offer-grid { flex-direction: column; }
             .row { flex-direction: column; }
-            input { width: 100%; box-sizing: border-box; }
+            input { width: 100%; }
         }
     </style>
 </head>
@@ -124,9 +127,9 @@
     </div>
 
     <div class="partner-callout">
-        <div class="launch-badge">OFFRE DE LANCEMENT</div>
-        <h3>PROGRAMME PIONNIERS</h3>
-        <p>Vous êtes un studio indépendant ? Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.</p>
+        <div class="launch-badge">Offre de lancement</div>
+        <h3 style="font-size: 28px; margin-bottom: 15px;">PROGRAMME PIONNIERS</h3>
+        <p style="color: rgba(255,255,255,0.8);">Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.</p>
         
         <div class="offer-grid">
             <div class="offer-item">
@@ -145,22 +148,19 @@
     </div>
 
     <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-area" id="contactForm">
-        <div class="contact-title">CONTACTER LE SUPPORT / STUDIOS</div>
+        <div class="contact-title">REJOINDRE L'AVENTURE / CONTACT</div>
         <div class="form-container">
             <div class="row">
                 <input type="text" name="name" placeholder="Nom" required>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
-            <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet ou posez votre question..." required></textarea>
+            <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet ou posez vos questions ici..." required></textarea>
             <button type="submit" class="btn-send" id="btnText">ENVOYER LE MESSAGE</button>
         </div>
     </form>
 
-    <div class="founder-section">
-        <p style="color: rgba(255,255,255,0.8); margin-bottom: 25px; font-size: 1.1rem;">
-            Soutenez le lancement de <strong>JeuxVideo.Pi</strong> en donnant 1 Pi
-        </p>
-        <button id="pay_button" class="btn-founder">DEVENIR FONDATEUR (1 PI)</button>
+    <div class="donation-section">
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
     </div>
 
     <footer>
@@ -168,7 +168,6 @@
     </footer>
 
     <script>
-        // --- LOGIQUE FORMULAIRE ---
         const form = document.getElementById('contactForm');
         const btnContact = document.getElementById('btnText');
 
@@ -178,5 +177,53 @@
             btnContact.style.pointerEvents = 'none';
         };
 
-        // --- LOGIQUE PI SDK ---
-        Pi.init({ version: "2.0", sandbox: false
+        Pi.init({ version: "2.0", sandbox: false });
+
+        async function clorePaiementsBloqués(payment) {
+            try {
+                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId: payment.identifier })
+                });
+                await Pi.completePayment(payment.identifier);
+            } catch (e) { console.error(e); }
+        }
+
+        async function donnerPi() {
+            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
+            if (montant === null || isNaN(montant) || parseFloat(montant) < 1) {
+                alert("Veuillez entrer un montant valide (minimum 1 Pi).");
+                return;
+            }
+
+            try {
+                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                await Pi.createPayment({
+                    amount: parseFloat(montant),
+                    memo: "Don de soutien JeuxVideo.Pi",
+                    metadata: { type: "don_libre" }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId })
+                        }).then(res => res.json());
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        Pi.completePayment(paymentId);
+                        alert("Un immense merci pour votre soutien de " + montant + " Pi !");
+                    },
+                    onCancel: function(paymentId) { },
+                    onError: function(error, payment) {
+                        if(payment) { clorePaiementsBloqués(payment); }
+                    }
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('pay_button').onclick = donnerPi;
+    </script>
+</body>
+</html>
