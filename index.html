@@ -111,18 +111,16 @@
         </div>
     </div>
 
-  <form action="https://formspree.io/f/TON_ID_ICI" method="POST" class="contact-area">
-        <input type="hidden" name="_next" value="https://wadcox44.github.io/">
-        
+  <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-area">
         <div class="contact-title">PARTENAIRES & STUDIOS</div>
         <div class="form-container">
             <div class="row">
-                <input type="text" name="nom" placeholder="Nom" required>
+                <input type="text" name="name" placeholder="Nom" required>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
             <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet..." required></textarea>
             
-            <button type="submit" class="btn-send" id="submit-btn" onclick="submitEffect()">ENVOYER</button>
+            <button type="submit" class="btn-send" onclick="if(this.form.checkValidity()) this.innerText='PATIENTEZ...'">ENVOYER</button>
         </div>
     </form>
 
@@ -192,5 +190,6 @@
     </script>
 </body>
 </html>
+
 
 
