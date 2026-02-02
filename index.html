@@ -3,98 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JeuxVideo.Pi - Hub Gaming</title>
+    <title>JEUXVIDEO.PI - L'Avenir du Gaming</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a2e; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: #16213e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { color: #ffaa00; margin-bottom: 10px; }
-        p { font-size: 0.9em; color: #a2a2d0; line-height: 1.5; }
-        #pay_button { 
-            background: linear-gradient(45deg, #ffaa00, #ff8800); 
-            color: #000; padding: 18px; border: none; border-radius: 12px; 
-            font-weight: 800; cursor: pointer; width: 100%; font-size: 1em; 
-            text-transform: uppercase; margin-top: 20px; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-orange: #ffaa00;
+            --bg-dark: #050b14;
+            --glass: rgba(10, 20, 40, 0.7);
         }
-        #pay_button:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .footer { margin-top: 30px; font-size: 0.7em; opacity: 0.5; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 0%, #1a2a4a 0%, var(--bg-dark) 70%),
+                linear-gradient(0deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            text-align: center;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding: 60px 20px 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5em;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #ffffff, #89cff0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .domain-suffix {
+            color: var(--neon-orange);
+            -webkit-text-fill-color: var(--neon-orange);
+            text-shadow: 0 0 20px rgba(255, 170, 0, 0.6);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #a2c2d0;
+            margin-top: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* --- LE BOUTON MAGIQUE --- */
+        #pay_button {
+            margin-top: 40px;
+            background: linear-gradient(90deg, #ff8800, #ffcc00);
+            border: none;
+            padding: 18px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1em;
+            color: #000;
+            text-transform: uppercase;
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: 0.3s;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.4);
+            position: relative;
+            z-index: 10;
+        }
+        
+        #pay_button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 170, 0, 0.8);
+        }
+
+        /* --- LA GRILLE DE JEUX --- */
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 15px;
+            width: 300px;
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 243, 255, 0.05);
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card-icon { font-size: 3em; margin-bottom: 15px; display: block; }
+        .card h3 { font-family: 'Orbitron', sans-serif; margin: 10px 0; font-size: 1.5em; }
+        .card p { color: #8899a6; font-size: 0.9em; }
+
+        /* Style spécifique Slot Vide */
+        .empty-slot {
+            border: 1px dashed #444;
+            opacity: 0.8;
+        }
+        .empty-slot .card-icon { filter: grayscale(1); opacity: 0.5; }
+        .empty-slot h3 { color: #555; font-size: 1.1em; }
+        
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--neon-blue);
+            color: #000;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .play-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-weight: bold;
+            border: 1px solid var(--neon-blue);
+            padding: 8px 20px;
+            border-radius: 30px;
+            transition: 0.3s;
+        }
+        .play-link:hover { background: var(--neon-blue); color: black; }
+
+        /* --- CONTACT --- */
+        .contact-section {
+            background: linear-gradient(to top, #000, #0a1525);
+            padding: 50px 20px;
+            border-top: 1px solid #333;
+        }
+        
+        .form-box {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #333;
+            padding: 30px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        input, textarea {
+            width: 90%;
+            background: #0f1a2e;
+            border: 1px solid #333;
+            color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        /* --- FOOTER VERIF --- */
+        .footer-verif {
+            background: black;
+            color: #555;
+            font-size: 0.8em;
+            padding: 15px;
+            border-top: 1px solid #222;
+        }
+        .check-icon { color: var(--neon-blue); margin-right: 5px; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎮 JeuxVideo.Pi</h1>
-        <p>Aidez-nous à construire le premier hub de jeux indépendant sur Pi Network. Votre contribution permet d'héberger les serveurs et d'ajouter de nouveaux titres chaque mois.</p>
+    <div class="hero">
+        <h1>JEUXVIDEO<span class="domain-suffix">.PI</span></h1>
+        <div class="subtitle">L'avenir du Gaming sur Pi Network</div>
         
         <button id="pay_button">🚀 DEVENIR MEMBRE FONDATEUR (1 PI)</button>
+    </div>
+
+    <div class="grid-container">
         
-        <div class="footer">Étape 10 : Validation Mainnet en cours...</div>
+        <div class="card">
+            <span class="badge">ONLINE</span>
+            <div class="card-icon">🧩</div>
+            <h3>2048 NEON</h3>
+            <p>Le classique revisité pour l'écosystème Pi.</p>
+            <a href="2048/index.html" class="play-link">JOUER MAINTENANT</a>
+        </div>
+
+        <div class="card empty-slot">
+            <div class="card-icon">👨‍💻</div>
+            <h3>SLOT DÉVELOPPEUR</h3>
+            <p>Espace réservé pour un studio ou un dév indépendant.</p>
+            <a href="#contact" style="color:#666; font-size:0.8em;">CANDIDATER</a>
+        </div>
+
+        <div class="card empty-slot">
+            <div class="card-icon">🚀</div>
+            <h3>VOTRE JEU ICI</h3>
+            <p>Plus de 50M de Pionniers attendent votre projet.</p>
+            <a href="#contact" style="color:#666; font-size:0.8em;">RÉSERVER</a>
+        </div>
+
+    </div>
+
+    <section id="contact" class="contact-section">
+        <h2 style="font-family:'Orbitron'; color:white;">PARTENAIRES & STUDIOS</h2>
+        <p style="color:#8899a6; margin-bottom:30px;">Envoyez un message direct sécurisé.</p>
+        
+        <div class="form-box">
+            <input type="text" placeholder="Nom du Studio / Développeur">
+            <input type="text" placeholder="Contact (Email / Telegram)">
+            <textarea rows="4" placeholder="Description du projet..."></textarea>
+            <button style="background:var(--neon-blue); border:none; padding:10px 30px; font-weight:bold; cursor:pointer; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);">ENVOYER</button>
+        </div>
+    </section>
+
+    <div class="footer-verif">
+        <span class="check-icon">✔</span> Propriété vérifiée : wadcox44-github-io | Domaine lié au Pi Wallet : wadcox44.github.io
     </div>
 
     <script>
-  Pi.init({ version: "2.0", sandbox: false });
+        Pi.init({ version: "2.0", sandbox: false });
 
-  // Cette fonction va tenter de fermer TOUS les paiements qui traînent
-  async function clorePaiementsBloqués(payment) {
-    console.log("Nettoyage du paiement :", payment.identifier);
-    try {
-      // 1. On informe ton serveur
-      await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId: payment.identifier })
-      });
-      // 2. On dit au SDK que c'est fini
-      await Pi.completePayment(payment.identifier);
-      console.log("Paiement clos avec succès");
-    } catch (e) {
-      console.error("Erreur nettoyage :", e);
-    }
-  }
-
-  async function donnerPi() {
-    const btn = document.getElementById('pay_button');
-    try {
-      // Authentification avec fonction de nettoyage automatique
-      await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-
-      await Pi.createPayment({
-        amount: 1,
-        memo: "Finalisation Etape 10",
-        metadata: { productId: "fondateur-001" }
-      }, {
-        onReadyForServerApproval: function(paymentId) {
-          btn.disabled = true;
-          return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId: paymentId })
-          }).then(res => res.json());
-        },
-        onReadyForServerCompletion: function(paymentId, txid) {
-          // IMPORTANT : On finalise officiellement ici aussi
-          Pi.completePayment(paymentId);
-          alert("Transaction validée !");
-          window.location.href = "2048/index.html";
-        },
-        onCancel: function(paymentId) { btn.disabled = false; },
-        onError: function(error, payment) {
-          // Si l'erreur est "Pending", on essaie de fermer ce paiement
-          if(payment) { clorePaiementsBloqués(payment); }
-          alert("Note : Le système se synchronise. Réessayez dans un instant.");
-          btn.disabled = false;
+        // FONCTION KARCHER : Nettoie les paiements bloqués
+        async function clorePaiementsBloqués(payment) {
+            try {
+                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId: payment.identifier })
+                });
+                await Pi.completePayment(payment.identifier);
+                console.log("Paiement fantôme nettoyé.");
+            } catch (e) {
+                console.error("Erreur nettoyage :", e);
+            }
         }
-      });
-    } catch (err) {
-      alert("Erreur : " + err.message);
-    }
-  }
 
-  document.getElementById('pay_button').onclick = donnerPi;
-</script>
-    
+        async function donnerPi() {
+            const btn = document.getElementById('pay_button');
+            try {
+                // Authentification + Nettoyage auto
+                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+
+                // Création du paiement
+                await Pi.createPayment({
+                    amount: 1,
+                    memo: "Membre Fondateur - JEUXVIDEO.PI",
+                    metadata: { productId: "fondateur-001" }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        btn.disabled = true;
+                        btn.innerText = "CONNEXION BLOCKCHAIN...";
+                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId })
+                        }).then(res => res.json());
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        Pi.completePayment(paymentId);
+                        btn.innerText = "ACCÈS AUTORISÉ";
+                        btn.style.background = "#00f3ff"; // Passe au bleu néon
+                        setTimeout(() => {
+                            window.location.href = "2048/index.html";
+                        }, 1500);
+                    },
+                    onCancel: function(paymentId) {
+                        btn.disabled = false;
+                        btn.innerText = "🚀 DEVENIR MEMBRE FONDATEUR (1 PI)";
+                    },
+                    onError: function(error, payment) {
+                        if(payment) { clorePaiementsBloqués(payment); }
+                        alert("Synchronisation en cours... Réessayez.");
+                        btn.disabled = false;
+                    }
+                });
+            } catch (err) {
+                alert("Erreur SDK : " + err.message);
+            }
+        }
+
+        document.getElementById('pay_button').onclick = donnerPi;
+    </script>
 </body>
 </html>
-
-
