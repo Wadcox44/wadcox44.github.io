@@ -136,43 +136,76 @@
     </div>
 </div>
 <script>
+  // 1. Initialisation du SDK Pi
   Pi.init({ version: "2.0", sandbox: false });
 
   async function donnerPi() {
+    const bouton = document.getElementById('pay_button');
+    
     try {
-      const user = await Pi.authenticate(['username', 'payments'], function(p) {
-          console.log("Incomplet", p);
+      // 2. Authentification + Gestion des paiements en attente (évite les blocages)
+      const user = await Pi.authenticate(['username', 'payments'], function(payment) {
+        // Si un paiement était resté bloqué, on tente de le valider discrètement
+        fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId: payment.identifier })
+        });
       });
 
+      console.log("Utilisateur : " + user.user.username);
+
+      // 3. Lancement du nouveau paiement
       await Pi.createPayment({
         amount: 1,
-        memo: "Soutien projet",
+        memo: "Soutien au projet jeuxvideo.pi",
         metadata: { productId: "don-001" }
       }, {
         onReadyForServerApproval: function(paymentId) {
+          // On désactive le bouton pour éviter les clics multiples
+          bouton.disabled = true;
+          bouton.innerText = "Validation en cours...";
+
           return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ paymentId: paymentId })
-          }).then(function(res) { return res.json(); });
+          }).then(res => res.json());
         },
         onReadyForServerCompletion: function(paymentId, txid) {
-          // On arrête l'alerte infinie en changeant de page
+          // ARRÊT DE LA BOUCLE : On redirige l'utilisateur
+          alert("Merci ! Redirection vers l'espace gaming...");
           window.location.href = "https://wadcox44-github-io.vercel.app/2048/index.html";
         },
-        onCancel: function(paymentId) { console.log("Annulé"); },
-        onError: function(error, payment) { alert("Erreur : " + error.message); }
+        onCancel: function(paymentId) {
+          bouton.disabled = false;
+          bouton.innerText = "Donner 1 pi pour soutenir le projet";
+          console.log("Paiement annulé.");
+        },
+        onError: function(error, payment) {
+          bouton.disabled = false;
+          bouton.innerText = "Réessayer le don";
+          alert("Erreur Pi : " + error.message);
+        }
       });
+
     } catch (err) {
-      alert("Erreur : " + err.message);
+      alert("Erreur d'authentification : " + err.message);
     }
   }
 
-  document.getElementById('pay_button').onclick = donnerPi;
+  // 4. Liaison du bouton au clic
+  window.onload = function() {
+    const btn = document.getElementById('pay_button');
+    if (btn) {
+      btn.onclick = donnerPi;
+    }
+  };
 </script>
     
 </body>
 </html>
+
 
 
 
