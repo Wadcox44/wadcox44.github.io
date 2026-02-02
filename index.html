@@ -2,69 +2,55 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JEUXVIDEO.PI</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; }
+        
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
-            font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; 
-            display: flex; flex-direction: column; justify-content: space-between;
+            font-family: 'Rajdhani', sans-serif; min-height: 100vh;
+            display: flex; flex-direction: column;
         }
 
         /* --- Animation Néon --- */
         @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 40px var(--neon-blue); }
-            20%, 24%, 55% { text-shadow: none; }
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 30px var(--neon-blue);
+            }
+            20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 10px 0; text-align: center; }
+        header { padding: 15px 5px; text-align: center; }
+        
         h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin: 0; 
-            color: #fff; animation: flicker 3s infinite alternate;
+            font-family: 'Orbitron', sans-serif; font-size: 1.6rem; margin: 0; 
+            color: #fff; text-transform: uppercase;
+            animation: flicker 3s infinite alternate;
         }
+        
         .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
-        .subtitle { font-size: 0.7rem; letter-spacing: 1px; color: #a2c2d0; margin-top: 5px; }
+        .subtitle { font-size: 0.7rem; letter-spacing: 1px; color: #a2c2d0; margin-top: 5px; font-weight: bold; }
 
         #pay_button {
             background: linear-gradient(90deg, #ff8800, #ffcc00);
-            border: none; padding: 8px 20px; font-family: 'Orbitron'; font-size: 0.8rem;
+            border: none; padding: 10px 20px; font-family: 'Orbitron'; font-size: 0.8rem;
             clip-path: polygon(5% 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
-            margin: 10px auto; display: block; cursor: pointer; font-weight: bold;
+            margin: 10px auto; display: block; cursor: pointer; font-weight: bold; color: #000;
         }
 
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 10px; }
+        /* Grille Compacte */
+        .game-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; padding: 10px; max-width: 500px; margin: 0 auto;
+        }
+        
         .card {
-            background: rgba(10, 20, 40, 0.6); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px; padding: 8px; text-align: center;
+            background: rgba(10, 20, 40, 0.8); border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 8px; padding: 10px 5px; text-align: center;
         }
-        .card-icon { font-size: 1.5rem; display: block; margin-bottom: 5px; }
-        .card h3 { margin: 2px 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
-        .empty { border: 1px dashed #444; opacity: 0.6; }
-
-        .contact-area { padding: 10px; background: rgba(0,0,0,0.4); border-top: 1px solid #1a2a4a; }
-        .contact-title { font-family: 'Orbitron'; font-size: 0.7rem; margin-bottom: 8px; text-align: center; color: var(--neon-blue); }
         
-        .row { display: flex; gap: 5px; margin-bottom: 5px; }
-        input, textarea { 
-            background: #0f1a2e; border: 1px solid #333; color: white; 
-            padding: 8px; font-size: 0.8rem; border-radius: 4px; font-family: 'Rajdhani';
-        }
-        input { flex: 1; }
-        textarea { width: 100%; box-sizing: border-box; resize: none; }
-        
-        .btn-send { 
-            width: 100%; background: var(--neon-blue); border: none; padding: 10px; 
-            font-weight: bold; margin-top: 5px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;
-        }
-
-        footer { font-size: 0.65rem; color: #555; padding: 8px; text-align: center; border-top: 1px solid #111; }
-        .secure-icon { color: var(--neon-blue); }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>JEUX
+        .card-icon { font-size: 1.4rem; display: block; margin-bottom: 5
+                
