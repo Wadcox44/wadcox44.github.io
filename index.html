@@ -35,32 +35,37 @@
     <script>
   Pi.init({ version: "2.0", sandbox: false });
 
-  // FONCTION DE SECOURS : Pour finaliser les paiements bloqués
-  async function handleIncompletePayments(payment) {
-    console.log("Paiement incomplet trouvé, finalisation...");
-    await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentId: payment.identifier })
-    });
-    // On peut ajouter ici un appel à Pi.completePayment si nécessaire selon ta version du SDK
+  // Cette fonction va tenter de fermer TOUS les paiements qui traînent
+  async function clorePaiementsBloqués(payment) {
+    console.log("Nettoyage du paiement :", payment.identifier);
+    try {
+      // 1. On informe ton serveur
+      await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId: payment.identifier })
+      });
+      // 2. On dit au SDK que c'est fini
+      await Pi.completePayment(payment.identifier);
+      console.log("Paiement clos avec succès");
+    } catch (e) {
+      console.error("Erreur nettoyage :", e);
+    }
   }
 
   async function donnerPi() {
     const btn = document.getElementById('pay_button');
     try {
-      // 1. Authentification avec capture des paiements incomplets
-      const user = await Pi.authenticate(['username', 'payments'], handleIncompletePayments);
+      // Authentification avec fonction de nettoyage automatique
+      await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
 
-      // 2. Création du paiement normal
       await Pi.createPayment({
         amount: 1,
-        memo: "Validation Étape 10 - Membre Fondateur",
+        memo: "Finalisation Etape 10",
         metadata: { productId: "fondateur-001" }
       }, {
         onReadyForServerApproval: function(paymentId) {
           btn.disabled = true;
-          btn.innerText = "VALIDATION...";
           return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -68,22 +73,28 @@
           }).then(res => res.json());
         },
         onReadyForServerCompletion: function(paymentId, txid) {
-          btn.innerText = "SUCCÈS !";
-          setTimeout(() => { window.location.href = "2048/index.html"; }, 1500);
+          // IMPORTANT : On finalise officiellement ici aussi
+          Pi.completePayment(paymentId);
+          alert("Transaction validée !");
+          window.location.href = "2048/index.html";
         },
         onCancel: function(paymentId) { btn.disabled = false; },
-        onError: function(error, payment) { 
-          alert("Erreur : " + error.message);
+        onError: function(error, payment) {
+          // Si l'erreur est "Pending", on essaie de fermer ce paiement
+          if(payment) { clorePaiementsBloqués(payment); }
+          alert("Note : Le système se synchronise. Réessayez dans un instant.");
           btn.disabled = false;
         }
       });
     } catch (err) {
-      alert("Erreur SDK : " + err.message);
+      alert("Erreur : " + err.message);
     }
   }
 
   document.getElementById('pay_button').onclick = donnerPi;
 </script>
+    
 </body>
 </html>
+
 
