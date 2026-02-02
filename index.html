@@ -111,7 +111,9 @@
         </div>
     </div>
 
-   <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-area">
+  <form action="https://formspree.io/f/TON_ID_ICI" method="POST" class="contact-area">
+        <input type="hidden" name="_next" value="https://wadcox44.github.io/">
+        
         <div class="contact-title">PARTENAIRES & STUDIOS</div>
         <div class="form-container">
             <div class="row">
@@ -119,9 +121,21 @@
                 <input type="email" name="email" placeholder="Email" required>
             </div>
             <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet..." required></textarea>
-            <button type="submit" class="btn-send">ENVOYER</button>
+            
+            <button type="submit" class="btn-send" id="submit-btn" onclick="submitEffect()">ENVOYER</button>
         </div>
     </form>
+
+    <script>
+        function submitEffect() {
+            const btn = document.getElementById('submit-btn');
+            // On vérifie si les champs sont remplis avant de changer le bouton
+            if(document.querySelector('textarea').value !== "") {
+                btn.innerText = "PATIENTEZ...";
+                btn.style.background = "#555";
+            }
+        }
+    </script>
 
     <footer>
         <span class="secure-icon">✔</span> Certifié WadCox | Écosystème Pi Network
@@ -178,4 +192,5 @@
     </script>
 </body>
 </html>
+
 
