@@ -28,10 +28,7 @@
             100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
         }
 
-        /* Animation de balayage lumineux pour le bouton d'envoi */
-        @keyframes shine {
-            100% { left: 125%; }
-        }
+        @keyframes shine { 100% { left: 125%; } }
 
         header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
@@ -53,7 +50,7 @@
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
-        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; justify-content: center; }
         .btn-don {
             background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
             font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
@@ -87,45 +84,19 @@
         .row { display: flex; gap: 10px; width: 100%; }
         input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; }
         
-        /* Bouton d'envoi avec animation discrète et pro */
         .btn-send { 
-            width: 100%; 
-            background: var(--neon-blue); 
-            border: none; 
-            padding: 14px; 
-            font-weight: bold; 
-            border-radius: 4px; 
-            font-size: 0.9rem; 
-            color: #000; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-family: 'Orbitron'; 
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%; background: var(--neon-blue); border: none; padding: 14px; 
+            font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; 
+            cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; 
+            position: relative; overflow: hidden; transition: 0.2s;
         }
-
-        .btn-send:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
-        }
-
+        .btn-send:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4); }
         .btn-send::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             transform: skewX(-20deg);
         }
-
-        .btn-send:hover::after {
-            animation: shine 0.6s fowards;
-            left: 125%;
-            transition: left 0.6s ease;
-        }
+        .btn-send:hover::after { animation: shine 0.6s forwards; }
 
         footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
     </style>
@@ -154,9 +125,6 @@
 
     <div class="donation-section">
         <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
-        <button onclick="forcerNettoyage()" style="background:red; color:white; margin-top:10px; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.8rem;">
-            DEBUG : CLIQUER ICI SI BLOQUÉ
-        </button>
     </div>
 
     <div class="partner-callout">
@@ -164,20 +132,10 @@
         <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
             Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.
         </p>
-        
         <div class="offer-grid">
-            <div class="offer-item">
-                <strong>Loyer 0 Pi</strong>
-                <p>Durée limitée</p>
-            </div>
-            <div class="offer-item">
-                <strong>0% Commission</strong>
-                <p>Sur les transactions In-Game</p>
-            </div>
-            <div class="offer-item">
-                <strong>Slot Premium</strong>
-                <p>Visibilité prioritaire</p>
-            </div>
+            <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
+            <div class="offer-item"><strong>0% Commission</strong><p>Sur les transactions</p></div>
+            <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
         </div>
     </div>
 
@@ -188,7 +146,7 @@
                 <input type="text" name="name" placeholder="Nom" required>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
-            <textarea name="message" rows="4" placeholder="Décrivez votre projet ou votre demande de partenariat..." required></textarea>
+            <textarea name="message" rows="4" placeholder="Décrivez votre projet..." required></textarea>
             <button type="submit" class="btn-send" id="btnText">SOUMETTRE LA DEMANDE</button>
         </form>
     </div>
@@ -198,79 +156,60 @@
     </footer>
 
     <script>
-        // --- INITIALISATION SDK & NETTOYAGE ---
+        // --- 1. LOGIQUE DE NETTOYAGE (BACKEND CALL) ---
+        const onIncompletePaymentFound = async (payment) => {
+            console.log("Paiement bloqué détecté:", payment.identifier);
+            try {
+                // On appelle ton API Vercel pour Cancel ou Complete le paiement
+                await fetch('https://wadcox44-github-io.vercel.app/api/complete-pending-payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment }) 
+                });
+                console.log("Nettoyage effectué côté serveur.");
+            } catch (e) {
+                console.error("Erreur lors du nettoyage:", e);
+            }
+        };
+
+        // --- 2. INITIALISATION SDK ---
         async function initPi() {
             try {
+                if (typeof Pi === 'undefined') return;
+                
                 await Pi.init({ version: "2.0", sandbox: false });
-                console.log("SDK Pi Initialisé");
-
-                await Pi.createPayment({}, {
-                    onIncompletePaymentFound: (payment) => {
-                        console.log("Paiement incomplet détecté:", payment.identifier);
-                        clorePaiementsBloqués(payment);
-                    }
-                });
+                
+                // Authentification avec le callback de nettoyage
+                await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+                
             } catch (e) {
-                console.warn("SDK Pi non chargé");
+                console.warn("Erreur init ou utilisateur non connecté");
             }
         }
 
         initPi();
 
-        async function forcerNettoyage() {
-            if (typeof Pi === 'undefined') {
-                alert("Ouvrez le Pi Browser !");
-                return;
-            }
-            try {
-                alert("Étape 1 : Authentification...");
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-                alert("Étape 2 : Vérification...");
-                let trouve = false;
-                await Pi.createPayment({
-                    amount: 0.1, memo: "Nettoyage", metadata: { type: "cleanup" }
-                }, {
-                    onIncompletePaymentFound: async (payment) => {
-                        trouve = true;
-                        await clorePaiementsBloqués(payment);
-                        alert("✅ Paiement bloqué nettoyé !");
-                    },
-                    onReadyForServerApproval: function(id) {},
-                    onReadyForServerCompletion: function(id, txid) { Pi.completePayment(id); },
-                    onCancel: function(id) {},
-                    onError: function(error, payment) { if (payment) clorePaiementsBloqués(payment); }
-                });
-                if(!trouve) alert("Aucun paiement bloqué trouvé.");
-            } catch (e) { alert("Info : " + e.message); }
-        }
-
-        async function clorePaiementsBloqués(payment) {
-            try {
-                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId: payment.identifier })
-                });
-                await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error("Erreur de clôture:", e); }
-        }
-
+        // --- 3. LOGIQUE DE DON ---
         async function donnerPi() {
             if (typeof Pi === 'undefined') {
-                alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER.");
+                alert("Ouvrez ce site dans PI BROWSER.");
                 return;
             }
-            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
+
+            const montant = prompt("Montant du don (minimum 1 Pi) :", "1");
             if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
 
             try {
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                // On s'assure d'être authentifié avant de créer un paiement
+                await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+                
                 await Pi.createPayment({
                     amount: parseFloat(montant),
                     memo: "Don JeuxVideo.Pi",
                     metadata: { type: "don_libre" }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
+                        // On délègue l'approbation à ton backend
                         return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -278,16 +217,22 @@
                         }).then(res => res.json());
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        Pi.completePayment(paymentId);
+                        // On finalise via ton backend
+                        fetch('https://wadcox44-github-io.vercel.app/api/complete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId, txid })
+                        });
                         alert("Merci infiniment pour votre don !");
                     },
-                    onCancel: function(paymentId) {},
-                    onError: function(error, payment) {
-                        if(payment) clorePaiementsBloqués(payment);
-                        else alert("Erreur : " + error.message);
+                    onCancel: function(paymentId) { console.log("Annulé"); },
+                    onError: function(error, payment) { 
+                        if(payment) onIncompletePaymentFound(payment);
                     }
                 });
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         document.getElementById('pay_button').onclick = donnerPi;
