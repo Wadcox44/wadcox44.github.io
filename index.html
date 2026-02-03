@@ -55,8 +55,8 @@
             width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
             animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
         }
-        .btn-don:hover { background: var(--neon-blue); color: #000; transform: scale(1.02); }
 
+        /* SECTION OFFRE AVEC TEXTE CENTRÉ */
         .partner-callout {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px; padding: 20px; margin: 5px auto; text-align: center; width: 90%; max-width: 800px;
@@ -69,35 +69,20 @@
         }
 
         .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
-        .offer-item { background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1; }
-        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 3px; }
-        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; }
+        .offer-item { 
+            background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80px;
+        }
+        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 3px; text-align: center; width: 100%; }
+        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; text-align: center; width: 100%; }
 
         .contact-area { width: 100%; padding: 20px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
         .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 15px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
         
         .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
         .row { display: flex; gap: 10px; width: 100%; }
-        
-        input, textarea { 
-            background: #0f1a2e; border: 1px solid #333; color: white; 
-            padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani';
-            box-sizing: border-box; width: 100%;
-        }
-        
-        .btn-send { 
-            width: 100%; background: var(--neon-blue); border: none; padding: 14px; 
-            font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer;
-            text-transform: uppercase; font-family: 'Orbitron';
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader {
-            border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000;
-            border-radius: 50%; width: 14px; height: 14px;
-            animation: spin 0.8s linear infinite; display: inline-block;
-            margin-right: 10px; vertical-align: middle;
-        }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; }
+        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; }
 
         footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
     </style>
@@ -140,7 +125,7 @@
                 <p>Durée limitée</p>
             </div>
             <div class="offer-item">
-                <strong>0% Commission *</strong>
+                <strong>0% Commission</strong>
                 <p>Sur les transactions In-Game</p>
             </div>
             <div class="offer-item">
@@ -171,22 +156,13 @@
         try {
             Pi.init({ version: "2.0", sandbox: false });
         } catch (e) {
-            console.log("SDK Pi non détecté (Normal hors Pi Browser)");
+            console.log("SDK Pi non détecté");
         }
 
-        // --- DÉTECTION DU NAVIGATEUR ---
-        const isPiBrowser = navigator.userAgent.includes("PiBrowser");
+        // --- DÉTECTION DU NAVIGATEUR (VERSION ROBUSTE) ---
+        // On vérifie le userAgent OU la présence de l'objet Pi injecté par le browser
+        const isPiBrowser = navigator.userAgent.includes("PiBrowser") || (window.Pi && window.Pi.native);
 
-        // --- GESTION DU FORMULAIRE ---
-        const form = document.getElementById('contactForm');
-        const btnContact = document.getElementById('btnText');
-        if(form) {
-            form.onsubmit = function() {
-                btnContact.innerHTML = '<span class="loader"></span> ENVOI...';
-            };
-        }
-
-        // --- GESTION DES PAIEMENTS ---
         async function clorePaiementsBloqués(payment) {
             try {
                 await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
@@ -199,47 +175,3 @@
         }
 
         async function donnerPi() {
-            // SI HORS PI BROWSER : Message d'information
-            if (!isPiBrowser) {
-                alert("🚀 Pour soutenir le projet avec vos Pi, vous devez ouvrir ce site directement dans l'application PI BROWSER.");
-                return;
-            }
-
-            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
-            if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
-
-            try {
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, clorePaiementsBloqués);
-                
-                await Pi.createPayment({
-                    amount: parseFloat(montant),
-                    memo: "Don de soutien JeuxVideo.Pi",
-                    metadata: { type: "don_libre" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        Pi.completePayment(paymentId);
-                        alert("Merci infiniment pour votre don de " + montant + " Pi !");
-                    },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) {
-                        if(payment) { clorePaiementsBloqués(payment); }
-                    }
-                });
-            } catch (err) {
-                console.error(err);
-                alert("Erreur lors de la connexion au Wallet Pi.");
-            }
-        }
-
-        document.getElementById('pay_button').onclick = donnerPi;
-    </script>
-</body>
-</html>
