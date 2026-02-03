@@ -183,24 +183,41 @@
     }
 
     try {
-        alert("Étape 1 : Demande d'autorisation...");
-        // On force l'authentification avec le scope payments
+        alert("Étape 1 : Authentification...");
         await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
         
-        alert("Étape 2 : Recherche de paiements bloqués...");
+        alert("Étape 2 : Vérification des paiements...");
         let trouve = false;
-        await Pi.createPayment({}, {
+
+        // Le SDK exige que toutes les fonctions de rappel soient définies
+        await Pi.createPayment({
+            amount: 0.1,
+            memo: "Nettoyage",
+            metadata: { type: "cleanup" }
+        }, {
             onIncompletePaymentFound: async (payment) => {
                 trouve = true;
-                console.log("Nettoyage de :", payment.identifier);
                 await clorePaiementsBloqués(payment);
-                alert("✅ Succès ! Le paiement " + payment.identifier + " a été nettoyé.");
+                alert("✅ Paiement bloqué nettoyé !");
+            },
+            onReadyForServerApproval: function(paymentId) { 
+                // On ne fait rien ici, on veut juste que le SDK soit content
+            },
+            onReadyForServerCompletion: function(paymentId, txid) {
+                Pi.completePayment(paymentId);
+            },
+            onCancel: function(paymentId) { },
+            onError: function(error, payment) { 
+                if (payment) clorePaiementsBloqués(payment);
             }
         });
         
-        if(!trouve) alert("Refait un test de don, le scope a été mis à jour.");
+        if(!trouve) alert("Aucun paiement bloqué trouvé. Votre compte est propre !");
     } catch (e) {
-        alert("Erreur de scope : " + e.message);
+        // On ignore l'erreur de création si aucun paiement n'était vraiment bloqué
+        if (!e.message.includes("Ad-blocker")) {
+            alert("Info : " + e.message);
+        }
     }
 }
 
@@ -263,6 +280,7 @@
     </script>
 </body>
 </html>
+
 
 
 
