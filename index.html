@@ -156,12 +156,12 @@
     </footer>
 
     <script>
-        // --- 1. LOGIQUE DE NETTOYAGE (BACKEND CALL) ---
+        // --- 1. LOGIQUE DE NETTOYAGE (AUTO-DÉTECTION API) ---
         const onIncompletePaymentFound = async (payment) => {
             console.log("Paiement bloqué détecté:", payment.identifier);
             try {
-                // On appelle ton API Vercel pour Cancel ou Complete le paiement
-                await fetch('https://wadcox44-github-io.vercel.app/api/complete-pending-payments', {
+                // Utilisation du chemin relatif /api/
+                await fetch('/api/complete-pending-payments', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ payment }) 
@@ -176,7 +176,6 @@
         async function initPi() {
             try {
                 if (typeof Pi === 'undefined') return;
-                
                 await Pi.init({ version: "2.0", sandbox: false });
                 
                 // Authentification avec le callback de nettoyage
@@ -200,7 +199,6 @@
             if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
 
             try {
-                // On s'assure d'être authentifié avant de créer un paiement
                 await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
                 
                 await Pi.createPayment({
@@ -209,16 +207,14 @@
                     metadata: { type: "don_libre" }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
-                        // On délègue l'approbation à ton backend
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                        return fetch('/api/approve', { // Chemin relatif
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId: paymentId })
                         }).then(res => res.json());
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
-                        // On finalise via ton backend
-                        fetch('https://wadcox44-github-io.vercel.app/api/complete', {
+                        fetch('/api/complete', { // Chemin relatif (assure-toi d'avoir api/complete.js)
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paymentId, txid })
