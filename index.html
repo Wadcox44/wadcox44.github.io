@@ -177,28 +177,32 @@
 
         // --- FONCTION DE SECOURS (Bouton Rouge) ---
         async function forcerNettoyage() {
-            alert("Recherche de paiements bloqués en cours...");
-            if (typeof Pi === 'undefined') {
-                alert("SDK Pi introuvable. Utilisez le Pi Browser.");
-                return;
-            }
+    if (typeof Pi === 'undefined') {
+        alert("Ouvrez le Pi Browser !");
+        return;
+    }
 
-            try {
-                let trouve = false;
-                await Pi.createPayment({}, {
-                    onIncompletePaymentFound: async (payment) => {
-                        trouve = true;
-                        console.log("Nettoyage manuel de :", payment.identifier);
-                        await clorePaiementsBloqués(payment);
-                        alert("Succès ! Le paiement bloqué " + payment.identifier + " a été nettoyé.");
-                    }
-                });
-                
-                if(!trouve) alert("Aucun paiement bloqué n'a été trouvé par le système.");
-            } catch (e) {
-                alert("Erreur lors du nettoyage : " + e.message);
+    try {
+        alert("Étape 1 : Demande d'autorisation...");
+        // On force l'authentification avec le scope payments
+        await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+        
+        alert("Étape 2 : Recherche de paiements bloqués...");
+        let trouve = false;
+        await Pi.createPayment({}, {
+            onIncompletePaymentFound: async (payment) => {
+                trouve = true;
+                console.log("Nettoyage de :", payment.identifier);
+                await clorePaiementsBloqués(payment);
+                alert("✅ Succès ! Le paiement " + payment.identifier + " a été nettoyé.");
             }
-        }
+        });
+        
+        if(!trouve) alert("Refait un test de don, le scope a été mis à jour.");
+    } catch (e) {
+        alert("Erreur de scope : " + e.message);
+    }
+}
 
         async function clorePaiementsBloqués(payment) {
             try {
@@ -259,6 +263,7 @@
     </script>
 </body>
 </html>
+
 
 
 
