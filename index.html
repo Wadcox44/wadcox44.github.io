@@ -111,6 +111,10 @@
     <div class="donation-section">
         <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
     </div>
+    
+    <button onclick="forcerNettoyage()" style="background:red; color:white; margin-top:10px;">
+    DEBUG : CLIQUER ICI SI BLOQUÉ
+</button>
 
     <div class="partner-callout">
         <div class="launch-badge">Offre de lancement</div>
@@ -154,41 +158,67 @@
         // --- INITIALISATION SDK & NETTOYAGE ---
         async function initPi() {
             try {
-                // Initialisation du SDK
                 await Pi.init({ version: "2.0", sandbox: false });
                 console.log("SDK Pi Initialisé");
 
-                // --- FONCTION DE NETTOYAGE AUTO ---
-                // Si un paiement est resté bloqué, on tente de le résoudre au chargement
-                const incompletePayment = await Pi.createPayment({}, {
+                // Nettoyage automatique au démarrage
+                await Pi.createPayment({}, {
                     onIncompletePaymentFound: (payment) => {
-                        console.log("Paiement incomplet détecté :", payment.identifier);
+                        console.log("Paiement incomplet détecté au démarrage:", payment.identifier);
                         clorePaiementsBloqués(payment);
-                        alert("Un paiement en attente a été détecté et validé. Vous pouvez maintenant refaire une tentative.");
                     }
                 });
             } catch (e) {
-                console.warn("SDK Pi non chargé ou erreur de nettoyage");
+                console.warn("SDK Pi non chargé");
             }
         }
 
-        // Lancement de l'initialisation au chargement de la page
         initPi();
+
+        // --- FONCTION DE SECOURS (Bouton Rouge) ---
+        async function forcerNettoyage() {
+            alert("Recherche de paiements bloqués en cours...");
+            if (typeof Pi === 'undefined') {
+                alert("SDK Pi introuvable. Utilisez le Pi Browser.");
+                return;
+            }
+
+            try {
+                let trouve = false;
+                await Pi.createPayment({}, {
+                    onIncompletePaymentFound: async (payment) => {
+                        trouve = true;
+                        console.log("Nettoyage manuel de :", payment.identifier);
+                        await clorePaiementsBloqués(payment);
+                        alert("Succès ! Le paiement bloqué " + payment.identifier + " a été nettoyé.");
+                    }
+                });
+                
+                if(!trouve) alert("Aucun paiement bloqué n'a été trouvé par le système.");
+            } catch (e) {
+                alert("Erreur lors du nettoyage : " + e.message);
+            }
+        }
 
         async function clorePaiementsBloqués(payment) {
             try {
+                // 1. On informe ton serveur
                 await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId: payment.identifier })
                 });
+                // 2. On finalise sur le réseau Pi
                 await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error("Erreur de clôture:", e); }
+                console.log("Paiement clos avec succès.");
+            } catch (e) { 
+                console.error("Erreur de clôture:", e); 
+            }
         }
 
         async function donnerPi() {
             if (typeof Pi === 'undefined') {
-                alert("🚀 Action requise : Ouvrez ce site dans l'application PI BROWSER pour accéder au Wallet.");
+                alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER.");
                 return;
             }
 
@@ -196,13 +226,11 @@
             if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
 
             try {
-                // Étape 1 : Authentification
                 const auth = await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
                 
-                // Étape 2 : Création du paiement avec un mémo unique pour éviter le cache
                 await Pi.createPayment({
                     amount: parseFloat(montant),
-                    memo: "Don JeuxVideo.Pi - " + Date.now(), // ID unique pour forcer le rafraîchissement
+                    memo: "Don JeuxVideo.Pi - " + Date.now(),
                     metadata: { type: "don_libre" }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
@@ -214,23 +242,16 @@
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
                         Pi.completePayment(paymentId);
-                        alert("Merci infiniment pour votre don de " + montant + " Pi !");
+                        alert("Merci infiniment pour votre don !");
                     },
                     onCancel: function(paymentId) { },
                     onError: function(error, payment) {
-                        if(payment) { 
-                            clorePaiementsBloqués(payment); 
-                        } else { 
-                            alert("Erreur Pi: " + error.message); 
-                        }
+                        if(payment) clorePaiementsBloqués(payment);
+                        else alert("Erreur : " + error.message);
                     }
                 });
             } catch (err) {
-                if (err.message && err.message.includes("native")) {
-                    alert("Veuillez utiliser le Pi Browser pour cette action.");
-                } else {
-                    console.error(err);
-                }
+                console.error(err);
             }
         }
 
@@ -238,6 +259,7 @@
     </script>
 </body>
 </html>
+
 
 
 
