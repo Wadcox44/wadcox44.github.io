@@ -28,6 +28,14 @@
             100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
         }
 
+        @keyframes glitch-hover {
+            0% { transform: translate(0); text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(2px, -2px); text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+            75% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
         header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
             font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
@@ -48,7 +56,7 @@
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
-        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; justify-content: center; flex-direction: column; align-items: center; }
+        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; flex-direction: column; align-items: center; }
         .btn-don {
             background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
             font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
@@ -56,15 +64,9 @@
             animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
         }
 
-        .btn-debug {
-            background: rgba(255, 0, 0, 0.2); color: #ff4444; border: 1px solid #ff4444;
-            padding: 8px 15px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;
-            margin-top: 15px; font-family: 'Orbitron'; text-transform: uppercase;
-        }
-
         .partner-callout {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 20px; margin: 5px auto; text-align: center; width: 90%; max-width: 800px;
+            border-radius: 15px; padding: 20px; margin: 20px auto; text-align: center; width: 90%; max-width: 800px;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
@@ -78,40 +80,45 @@
             background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1;
             display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90px;
         }
-        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 4px; text-align: center; width: 100%; }
-        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; text-align: center; width: 100%; }
+        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-        /* FORMULAIRE GAMER / FUTURISTE */
-        .contact-area { width: 100%; padding: 40px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
-        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 20px; text-align: center; color: var(--neon-blue); letter-spacing: 2px; width: 100%; }
-        
+        /* --- SECTION CONTACT PRO DARK --- */
+        .contact-area { 
+            width: 100%; padding: 60px 0; 
+            background: linear-gradient(180deg, rgba(5,11,20,0) 0%, rgba(0,243,255,0.03) 100%); 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+        .contact-title { 
+            font-family: 'Orbitron'; font-size: 1.1rem; margin-bottom: 30px; 
+            color: white; letter-spacing: 3px; border-bottom: 2px solid var(--neon-blue); padding-bottom: 8px;
+        }
         .form-container { 
-            width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; 
-            background: rgba(0, 20, 40, 0.4); padding: 25px; 
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            clip-path: polygon(0 0, 92% 0, 100% 15%, 100% 100%, 8% 100%, 0 85%);
+            width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 25px; 
+            background: rgba(10, 20, 30, 0.6); padding: 35px; border-radius: 4px;
         }
-        .row { display: flex; gap: 10px; width: 100%; }
+        .row { display: flex; gap: 15px; width: 100%; }
         input, textarea { 
-            background: #0f1a2e; border: 1px solid #1a3a5a; color: var(--neon-blue); 
-            padding: 14px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; 
-            box-sizing: border-box; width: 100%; transition: 0.3s;
+            background: transparent !important; border: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.2) !important;
+            color: white !important; padding: 10px 5px !important; font-size: 1rem; 
+            font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; transition: 0.4s;
         }
-        input:focus, textarea:focus {
-            border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); outline: none;
+        input:focus, textarea:focus { 
+            border-bottom-color: var(--neon-blue) !important; outline: none; 
+            background: rgba(0, 243, 255, 0.02) !important; 
         }
         .btn-send { 
-            width: 100%; background: transparent; border: 2px solid var(--neon-blue); 
-            padding: 16px; font-weight: bold; font-size: 0.9rem; color: var(--neon-blue); 
-            cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; 
-            letter-spacing: 2px; transition: 0.4s; position: relative;
+            width: 100%; background: var(--neon-blue); border: none; padding: 18px; 
+            font-weight: bold; color: #000; cursor: pointer; text-transform: uppercase; 
+            font-family: 'Orbitron'; letter-spacing: 2px; transition: 0.3s; margin-top: 10px;
         }
-        .btn-send:hover {
-            background: var(--neon-blue) !important; color: #000 !important;
-            box-shadow: 0 0 20px var(--neon-blue);
+        .btn-send:hover { 
+            background: #fff; box-shadow: 0 0 20px var(--neon-blue); 
+            animation: glitch-hover 0.2s infinite; 
         }
 
-        footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
+        footer { font-size: 0.75rem; color: #666; padding: 40px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -138,40 +145,30 @@
 
     <div class="donation-section">
         <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
-        <button onclick="forcerNettoyage()" class="btn-debug">DEBUG : CLIQUER ICI SI BLOQUÉ</button>
+        <button onclick="forcerNettoyage()" style="background:none; border:none; color:#444; font-size:10px; cursor:pointer; margin-top:10px;">[ RÉINITIALISER LA SESSION ]</button>
     </div>
 
     <div class="partner-callout">
         <div class="launch-badge">Offre de lancement</div>
         <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
-            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.
+            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate.
         </p>
-        
         <div class="offer-grid">
-            <div class="offer-item">
-                <strong>Loyer 0 Pi</strong>
-                <p>Durée limitée</p>
-            </div>
-            <div class="offer-item">
-                <strong>0% Commission</strong>
-                <p>Sur les transactions In-Game</p>
-            </div>
-            <div class="offer-item">
-                <strong>Slot Premium</strong>
-                <p>Visibilité prioritaire</p>
-            </div>
+            <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
+            <div class="offer-item"><strong>0% Commission</strong><p>In-Game</p></div>
+            <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
         </div>
     </div>
 
     <div class="contact-area">
-        <div class="contact-title">[ ENVOYER UNE TRANSMISSION ]</div>
+        <div class="contact-title">CONTACT & PARTENARIAT</div>
         <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container" id="contactForm">
             <div class="row">
-                <input type="text" name="name" placeholder="ID UTILISATEUR" required>
-                <input type="email" name="email" placeholder="CANAL EMAIL" required>
+                <input type="text" name="name" placeholder="VOTRE NOM" required>
+                <input type="email" name="email" placeholder="VOTRE EMAIL" required>
             </div>
-            <textarea name="message" rows="4" placeholder="ENTREZ VOTRE MESSAGE ICI..." required></textarea>
-            <button type="submit" class="btn-send" id="btnText">INITIALISER LA TRANSMISSION</button>
+            <textarea name="message" rows="4" placeholder="VOTRE MESSAGE..." required></textarea>
+            <button type="submit" class="btn-send" id="btnText">ENVOYER LA TRANSMISSION</button>
         </form>
     </div>
 
@@ -180,110 +177,60 @@
     </footer>
 
     <script>
-        // --- INITIALISATION SDK & NETTOYAGE ---
+        // --- SDK PI ---
         async function initPi() {
             try {
                 await Pi.init({ version: "2.0", sandbox: true });
-                console.log("SDK Pi Initialisé");
-
                 await Pi.createPayment({}, {
-                    onIncompletePaymentFound: (payment) => {
-                        console.log("Paiement incomplet détecté au démarrage:", payment.identifier);
-                        clorePaiementsBloqués(payment);
-                    }
+                    onIncompletePaymentFound: (payment) => clorePaiementsBloqués(payment)
                 });
-            } catch (e) {
-                console.warn("SDK Pi non chargé");
-            }
+            } catch (e) { console.warn("SDK Pi non chargé"); }
         }
-
         initPi();
-
-        // --- GESTION FORMULAIRE FUTURISTE ---
-        const contactForm = document.getElementById('contactForm');
-        const btnText = document.getElementById('btnText');
-
-        contactForm.onsubmit = function() {
-            btnText.innerHTML = "TRANSMISSION EN COURS...";
-            btnText.style.opacity = "0.7";
-        };
-
-        // --- FONCTIONS PI PAYMENTS ---
-        async function forcerNettoyage() {
-            if (typeof Pi === 'undefined') {
-                alert("Ouvrez le Pi Browser !");
-                return;
-            }
-            try {
-                alert("Étape 1 : Authentification...");
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-                alert("Étape 2 : Vérification...");
-                let trouve = false;
-                await Pi.createPayment({
-                    amount: 0.1, memo: "Nettoyage", metadata: { type: "cleanup" }
-                }, {
-                    onIncompletePaymentFound: async (payment) => {
-                        trouve = true;
-                        await clorePaiementsBloqués(payment);
-                        alert("✅ Paiement bloqué nettoyé !");
-                    },
-                    onReadyForServerApproval: function(paymentId) { },
-                    onReadyForServerCompletion: function(paymentId, txid) { Pi.completePayment(paymentId); },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) { if (payment) clorePaiementsBloqués(payment); }
-                });
-                if(!trouve) alert("Aucun paiement bloqué trouvé. Votre compte est propre !");
-            } catch (e) {
-                if (!e.message.includes("Ad-blocker")) alert("Info : " + e.message);
-            }
-        }
 
         async function clorePaiementsBloqués(payment) {
             try {
                 await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId: payment.identifier })
                 });
                 await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error("Erreur de clôture:", e); }
+            } catch (e) { console.error(e); }
+        }
+
+        async function forcerNettoyage() {
+            if (typeof Pi === 'undefined') return;
+            try {
+                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                await Pi.createPayment({ amount: 0.1, memo: "Reset", metadata: { type: "cleanup" } }, {
+                    onIncompletePaymentFound: async (p) => { await clorePaiementsBloqués(p); alert("Session nettoyée."); },
+                    onReadyForServerApproval: function(id) { },
+                    onReadyForServerCompletion: function(id, tx) { Pi.completePayment(id); },
+                    onCancel: function(id) { },
+                    onError: function(e, p) { if (p) clorePaiementsBloqués(p); }
+                });
+            } catch (e) { console.log(e.message); }
         }
 
         async function donnerPi() {
-            if (typeof Pi === 'undefined') {
-                alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER.");
-                return;
-            }
-            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
+            if (typeof Pi === 'undefined') { alert("Ouvrez PI BROWSER."); return; }
+            const montant = prompt("Montant du don (min 1 Pi) :", "1");
             if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
-
             try {
                 await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
                 await Pi.createPayment({
-                    amount: parseFloat(montant),
-                    memo: "Don JeuxVideo.Pi - " + Date.now(),
-                    metadata: { type: "don_libre" }
+                    amount: parseFloat(montant), memo: "Don JeuxVideo.Pi", metadata: { type: "don" }
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        Pi.completePayment(paymentId);
-                        alert("Merci infiniment pour votre don !");
-                    },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) {
-                        if(payment) clorePaiementsBloqués(payment);
-                        else alert("Erreur : " + error.message);
-                    }
+                    onReadyForServerApproval: (id) => fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId: id })
+                    }).then(res => res.json()),
+                    onReadyForServerCompletion: (id, tx) => { Pi.completePayment(id); alert("Merci pour votre soutien !"); },
+                    onCancel: (id) => { },
+                    onError: (e, p) => p ? clorePaiementsBloqués(p) : alert("Erreur")
                 });
             } catch (err) { console.error(err); }
         }
-
         document.getElementById('pay_button').onclick = donnerPi;
     </script>
 </body>
