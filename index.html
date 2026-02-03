@@ -151,12 +151,29 @@
     </footer>
 
     <script>
-        // --- INITIALISATION SDK ---
-        try {
-            Pi.init({ version: "2.0", sandbox: false });
-        } catch (e) {
-            console.warn("SDK Pi non chargé au démarrage");
+        // --- INITIALISATION SDK & NETTOYAGE ---
+        async function initPi() {
+            try {
+                // Initialisation du SDK
+                await Pi.init({ version: "2.0", sandbox: false });
+                console.log("SDK Pi Initialisé");
+
+                // --- FONCTION DE NETTOYAGE AUTO ---
+                // Si un paiement est resté bloqué, on tente de le résoudre au chargement
+                const incompletePayment = await Pi.createPayment({}, {
+                    onIncompletePaymentFound: (payment) => {
+                        console.log("Paiement incomplet détecté :", payment.identifier);
+                        clorePaiementsBloqués(payment);
+                        alert("Un paiement en attente a été détecté et validé. Vous pouvez maintenant refaire une tentative.");
+                    }
+                });
+            } catch (e) {
+                console.warn("SDK Pi non chargé ou erreur de nettoyage");
+            }
         }
+
+        // Lancement de l'initialisation au chargement de la page
+        initPi();
 
         async function clorePaiementsBloqués(payment) {
             try {
@@ -170,7 +187,6 @@
         }
 
         async function donnerPi() {
-            // On vérifie si Pi est disponible sans bloquer par un message d'erreur texte
             if (typeof Pi === 'undefined') {
                 alert("🚀 Action requise : Ouvrez ce site dans l'application PI BROWSER pour accéder au Wallet.");
                 return;
@@ -180,14 +196,13 @@
             if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
 
             try {
-                // Étape 1 : Demander l'authentification (indispensable)
-                const scopes = ['username', 'payments'];
-                await Pi.authenticate(scopes, clorePaiementsBloqués);
-
-                // Étape 2 : Créer le paiement
+                // Étape 1 : Authentification
+                const auth = await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                
+                // Étape 2 : Création du paiement avec un mémo unique pour éviter le cache
                 await Pi.createPayment({
                     amount: parseFloat(montant),
-                    memo: "Don de soutien JeuxVideo.Pi",
+                    memo: "Don JeuxVideo.Pi - " + Date.now(), // ID unique pour forcer le rafraîchissement
                     metadata: { type: "don_libre" }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
@@ -203,12 +218,14 @@
                     },
                     onCancel: function(paymentId) { },
                     onError: function(error, payment) {
-                        if(payment) { clorePaiementsBloqués(payment); }
-                        else { alert("Erreur Pi: " + error.message); }
+                        if(payment) { 
+                            clorePaiementsBloqués(payment); 
+                        } else { 
+                            alert("Erreur Pi: " + error.message); 
+                        }
                     }
                 });
             } catch (err) {
-                // Si l'erreur est liée au navigateur
                 if (err.message && err.message.includes("native")) {
                     alert("Veuillez utiliser le Pi Browser pour cette action.");
                 } else {
@@ -221,5 +238,6 @@
     </script>
 </body>
 </html>
+
 
 
