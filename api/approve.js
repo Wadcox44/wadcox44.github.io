@@ -21,19 +21,25 @@ export default async function handler(req, res) {
   const PI_API_KEY = process.env.PI_API_KEY;
 
   try {
-    // On demande au réseau Pi d'approuver le paiement
     const response = await axios.post(
       `https://api.minepi.com/v2/payments/${paymentId}/approve`,
       {},
-      {
-        headers: { Authorization: `Key ${PI_API_KEY}` }
-      }
+      { headers: { Authorization: `Key ${PI_API_KEY}` } }
     );
 
     console.log("Paiement approuvé !");
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error("Erreur Pi:", error.response ? error.response.data : error.message);
-    return res.status(500).json({ error: "Erreur lors de l'approbation du paiement." });
+    const errorData = error.response ? error.response.data : {};
+    
+    // Si le paiement est déjà approuvé, on renvoie quand même un succès
+    // Cela débloque l'interface utilisateur sur ton téléphone
+    if (errorData.error === 'already_approved') {
+      console.log("Paiement déjà approuvé sur Pi, déblocage de l'interface.");
+      return res.status(200).json({ approved: true });
+    }
+
+    console.error("Erreur Pi:", errorData);
+    return res.status(500).json({ error: "Erreur lors de l'approbation." });
   }
 }
