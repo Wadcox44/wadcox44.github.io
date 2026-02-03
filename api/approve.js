@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 export default async function handler(req, res) {
   // Autoriser la connexion depuis le Pi Browser (CORS)
