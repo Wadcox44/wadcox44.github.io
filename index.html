@@ -117,4 +117,113 @@
         <span class="side-text">GOLD</span>
         <div class="card" style="width: 140px; padding: 15px;" onclick="window.location.href='https://goldpixel.netlify.app/'">
             <img src="Images/miniature GoldPixel.jpg" class="card-thumb" style="height: 100px; width: 100%;" alt="Gold Pixel">
-            <span style="color:var(--neon-orange); font-size:
+            <span style="color:var(--neon-orange); font-size:0.55rem; font-weight:bold;">● ROYAL</span>
+        </div>
+        <span class="side-text">PIXEL</span>
+    </div>
+
+    <div class="category-title">🧩 Arcade & Puzzles</div>
+    <div class="game-grid">
+        <div class="card" onclick="window.location.href='2048/index.html'">
+            <img src="Images/miniature 2048.jpg" class="card-thumb" alt="2048">
+            <h3>2048 NEON</h3>
+            <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
+        </div>
+        <div class="card empty">
+            <span class="card-icon">🎮</span>
+            <h3>SLOT DEV</h3>
+        </div>
+        <div class="card empty">
+            <span class="card-icon">📦</span>
+            <h3>VOTRE JEU</h3>
+        </div>
+    </div>
+
+    <div class="donation-section">
+        <div class="donation-title">SOUTENEZ LE PROJET EN FAISANT UN DON</div>
+        <div class="goal-container">
+            <div class="progress-bg"><div class="progress-bar"></div></div>
+        </div>
+        <div class="donation-grid">
+            <button class="btn-quick-don" onclick="donnerPi(1)">1 Pi</button>
+            <button class="btn-quick-don" onclick="donnerPi(10)">10 Pi</button>
+            <button class="btn-quick-don" onclick="donnerPi('libre')">LIBRE</button>
+        </div>
+    </div>
+
+    <div class="partner-callout">
+        <div class="launch-badge">Offre de lancement</div>
+        <p style="color: white; font-weight: bold; margin: 0;">Rejoignez JeuxVideo.Pi</p>
+        <div class="offer-grid">
+            <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
+            <div class="offer-item"><strong>0% Commission</strong><p>Sur transactions</p></div>
+            <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
+        </div>
+    </div>
+
+    <div class="contact-area">
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" style="width: 90%; max-width: 500px;">
+            <input type="text" name="name" placeholder="Nom" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <textarea name="message" rows="3" placeholder="Votre projet..." required></textarea>
+            <button type="submit" class="btn-send">SOUMETTRE LA DEMANDE</button>
+        </form>
+    </div>
+
+    <div id="thankYouModal">
+        <div class="modal-content">
+            <h2 style="font-family: 'Orbitron'; color: var(--neon-orange); margin-top:0;">MERCI !</h2>
+            <p>Votre don aide le projet à grandir.</p>
+            <button class="btn-send" onclick="document.getElementById('thankYouModal').style.display='none'">FERMER</button>
+        </div>
+    </div>
+
+    <footer>✔ Certifié WadCox | Écosystème Pi Network</footer>
+
+    <script>
+        const onIncompletePaymentFound = async (payment) => {
+            try {
+                await fetch('/api/complete-pending-payments', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment }) 
+                });
+            } catch (e) { console.error(e); }
+        };
+
+        async function initPi() {
+            try {
+                if (typeof Pi !== 'undefined') {
+                    await Pi.init({ version: "2.0", sandbox: false });
+                    await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+                }
+            } catch (e) { console.warn("Non connecté"); }
+        }
+        initPi();
+
+        async function donnerPi(option) {
+            if (typeof Pi === 'undefined') { alert("Ouvrez dans PI BROWSER."); return; }
+            let montant = (option === 'libre') ? prompt("Montant (min 1 Pi) :", "1") : option;
+            if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
+
+            try {
+                await Pi.createPayment({
+                    amount: parseFloat(montant),
+                    memo: "Don JeuxVideo.Pi",
+                    metadata: { type: "don" }
+                }, {
+                    onReadyForServerApproval: (paymentId) => fetch('/api/approve', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentId })
+                    }).then(res => res.json()),
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        fetch('/api/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId, txid }) });
+                        document.getElementById('thankYouModal').style.display = 'flex';
+                    },
+                    onCancel: () => console.log("Annulé"),
+                    onError: (error, payment) => { if(payment) onIncompletePaymentFound(payment); }
+                });
+            } catch (err) { console.error(err); }
+        }
+    </script>
+</body>
+</html>
