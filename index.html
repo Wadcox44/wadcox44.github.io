@@ -118,14 +118,15 @@
     transform: translateY(-3px);
     border-color: var(--neon-blue);
 }
-        /* Style des miniatures dans la grille */
+        /* Style des miniatures optimisé pour voir l'image EN ENTIER */
         .card-thumb {
-            width: 100%;
-            height: 80px; /* Hauteur fixe pour aligner les titres */
-            object-fit: cover; /* Recadre l'image proprement */
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(0, 243, 255, 0.2);
+            width: 90%;            /* Laisse un peu d'espace sur les côtés */
+            height: 80px;          /* Garde une hauteur fixe pour l'alignement */
+            object-fit: contain;   /* FORCE l'image à tenir entièrement dans le cadre */
+            background: rgba(0, 0, 0, 0.2); /* Ajoute un fond sombre si l'image est plus petite */
+            border-radius: 4px;
+            margin-top: 5px;
+            margin-bottom: 5px;
             display: block;
         }
 
@@ -282,6 +283,7 @@
     </script>
 </body>
 </html>
+
 
 
 
