@@ -37,7 +37,7 @@
             padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; box-sizing: border-box;
         }
 
-        /* --- MAIN PROJECT --- */
+        /* --- MAIN PROJECT (GOLD) --- */
         .hero-card {
             width: 100%; height: 250px; background: #000; 
             border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 12px;
@@ -60,22 +60,38 @@
         .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
         .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; }
 
-        /* --- ANIMATION DIGITAL BORDER (OFFRE) --- */
-        @keyframes borderPulse {
-            0% { border-color: rgba(0, 243, 255, 0.1); box-shadow: inset 0 0 5px rgba(0, 243, 255, 0.05); }
-            50% { border-color: rgba(0, 243, 255, 0.8); box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.2), 0 0 10px rgba(0, 243, 255, 0.2); }
-            100% { border-color: rgba(0, 243, 255, 0.1); box-shadow: inset 0 0 5px rgba(0, 243, 255, 0.05); }
+        /* --- ANIMATION SCANNING LINE (OFFRE) --- */
+        @keyframes scan {
+            0% { left: -100%; }
+            30% { left: 100%; }
+            100% { left: 100%; }
         }
 
         .offer-container {
             width: 100%;
-            background: rgba(0, 243, 255, 0.02);
+            background: rgba(0, 243, 255, 0.03);
             border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 12px;
             padding: 20px 0;
             text-align: center;
-            /* L'animation se concentre sur la bordure */
-            animation: borderPulse 3s infinite ease-in-out;
+            position: relative;
+            overflow: hidden; /* Important pour masquer le reflet qui sort du bloc */
+        }
+
+        /* Le reflet (Scanning Line) */
+        .offer-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg, 
+                transparent, 
+                rgba(0, 243, 255, 0.15), 
+                transparent
+            );
+            animation: scan 4s infinite linear;
         }
 
         .offer-main-title {
@@ -85,13 +101,20 @@
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            opacity: 0.9;
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+            position: relative; /* Pour rester au-dessus du reflet */
         }
 
-        .offer-grid { display: flex; justify-content: space-around; align-items: center; }
+        .offer-grid { 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center;
+            position: relative; /* Pour rester au-dessus du reflet */
+        }
+
         .offer-point { flex: 1; }
         .offer-point strong { display: block; color: white; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 4px; }
-        .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
 
         /* --- SUPPORT & CONTACT --- */
         .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
@@ -144,7 +167,7 @@
                     <strong>Premium Slot</strong>
                     <span>Priority Access</span>
                 </div>
-                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.1); border-right: 1px solid rgba(0, 243, 255, 0.1);">
+                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.2); border-right: 1px solid rgba(0, 243, 255, 0.2);">
                     <strong>0 Pi Rent</strong>
                     <span>No Monthly Cost</span>
                 </div>
