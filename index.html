@@ -37,7 +37,7 @@
             padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; box-sizing: border-box;
         }
 
-        /* --- MAIN PROJECT (GOLD) --- */
+        /* --- RESTAURATION ANIMATIONS GOLD PIXEL --- */
         .hero-card {
             width: 100%; height: 250px; background: #000; 
             border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 12px;
@@ -46,10 +46,15 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .hero-card img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); filter: brightness(0.6); transition: all 0.8s ease; }
-        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5); letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease; text-align: center; }
+        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5); letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease; text-align: center; pointer-events: none; }
 
-        /* --- DEVELOPER SHOWCASE --- */
+        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 170, 0, 0.4); }
+        .hero-card:hover img { transform: scale(1.15); filter: brightness(0.85); }
+        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
+
+        /* --- RESTAURATION ANIMATIONS GRID DEVELOPERS --- */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
+        
         .card {
             background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 10px; height: 130px; position: relative;
@@ -57,10 +62,20 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.5s ease;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
-        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; }
 
-        /* --- ANIMATION SCANNING LINE (OFFRE) --- */
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
+        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; transition: 0.5s ease; }
+
+        .card-dev-slot { border: 1px dashed rgba(0, 243, 255, 0.4); background: rgba(0, 243, 255, 0.02); }
+        .dev-icon { font-size: 1.5rem; color: var(--neon-blue); opacity: 0.5; transition: 0.5s ease; margin-bottom: 5px; }
+        .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+
+        .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); transform: translateY(-3px); }
+        .card:hover img { transform: scale(1.2); filter: brightness(1); }
+        .card:hover .dev-icon { opacity: 1; transform: scale(1.2); color: var(--neon-gold); }
+        .card:hover h3 { color: white; text-shadow: 0 0 10px var(--neon-blue); }
+
+        /* --- OPTION 2 : SCANNING LINE (CYAN) --- */
         @keyframes scan {
             0% { left: -100%; }
             30% { left: 100%; }
@@ -75,22 +90,16 @@
             padding: 20px 0;
             text-align: center;
             position: relative;
-            overflow: hidden; /* Important pour masquer le reflet qui sort du bloc */
+            overflow: hidden;
         }
 
-        /* Le reflet (Scanning Line) */
         .offer-container::before {
             content: "";
             position: absolute;
             top: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                120deg, 
-                transparent, 
-                rgba(0, 243, 255, 0.15), 
-                transparent
-            );
+            background: linear-gradient(120deg, transparent, rgba(0, 243, 255, 0.15), transparent);
             animation: scan 4s infinite linear;
         }
 
@@ -102,16 +111,10 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
-            position: relative; /* Pour rester au-dessus du reflet */
+            position: relative;
         }
 
-        .offer-grid { 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center;
-            position: relative; /* Pour rester au-dessus du reflet */
-        }
-
+        .offer-grid { display: flex; justify-content: space-around; align-items: center; position: relative; }
         .offer-point { flex: 1; }
         .offer-point strong { display: block; color: white; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 4px; }
         .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
@@ -119,11 +122,16 @@
         /* --- SUPPORT & CONTACT --- */
         .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
         .donation-grid { display: flex; gap: 10px; width: 100%; }
-        .btn-quick-don { flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; }
+        .btn-quick-don { flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
+        .btn-quick-don:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
+        
         .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; }
         form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; }
-        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; transition: 0.3s; }
+        .btn-send:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--neon-blue); }
+        
         footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; }
     </style>
 </head>
@@ -149,13 +157,13 @@
                 <h3>2048 NEON</h3>
             </div>
             <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
-                <div style="font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Available</div>
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
                 <h3>Deploy Here</h3>
             </div>
             <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
-                <div style="font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Available</div>
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
                 <h3>Deploy Here</h3>
             </div>
         </div>
