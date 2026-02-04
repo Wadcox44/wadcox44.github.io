@@ -18,124 +18,87 @@
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
-            -webkit-font-smoothing: antialiased;
         }
 
-        header { padding: 30px 0; text-align: center; width: 100%; }
-        h1 { font-family: 'Orbitron'; font-size: 2.2rem; margin: 0; color: white; text-shadow: 0 0 15px var(--neon-blue); }
-        .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
+        /* HEADER RÉDUIT */
+        header { padding: 15px 0 5px 0; text-align: center; width: 100%; }
+        h1 { font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; text-shadow: 0 0 10px var(--neon-blue); }
+        .pi-text { color: var(--neon-gold); text-shadow: 0 0 8px var(--neon-gold); }
 
         section {
-            width: 90%; max-width: var(--width-max); padding: 30px 0;
+            width: 90%; max-width: var(--width-max); padding: 15px 0; /* Espacement réduit */
             border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-            display: flex; flex-direction: column; align-items: center;
         }
 
         .category-title {
-            width: 100%; font-family: 'Orbitron'; font-size: 0.85rem;
+            font-family: 'Orbitron'; font-size: 0.75rem;
             color: var(--neon-blue); border-left: 3px solid var(--neon-gold);
-            padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; box-sizing: border-box;
+            padding-left: 10px; margin-bottom: 10px; text-transform: uppercase;
         }
 
-        /* --- RESTAURATION ANIMATIONS GOLD PIXEL --- */
+        /* MAIN PROJECT */
         .hero-card {
-            width: 100%; height: 250px; background: #000; 
-            border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 12px;
+            width: 100%; height: 200px; /* Hauteur légèrement réduite */
+            background: #000; border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 12px;
             overflow: hidden; cursor: pointer; position: relative;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.5s;
         }
-        .hero-card img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); filter: brightness(0.6); transition: all 0.8s ease; }
-        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5); letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease; text-align: center; pointer-events: none; }
+        .hero-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); transition: 0.8s; }
+        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2rem; color: var(--neon-gold); letter-spacing: 5px; transition: 0.5s; pointer-events: none; }
+        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 30px rgba(255, 170, 0, 0.4); }
+        .hero-card:hover .hero-overlay-text { letter-spacing: 10px; text-shadow: 0 0 20px var(--neon-gold); }
 
-        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 170, 0, 0.4); }
-        .hero-card:hover img { transform: scale(1.15); filter: brightness(0.85); }
-        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
-
-        /* --- RESTAURATION ANIMATIONS GRID DEVELOPERS --- */
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
-        
-        .card {
-            background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 10px; height: 130px; position: relative;
-            overflow: hidden; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.5s ease;
-        }
-
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
-        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; transition: 0.5s ease; }
-
-        .card-dev-slot { border: 1px dashed rgba(0, 243, 255, 0.4); background: rgba(0, 243, 255, 0.02); }
-        .dev-icon { font-size: 1.5rem; color: var(--neon-blue); opacity: 0.5; transition: 0.5s ease; margin-bottom: 5px; }
-        .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
-
-        .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); transform: translateY(-3px); }
-        .card:hover img { transform: scale(1.2); filter: brightness(1); }
-        .card:hover .dev-icon { opacity: 1; transform: scale(1.2); color: var(--neon-gold); }
-        .card:hover h3 { color: white; text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* --- OPTION 2 : SCANNING LINE (CYAN) --- */
-        @keyframes scan {
-            0% { left: -100%; }
-            30% { left: 100%; }
-            100% { left: 100%; }
-        }
-
+        /* DEVELOPER OFFER (SCANNING) */
+        @keyframes scan { 0% { left: -100%; } 30% { left: 100%; } 100% { left: 100%; } }
         .offer-container {
-            width: 100%;
-            background: rgba(0, 243, 255, 0.03);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 12px;
-            padding: 20px 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            width: 100%; background: rgba(0, 243, 255, 0.03);
+            border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 10px;
+            padding: 15px 0; text-align: center; position: relative; overflow: hidden; margin-top: 10px;
         }
+        .offer-container::before { content: ""; position: absolute; top: 0; width: 100%; height: 100%; background: linear-gradient(120deg, transparent, rgba(0, 243, 255, 0.1), transparent); animation: scan 4s infinite linear; }
+        .offer-main-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 10px; text-transform: uppercase; }
+        .offer-grid { display: flex; justify-content: space-around; position: relative; }
+        .offer-point strong { display: block; font-size: 0.65rem; font-family: 'Orbitron'; }
+        .offer-point span { font-size: 0.5rem; color: rgba(255,255,255,0.5); }
 
-        .offer-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(0, 243, 255, 0.15), transparent);
-            animation: scan 4s infinite linear;
+        /* NOUVEAU SYSTÈME DE DON FLOTTANT (SIDEBAR) */
+        .donation-sidebar {
+            position: fixed; right: -130px; top: 50%; transform: translateY(-50%);
+            background: rgba(15, 26, 46, 0.95); border: 1px solid var(--neon-blue);
+            border-radius: 10px 0 0 10px; padding: 15px 10px;
+            display: flex; flex-direction: column; gap: 10px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100;
+            box-shadow: -5px 0 20px rgba(0, 243, 255, 0.2);
         }
-
-        .offer-main-title {
-            font-family: 'Orbitron';
-            color: var(--neon-blue);
-            font-size: 1rem;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
-            position: relative;
+        .donation-sidebar:hover { right: 0; }
+        .donation-handle {
+            position: absolute; left: -40px; top: 0; bottom: 0; width: 40px;
+            background: var(--neon-blue); color: #000; border-radius: 10px 0 0 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: pointer; font-size: 0.8rem; writing-mode: vertical-rl;
+            text-transform: uppercase; font-family: 'Orbitron';
         }
+        .btn-don-small {
+            background: transparent; border: 1px solid var(--neon-blue);
+            color: white; padding: 8px; font-family: 'Orbitron'; font-size: 0.7rem;
+            cursor: pointer; border-radius: 5px; transition: 0.3s;
+        }
+        .btn-don-small:hover { background: var(--neon-blue); color: black; }
 
-        .offer-grid { display: flex; justify-content: space-around; align-items: center; position: relative; }
-        .offer-point { flex: 1; }
-        .offer-point strong { display: block; color: white; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 4px; }
-        .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- SUPPORT & CONTACT --- */
-        .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
-        .donation-grid { display: flex; gap: 10px; width: 100%; }
-        .btn-quick-don { flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
-        .btn-quick-don:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
-        
-        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; }
-        form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus, textarea:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; transition: 0.3s; }
-        .btn-send:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--neon-blue); }
-        
-        footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; }
+        /* FOOTER / CONTACT */
+        .btn-send { background: var(--neon-blue); border: none; padding: 12px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; width: 100%; margin-top: 10px; }
+        footer { font-size: 0.6rem; color: #444; padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
+
+    <div class="donation-sidebar">
+        <div class="donation-handle">Support Us</div>
+        <button class="btn-don-small">1 Pi</button>
+        <button class="btn-don-small">10 Pi</button>
+        <button class="btn-don-small">Custom</button>
+    </div>
 
     <header>
         <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
@@ -144,64 +107,25 @@
     <section>
         <div class="category-title">⭐ Main Project</div>
         <div class="hero-card" onclick="window.location.href='https://goldpixel.netlify.app/'">
-            <img src="Images/Gold Pixel.png" alt="Gold Pixel Game">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel">
             <div class="hero-overlay-text">GOLD PIXEL</div>
         </div>
     </section>
 
-    <section>
+    <section style="border:none;">
         <div class="category-title">🚀 Developer Showcase</div>
-        <div class="game-grid">
-            <div class="card" onclick="window.location.href='2048/index.html'">
-                <img src="Images/miniature 2048.jpg" alt="2048 Neon">
-                <h3>2048 NEON</h3>
-            </div>
-            <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div class="dev-icon">✚</div>
-                <div class="dev-text">Available</div>
-                <h3>Deploy Here</h3>
-            </div>
-            <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div class="dev-icon">✚</div>
-                <div class="dev-text">Available</div>
-                <h3>Deploy Here</h3>
-            </div>
-        </div>
-
         <div class="offer-container">
             <div class="offer-main-title">DEVELOPER OFFER : NO CHARGE *</div>
             <div class="offer-grid">
-                <div class="offer-point">
-                    <strong>Premium Slot</strong>
-                    <span>Priority Access</span>
+                <div class="offer-point"><strong>Premium Slot</strong><span>Priority Access</span></div>
+                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.1); border-right: 1px solid rgba(0, 243, 255, 0.1);">
+                    <strong>0 Pi Rent</strong><span>No Monthly Cost</span>
                 </div>
-                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.2); border-right: 1px solid rgba(0, 243, 255, 0.2);">
-                    <strong>0 Pi Rent</strong>
-                    <span>No Monthly Cost</span>
-                </div>
-                <div class="offer-point">
-                    <strong>0% Fee</strong>
-                    <span>On Transactions</span>
-                </div>
+                <div class="offer-point"><strong>0% Fee</strong><span>On Transactions</span></div>
             </div>
         </div>
-    </section>
-
-    <section>
-        <div class="donation-title">SUPPORT THE PROJECT</div>
-        <div class="donation-grid">
-            <button class="btn-quick-don">1 Pi</button>
-            <button class="btn-quick-don">10 Pi</button>
-            <button class="btn-quick-don">CUSTOM</button>
-        </div>
-    </section>
-
-    <section style="border:none;">
-        <div class="contact-title">CONTACT & DEPLOYMENT</div>
-        <form action="https://formspree.io/f/xwvoaroz" method="POST">
-            <input type="text" name="name" placeholder="Project / Dev Name" required>
-            <input type="email" name="email" placeholder="Contact Email" required>
-            <textarea name="message" rows="4" placeholder="Link to your game or description..." required></textarea>
+        
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" style="margin-top: 15px;">
             <button type="submit" class="btn-send">SUBMIT MY GAME</button>
         </form>
     </section>
