@@ -27,45 +27,45 @@
         .pi-text { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
 
         section {
-            width: 90%;
-            max-width: var(--width-max);
-            padding: 30px 0;
+            width: 90%; max-width: var(--width-max); padding: 30px 0;
             border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         .category-title {
             width: 100%; font-family: 'Orbitron'; font-size: 0.85rem;
             color: var(--neon-blue); border-left: 3px solid var(--neon-orange);
-            padding-left: 10px; margin-bottom: 20px; text-transform: uppercase;
-            box-sizing: border-box;
+            padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; box-sizing: border-box;
         }
 
-        /* Projet Principal Fusionné */
-        .gold-pixel-hero {
-            display: flex; align-items: center; justify-content: center;
-            gap: 15px; width: 100%; padding: 20px 10px;
-            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 12px; cursor: pointer; transition: 0.3s;
+        /* SLOT PROJET PRINCIPAL PURIFIÉ */
+        .hero-card {
+            width: 100%; height: 250px; 
+            background: #000; border: 2px solid rgba(0, 243, 255, 0.3);
+            border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.3s;
+            position: relative;
         }
-        .gold-pixel-hero:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); }
+        .hero-card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 25px rgba(0, 243, 255, 0.2); }
         
-        .side-label {
-            font-family: 'Orbitron'; font-size: 1.4rem; color: var(--neon-orange);
-            text-shadow: 0 0 10px var(--neon-orange); letter-spacing: 2px;
+        .hero-card img { 
+            width: 100%; height: 100%; object-fit: cover; /* Remplit tout l'espace */
+            display: block;
         }
-        .hero-img { height: 100px; width: auto; border-radius: 4px; border: 1px solid rgba(255,170,0,0.3); }
 
-        /* Grilles et Cartes */
+        .hero-badge {
+            position: absolute; bottom: 10px; right: 10px;
+            background: var(--neon-orange); color: #000; font-family: 'Orbitron';
+            font-size: 0.6rem; padding: 4px 10px; border-radius: 4px; font-weight: bold;
+        }
+
+        /* Grilles Arcade */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
             transition: 0.3s; display: flex; flex-direction: column; align-items: center;
         }
-        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); }
+        .card:hover { border-color: var(--neon-blue); }
         .card-thumb { width: 90%; height: 80px; object-fit: contain; border-radius: 4px; margin-bottom: 8px; }
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; }
@@ -78,7 +78,7 @@
             padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.8rem;
         }
 
-        /* Partenariat Box */
+        /* Partenariat */
         .partner-box {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 20px;
@@ -92,7 +92,7 @@
         .offer-item strong { display: block; font-size: 0.8rem; }
         .offer-item p { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
+        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; }
         form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         input, textarea { 
             background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
@@ -100,7 +100,7 @@
         }
         .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; }
 
-        footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; border: none; }
+        footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; }
 
         #thankYouModal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
@@ -117,10 +117,9 @@
 
     <section>
         <div class="category-title">⭐ Projet Principal</div>
-        <div class="gold-pixel-hero" onclick="window.location.href='https://goldpixel.netlify.app/'">
-            <span class="side-label">GOLD</span>
-            <img src="Images/miniature GoldPixel.jpg" class="hero-img" alt="Gold Pixel">
-            <span class="side-label">PIXEL</span>
+        <div class="hero-card" onclick="window.location.href='https://goldpixel.netlify.app/'">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel Game">
+            <div class="hero-badge">ÉCOSYSTÈME ROYAL</div>
         </div>
     </section>
 
