@@ -18,77 +18,109 @@
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. BARRE DE DON FIXE (Haut de page, n'empiète pas sur le flux) */
+        /* BARRE DE DON FIXE */
         .top-donation-bar {
             position: sticky; top: 0; width: 100%; z-index: 1000;
-            background: rgba(10, 20, 35, 0.9); border-bottom: 1px solid var(--neon-blue);
-            backdrop-filter: blur(5px); display: flex; justify-content: center;
-            align-items: center; padding: 8px 0; gap: 15px;
+            background: rgba(10, 20, 35, 0.95); border-bottom: 1px solid var(--neon-blue);
+            backdrop-filter: blur(8px); display: flex; justify-content: center;
+            align-items: center; padding: 10px 0; gap: 15px;
         }
-        .bar-label { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; }
+        .bar-label { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 1px; }
         .btn-don-min { 
             background: transparent; border: 1px solid var(--neon-blue); color: white;
-            font-family: 'Orbitron'; font-size: 0.65rem; padding: 4px 12px; cursor: pointer; transition: 0.3s;
+            font-family: 'Orbitron'; font-size: 0.65rem; padding: 5px 15px; cursor: pointer; transition: 0.3s;
         }
         .btn-don-min:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* 2. HEADER ULTRA COMPACT */
-        header { padding: 10px 0 0 0; text-align: center; width: 100%; }
-        h1 { font-family: 'Orbitron'; font-size: 1.6rem; margin: 0; text-shadow: 0 0 10px var(--neon-blue); }
-        .pi-text { color: var(--neon-gold); text-shadow: 0 0 8px var(--neon-gold); }
+        /* HEADER COMPACT */
+        header { padding: 15px 0 5px 0; text-align: center; width: 100%; }
+        h1 { font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; text-shadow: 0 0 15px var(--neon-blue); }
+        .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
 
         section {
-            width: 90%; max-width: var(--width-max); padding: 10px 0;
+            width: 90%; max-width: var(--width-max); padding: 15px 0;
             border-bottom: 1px solid rgba(0, 243, 255, 0.1);
         }
 
         .category-title {
-            font-family: 'Orbitron'; font-size: 0.75rem; color: var(--neon-blue);
+            font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue);
             border-left: 3px solid var(--neon-gold); padding-left: 10px;
-            margin-bottom: 12px; text-transform: uppercase;
+            margin-bottom: 15px; text-transform: uppercase;
         }
 
-        /* CARTES ET ANIMATIONS RÉTABLIES */
+        /* MAIN PROJECT - ZÉRO CONTOUR BLANC */
         .hero-card {
-            width: 100%; height: 200px; background: #000; border: 2px solid rgba(255, 170, 0, 0.3);
+            width: 100%; height: 230px; background: #000; 
+            border: 2px solid rgba(255, 170, 0, 0.4); /* Contour Gold de base voyant mais pas trop */
             border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
             display: flex; align-items: center; justify-content: center; transition: 0.5s;
         }
-        .hero-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); transition: 0.8s; }
-        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 1.8rem; color: var(--neon-gold); letter-spacing: 5px; transition: 0.5s; pointer-events: none; }
-        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 25px rgba(255, 170, 0, 0.4); }
-        .hero-card:hover img { transform: scale(1.1); filter: brightness(0.8); }
+        /* Fix contour blanc : scale légèrement supérieur et background noir */
+        .hero-card img { 
+            width: 101%; height: 101%; object-fit: cover; 
+            filter: brightness(0.6); transition: 0.8s ease; 
+            display: block; outline: none; border: none;
+        }
+        .hero-overlay-text { 
+            position: absolute; font-family: 'Orbitron'; font-size: 2.2rem; 
+            color: var(--neon-gold); letter-spacing: 5px; font-weight: 900; 
+            transition: 0.5s ease; text-align: center; pointer-events: none; 
+        }
 
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-bottom: 15px; }
+        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 35px rgba(255, 170, 0, 0.5); }
+        .hero-card:hover img { transform: scale(1.1); filter: brightness(0.85); }
+        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
+
+        /* DEVELOPER SHOWCASE & SLOTS */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
         .card {
             background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px; height: 110px; position: relative; overflow: hidden;
+            border-radius: 10px; height: 130px; position: relative; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s;
         }
-        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
-        .card h3 { position: absolute; bottom: 5px; margin: 0; font-size: 0.5rem; font-family: 'Orbitron'; color: var(--neon-blue); }
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s; }
+        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; }
 
-        /* OFFER BLOCK AVEC EFFET SCANNING */
+        /* Slots avec Croix Jaune */
+        .card-dev-slot { border: 1px dashed rgba(255, 170, 0, 0.5); background: rgba(255, 170, 0, 0.02); }
+        .dev-icon { font-size: 1.8rem; color: var(--neon-gold); margin-bottom: 5px; transition: 0.5s; }
+        .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+
+        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
+        .card-dev-slot:hover .dev-icon { transform: scale(1.2) rotate(90deg); color: var(--neon-blue); }
+
+        /* OFFER SCANNING */
         @keyframes scan { 0% { left: -100%; } 30% { left: 100%; } 100% { left: 100%; } }
         .offer-container {
             width: 100%; background: rgba(0, 243, 255, 0.03);
-            border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 10px;
-            padding: 15px 0; text-align: center; position: relative; overflow: hidden;
+            border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 12px;
+            padding: 20px 0; text-align: center; position: relative; overflow: hidden;
         }
         .offer-container::before { content: ""; position: absolute; top: 0; width: 100%; height: 100%; background: linear-gradient(120deg, transparent, rgba(0, 243, 255, 0.1), transparent); animation: scan 4s infinite linear; }
-        .offer-main-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 10px; }
+        .offer-main-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; letter-spacing: 1px; }
         .offer-grid { display: flex; justify-content: space-around; position: relative; }
-        .offer-point strong { display: block; font-size: 0.65rem; font-family: 'Orbitron'; }
-        .offer-point span { font-size: 0.5rem; color: rgba(255,255,255,0.4); }
+        .offer-point strong { display: block; font-size: 0.7rem; font-family: 'Orbitron'; color: white; margin-bottom: 4px; }
+        .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.4); text-transform: uppercase; }
 
-        /* BOUTON SUBMIT */
-        .btn-send { background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; width: 100%; margin-top: 15px; transition: 0.3s; }
-        .btn-send:hover { box-shadow: 0 0 20px var(--neon-blue); }
+        /* FORMULAIRE DE CONTACT RÉCUPÉRÉ */
+        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin: 20px 0 15px 0; text-align: center; }
+        form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { 
+            background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
+            border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--neon-blue); }
+        .btn-send { 
+            background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; 
+            border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; 
+            margin-top: 10px; transition: 0.3s; 
+        }
+        .btn-send:hover { box-shadow: 0 0 20px var(--neon-blue); transform: scale(1.02); }
 
-        footer { font-size: 0.6rem; color: #444; padding: 30px; text-align: center; }
+        footer { font-size: 0.7rem; color: #444; padding: 40px 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -116,16 +148,18 @@
         <div class="category-title">🚀 Developer Showcase</div>
         <div class="game-grid">
             <div class="card" onclick="window.location.href='2048/index.html'">
-                <img src="Images/miniature 2048.jpg" alt="2048">
+                <img src="Images/miniature 2048.jpg" alt="2048 Neon">
                 <h3>2048 NEON</h3>
             </div>
-            <div class="card" style="border: 1px dashed rgba(0,243,255,0.3)">
-                <div style="font-size: 1.2rem; opacity: 0.3;">✚</div>
-                <h3>DEPLOY HERE</h3>
+            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
             </div>
-            <div class="card" style="border: 1px dashed rgba(0,243,255,0.3)">
-                <div style="font-size: 1.2rem; opacity: 0.3;">✚</div>
-                <h3>DEPLOY HERE</h3>
+            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
             </div>
         </div>
 
@@ -133,14 +167,22 @@
             <div class="offer-main-title">DEVELOPER OFFER : NO CHARGE *</div>
             <div class="offer-grid">
                 <div class="offer-point"><strong>Premium Slot</strong><span>Priority Access</span></div>
-                <div class="offer-point" style="border-left: 1px solid rgba(0,243,255,0.1); border-right: 1px solid rgba(0,243,255,0.1);">
+                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.1); border-right: 1px solid rgba(0, 243, 255, 0.1);">
                     <strong>0 Pi Rent</strong><span>No Monthly Cost</span>
                 </div>
                 <div class="offer-point"><strong>0% Fee</strong><span>On Transactions</span></div>
             </div>
         </div>
+    </section>
 
-        <button type="button" class="btn-send">SUBMIT MY GAME</button>
+    <section id="contact-form" style="border:none;">
+        <div class="contact-title">CONTACT & DEPLOYMENT</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST">
+            <input type="text" name="name" placeholder="Project / Dev Name" required>
+            <input type="email" name="email" placeholder="Contact Email" required>
+            <textarea name="message" rows="4" placeholder="Link to your game or description..." required></textarea>
+            <button type="submit" class="btn-send">SUBMIT MY GAME</button>
+        </form>
     </section>
 
     <footer>✔ Certified WadCox | Pi Network Ecosystem</footer>
