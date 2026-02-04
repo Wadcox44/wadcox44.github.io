@@ -15,7 +15,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Animations */
         @keyframes flicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
                 text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 30px var(--neon-blue);
@@ -27,7 +26,6 @@
         h1 { font-family: 'Orbitron'; font-size: 2.2rem; margin: 0; animation: flicker 3s infinite alternate; }
         .pi-text { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
 
-        /* Délimitation des sections */
         section {
             width: 90%;
             max-width: var(--width-max);
@@ -45,17 +43,22 @@
             box-sizing: border-box;
         }
 
-        /* Projet Principal */
-        .hero-container {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; margin-bottom: 10px;
+        /* Projet Principal Fusionné */
+        .gold-pixel-hero {
+            display: flex; align-items: center; justify-content: center;
+            gap: 15px; width: 100%; padding: 20px 10px;
+            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 12px; cursor: pointer; transition: 0.3s;
         }
-        .side-text {
+        .gold-pixel-hero:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); }
+        
+        .side-label {
             font-family: 'Orbitron'; font-size: 1.4rem; color: var(--neon-orange);
             text-shadow: 0 0 10px var(--neon-orange); letter-spacing: 2px;
         }
+        .hero-img { height: 100px; width: auto; border-radius: 4px; border: 1px solid rgba(255,170,0,0.3); }
 
-        /* Cartes & Grille */
+        /* Grilles et Cartes */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
@@ -75,28 +78,27 @@
             padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.8rem;
         }
 
-        /* Offre de lancement */
+        /* Partenariat Box */
         .partner-box {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box;
+            border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 20px;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 5px 15px; border-radius: 50px; font-size: 12px; margin-bottom: 15px; font-weight: bold;
+            padding: 5px 15px; border-radius: 50px; font-size: 11px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase;
         }
         .offer-grid { display: flex; justify-content: space-around; gap: 10px; }
         .offer-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; flex: 1; }
-        .offer-item strong { display: block; font-size: 0.85rem; }
-        .offer-item p { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin: 0; }
+        .offer-item strong { display: block; font-size: 0.8rem; }
+        .offer-item p { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-        /* Formulaire */
-        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; width: 100%; }
+        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
         form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         input, textarea { 
             background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
             border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; 
         }
-        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; width: 100%; }
+        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; }
 
         footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; border: none; }
 
@@ -115,13 +117,10 @@
 
     <section>
         <div class="category-title">⭐ Projet Principal</div>
-        <div class="hero-container">
-            <span class="side-text">GOLD</span>
-            <div class="card" style="width: 150px;" onclick="window.location.href='https://goldpixel.netlify.app/'">
-                <img src="Images/miniature GoldPixel.jpg" class="card-thumb" alt="Gold Pixel">
-                <span style="color:var(--neon-orange); font-size:0.6rem; font-weight:bold;">● ROYAL</span>
-            </div>
-            <span class="side-text">PIXEL</span>
+        <div class="gold-pixel-hero" onclick="window.location.href='https://goldpixel.netlify.app/'">
+            <span class="side-label">GOLD</span>
+            <img src="Images/miniature GoldPixel.jpg" class="hero-img" alt="Gold Pixel">
+            <span class="side-label">PIXEL</span>
         </div>
     </section>
 
@@ -154,8 +153,6 @@
     </section>
 
     <section style="border:none;">
-        <div class="contact-title">COLLABORATIONS & PARTENARIATS</div>
-        
         <div class="partner-box">
             <div class="launch-badge">Offre de lancement pour les Développeurs</div>
             <div class="offer-grid">
@@ -165,7 +162,9 @@
             </div>
         </div>
 
-        <form action="https://formspree.io/f/xwvoaroz" method="POST" style="margin-top:20px;">
+        <div class="contact-title">COLLABORATIONS & PARTENARIATS</div>
+
+        <form action="https://formspree.io/f/xwvoaroz" method="POST">
             <input type="text" name="name" placeholder="Nom du projet / Développeur" required>
             <input type="email" name="email" placeholder="Email de contact" required>
             <textarea name="message" rows="4" placeholder="Décrivez votre jeu ou votre demande..." required></textarea>
