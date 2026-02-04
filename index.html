@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; }
+        :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; --width-max: 500px; }
         
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
@@ -23,86 +23,88 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 25px 5px 10px; text-align: center; width: 100%; }
-        h1 { font-family: 'Orbitron'; font-size: 2.2rem; margin: 0; animation: flicker 3s infinite alternate; letter-spacing: 2px; }
+        header { padding: 30px 0; text-align: center; width: 100%; }
+        h1 { font-family: 'Orbitron'; font-size: 2.2rem; margin: 0; animation: flicker 3s infinite alternate; }
         .pi-text { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
 
-        /* Catégories */
-        .category-title {
-            width: 90%; max-width: 500px; font-family: 'Orbitron'; font-size: 0.85rem;
-            color: var(--neon-blue); border-left: 3px solid var(--neon-orange);
-            padding-left: 10px; margin: 25px 0 15px 0; text-transform: uppercase;
+        /* Délimitation des sections */
+        section {
+            width: 90%;
+            max-width: var(--width-max);
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Projet Principal avec Gold & Pixel */
+        .category-title {
+            width: 100%; font-family: 'Orbitron'; font-size: 0.85rem;
+            color: var(--neon-blue); border-left: 3px solid var(--neon-orange);
+            padding-left: 10px; margin-bottom: 20px; text-transform: uppercase;
+            box-sizing: border-box;
+        }
+
+        /* Projet Principal */
         .hero-container {
-            display: flex; align-items: center; justify-content: center;
-            gap: 15px; width: 95%; max-width: 550px; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; margin-bottom: 10px;
         }
         .side-text {
-            font-family: 'Orbitron'; font-size: 1.5rem; color: var(--neon-orange);
+            font-family: 'Orbitron'; font-size: 1.4rem; color: var(--neon-orange);
             text-shadow: 0 0 10px var(--neon-orange); letter-spacing: 2px;
         }
 
-        /* Cartes */
+        /* Cartes & Grille */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;
+            transition: 0.3s; display: flex; flex-direction: column; align-items: center;
         }
-        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); }
-        
-        .card-thumb {
-            width: 90%; height: 80px; object-fit: contain; background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px; margin-bottom: 8px; transition: 0.4s;
-        }
-        
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 95%; max-width: 500px; }
+        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); }
+        .card-thumb { width: 90%; height: 80px; object-fit: contain; border-radius: 4px; margin-bottom: 8px; }
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
-        .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
-        .card-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+        .empty { border: 1px dashed #444; opacity: 0.5; }
 
-        /* Section Dons */
-        .donation-section { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
-        .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; }
-        
-        .goal-container { width: 90%; max-width: 450px; margin-bottom: 15px; }
-        .progress-bg { background: rgba(255,255,255,0.1); height: 10px; border-radius: 10px; border: 1px solid rgba(0, 243, 255, 0.2); overflow: hidden; }
-        .progress-bar { background: linear-gradient(90deg, var(--neon-blue), #00ff88); width: 45%; height: 100%; box-shadow: 0 0 10px var(--neon-blue); }
-
-        .donation-grid { display: flex; gap: 10px; width: 90%; max-width: 450px; }
+        /* Dons */
+        .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
+        .donation-grid { display: flex; gap: 10px; width: 100%; }
         .btn-quick-don { 
             flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; 
             padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.8rem;
         }
 
-        /* Offre de lancement (Style original) */
-        .partner-callout {
+        /* Offre de lancement */
+        .partner-box {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 20px; margin: 15px auto; text-align: center; width: 90%; max-width: 500px;
+            border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 8px 20px; border-radius: 50px; font-size: 14px; letter-spacing: 2px;
-            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05); text-transform: uppercase;
+            padding: 5px 15px; border-radius: 50px; font-size: 12px; margin-bottom: 15px; font-weight: bold;
         }
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
-        .offer-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px; flex: 1; }
-        .offer-item strong { display: block; font-size: 0.9rem; color: #fff; }
-        .offer-item p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin: 0; }
+        .offer-grid { display: flex; justify-content: space-around; gap: 10px; }
+        .offer-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; flex: 1; }
+        .offer-item strong { display: block; font-size: 0.85rem; }
+        .offer-item p { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-        /* Formulaire & Modal */
-        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
-        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; }
+        /* Formulaire */
+        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; width: 100%; }
+        form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { 
+            background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
+            border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; 
+        }
+        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; width: 100%; }
+
+        footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; border: none; }
 
         #thankYouModal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
             background: rgba(5, 11, 20, 0.95); align-items: center; justify-content: center;
         }
         .modal-content { background: #0f1a2e; border: 2px solid var(--neon-orange); padding: 30px; border-radius: 15px; text-align: center; max-width: 280px; }
-
-        footer { font-size: 0.7rem; color: #666; padding: 30px; text-align: center; }
     </style>
 </head>
 <body>
@@ -111,69 +113,70 @@
         <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
     </header>
 
-    <div class="category-title">⭐ Projet Principal</div>
-    
-    <div class="hero-container">
-        <span class="side-text">GOLD</span>
-        <div class="card" style="width: 140px; padding: 15px;" onclick="window.location.href='https://goldpixel.netlify.app/'">
-            <img src="Images/miniature GoldPixel.jpg" class="card-thumb" style="height: 100px; width: 100%;" alt="Gold Pixel">
-            <span style="color:var(--neon-orange); font-size:0.55rem; font-weight:bold;">● ROYAL</span>
+    <section>
+        <div class="category-title">⭐ Projet Principal</div>
+        <div class="hero-container">
+            <span class="side-text">GOLD</span>
+            <div class="card" style="width: 150px;" onclick="window.location.href='https://goldpixel.netlify.app/'">
+                <img src="Images/miniature GoldPixel.jpg" class="card-thumb" alt="Gold Pixel">
+                <span style="color:var(--neon-orange); font-size:0.6rem; font-weight:bold;">● ROYAL</span>
+            </div>
+            <span class="side-text">PIXEL</span>
         </div>
-        <span class="side-text">PIXEL</span>
-    </div>
+    </section>
 
-    <div class="category-title">🧩 Arcade & Puzzles</div>
-    <div class="game-grid">
-        <div class="card" onclick="window.location.href='2048/index.html'">
-            <img src="Images/miniature 2048.jpg" class="card-thumb" alt="2048">
-            <h3>2048 NEON</h3>
-            <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
+    <section>
+        <div class="category-title">🧩 Arcade & Puzzles</div>
+        <div class="game-grid">
+            <div class="card" onclick="window.location.href='2048/index.html'">
+                <img src="Images/miniature 2048.jpg" class="card-thumb" alt="2048">
+                <h3>2048 NEON</h3>
+                <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
+            </div>
+            <div class="card empty">
+                <span style="font-size:1.5rem;">🎮</span>
+                <h3>SLOT DEV</h3>
+            </div>
+            <div class="card empty">
+                <span style="font-size:1.5rem;">📦</span>
+                <h3>VOTRE JEU</h3>
+            </div>
         </div>
-        <div class="card empty">
-            <span class="card-icon">🎮</span>
-            <h3>SLOT DEV</h3>
-        </div>
-        <div class="card empty">
-            <span class="card-icon">📦</span>
-            <h3>VOTRE JEU</h3>
-        </div>
-    </div>
+    </section>
 
-    <div class="donation-section">
+    <section>
         <div class="donation-title">SOUTENEZ LE PROJET EN FAISANT UN DON</div>
-        <div class="goal-container">
-            <div class="progress-bg"><div class="progress-bar"></div></div>
-        </div>
         <div class="donation-grid">
             <button class="btn-quick-don" onclick="donnerPi(1)">1 Pi</button>
             <button class="btn-quick-don" onclick="donnerPi(10)">10 Pi</button>
             <button class="btn-quick-don" onclick="donnerPi('libre')">LIBRE</button>
         </div>
-    </div>
+    </section>
 
-    <div class="partner-callout">
-        <div class="launch-badge">Offre de lancement</div>
-        <p style="color: white; font-weight: bold; margin: 0;">Rejoignez JeuxVideo.Pi</p>
-        <div class="offer-grid">
-            <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
-            <div class="offer-item"><strong>0% Commission</strong><p>Sur transactions</p></div>
-            <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
+    <section style="border:none;">
+        <div class="contact-title">COLLABORATIONS & PARTENARIATS</div>
+        
+        <div class="partner-box">
+            <div class="launch-badge">Offre de lancement pour les Développeurs</div>
+            <div class="offer-grid">
+                <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
+                <div class="offer-item"><strong>0% Comm.</strong><p>Sur transactions</p></div>
+                <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
+            </div>
         </div>
-    </div>
 
-    <div class="contact-area">
-        <form action="https://formspree.io/f/xwvoaroz" method="POST" style="width: 90%; max-width: 500px;">
-            <input type="text" name="name" placeholder="Nom" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <textarea name="message" rows="3" placeholder="Votre projet..." required></textarea>
-            <button type="submit" class="btn-send">SOUMETTRE LA DEMANDE</button>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" style="margin-top:20px;">
+            <input type="text" name="name" placeholder="Nom du projet / Développeur" required>
+            <input type="email" name="email" placeholder="Email de contact" required>
+            <textarea name="message" rows="4" placeholder="Décrivez votre jeu ou votre demande..." required></textarea>
+            <button type="submit" class="btn-send">ENVOYER LA DEMANDE</button>
         </form>
-    </div>
+    </section>
 
     <div id="thankYouModal">
         <div class="modal-content">
             <h2 style="font-family: 'Orbitron'; color: var(--neon-orange); margin-top:0;">MERCI !</h2>
-            <p>Votre don aide le projet à grandir.</p>
+            <p>Votre contribution aide JeuxVideo.Pi à grandir.</p>
             <button class="btn-send" onclick="document.getElementById('thankYouModal').style.display='none'">FERMER</button>
         </div>
     </div>
@@ -191,12 +194,12 @@
         };
 
         async function initPi() {
-            try {
-                if (typeof Pi !== 'undefined') {
+            if (typeof Pi !== 'undefined') {
+                try {
                     await Pi.init({ version: "2.0", sandbox: false });
                     await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
-                }
-            } catch (e) { console.warn("Non connecté"); }
+                } catch (e) { console.warn("Init Pi échoué"); }
+            }
         }
         initPi();
 
