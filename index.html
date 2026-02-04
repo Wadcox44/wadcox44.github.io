@@ -48,10 +48,6 @@
         .hero-card img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); filter: brightness(0.6); transition: all 0.8s ease; }
         .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5); letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease; text-align: center; }
 
-        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 170, 0, 0.4); }
-        .hero-card:hover img { transform: scale(1.15); filter: brightness(0.85); }
-        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
-
         /* --- DEVELOPER SHOWCASE --- */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
         .card {
@@ -64,22 +60,12 @@
         .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
         .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; }
 
-        /* --- ANIMATIONS POUR L'OFFRE (CYAN) --- */
-
-        /* Animation 1: Neon Breathing (ACTIF) */
-        @keyframes neonBreathing {
-            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.1); border-color: rgba(0, 243, 255, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); border-color: rgba(0, 243, 255, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.1); border-color: rgba(0, 243, 255, 0.2); }
+        /* --- ANIMATION SCANNING LINE (OFFRE) --- */
+        @keyframes scan {
+            0% { left: -100%; }
+            30% { left: 100%; }
+            100% { left: 100%; }
         }
-
-        /* Animation 2: Scanning (Optionnel - décommenter pour tester) */
-        /* @keyframes scanning {
-            0% { background: linear-gradient(90deg, rgba(0,243,255,0.04) 0%, rgba(0,243,255,0.04) 100%); }
-            50% { background: linear-gradient(90deg, rgba(0,243,255,0.04) 0%, rgba(0,243,255,0.15) 50%, rgba(0,243,255,0.04) 100%); }
-            100% { background: linear-gradient(90deg, rgba(0,243,255,0.04) 0%, rgba(0,243,255,0.04) 100%); }
-        }
-        */
 
         .offer-container {
             width: 100%;
@@ -88,9 +74,24 @@
             border-radius: 12px;
             padding: 20px 0;
             text-align: center;
-            animation: neonBreathing 4s ease-in-out infinite; /* Change le nom ici pour tester les autres */
             position: relative;
-            overflow: hidden;
+            overflow: hidden; /* Important pour masquer le reflet qui sort du bloc */
+        }
+
+        /* Le reflet (Scanning Line) */
+        .offer-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg, 
+                transparent, 
+                rgba(0, 243, 255, 0.15), 
+                transparent
+            );
+            animation: scan 4s infinite linear;
         }
 
         .offer-main-title {
@@ -101,9 +102,16 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+            position: relative; /* Pour rester au-dessus du reflet */
         }
 
-        .offer-grid { display: flex; justify-content: space-around; align-items: center; }
+        .offer-grid { 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center;
+            position: relative; /* Pour rester au-dessus du reflet */
+        }
+
         .offer-point { flex: 1; }
         .offer-point strong { display: block; color: white; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 4px; }
         .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
@@ -141,12 +149,12 @@
                 <h3>2048 NEON</h3>
             </div>
             <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div class="dev-icon" style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
+                <div style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
                 <div style="font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Available</div>
                 <h3>Deploy Here</h3>
             </div>
             <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
-                <div class="dev-icon" style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
+                <div style="color:var(--neon-blue); font-size: 1.5rem; opacity: 0.5;">✚</div>
                 <div style="font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Available</div>
                 <h3>Deploy Here</h3>
             </div>
