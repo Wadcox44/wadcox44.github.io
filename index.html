@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root { --neon-blue: #00f3ff; --neon-gold: #ffaa00; --bg: #050b14; --width-max: 500px; }
+        :root { 
+            --neon-blue: #00f3ff; 
+            --neon-gold: #ffaa00; 
+            --bg: #050b14; 
+            --width-max: 500px; 
+        }
         
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
+            -webkit-font-smoothing: antialiased;
         }
 
         header { padding: 30px 0; text-align: center; width: 100%; }
@@ -31,68 +37,54 @@
             padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; box-sizing: border-box;
         }
 
-        /* --- SLOT PROJET PRINCIPAL (OPTION 1) --- */
+        /* --- MAIN PROJECT --- */
         .hero-card {
             width: 100%; height: 250px; background: #000; 
             border: 2px solid rgba(255, 170, 0, 0.3); border-radius: 12px;
             overflow: hidden; cursor: pointer; position: relative;
             display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hero-card img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); filter: brightness(0.6); transition: all 0.8s ease; }
+        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5); letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease; text-align: center; }
+
+        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 170, 0, 0.4); }
+        .hero-card:hover img { transform: scale(1.15); filter: brightness(0.85); }
+        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
+
+        /* --- DEVELOPER SHOWCASE --- */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+        
+        .card {
+            background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px; height: 130px; position: relative;
+            overflow: hidden; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: all 0.5s ease;
         }
-        .hero-card img { 
-            width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); 
-            filter: brightness(0.6); transition: all 0.8s ease;
-        }
-        .hero-overlay-text {
-            position: absolute; font-family: 'Orbitron'; font-size: 2.5rem;
-            color: var(--neon-gold); text-shadow: 0 0 15px rgba(255,170,0,0.5);
-            letter-spacing: 5px; font-weight: 900; transition: all 0.5s ease;
-        }
 
-        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 170, 0, 0.3); }
-        .hero-card:hover img { transform: scale(1.15); filter: brightness(0.8); }
-        .hero-card:hover .hero-overlay-text { letter-spacing: 10px; text-shadow: 0 0 30px var(--neon-gold); }
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s ease; }
+        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; color: var(--neon-blue); text-transform: uppercase; font-family: 'Orbitron'; letter-spacing: 1px; }
 
-        /* Grilles Arcade */
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-        .card {
-            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
-            transition: 0.3s; display: flex; flex-direction: column; align-items: center;
-        }
-        .card-thumb { width: 90%; height: 80px; object-fit: contain; border-radius: 4px; margin-bottom: 8px; }
-        .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
+        .card-dev-slot { border: 1px dashed rgba(0, 243, 255, 0.4); background: rgba(0, 243, 255, 0.02); }
+        .dev-icon { font-size: 1.5rem; color: var(--neon-blue); opacity: 0.5; transition: 0.5s ease; margin-bottom: 5px; }
+        .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Dons */
+        .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
+        .card:hover img { transform: scale(1.2); filter: brightness(1); }
+        .card:hover .dev-icon { opacity: 1; transform: scale(1.2); color: var(--neon-gold); }
+        .card:hover h3 { color: white; text-shadow: 0 0 10px var(--neon-blue); }
+
+        /* --- OTHER SECTIONS (DONS & CONTACT) --- */
         .donation-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
         .donation-grid { display: flex; gap: 10px; width: 100%; }
-        .btn-quick-don { 
-            flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; 
-            padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer;
-        }
-
-        /* Partenariat */
-        .partner-box {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 20px;
-        }
-        .launch-badge {
-            display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 5px 15px; border-radius: 50px; font-size: 11px; margin-bottom: 15px; font-weight: bold;
-        }
-        .offer-grid { display: flex; justify-content: space-around; gap: 10px; }
-        .offer-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; flex: 1; }
-        .offer-item strong { display: block; font-size: 0.8rem; }
-        .offer-item p { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0; }
-
+        .btn-quick-don { flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; padding: 12px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; }
+        .partner-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
+        .launch-badge { display: inline-block; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 50px; font-size: 11px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
         .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; text-align: center; }
         form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        input, textarea { 
-            background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
-            border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; 
-        }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; }
         .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; }
-
         footer { font-size: 0.7rem; color: #666; padding: 40px 0; text-align: center; }
     </style>
 </head>
@@ -103,61 +95,63 @@
     </header>
 
     <section>
-        <div class="category-title">⭐ Projet Principal</div>
+        <div class="category-title">⭐ Main Project</div>
         <div class="hero-card" onclick="window.location.href='https://goldpixel.netlify.app/'">
-            <img src="Images/Gold Pixel.png" alt="Gold Pixel">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel Game">
             <div class="hero-overlay-text">GOLD PIXEL</div>
         </div>
     </section>
 
     <section>
-        <div class="category-title">🧩 Arcade & Puzzles</div>
+        <div class="category-title">🚀 Developer Showcase</div>
         <div class="game-grid">
+            
             <div class="card" onclick="window.location.href='2048/index.html'">
-                <img src="Images/miniature 2048.jpg" class="card-thumb" alt="2048">
+                <img src="Images/miniature 2048.jpg" alt="2048 Neon">
                 <h3>2048 NEON</h3>
-                <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
             </div>
-            <div class="card" style="opacity:0.5;">
-                <span style="font-size:1.5rem; margin-bottom:8px;">🎮</span>
-                <h3>SLOT DEV</h3>
+
+            <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
             </div>
-            <div class="card" style="opacity:0.5;">
-                <span style="font-size:1.5rem; margin-bottom:8px;">📦</span>
-                <h3>VOTRE JEU</h3>
+
+            <div class="card card-dev-slot" onclick="document.querySelector('textarea').focus();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
             </div>
+
         </div>
     </section>
 
     <section>
-        <div class="donation-title">SOUTENEZ LE PROJET EN FAISANT UN DON</div>
+        <div class="donation-title">SUPPORT THE PROJECT</div>
         <div class="donation-grid">
-            <button class="btn-quick-don" onclick="donnerPi(1)">1 Pi</button>
-            <button class="btn-quick-don" onclick="donnerPi(10)">10 Pi</button>
-            <button class="btn-quick-don" onclick="donnerPi('libre')">LIBRE</button>
+            <button class="btn-quick-don">1 Pi</button>
+            <button class="btn-quick-don">10 Pi</button>
+            <button class="btn-quick-don">CUSTOM</button>
         </div>
     </section>
 
     <section style="border:none;">
         <div class="partner-box">
-            <div class="launch-badge">Offre de lancement pour les Développeurs</div>
-            <div class="offer-grid">
-                <div class="offer-item"><strong>Loyer 0 Pi</strong><p>Durée limitée</p></div>
-                <div class="offer-item"><strong>0% Comm.</strong><p>Sur transactions</p></div>
-                <div class="offer-item"><strong>Slot Premium</strong><p>Prioritaire</p></div>
-            </div>
+            <div class="launch-badge">Developer Offer: 0 Pi Rent</div>
+            <p style="font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 0;">Claim your spot in the ecosystem today.</p>
         </div>
 
-        <div class="contact-title">COLLABORATIONS & PARTENARIATS</div>
+        <div class="contact-title">CONTACT & DEPLOYMENT</div>
 
         <form action="https://formspree.io/f/xwvoaroz" method="POST">
-            <input type="text" name="name" placeholder="Nom du projet / Développeur" required>
-            <input type="email" name="email" placeholder="Email de contact" required>
-            <textarea name="message" rows="4" placeholder="Décrivez votre jeu ou votre demande..." required></textarea>
-            <button type="submit" class="btn-send">ENVOYER LA DEMANDE</button>
+            <input type="text" name="name" placeholder="Project / Dev Name" required>
+            <input type="email" name="email" placeholder="Contact Email" required>
+            <textarea name="message" rows="4" placeholder="Link to your game or description..." required></textarea>
+            <button type="submit" class="btn-send">SUBMIT MY GAME</button>
         </form>
     </section>
 
-    <footer>✔ Certifié WadCox | Écosystème Pi Network</footer>
+    <footer>✔ Certified WadCox | Pi Network Ecosystem</footer>
+
 </body>
 </html>
