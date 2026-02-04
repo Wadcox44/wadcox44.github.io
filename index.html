@@ -15,96 +15,132 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* --- ANIMATIONS --- */
+        /* Animations */
         @keyframes flicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
                 text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 30px var(--neon-blue);
             }
             20%, 22%, 55% { text-shadow: none; }
         }
-
         @keyframes neon-pulse {
-            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
             50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); border-color: var(--neon-blue); }
-            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
         }
-
-        @keyframes shine { 100% { left: 125%; } }
 
         header { padding: 25px 5px 10px; text-align: center; width: 100%; }
-        h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
-            color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
-            letter-spacing: 2px;
-        }
-        .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
+        h1 { font-family: 'Orbitron'; font-size: 2.5rem; margin: 0; animation: flicker 3s infinite alternate; letter-spacing: 2px; }
+        .pi-text { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); }
 
-        /* --- TITRES DE CATÉGORIES --- */
+        /* Structure Sections */
         .category-title {
-            width: 90%; max-width: 500px;
-            font-family: 'Orbitron'; font-size: 0.85rem;
+            width: 90%; max-width: 500px; font-family: 'Orbitron'; font-size: 0.85rem;
             color: var(--neon-blue); border-left: 3px solid var(--neon-orange);
-            padding-left: 10px; margin: 25px 0 10px 0;
-            letter-spacing: 1px; text-transform: uppercase;
+            padding-left: 10px; margin: 25px 0 10px 0; text-transform: uppercase;
         }
 
-        /* --- SYSTÈME DE GRILLE ET CARTES --- */
         .game-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; padding: 10px; width: 95%; max-width: 500px; box-sizing: border-box;
+            gap: 10px; padding: 10px; width: 95%; max-width: 500px;
         }
 
+        /* Cartes & Miniatures */
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
             border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center;
-            transition: all 0.3s ease; overflow: hidden;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;
         }
-
-        .card:hover {
-            border-color: var(--neon-blue);
-            transform: translateY(-3px);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-        }
-
-        /* MINIATURES NÉON */
+        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); }
+        
         .card-thumb {
-            width: 90%; height: 75px;
-            object-fit: contain; background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px; margin-bottom: 8px;
-            border: 1px solid transparent; transition: all 0.4s ease;
+            width: 90%; height: 75px; object-fit: contain; background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.4s;
         }
+        .card:hover .card-thumb { border-color: var(--neon-blue); box-shadow: 0 0 12px var(--neon-blue); }
 
-        .card:hover .card-thumb {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 12px var(--neon-blue); /* L'effet Néon */
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .card-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
+        .card-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
 
-        /* --- SECTIONS SPÉCIFIQUES --- */
-        .donation-section { text-align: center; padding: 30px 0; width: 100%; display: flex; justify-content: center; }
-        .btn-don {
-            background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
-            font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
-            width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
-            animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
+        /* Système de Dons & Barre */
+        .donation-section { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+        .goal-container { width: 90%; max-width: 450px; margin-bottom: 15px; }
+        .goal-label { font-size: 0.7rem; color: var(--neon-blue); display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .progress-bg { background: rgba(255,255,255,0.1); height: 8px; border-radius: 10px; border: 1px solid rgba(0, 243, 255, 0.2); overflow: hidden; }
+        .progress-bar { background: var(--neon-blue); width: 45%; height: 100%; box-shadow: 0 0 10px var(--neon-blue); }
+
+        .donation-grid { display: flex; gap: 10px; width: 90%; max-width: 450px; }
+        .btn-quick-don { 
+            flex: 1; background: #0f1a2e; border: 1px solid var(--neon-blue); color: #fff; 
+            padding: 10px; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; font-size: 0.8rem;
+        }
+        .btn-quick-don:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+
+        /* Modal de remerciement */
+        #thankYouModal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(5, 11, 20, 0.95); align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #0f1a2e; border: 2px solid var(--neon-orange); padding: 30px; border-radius: 15px;
+            text-align: center; max-width: 280px; box-shadow: 0 0 30px var(--neon-orange);
         }
 
-        .partner-callout {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 20px; margin: 10px auto; text-align: center; width: 90%; max-width: 800px;
-        }
-        .launch-badge {
-            display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 8px 20px; border-radius: 50px; font-size: 15px; letter-spacing: 3px;
-            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
-            text-transform: uppercase;
-        }
+        /* Partenaires & Contact */
+        .partner-callout { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin: 10px auto; text-align: center; width: 90%; max-width: 500px; }
+        .launch-badge { display: inline-block; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 50px; font-size: 12px; margin-bottom: 10px; font-weight: bold; }
+        
+        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; }
+        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; }
 
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
-        .offer-item { 
-            background: rgba
+        footer { font-size: 0.7rem; color: #666; padding: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+    </header>
+
+    <div class="category-title">⭐ Projet Principal</div>
+    <div style="width: 95%; max-width: 500px;">
+        <div class="card" style="padding: 20px 10px;" onclick="window.location.href='https://goldpixel.netlify.app/'">
+            <img src="Images/miniature GoldPixel.jpg" class="card-thumb" style="height: 110px;" alt="Gold Pixel">
+            <h3 style="font-size: 1rem;">GOLD PIXEL</h3>
+            <span style="color:var(--neon-orange); font-size:0.6rem; font-weight:bold;">● ÉCOSYSTÈME ROYAL</span>
+        </div>
+    </div>
+
+    <div class="category-title">🧩 Arcade & Puzzles</div>
+    <div class="game-grid">
+        <div class="card" onclick="window.location.href='2048/index.html'">
+            <img src="Images/miniature 2048.jpg" class="card-thumb" alt="2048">
+            <h3>2048 NEON</h3>
+            <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
+        </div>
+        <div class="card empty">
+            <span class="card-icon">🎮</span>
+            <h3>SLOT DEV</h3>
+        </div>
+        <div class="card empty">
+            <span class="card-icon">📦</span>
+            <h3>VOTRE JEU</h3>
+        </div>
+    </div>
+
+    <div class="donation-section">
+        <div class="goal-container">
+            <div class="goal-label"><span>OBJECTIF : SERVEUR</span><span>45%</span></div>
+            <div class="progress-bg"><div class="progress-bar"></div></div>
+        </div>
+        <div class="donation-grid">
+            <button class="btn-quick-don" onclick="donnerPi(1)">1 Pi</button>
+            <button class="btn-quick-don" onclick="donnerPi(10)">10 Pi</button>
+            <button class="btn-quick-don" onclick="donnerPi('libre')">LIBRE</button>
+        </div>
+    </div>
+
+    <div class="partner-callout">
+        <div class="launch-badge">Offre de lancement</div>
+        <p style="font-size: 0.9rem; margin: 0;">Rejoignez <strong>JeuxVideo.Pi</strong> :
