@@ -21,14 +21,13 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* BARRE DE DON FIXE */
+        /* BARRE DE DON */
         .top-donation-bar {
             position: sticky; top: 0; width: 100%; z-index: 1000;
             background: rgba(10, 20, 35, 0.95); border-bottom: 1px solid var(--neon-blue);
             backdrop-filter: blur(8px); display: flex; justify-content: center;
             align-items: center; padding: 10px 0; gap: 15px;
         }
-        .bar-label { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 1px; }
         .btn-don-min { 
             background: transparent; border: 1px solid var(--neon-blue); color: white;
             font-family: 'Orbitron'; font-size: 0.65rem; padding: 5px 15px; cursor: pointer; transition: 0.3s;
@@ -37,24 +36,25 @@
 
         /* HEADER AVEC LOGO FIDÈLE */
         header { padding: 25px 0 10px 0; width: 100%; display: flex; justify-content: center; }
-        .header-content { display: flex; align-items: center; gap: 18px; }
+        .header-content { display: flex; align-items: center; gap: 15px; }
         
+        /* Style du logo SVG pour correspondre à l'image */
         .svg-logo {
-            width: 55px; height: 55px;
-            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.6));
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.7));
         }
 
         h1 { 
             font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; 
             text-shadow: 0 0 15px var(--neon-blue); line-height: 1;
-            letter-spacing: 1px;
         }
         .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
 
-        /* SECTIONS & CARDS */
         section { width: 90%; max-width: var(--width-max); padding: 15px 0; border-bottom: 1px solid rgba(0, 243, 255, 0.1); }
         .category-title { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue); border-left: 3px solid var(--neon-gold); padding-left: 10px; margin-bottom: 15px; text-transform: uppercase; }
 
+        /* MAIN PROJECT */
         .hero-card {
             width: 100%; height: 230px; background: #000; border: 2px solid rgba(255, 170, 0, 0.4); 
             border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
@@ -62,40 +62,32 @@
         }
         .hero-card img { width: 101%; height: 101%; object-fit: cover; filter: brightness(0.6); transition: 0.8s ease; }
         .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.2rem; color: var(--neon-gold); letter-spacing: 5px; font-weight: 900; transition: 0.5s ease; text-align: center; pointer-events: none; }
-        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 35px rgba(255, 170, 0, 0.5); }
-        .hero-card:hover img { transform: scale(1.1); filter: brightness(0.85); }
-        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
 
+        /* GRILLE DE JEUX */
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
         .card { background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 10px; height: 130px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s; }
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s; }
-        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; }
-        .card-dev-slot { border: 1px dashed rgba(255, 170, 0, 0.5); background: rgba(255, 170, 0, 0.02); }
-        .dev-icon { font-size: 1.8rem; color: var(--neon-gold); margin-bottom: 5px; }
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); }
 
-        /* OFFER & FORM */
-        .offer-container { width: 100%; background: rgba(0, 243, 255, 0.03); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 12px; padding: 20px 0; text-align: center; position: relative; overflow: hidden; }
-        .btn-send { background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; margin-top: 10px; transition: 0.3s; }
-        .btn-send:hover { box-shadow: 0 0 20px var(--neon-blue); transform: scale(1.02); }
         footer { font-size: 0.7rem; color: #444; padding: 40px 0; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="top-donation-bar">
-        <span class="bar-label">Support the Project:</span>
+        <span class="bar-label" style="font-family:'Orbitron'; font-size:0.6rem; color:var(--neon-blue);">Support:</span>
         <button class="btn-don-min">1 Pi</button>
         <button class="btn-don-min">10 Pi</button>
-        <button class="btn-don-min">Custom</button>
     </div>
 
     <header>
         <div class="header-content">
-            <svg class="svg-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M30 25 L15 35 V65 L30 75 L45 65 V55 L35 60 V40 L45 35 Z" fill="var(--neon-blue)" opacity="0.9"/>
-                <path d="M70 25 L85 35 V65 L70 75 L55 65 V55 L65 60 V40 L55 35 Z" fill="var(--neon-blue)" opacity="0.9"/>
-                <path d="M50 35 L65 43 V57 L50 65 L35 57 V43 L50 35 Z" fill="var(--neon-gold)" opacity="0.9"/>
-                <path d="M50 40 L60 46 V54 L50 60 L40 54 V46 L50 40 Z" fill="white" opacity="0.2"/>
+            <svg class="svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 25 L25 35 V65 L40 75 L45 70 V35 L40 25 Z" fill="#00f3ff" />
+                <path d="M40 25 L45 35 V70 L40 75" stroke="#00f3ff" stroke-width="1" />
+                <path d="M60 25 L75 35 V65 L60 75 L55 70 V35 L60 25 Z" fill="#00f3ff" />
+                <path d="M50 38 L62 45 V55 L50 62 L38 55 V45 L50 38 Z" fill="#ffaa00" />
+                <path d="M45 40 H55 M45 60 H55" stroke="#00f3ff" stroke-width="2" opacity="0.6"/>
             </svg>
             
             <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
@@ -117,29 +109,15 @@
                 <img src="Images/miniature 2048.jpg" alt="2048 Neon">
                 <h3>2048 NEON</h3>
             </div>
-            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
-                <div class="dev-icon">✚</div>
-                <h3>Deploy Here</h3>
+            <div class="card" style="border: 1px dashed rgba(255,170,0,0.5);">
+                <span style="color:var(--neon-gold); font-size:1.5rem;">✚</span>
+                <h3 style="position:relative; bottom:0; font-size:0.5rem;">Deploy Here</h3>
             </div>
-            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
-                <div class="dev-icon">✚</div>
-                <h3>Deploy Here</h3>
+            <div class="card" style="border: 1px dashed rgba(255,170,0,0.5);">
+                <span style="color:var(--neon-gold); font-size:1.5rem;">✚</span>
+                <h3 style="position:relative; bottom:0; font-size:0.5rem;">Deploy Here</h3>
             </div>
         </div>
-
-        <div class="offer-container">
-            <div class="offer-main-title">DEVELOPER OFFER : NO CHARGE *</div>
-        </div>
-    </section>
-
-    <section id="contact-form" style="border:none;">
-        <div class="contact-title">CONTACT & DEPLOYMENT</div>
-        <form action="https://formspree.io/f/xwvoaroz" method="POST">
-            <input type="text" name="name" placeholder="Project / Dev Name" required>
-            <input type="email" name="email" placeholder="Contact Email" required>
-            <textarea name="message" rows="4" placeholder="Link to your game..." required></textarea>
-            <button type="submit" class="btn-send">SUBMIT MY GAME</button>
-        </form>
     </section>
 
     <footer>✔ Certified WadCox | Pi Network Ecosystem</footer>
