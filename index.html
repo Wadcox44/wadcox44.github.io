@@ -35,9 +35,30 @@
         }
         .btn-don-min:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* HEADER COMPACT */
-        header { padding: 15px 0 5px 0; text-align: center; width: 100%; }
-        h1 { font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; text-shadow: 0 0 15px var(--neon-blue); }
+        /* HEADER AVEC LOGO */
+        header { 
+            padding: 25px 0 10px 0; 
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Espace entre le logo et le texte */
+        }
+        .logo-main {
+            height: 45px; /* Taille proportionnelle au texte H1 */
+            width: auto;
+            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.4));
+        }
+        h1 { 
+            font-family: 'Orbitron'; 
+            font-size: 1.8rem; 
+            margin: 0; 
+            text-shadow: 0 0 15px var(--neon-blue); 
+            line-height: 1;
+        }
         .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
 
         section {
@@ -51,14 +72,13 @@
             margin-bottom: 15px; text-transform: uppercase;
         }
 
-        /* MAIN PROJECT - ZÉRO CONTOUR BLANC */
+        /* MAIN PROJECT */
         .hero-card {
             width: 100%; height: 230px; background: #000; 
-            border: 2px solid rgba(255, 170, 0, 0.4); /* Contour Gold de base voyant mais pas trop */
+            border: 2px solid rgba(255, 170, 0, 0.4); 
             border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
             display: flex; align-items: center; justify-content: center; transition: 0.5s;
         }
-        /* Fix contour blanc : scale légèrement supérieur et background noir */
         .hero-card img { 
             width: 101%; height: 101%; object-fit: cover; 
             filter: brightness(0.6); transition: 0.8s ease; 
@@ -84,7 +104,6 @@
         .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s; }
         .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; }
 
-        /* Slots avec Croix Jaune */
         .card-dev-slot { border: 1px dashed rgba(255, 170, 0, 0.5); background: rgba(255, 170, 0, 0.02); }
         .dev-icon { font-size: 1.8rem; color: var(--neon-gold); margin-bottom: 5px; transition: 0.5s; }
         .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; }
@@ -105,7 +124,7 @@
         .offer-point strong { display: block; font-size: 0.7rem; font-family: 'Orbitron'; color: white; margin-bottom: 4px; }
         .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.4); text-transform: uppercase; }
 
-        /* FORMULAIRE DE CONTACT RÉCUPÉRÉ */
+        /* FORMULAIRE DE CONTACT */
         .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin: 20px 0 15px 0; text-align: center; }
         form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         input, textarea { 
@@ -133,7 +152,10 @@
     </div>
 
     <header>
-        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+        <div class="header-content">
+            <img src="Images/logo.png" alt="Logo JVPI" class="logo-main">
+            <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+        </div>
     </header>
 
     <section>
