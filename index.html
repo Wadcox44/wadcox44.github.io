@@ -35,29 +35,18 @@
         }
         .btn-don-min:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* HEADER AVEC LOGO */
-        header { 
-            padding: 25px 0 10px 0; 
-            width: 100%; 
-            display: flex; 
-            justify-content: center; 
+        /* HEADER AVEC LOGO SVG */
+        header { padding: 25px 0 10px 0; width: 100%; display: flex; justify-content: center; }
+        .header-content { display: flex; align-items: center; gap: 15px; }
+        
+        .svg-logo {
+            width: 45px; height: 45px;
+            filter: drop-shadow(0 0 8px var(--neon-blue));
         }
-        .header-content {
-            display: flex;
-            align-items: center;
-            gap: 15px; /* Espace entre le logo et le texte */
-        }
-        .logo-main {
-            height: 45px; /* Taille proportionnelle au texte H1 */
-            width: auto;
-            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.4));
-        }
+
         h1 { 
-            font-family: 'Orbitron'; 
-            font-size: 1.8rem; 
-            margin: 0; 
-            text-shadow: 0 0 15px var(--neon-blue); 
-            line-height: 1;
+            font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; 
+            text-shadow: 0 0 15px var(--neon-blue); line-height: 1;
         }
         .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
 
@@ -153,7 +142,13 @@
 
     <header>
         <div class="header-content">
-            <img src="Images/Logo portail2.jpg" alt="Logo JVPI" class="logo-main">
+            <svg class="svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" stroke="#00f3ff" stroke-width="4"/>
+                <path d="M50 30L70 42V58L50 70L30 58V42L50 30Z" fill="#ffaa00" opacity="0.8"/>
+                <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" stroke="#00f3ff" stroke-width="2" opacity="0.5">
+                    <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+                </path>
+            </svg>
             <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
         </div>
     </header>
@@ -211,5 +206,3 @@
 
 </body>
 </html>
-
-
