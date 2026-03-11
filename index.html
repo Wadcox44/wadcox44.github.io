@@ -85,4 +85,67 @@
         /* --- FORMULAIRE FORMSPREE --- */
         .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); margin-top: 30px; display: flex; flex-direction: column; align-items: center; }
         .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
-        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: '
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; }
+        .btn-send { background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; width: 100%; }
+
+        footer { font-size: 0.7rem; color: #444; padding: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+    </header>
+
+    <div class="main-container">
+        <div class="section-label">⭐ Main Project</div>
+        
+        <div class="gold-pixel-hero" onclick="window.location.href='https://gold-pixel.onrender.com'">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel Image">
+            <div class="gold-pixel-title">GOLD PIXEL</div>
+        </div>
+
+        <div class="section-label" style="margin-top:25px;">🚀 Showcase</div>
+        <div class="game-grid">
+            <div class="card" onclick="window.location.href='2048/index.html'">
+                <span class="card-icon">🧩</span>
+                <h3>2048 NEON</h3>
+            </div>
+            <div class="card empty">
+                <span class="card-icon">🎮</span>
+                <h3>SLOT DEV</h3>
+            </div>
+            <div class="card empty">
+                <span class="card-icon">📦</span>
+                <h3>VOTRE JEU</h3>
+            </div>
+        </div>
+
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET (DON)</button>
+    </div>
+
+    <div class="contact-area">
+        <div style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:15px;">PARTENARIATS</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container">
+            <input type="email" name="email" placeholder="Email" required>
+            <textarea name="message" rows="3" placeholder="Votre message..." required></textarea>
+            <button type="submit" class="btn-send">ENVOYER</button>
+        </form>
+    </div>
+
+    <footer>✔ Certifié WadCox | Écosystème Pi Network</footer>
+
+    <script>
+        // --- LOGIQUE SDK PI (Gardée intacte) ---
+        async function initPi() {
+            try {
+                await Pi.init({ version: "2.0", sandbox: false });
+                console.log("SDK Initialisé");
+            } catch (e) { console.warn("SDK non chargé"); }
+        }
+        initPi();
+
+        // Ajoute ici tes fonctions donnerPi() et clorePaiementsBloqués() comme avant
+    </script>
+</body>
+</html>
