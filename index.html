@@ -1,48 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JeuxVideo.Pi — Le Hub Gaming</title> <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"> <style>
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JeuxVideo.Pi | Main Portal</title> <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet"> <style>
+        /* --- THEME CYBER PORTAL --- */
         :root {
-            --gold: #D4AF37; /* Couleur Or officielle */
-            --bg: #0b0f14; /* Fond Matte Black */
-            --panel: #121926; /* Couleur des cartes et menus */
-            --stroke: #223047; /* Bordures techniques */
+            --cyan: #00f2ff; /* Bleu néon des bordures */
+            --gold: #ff9900; /* Or du logo et Gold Pixel */
+            --bg: #050a0f; /* Fond très sombre */
+            --card-bg: rgba(10, 20, 30, 0.8); /* Fond des cartes */
         }
+
         body {
-            margin: 0; padding: 0; background: var(--bg); color: white;
-            font-family: 'Rajdhani', sans-serif; display: flex; height: 100vh;
+            margin: 0; background: var(--bg); color: white;
+            font-family: 'Roboto', sans-serif; text-align: center;
         }
-        /* BARRE LATÉRALE (SIDEBAR) */
-        .sidebar {
-            width: 280px; background: var(--panel); border-right: 1px solid var(--stroke);
-            display: flex; flex-direction: column; padding: 25px;
+
+        header { padding: 40px; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: white; }
+        .logo span { color: var(--gold); }
+
+        .section-title {
+            color: var(--cyan); font-family: 'Orbitron', sans-serif;
+            text-align: left; max-width: 900px; margin: 30px auto 15px;
+            font-size: 0.9rem; letter-spacing: 2px; border-left: 3px solid var(--gold); padding-left: 10px;
         }
-        .profile-box {
-            border: 1px solid var(--gold); padding: 15px; border-radius: 10px;
-            background: rgba(212, 175, 55, 0.05); text-align: center;
+
+        /* --- MAIN PROJECT BLOCK --- */
+        .main-project {
+            max-width: 900px; margin: 0 auto;
+            border: 1px solid var(--gold); border-radius: 10px;
+            overflow: hidden; position: relative;
+            background: url('https://ton-image-fond.jpg') center/cover; /* Ton image avec le globe */
+            height: 400px; display: flex; align-items: center; justify-content: center;
         }
-        .grade { color: var(--gold); font-family: 'Orbitron'; font-size: 12px; }
-        
-        /* ZONE PRINCIPALE */
-        .main-content { flex: 1; overflow-y: auto; padding: 40px; }
-        header { margin-bottom: 40px; }
-        h1 { font-family: 'Orbitron'; font-size: 2.5rem; color: var(--gold); margin: 0; }
-        
-        /* GRILLE DE LOCATION DES JEUX */
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-        
-        /* TUILE DE JEU */
-        .game-card {
-            background: var(--panel); border: 1px solid var(--stroke); border-radius: 15px;
-            padding: 20px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; overflow: hidden;
+        .main-project h2 { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: var(--gold); letter-spacing: 5px; }
+
+        /* --- DEVELOPER SHOWCASE --- */
+        .showcase-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            max-width: 900px; margin: 0 auto; gap: 20px;
         }
-        .game-card:hover { border-color: var(--gold); transform: translateY(-5px); }
-        .game-card.featured { border: 2px solid var(--gold); background: linear-gradient(145deg, rgba(212,175,55,0.1), transparent); }
-        
-        .badge { position: absolute; top: 15px; right: 15px; background: var(--gold); color: black; padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 4px; }
-        
-        .btn-enter {
-            display: block; margin-top: 20px; padding: 10px; background: var(--gold);
-            color: black; text-decoration: none; text-align: center;
-            font-family: 'Orbitron'; font-weight: bold; border-radius:
+        .slot {
+            border: 1px solid var(--cyan); border-radius: 8px;
+            background: var(--card-bg); height: 180px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.3s; cursor: pointer;
+        }
+        .slot:hover
