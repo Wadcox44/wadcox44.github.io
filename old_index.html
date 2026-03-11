@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,121 +7,282 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        :root { 
-            --neon-blue: #00f3ff; 
-            --neon-gold: #ffaa00; 
-            --bg: #050b14; 
-            --width-max: 500px; 
-        }
+        :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; }
         
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* BARRE DE DON */
-        .top-donation-bar {
-            position: sticky; top: 0; width: 100%; z-index: 1000;
-            background: rgba(10, 20, 35, 0.95); border-bottom: 1px solid var(--neon-blue);
-            backdrop-filter: blur(8px); display: flex; justify-content: center;
-            align-items: center; padding: 10px 0; gap: 15px;
-        }
-        .btn-don-min { 
-            background: transparent; border: 1px solid var(--neon-blue); color: white;
-            font-family: 'Orbitron'; font-size: 0.65rem; padding: 5px 15px; cursor: pointer; transition: 0.3s;
-        }
-        .btn-don-min:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
-
-        /* HEADER AVEC LOGO FIDÈLE */
-        header { padding: 25px 0 10px 0; width: 100%; display: flex; justify-content: center; }
-        .header-content { display: flex; align-items: center; gap: 15px; }
-        
-        /* Style du logo SVG pour correspondre à l'image */
-        .svg-logo {
-            width: 50px;
-            height: 50px;
-            filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.7));
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 30px var(--neon-blue);
+            }
+            20%, 22%, 55% { text-shadow: none; }
         }
 
+        @keyframes neon-pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); border-color: var(--neon-blue); }
+            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+        }
+
+        header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
-            font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; 
-            text-shadow: 0 0 15px var(--neon-blue); line-height: 1;
+            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
+            color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
+            letter-spacing: 2px;
         }
-        .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
+        .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
 
-        section { width: 90%; max-width: var(--width-max); padding: 15px 0; border-bottom: 1px solid rgba(0, 243, 255, 0.1); }
-        .category-title { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue); border-left: 3px solid var(--neon-gold); padding-left: 10px; margin-bottom: 15px; text-transform: uppercase; }
-
-        /* MAIN PROJECT */
-        .hero-card {
-            width: 100%; height: 230px; background: #000; border: 2px solid rgba(255, 170, 0, 0.4); 
-            border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
-            display: flex; align-items: center; justify-content: center; transition: 0.5s;
+        .game-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; padding: 10px; width: 95%; max-width: 500px; box-sizing: border-box; margin-bottom: 15px;
         }
-        .hero-card img { width: 101%; height: 101%; object-fit: cover; filter: brightness(0.6); transition: 0.8s ease; }
-        .hero-overlay-text { position: absolute; font-family: 'Orbitron'; font-size: 2.2rem; color: var(--neon-gold); letter-spacing: 5px; font-weight: 900; transition: 0.5s ease; text-align: center; pointer-events: none; }
+        .card {
+            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
+        }
+        .card-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+        .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
+        .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
-        /* GRILLE DE JEUX */
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
-        .card { background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 10px; height: 130px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s; }
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
-        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); }
+        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; justify-content: center; }
+        .btn-don {
+            background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
+            font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
+            width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
+            animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
+        }
 
-        footer { font-size: 0.7rem; color: #444; padding: 40px 0; text-align: center; }
+        .partner-callout {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px; padding: 20px; margin: 5px auto; text-align: center; width: 90%; max-width: 800px;
+        }
+        .launch-badge {
+            display: inline-block; border: 1px solid #ffd700; color: #ffd700;
+            padding: 8px 20px; border-radius: 50px; font-size: 15px; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
+            text-transform: uppercase;
+        }
+
+        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
+        .offer-item { 
+            background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90px;
+        }
+        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 4px; text-align: center; width: 100%; }
+        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; text-align: center; width: 100%; }
+
+        .contact-area { width: 100%; padding: 20px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 15px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
+        
+        .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        .row { display: flex; gap: 10px; width: 100%; }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; }
+        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; }
+
+        footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="top-donation-bar">
-        <span class="bar-label" style="font-family:'Orbitron'; font-size:0.6rem; color:var(--neon-blue);">Support:</span>
-        <button class="btn-don-min">1 Pi</button>
-        <button class="btn-don-min">10 Pi</button>
-    </div>
-
     <header>
-        <div class="header-content">
-            <svg class="svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 25 L25 35 V65 L40 75 L45 70 V35 L40 25 Z" fill="#00f3ff" />
-                <path d="M40 25 L45 35 V70 L40 75" stroke="#00f3ff" stroke-width="1" />
-                <path d="M60 25 L75 35 V65 L60 75 L55 70 V35 L60 25 Z" fill="#00f3ff" />
-                <path d="M50 38 L62 45 V55 L50 62 L38 55 V45 L50 38 Z" fill="#ffaa00" />
-                <path d="M45 40 H55 M45 60 H55" stroke="#00f3ff" stroke-width="2" opacity="0.6"/>
-            </svg>
-            
-            <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
-        </div>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
     </header>
 
-    <section>
-        <div class="category-title">⭐ Main Project</div>
-        <div class="hero-card" onclick="window.location.href='/gold-pixel/'">
-            <img src="Images/Gold Pixel.png" alt="Gold Pixel">
-            <div class="hero-overlay-text">GOLD PIXEL</div>
+    <div class="game-grid">
+        <div class="card" onclick="window.location.href='2048/index.html'">
+            <span class="card-icon">🧩</span>
+            <h3>2048 NEON</h3>
+            <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
         </div>
-    </section>
+        <div class="card empty">
+            <span class="card-icon">🎮</span>
+            <h3>SLOT DEV</h3>
+        </div>
+        <div class="card empty">
+            <span class="card-icon">📦</span>
+            <h3>VOTRE JEU</h3>
+        </div>
+    </div>
 
-    <section>
-        <div class="category-title">🚀 Developer Showcase</div>
-        <div class="game-grid">
-            <div class="card" onclick="window.location.href='2048/index.html'">
-                <img src="Images/miniature 2048.jpg" alt="2048 Neon">
-                <h3>2048 NEON</h3>
+    <div class="donation-section">
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
+    </div>
+    
+    <button onclick="forcerNettoyage()" style="background:red; color:white; margin-top:10px;">
+    DEBUG : CLIQUER ICI SI BLOQUÉ
+</button>
+
+    <div class="partner-callout">
+        <div class="launch-badge">Offre de lancement</div>
+        <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
+            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.
+        </p>
+        
+        <div class="offer-grid">
+            <div class="offer-item">
+                <strong>Loyer 0 Pi</strong>
+                <p>Durée limitée</p>
             </div>
-            <div class="card" style="border: 1px dashed rgba(255,170,0,0.5);">
-                <span style="color:var(--neon-gold); font-size:1.5rem;">✚</span>
-                <h3 style="position:relative; bottom:0; font-size:0.5rem;">Deploy Here</h3>
+            <div class="offer-item">
+                <strong>0% Commission</strong>
+                <p>Sur les transactions In-Game</p>
             </div>
-            <div class="card" style="border: 1px dashed rgba(255,170,0,0.5);">
-                <span style="color:var(--neon-gold); font-size:1.5rem;">✚</span>
-                <h3 style="position:relative; bottom:0; font-size:0.5rem;">Deploy Here</h3>
+            <div class="offer-item">
+                <strong>Slot Premium</strong>
+                <p>Visibilité prioritaire</p>
             </div>
         </div>
-    </section>
+    </div>
 
-    <footer>✔ Certified WadCox | Pi Network Ecosystem</footer>
+    <div class="contact-area">
+        <div class="contact-title">COLLABORATIONS & DEMANDES DE PARTENARIAT</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container" id="contactForm">
+            <div class="row">
+                <input type="text" name="name" placeholder="Nom" required>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <textarea name="message" rows="4" placeholder="Décrivez votre projet ou votre demande de partenariat..." required></textarea>
+            <button type="submit" class="btn-send" id="btnText">ENVOYER LE MESSAGE</button>
+        </form>
+    </div>
 
+    <footer>
+        <span style="color: var(--neon-blue);">✔</span> Certifié WadCox | Écosystème Pi Network
+    </footer>
+
+    <script>
+        // --- INITIALISATION SDK & NETTOYAGE ---
+        async function initPi() {
+            try {
+                await Pi.init({ version: "2.0", sandbox: false });
+                console.log("SDK Pi Initialisé");
+
+                // Nettoyage automatique au démarrage
+                await Pi.createPayment({}, {
+                    onIncompletePaymentFound: (payment) => {
+                        console.log("Paiement incomplet détecté au démarrage:", payment.identifier);
+                        clorePaiementsBloqués(payment);
+                    }
+                });
+            } catch (e) {
+                console.warn("SDK Pi non chargé");
+            }
+        }
+
+        initPi();
+
+        // --- FONCTION DE SECOURS (Bouton Rouge) ---
+        async function forcerNettoyage() {
+    if (typeof Pi === 'undefined') {
+        alert("Ouvrez le Pi Browser !");
+        return;
+    }
+
+    try {
+        alert("Étape 1 : Authentification...");
+        await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+        
+        alert("Étape 2 : Vérification des paiements...");
+        let trouve = false;
+
+        // Le SDK exige que toutes les fonctions de rappel soient définies
+        await Pi.createPayment({
+            amount: 0.1,
+            memo: "Nettoyage",
+            metadata: { type: "cleanup" }
+        }, {
+            onIncompletePaymentFound: async (payment) => {
+                trouve = true;
+                await clorePaiementsBloqués(payment);
+                alert("✅ Paiement bloqué nettoyé !");
+            },
+            onReadyForServerApproval: function(paymentId) { 
+                // On ne fait rien ici, on veut juste que le SDK soit content
+            },
+            onReadyForServerCompletion: function(paymentId, txid) {
+                Pi.completePayment(paymentId);
+            },
+            onCancel: function(paymentId) { },
+            onError: function(error, payment) { 
+                if (payment) clorePaiementsBloqués(payment);
+            }
+        });
+        
+        if(!trouve) alert("Aucun paiement bloqué trouvé. Votre compte est propre !");
+    } catch (e) {
+        // On ignore l'erreur de création si aucun paiement n'était vraiment bloqué
+        if (!e.message.includes("Ad-blocker")) {
+            alert("Info : " + e.message);
+        }
+    }
+}
+
+        async function clorePaiementsBloqués(payment) {
+            try {
+                // 1. On informe ton serveur
+                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId: payment.identifier })
+                });
+                // 2. On finalise sur le réseau Pi
+                await Pi.completePayment(payment.identifier);
+                console.log("Paiement clos avec succès.");
+            } catch (e) { 
+                console.error("Erreur de clôture:", e); 
+            }
+        }
+
+        async function donnerPi() {
+            if (typeof Pi === 'undefined') {
+                alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER.");
+                return;
+            }
+
+            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
+            if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
+
+            try {
+                const auth = await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                
+                await Pi.createPayment({
+                    amount: parseFloat(montant),
+                    memo: "Don JeuxVideo.Pi - " + Date.now(),
+                    metadata: { type: "don_libre" }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId: paymentId })
+                        }).then(res => res.json());
+                    },
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        Pi.completePayment(paymentId);
+                        alert("Merci infiniment pour votre don !");
+                    },
+                    onCancel: function(paymentId) { },
+                    onError: function(error, payment) {
+                        if(payment) clorePaiementsBloqués(payment);
+                        else alert("Erreur : " + error.message);
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById('pay_button').onclick = donnerPi;
+    </script>
 </body>
 </html>
+
+
+
+
+
 
