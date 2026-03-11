@@ -38,6 +38,7 @@
         header { padding: 25px 0 10px 0; width: 100%; display: flex; justify-content: center; }
         .header-content { display: flex; align-items: center; gap: 15px; }
         
+        /* Style du logo SVG pour correspondre à l'image */
         .svg-logo {
             width: 50px;
             height: 50px;
@@ -68,17 +69,6 @@
         .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
         .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); }
 
-        /* SECTION CONTACT / FORMSPREE */
-        .contact-box { background: rgba(0, 243, 255, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(0, 243, 255, 0.1); margin-top: 10px; }
-        .contact-box input, .contact-box textarea { 
-            width: 100%; background: #0a1422; border: 1px solid var(--neon-blue); color: white; 
-            padding: 10px; margin: 8px 0; border-radius: 5px; font-family: 'Rajdhani'; box-sizing: border-box;
-        }
-        .btn-submit { 
-            width: 100%; background: var(--neon-gold); color: black; border: none; 
-            padding: 12px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px;
-        }
-
         footer { font-size: 0.7rem; color: #444; padding: 40px 0; text-align: center; }
     </style>
 </head>
@@ -106,7 +96,7 @@
 
     <section>
         <div class="category-title">⭐ Main Project</div>
-        <div class="hero-card" onclick="window.location.href='https://gold-pixel.onrender.com'">
+        <div class="hero-card" onclick="window.location.href='/gold-pixel/'">
             <img src="Images/Gold Pixel.png" alt="Gold Pixel">
             <div class="hero-overlay-text">GOLD PIXEL</div>
         </div>
@@ -127,18 +117,6 @@
                 <span style="color:var(--neon-gold); font-size:1.5rem;">✚</span>
                 <h3 style="position:relative; bottom:0; font-size:0.5rem;">Deploy Here</h3>
             </div>
-        </div>
-    </section>
-
-    <section>
-        <div class="category-title">📧 Contact Developers</div>
-        <div class="contact-box">
-            <p style="font-size: 0.7rem; margin-top: 0; opacity: 0.8;">Louez un emplacement ou proposez un partenariat.</p>
-            <form action="https://formspree.io/f/TON_ID_ICI" method="POST">
-                <input type="email" name="email" placeholder="Votre Email Pi" required>
-                <textarea name="message" placeholder="Votre proposition de jeu..." rows="3" required></textarea>
-                <button type="submit" class="btn-submit">ENVOYER LA DEMANDE</button>
-            </form>
         </div>
     </section>
 
