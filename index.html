@@ -1,115 +1,50 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JeuxVideo.Pi | Portal & Ecosystem</title> <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet"> <style>
-        /* --- STYLE DESIGN SYSTEM --- */
-        :root {
-            --cyan: #00f2ff; /* Bleu pour les bordures Tech */
-            --gold: #ff9900; /* Or pour Gold Pixel et les boutons */
-            --bg: #050a0f; /* Fond Matte Black profond */
-            --card-bg: rgba(10, 20, 30, 0.9); /* Fond des tuiles */
+    <meta charset="UTF-8">
+    <title>JeuxVideo.Pi - Le Portail</title>
+    <style>
+        /* Style casual et passionné pour ton empire */
+        body { background-color: #1a1a1a; color: #ffd700; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; }
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        /* La zone du jeu Gold Pixel */
+        .main-game { 
+            border: 3px solid #ffd700; 
+            padding: 40px; 
+            margin: 20px 0; 
+            cursor: pointer; 
+            background: linear-gradient(45deg, #000, #333);
+            border-radius: 15px;
+            transition: transform 0.3s;
         }
-
-        body {
-            margin: 0; background: var(--bg); color: white;
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        header { padding: 50px 20px; text-align: center; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; letter-spacing: 5px; }
-        .logo span { color: var(--gold); }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-
-        /* --- SECTION TITLES --- */
-        .section-header {
-            color: var(--cyan); font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem; letter-spacing: 3px; margin: 40px 0 15px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .section-header::after { content: ""; height: 1px; flex: 1; background: var(--cyan); opacity: 0.3; }
-
-        /* --- MAIN GAME (GOLD PIXEL) --- */
-        .main-game {
-            border: 1px solid var(--gold); border-radius: 12px;
-            padding: 40px; text-align: center; background: linear-gradient(145deg, rgba(255, 153, 0, 0.1), transparent);
-            cursor: pointer; transition: 0.3s;
-        }
-        .main-game:hover { box-shadow: 0 0 20px rgba(255, 153, 0, 0.2); }
-        .main-game h2 { font-family: 'Orbitron', sans-serif; font-size: 3rem; margin: 0; color: var(--gold); }
-
-        /* --- GRID SHOWCASE --- */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .slot {
-            border: 1px solid var(--cyan); background: var(--card-bg);
-            padding: 30px; border-radius: 8px; text-align: center; transition: 0.3s;
-        }
-        .slot:hover { border-color: white; transform: scale(1.02); }
-
-        /* --- DONATION & CONTACT --- */
-        .action-box {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid #222;
-            padding: 30px; border-radius: 12px; margin-top: 30px;
-        }
-        .pi-btn {
-            background: var(--gold); color: black; border: none; padding: 15px 30px;
-            font-family: 'Orbitron', sans-serif; font-weight: bold; border-radius: 5px;
-            cursor: pointer; text-decoration: none; display: inline-block;
-        }
-        .discord-link { color: var(--cyan); text-decoration: none; font-weight: bold; margin-top: 20px; display: block; }
-
-        form input, form textarea {
-            width: 100%; padding: 12px; margin: 10px 0; background: #111;
-            border: 1px solid var(--cyan); color: white; border-radius: 5px;
-        }
+        .main-game:hover { transform: scale(1.05); }
+        .btn-enter { background-color: #ffd700; color: #000; padding: 15px 30px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        .submit-btn { background-color: #ffd700; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Bienvenue sur JeuxVideo.Pi</h1>
+        <p>Le hub de l'innovation et du gaming sur Pi Network !</p>
 
-<header>
-    <div class="logo">JEUXVIDEO.<span>PI</span></div> <p style="opacity: 0.6;">Premier portail de jeux indépendant sur Pi Network</p>
-</header>
-
-<div class="container">
-    
-    <div class="section-header">⭐ PROJET PHARE</div>
-    <div class="main-game" onclick="window.location.href='https://gold-pixel.onrender.com'">
-        <h2>GOLD PIXEL</h2>
-        <p>Luttez pour le territoire. Posez vos pixels. Protégez votre zone.</p>
-        <span class="pi-btn">ENTRER DANS LE JEU</span>
-    </div>
-
-    <div class="section-header">🚀 CATALOGUE DÉVELOPPEURS</div>
-    <div class="grid">
-        <div class="slot">
-            <h3 style="color:var(--gold);">2048 NEON</h3> <p style="font-size: 0.8rem;">Le classique revisité pour l'écosystème Pi.</p>
-            <span style="color:var(--cyan); font-size: 0.7rem;">STATUT: ACTIF</span>
+        <div class="main-game" onclick="window.location.href='https://gold-pixel.onrender.com'">
+            <h2>PROJET PHARE : GOLD PIXEL</h2>
+            <p>Le jeu de conquête de pixels mensuel.</p>
+            <button class="btn-enter">ENTRER DANS LE JEU</button>
         </div>
-        <div class="slot">
-            <span style="font-size: 2rem;">+</span>
-            <h3>DEPLOY HERE</h3> <p style="font-size: 0.8rem;">Louez cet emplacement pour 1 Pi / mois.</p>
+
+        <hr>
+
+        <div id="contact">
+            <h3>Louer un emplacement "Deploy Here"</h3>
+            <p>Tu es développeur ? Contacte-moi pour intégrer ton jeu au portail !</p>
+            <form action="https://formspree.io/f/votre_id_ici" method="POST">
+                <input type="email" name="email" placeholder="Ton e-mail" required>
+                <textarea name="message" placeholder="Parle-moi de ton projet..."></textarea>
+                <button type="submit" class="submit-btn">Envoyer ma demande</button>
+            </form>
         </div>
     </div>
-
-    <div class="section-header">🛡️ SOUTENIR LE PROJET</div>
-    <div class="action-box">
-        <h3>Faire un don en Pi</h3> <p>Aidez-nous à maintenir les serveurs et à développer de nouvelles fonctionnalités.</p>
-        <button class="pi-btn" onclick="alert('Lien vers le SDK de paiement Pi...')">FAIRE UN DON (1 π)</button>
-        <a href="https://discord.gg/votrelien" class="discord-link">Rejoindre la communauté sur Discord</a> </div>
-
-    <div class="section-header">📧 CONTACT DÉVELOPPEURS</div>
-    <div class="action-box">
-        <p>Vous souhaitez intégrer votre jeu sur JeuxVideo.Pi ? Envoyez-nous un message.</p>
-        <form>
-            <input type="text" placeholder="Pseudo / Studio" required> <input type="email" placeholder="Votre Email" required> <textarea placeholder="Présentez votre projet ou posez vos questions..." rows="4"></textarea> <button type="submit" class="pi-btn" style="width: 100%;">ENVOYER LA DEMANDE</button>
-        </form>
-    </div>
-
-</div>
-
-<footer style="text-align: center; padding: 40px; opacity: 0.3; font-size: 0.8rem;">
-    &copy; 2026 JeuxVideo.Pi — Système de portail sécurisé pour Pi Network.
-</footer>
-
 </body>
 </html>
