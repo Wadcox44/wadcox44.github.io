@@ -1,18 +1,23 @@
-const express = require('express'); // Charge le module Express pour créer ton serveur web
-const app = express(); // Initialise l'application Express pour ton portail JeuxVideo.Pi
-const path = require('path'); // Module pour gérer les chemins de dossiers sans erreur
+const express = require('express'); // On importe le framework Express pour créer le serveur
+const app = express(); // On initialise l'application web JeuxVideo.Pi
+const path = require('path'); // Module pour gérer les chemins de fichiers proprement
 
-app.use(express.static(__dirname)); // Dit au serveur de rendre accessibles tous les dossiers (comme gold-pixel)
+// On autorise l'accès à tous les fichiers du dossier (images, dossiers de jeux, etc.)
+app.use(express.static(__dirname)); 
 
-app.get('/', (req, res) => { // Quand on arrive sur l'URL racine de ton portail
-    res.sendFile(path.join(__dirname, 'index.html')); // Envoie ton fichier d'accueil principal
+// Route pour afficher ton portail stylé (index.html)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html')); // Envoie ton portail avec le look Neon/Orbitron
 });
 
-app.get('/gold-pixel', (req, res) => { // Quand on veut jouer à Gold Pixel
-    res.sendFile(path.join(__dirname, 'gold-pixel', 'index.html')); // Va chercher le jeu dans son dossier
+// Route pour lancer Gold Pixel quand on clique sur la Hero Card
+app.get('/gold-pixel', (req, res) => {
+    res.sendFile(path.join(__dirname, 'gold-pixel', 'index.html')); // Envoie le jeu situé dans le sous-dossier
 });
 
-const PORT = process.env.PORT || 3000; // Utilise le port du serveur ou le port 3000 par défaut
-app.listen(PORT, () => { // Démarre officiellement le serveur
-    console.log(`Le serveur de ton portail est lancé sur le port ${PORT}`); // Message de confirmation passionné
+// Définition du port d'écoute (3000 par défaut)
+const PORT = process.env.PORT || 3000; 
+app.listen(PORT, () => {
+    // Message de confirmation pour dire que tout est prêt !
+    console.log(`🚀 Ton portail JeuxVideo.Pi est en ligne sur le port ${PORT} !`); 
 });
