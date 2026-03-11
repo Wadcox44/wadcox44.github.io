@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
+        /* --- STYLE DE TON EMPIRE --- */
         :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; }
         
         body { 
@@ -22,12 +23,6 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        @keyframes neon-pulse {
-            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); border-color: var(--neon-blue); }
-            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
-        }
-
         header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
             font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
@@ -36,235 +31,58 @@
         }
         .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
 
-        /* --- NOUVELLE SECTION MAIN PROJECT --- */
-        .main-project-container { width: 95%; max-width: 500px; margin-bottom: 20px; }
+        /* --- SECTION GOLD PIXEL (LE JEU) --- */
+        .main-container { width: 95%; max-width: 500px; margin-top: 10px; }
         .section-label { 
-            font-family: 'Orbitron'; font-size: 0.75rem; color: var(--neon-blue); 
-            margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .section-label span { color: var(--neon-orange); }
-
-        .hero-card {
-            width: 100%; height: 230px; background: #000; border: 1px solid var(--neon-orange); 
-            border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
-            display: flex; align-items: center; justify-content: center; transition: 0.4s;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
-        }
-        .hero-card:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(255, 170, 0, 0.4); }
-        .hero-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
-        .hero-overlay-text { 
-            position: absolute; font-family: 'Orbitron'; font-size: 2rem; 
-            color: var(--neon-orange); letter-spacing: 4px; font-weight: 900; 
-            text-shadow: 0 0 20px rgba(0,0,0,1), 0 0 10px var(--neon-orange); 
-            text-align: center; pointer-events: none;
-        }
-
-        /* GRILLE DE JEUX */
-        .game-grid { 
-            display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; padding: 0; width: 95%; max-width: 500px; box-sizing: border-box; margin-bottom: 15px;
-        }
-        .card {
-            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer; transition: 0.3s;
-        }
-        .card:hover { border-color: var(--neon-blue); background: rgba(16, 33, 62, 1); }
-        .card-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
-        .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
-        .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
-
-        .donation-section { text-align: center; padding: 10px 0; width: 100%; display: flex; justify-content: center; }
-        .btn-don {
-            background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
-            font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
-            width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
-            animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
-        }
-
-        .partner-callout {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 20px; margin: 15px auto; text-align: center; width: 90%; max-width: 800px;
-        }
-        .launch-badge {
-            display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 8px 20px; border-radius: 50px; font-size: 15px; letter-spacing: 3px;
-            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
+            font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue); 
+            margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
             text-transform: uppercase;
         }
 
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
-        .offer-item { 
-            background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90px;
+        .gold-pixel-hero {
+            width: 100%; height: 220px; border: 2px solid var(--neon-orange);
+            border-radius: 15px; position: relative; overflow: hidden;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3); transition: 0.4s;
+            background: #000;
         }
-        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 4px; text-align: center; width: 100%; }
-        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; text-align: center; width: 100%; }
-
-        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
-        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 15px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
+        .gold-pixel-hero:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 170, 0, 0.5); }
         
+        /* L'image de fond depuis ton GitHub */
+        .gold-pixel-hero img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            opacity: 0.6; filter: brightness(0.8);
+        }
+
+        .gold-pixel-title {
+            position: absolute; font-family: 'Orbitron'; font-size: 2.5rem;
+            color: var(--neon-orange); font-weight: 900; letter-spacing: 5px;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.8), 0 0 10px var(--neon-orange);
+            text-align: center; width: 100%;
+        }
+
+        /* --- GRILLE DES AUTRES JEUX --- */
+        .game-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; width: 100%; margin-top: 15px;
+        }
+        .card {
+            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
+        }
+        .card-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .card h3 { margin: 0; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; }
+        .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
+
+        /* --- BOUTON DON --- */
+        .btn-don {
+            background: #0f1a2e; color: var(--neon-blue); padding: 16px; font-weight: 800; 
+            border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
+            width: 100%; text-transform: uppercase; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-don:hover { background: var(--neon-blue); color: black; }
+
+        /* --- FORMULAIRE FORMSPREE --- */
+        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); margin-top: 30px; display: flex; flex-direction: column; align-items: center; }
         .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
-        .row { display: flex; gap: 10px; width: 100%; }
-        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; }
-        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; }
-
-        footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
-    </header>
-
-    <div class="main-project-container">
-        <div class="section-label"><span>★</span> Main Project</div>
-        <div class="hero-card" onclick="window.location.href='https://gold-pixel.onrender.com'">
-            <img src="Images/Gold Pixel.png" alt="Gold Pixel Image">
-            <div class="hero-overlay-text">GOLD PIXEL</div>
-        </div>
-    </div>
-
-    <div class="main-project-container">
-        <div class="section-label"><span>🚀</span> Developer Showcase</div>
-        <div class="game-grid">
-            <div class="card" onclick="window.location.href='2048/index.html'">
-                <span class="card-icon">🧩</span>
-                <h3>2048 NEON</h3>
-                <span style="color:#0f0; font-size:0.55rem; font-weight:bold;">● ONLINE</span>
-            </div>
-            <div class="card empty">
-                <span class="card-icon">🎮</span>
-                <h3>SLOT DEV</h3>
-            </div>
-            <div class="card empty">
-                <span class="card-icon">📦</span>
-                <h3>VOTRE JEU</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="donation-section">
-        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
-    </div>
-    
-    <button onclick="forcerNettoyage()" style="background:rgba(255,0,0,0.2); color:white; border:1px solid red; border-radius:4px; padding:5px 10px; cursor:pointer; font-size:0.7rem; margin-top:10px;">
-        DEBUG : CLIQUER ICI SI BLOQUÉ
-    </button>
-
-    <div class="partner-callout">
-        <div class="launch-badge">Offre de lancement</div>
-        <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
-            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate.
-        </p>
-        
-        <div class="offer-grid">
-            <div class="offer-item">
-                <strong>Loyer 0 Pi</strong>
-                <p>Durée limitée</p>
-            </div>
-            <div class="offer-item">
-                <strong>0% Commission</strong>
-                <p>In-Game</p>
-            </div>
-            <div class="offer-item">
-                <strong>Slot Premium</strong>
-                <p>Prioritaire</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="contact-area">
-        <div class="contact-title">COLLABORATIONS & PARTENARIATS</div>
-        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container" id="contactForm">
-            <div class="row">
-                <input type="text" name="name" placeholder="Nom" required>
-                <input type="email" name="email" placeholder="Email" required>
-            </div>
-            <textarea name="message" rows="4" placeholder="Décrivez votre projet..." required></textarea>
-            <button type="submit" class="btn-send" id="btnText">ENVOYER LE MESSAGE</button>
-        </form>
-    </div>
-
-    <footer>
-        <span style="color: var(--neon-blue);">✔</span> Certifié WadCox | Écosystème Pi Network
-    </footer>
-
-    <script>
-        // --- INITIALISATION SDK & NETTOYAGE (Gardé intact car crucial pour ton backend) ---
-        async function initPi() {
-            try {
-                await Pi.init({ version: "2.0", sandbox: false });
-                console.log("SDK Pi Initialisé");
-                await Pi.createPayment({}, {
-                    onIncompletePaymentFound: (payment) => {
-                        clorePaiementsBloqués(payment);
-                    }
-                });
-            } catch (e) { console.warn("SDK Pi non chargé"); }
-        }
-        initPi();
-
-        async function forcerNettoyage() {
-            if (typeof Pi === 'undefined') { alert("Ouvrez le Pi Browser !"); return; }
-            try {
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-                let trouve = false;
-                await Pi.createPayment({ amount: 0.1, memo: "Nettoyage", metadata: { type: "cleanup" } }, {
-                    onIncompletePaymentFound: async (payment) => {
-                        trouve = true;
-                        await clorePaiementsBloqués(payment);
-                        alert("✅ Paiement bloqué nettoyé !");
-                    },
-                    onReadyForServerApproval: function(paymentId) { },
-                    onReadyForServerCompletion: function(paymentId, txid) { Pi.completePayment(paymentId); },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) { if (payment) clorePaiementsBloqués(payment); }
-                });
-                if(!trouve) alert("Aucun paiement bloqué trouvé.");
-            } catch (e) { if (!e.message.includes("Ad-blocker")) alert("Info : " + e.message); }
-        }
-
-        async function clorePaiementsBloqués(payment) {
-            try {
-                await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId: payment.identifier })
-                });
-                await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error("Erreur de clôture:", e); }
-        }
-
-        async function donnerPi() {
-            if (typeof Pi === 'undefined') { alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER."); return; }
-            const montant = prompt("Montant du don (min 1 Pi) :", "1");
-            if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
-            try {
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
-                await Pi.createPayment({
-                    amount: parseFloat(montant),
-                    memo: "Don JeuxVideo.Pi - " + Date.now(),
-                    metadata: { type: "don_libre" }
-                }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        return fetch('https://wadcox44-github-io.vercel.app/api/approve', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paymentId: paymentId })
-                        }).then(res => res.json());
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        Pi.completePayment(paymentId);
-                        alert("Merci infiniment pour votre don !");
-                    },
-                    onCancel: function(paymentId) { },
-                    onError: function(error, payment) { if(payment) clorePaiementsBloqués(payment); }
-                });
-            } catch (err) { console.error(err); }
-        }
-        document.getElementById('pay_button').onclick = donnerPi;
-    </script>
-</body>
-</html>
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: '
