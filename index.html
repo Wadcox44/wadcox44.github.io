@@ -2,12 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JeuxVideo.Pi | Main Portal</title> <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet"> <style>
-        /* --- DESIGN SYSTEM : MATTE, GOLD & CYAN --- */
+        /* --- THEME CYBER PORTAL --- */
         :root {
-            --cyan: #00f2ff; /* Bordures néon pour le côté Tech */
-            --gold: #ff9900; /* L'or pour Gold Pixel et le logo */
-            --bg: #050a0f; /* Fond noir mat profond */
-            --card-bg: rgba(10, 20, 30, 0.9); /* Fond des tuiles */
+            --cyan: #00f2ff; /* Bleu néon des bordures */
+            --gold: #ff9900; /* Or du logo et Gold Pixel */
+            --bg: #050a0f; /* Fond très sombre */
+            --card-bg: rgba(10, 20, 30, 0.8); /* Fond des cartes */
         }
 
         body {
@@ -16,29 +16,26 @@
         }
 
         header { padding: 40px; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: white; letter-spacing: 3px; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: white; }
         .logo span { color: var(--gold); }
 
         .section-title {
             color: var(--cyan); font-family: 'Orbitron', sans-serif;
             text-align: left; max-width: 900px; margin: 30px auto 15px;
-            font-size: 0.8rem; letter-spacing: 2px; border-left: 3px solid var(--gold); padding-left: 15px;
+            font-size: 0.9rem; letter-spacing: 2px; border-left: 3px solid var(--gold); padding-left: 10px;
         }
 
-        /* --- MAIN PROJECT (GOLD PIXEL) --- */
+        /* --- MAIN PROJECT BLOCK --- */
         .main-project {
             max-width: 900px; margin: 0 auto;
             border: 1px solid var(--gold); border-radius: 10px;
-            overflow: hidden; cursor: pointer; position: relative;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://ton-image-globe.jpg'); /* Fond sombre pour faire ressortir le titre */
-            background-size: cover; background-position: center;
-            height: 350px; display: flex; align-items: center; justify-content: center;
-            transition: 0.4s;
+            overflow: hidden; position: relative;
+            background: url('https://ton-image-fond.jpg') center/cover; /* Ton image avec le globe */
+            height: 400px; display: flex; align-items: center; justify-content: center;
         }
-        .main-project:hover { box-shadow: 0 0 30px rgba(255, 153, 0, 0.3); transform: scale(1.01); }
-        .main-project h2 { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--gold); letter-spacing: 8px; margin: 0; }
+        .main-project h2 { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: var(--gold); letter-spacing: 5px; }
 
-        /* --- GRID DEVELOPER SHOWCASE --- */
+        /* --- DEVELOPER SHOWCASE --- */
         .showcase-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             max-width: 900px; margin: 0 auto; gap: 20px;
@@ -49,30 +46,25 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: 0.3s; cursor: pointer;
         }
-        .slot:hover { box-shadow: 0 0 15px var(--cyan); border-color: white; }
-        .plus-icon { font-size: 2.5rem; color: var(--gold); }
+        .slot:hover { box-shadow: 0 0 15px var(--cyan); }
+        .plus-icon { font-size: 2rem; color: var(--gold); }
         .slot-text { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--cyan); margin-top: 10px; }
 
-        /* --- CONTACT & FORMSPREE --- */
-        .contact-section {
-            max-width: 500px; margin: 80px auto; padding: 40px;
+        /* --- FORMULAIRE DE CONTACT --- */
+        .contact-form {
+            max-width: 500px; margin: 60px auto; padding: 30px;
             border-top: 1px solid #222;
         }
-        .contact-section h3 { font-family: 'Orbitron', sans-serif; color: var(--gold); margin-bottom: 25px; }
-        
         input, textarea {
-            width: 100%; padding: 14px; margin: 10px 0;
-            background: #0d1117; border: 1px solid var(--cyan);
-            color: white; border-radius: 5px; box-sizing: border-box;
+            width: 100%; padding: 12px; margin: 10px 0;
+            background: #111; border: 1px solid var(--cyan);
+            color: white; border-radius: 5px;
         }
-        
         .btn-submit {
             background: var(--gold); color: black; border: none;
-            padding: 15px 30px; font-family: 'Orbitron', sans-serif;
-            font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px;
-            transition: 0.3s;
+            padding: 12px 30px; font-family: 'Orbitron', sans-serif;
+            font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
         }
-        .btn-submit:hover { background: white; }
     </style>
 </head>
 <body>
@@ -81,12 +73,12 @@
     <div class="logo">⚡ JEUXVIDEO.<span>PI</span></div> </header>
 
 <div class="section-title">⭐ MAIN PROJECT</div>
-<div class="main-project" onclick="window.location.href='https://gold-pixel.onrender.com'">
+<div class="main-project" onclick="location.href='https://gold-pixel.onrender.com'">
     <h2>GOLD PIXEL</h2> </div>
 
 <div class="section-title">🚀 DEVELOPER SHOWCASE</div>
 <div class="showcase-grid">
-    <div class="slot"> <img src="https://via.placeholder.com/60/00f2ff/000000?text=2048" alt="2048" style="border-radius: 5px;">
+    <div class="slot"> <img src="https://via.placeholder.com/60" alt="2048">
         <div class="slot-text">2048 NEON</div>
     </div>
     <div class="slot"> <span class="plus-icon">+</span>
@@ -97,20 +89,15 @@
     </div>
 </div>
 
-<div class="contact-section">
-    <h3>LOUER UN EMPLACEMENT</h3>
-    <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 20px;">Intégrez le portail JeuxVideo.Pi et monétisez vos créations.</p>
-    
-    <form action="https://formspree.io/f/TON_ID_FORMSPREE" method="POST">
-        <input type="text" name="studio" placeholder="Nom du Projet / Studio" required>
-        <input type="email" name="email" placeholder="Votre Email (Pi Network)" required>
-        <textarea name="message" placeholder="Parlez-moi de votre jeu ou de votre proposition de don..." rows="4" required></textarea>
-        <button type="submit" class="btn-submit">ENVOYER LA DEMANDE</button>
-    </form>
+<div class="contact-form">
+    <h3 style="font-family:'Orbitron'; color:var(--gold);">LOUER UN EMPLACEMENT</h3>
+    <p style="font-size: 0.8rem; opacity: 0.7;">Développeurs, intégrez notre portail et profitez de l'audience Pi.</p>
+    <form>
+        <input type="text" placeholder="Nom du Projet / Studio" required> <input type="email" placeholder="Email de contact" required> <textarea placeholder="Décrivez votre jeu en quelques mots..." rows="4"></textarea> <button type="submit" class="btn-submit">ENVOYER LA DEMANDE</button> </form>
 </div>
 
-<footer style="padding: 50px; opacity: 0.3; font-size: 0.7rem;">
-    ✓ Portails JeuxVideo.Pi — Certified Ecosystem Project
+<footer style="padding: 20px; opacity: 0.4; font-size: 0.7rem;">
+    ✓ Certified WadCox | Pi Network Ecosystem
 </footer>
 
 </body>
