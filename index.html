@@ -36,7 +36,7 @@
     <canvas id="grille" width="512" height="512"></canvas>
   </main>
 <script>
-  const socket = io("https://gold-pixel.onrender.com", { transports: ['websocket'] });
+  const socket = io("http://localhost:3000", { transports: ['websocket'] });
   const canvas = document.getElementById("grille");
   const ctx = canvas.getContext("2d");
   let selectedColor = "#FF0000";
