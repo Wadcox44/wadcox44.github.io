@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JEUXVIDEO.PI - PORTAIL</title> <style>
+        /* Design inspiré par tes palettes Matte et Gold */
+        body { background-color: #050b14; color: white; font-family: 'Orbitron', sans-serif; text-align: center; margin: 0; }
+        .hero-card { border: 2px solid #ffaa00; margin: 20px; cursor: pointer; transition: 0.3s; } /* Bordure Gold signature */
+        .hero-card:hover { box-shadow: 0 0 15px #ffaa00; } /* Effet lumineux au survol */
+        .category-title { color: #ffaa00; font-size: 24px; margin-top: 30px; } /* Titre en Gold */
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JEUXVIDEO.PI</h1> </header>
+
+    <section>
+        <div class="category-title">⭐ PROJET PRINCIPAL</div>
+        <div class="hero-card" onclick="window.location.href='https://gold-pixel.onrender.com'">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel" style="width:100%; max-width:400px;">
+            <div class="hero-overlay-text">OUVRIR GOLD PIXEL</div>
+        </div>
+    </section>
+
+    <section>
+        <div class="category-title">🎮 MINI-JEUX</div>
+        <div class="hero-card" onclick="window.location.href='./2048/index.html'">
+            <p>2048 - VERSION PI</p>
+        </div>
+    </section>
+
+    <script>
+        console.log("Portail JeuxVideo.Pi prêt et lié à la Forteresse Render."); // Note de log pour confirmer le lien
+    </script>
+</body>
+</html>
