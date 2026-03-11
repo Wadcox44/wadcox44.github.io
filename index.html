@@ -12,7 +12,7 @@
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
             font-family: 'Rajdhani', sans-serif; min-height: 100vh;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         @keyframes flicker {
@@ -22,18 +22,23 @@
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 25px 5px 15px; text-align: center; }
+        @keyframes neon-pulse {
+            0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); border-color: var(--neon-blue); }
+            100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); border-color: rgba(0, 243, 255, 0.2); }
+        }
+
+        header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 2.2rem; margin: 0; 
+            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
             color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
             letter-spacing: 2px;
         }
         .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
 
-        /* Grille de Jeux */
         .game-grid { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; padding: 10px; width: 95%; margin: 0 auto; box-sizing: border-box;
+            gap: 8px; padding: 10px; width: 95%; max-width: 500px; box-sizing: border-box; margin-bottom: 15px;
         }
         .card {
             background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
@@ -43,65 +48,42 @@
         .card h3 { margin: 0; font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
         .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
-        /* Section Partenaires */
+        .donation-section { text-align: center; padding: 20px 0; width: 100%; display: flex; justify-content: center; }
+        .btn-don {
+            background: #0f1a2e; color: var(--neon-blue); padding: 16px 25px; font-weight: 800; border-radius: 4px;
+            font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
+            width: 90%; max-width: 450px; text-transform: uppercase; letter-spacing: 1px;
+            animation: neon-pulse 2s infinite ease-in-out; transition: 0.3s;
+        }
+
         .partner-callout {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 30px; margin: 15px auto; text-align: center; max-width: 850px;
+            border-radius: 15px; padding: 20px; margin: 5px auto; text-align: center; width: 90%; max-width: 800px;
         }
         .launch-badge {
             display: inline-block; border: 1px solid #ffd700; color: #ffd700;
-            padding: 8px 20px; border-radius: 50px; font-size: 14px; letter-spacing: 3px;
-            margin-bottom: 20px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
+            padding: 8px 20px; border-radius: 50px; font-size: 15px; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: bold; background: rgba(255, 215, 0, 0.05);
             text-transform: uppercase;
         }
-        .offer-grid { display: flex; justify-content: space-around; margin-top: 25px; gap: 15px; }
-        .offer-item { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; flex: 1; }
-        .offer-item strong { display: block; font-size: 1.1rem; margin-bottom: 5px; }
-        .offer-item p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
 
-        /* Section Contact */
-        .contact-area { width: 100%; padding: 25px 0; background: rgba(0,0,0,0.3); }
-        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 20px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; }
-        .form-container { width: 90%; max-width: 600px; margin: auto; }
-        .row { display: flex; gap: 8px; margin-bottom: 8px; }
-        input, textarea { 
-            background: #0f1a2e; border: 1px solid #333; color: white; 
-            padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani';
+        .offer-grid { display: flex; justify-content: space-around; margin-top: 15px; gap: 10px; }
+        .offer-item { 
+            background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; flex: 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90px;
         }
-        input { flex: 1; }
-        textarea { width: 100%; box-sizing: border-box; resize: none; margin-bottom: 8px; }
-        .btn-send { 
-            width: 100%; background: var(--neon-blue); border: none; padding: 14px; 
-            font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer;
-            text-transform: uppercase; font-family: 'Orbitron'; transition: 0.3s;
-        }
+        .offer-item strong { display: block; font-size: 1rem; margin-bottom: 4px; text-align: center; width: 100%; }
+        .offer-item p { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.2; text-align: center; width: 100%; }
 
-        /* Section Don */
-        .donation-section { text-align: center; padding: 40px 20px; width: 100%; margin-top: 20px; }
-        .btn-don {
-            background: #fff; color: #000; max-width: 350px; margin: 0 auto;
-            border: none; padding: 15px 30px; font-weight: bold; border-radius: 4px;
-            font-family: 'Orbitron'; cursor: pointer; display: block; width: 90%;
-            transition: transform 0.2s;
-        }
-        .btn-don:active { transform: scale(0.95); }
-
-        /* Loader */
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader {
-            border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000;
-            border-radius: 50%; width: 14px; height: 14px;
-            animation: spin 0.8s linear infinite; display: inline-block;
-            margin-right: 10px; vertical-align: middle;
-        }
-
-        footer { font-size: 0.7rem; color: #555; padding: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .contact-area { width: 100%; padding: 20px 0; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .contact-title { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 15px; text-align: center; color: var(--neon-blue); letter-spacing: 1px; width: 100%; }
         
-        @media (max-width: 600px) {
-            .offer-grid { flex-direction: column; }
-            .row { flex-direction: column; }
-            input { width: 100%; }
-        }
+        .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        .row { display: flex; gap: 10px; width: 100%; }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; font-size: 0.9rem; border-radius: 4px; font-family: 'Rajdhani'; box-sizing: border-box; width: 100%; }
+        .btn-send { width: 100%; background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; font-size: 0.9rem; color: #000; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; }
+
+        footer { font-size: 0.75rem; color: #666; padding: 30px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
@@ -126,10 +108,19 @@
         </div>
     </div>
 
+    <div class="donation-section">
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
+    </div>
+    
+    <button onclick="forcerNettoyage()" style="background:red; color:white; margin-top:10px;">
+    DEBUG : CLIQUER ICI SI BLOQUÉ
+</button>
+
     <div class="partner-callout">
         <div class="launch-badge">Offre de lancement</div>
-        <h3 style="font-size: 28px; margin-bottom: 15px;">PROGRAMME PIONNIERS</h3>
-        <p style="color: rgba(255,255,255,0.8);">Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.</p>
+        <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px 0; font-size: 1.1rem; font-weight: bold;">
+            Rejoignez <strong>JeuxVideo.Pi</strong> et profitez d'une exposition immédiate auprès de la communauté Pi Network.
+        </p>
         
         <div class="offer-grid">
             <div class="offer-item">
@@ -137,8 +128,8 @@
                 <p>Durée limitée</p>
             </div>
             <div class="offer-item">
-                <strong>0% Commission *</strong>
-                <p>Offre de bienvenue</p>
+                <strong>0% Commission</strong>
+                <p>Sur les transactions In-Game</p>
             </div>
             <div class="offer-item">
                 <strong>Slot Premium</strong>
@@ -147,20 +138,16 @@
         </div>
     </div>
 
-    <form action="https://formspree.io/f/xwvoaroz" method="POST" class="contact-area" id="contactForm">
-        <div class="contact-title">REJOINDRE L'AVENTURE / CONTACT</div>
-        <div class="form-container">
+    <div class="contact-area">
+        <div class="contact-title">COLLABORATIONS & DEMANDES DE PARTENARIAT</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container" id="contactForm">
             <div class="row">
                 <input type="text" name="name" placeholder="Nom" required>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
-            <textarea name="message" rows="3" placeholder="Parlez-nous de votre projet ou posez vos questions ici..." required></textarea>
+            <textarea name="message" rows="4" placeholder="Décrivez votre projet ou votre demande de partenariat..." required></textarea>
             <button type="submit" class="btn-send" id="btnText">ENVOYER LE MESSAGE</button>
-        </div>
-    </form>
-
-    <div class="donation-section">
-        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET EN FAISANT UN DON</button>
+        </form>
     </div>
 
     <footer>
@@ -168,40 +155,103 @@
     </footer>
 
     <script>
-        const form = document.getElementById('contactForm');
-        const btnContact = document.getElementById('btnText');
+        // --- INITIALISATION SDK & NETTOYAGE ---
+        async function initPi() {
+            try {
+                await Pi.init({ version: "2.0", sandbox: false });
+                console.log("SDK Pi Initialisé");
 
-        form.onsubmit = function() {
-            btnContact.innerHTML = '<span class="loader"></span> PATIENTEZ...';
-            btnContact.style.opacity = '0.7';
-            btnContact.style.pointerEvents = 'none';
-        };
+                // Nettoyage automatique au démarrage
+                await Pi.createPayment({}, {
+                    onIncompletePaymentFound: (payment) => {
+                        console.log("Paiement incomplet détecté au démarrage:", payment.identifier);
+                        clorePaiementsBloqués(payment);
+                    }
+                });
+            } catch (e) {
+                console.warn("SDK Pi non chargé");
+            }
+        }
 
-        Pi.init({ version: "2.0", sandbox: false });
+        initPi();
+
+        // --- FONCTION DE SECOURS (Bouton Rouge) ---
+        async function forcerNettoyage() {
+    if (typeof Pi === 'undefined') {
+        alert("Ouvrez le Pi Browser !");
+        return;
+    }
+
+    try {
+        alert("Étape 1 : Authentification...");
+        await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+        
+        alert("Étape 2 : Vérification des paiements...");
+        let trouve = false;
+
+        // Le SDK exige que toutes les fonctions de rappel soient définies
+        await Pi.createPayment({
+            amount: 0.1,
+            memo: "Nettoyage",
+            metadata: { type: "cleanup" }
+        }, {
+            onIncompletePaymentFound: async (payment) => {
+                trouve = true;
+                await clorePaiementsBloqués(payment);
+                alert("✅ Paiement bloqué nettoyé !");
+            },
+            onReadyForServerApproval: function(paymentId) { 
+                // On ne fait rien ici, on veut juste que le SDK soit content
+            },
+            onReadyForServerCompletion: function(paymentId, txid) {
+                Pi.completePayment(paymentId);
+            },
+            onCancel: function(paymentId) { },
+            onError: function(error, payment) { 
+                if (payment) clorePaiementsBloqués(payment);
+            }
+        });
+        
+        if(!trouve) alert("Aucun paiement bloqué trouvé. Votre compte est propre !");
+    } catch (e) {
+        // On ignore l'erreur de création si aucun paiement n'était vraiment bloqué
+        if (!e.message.includes("Ad-blocker")) {
+            alert("Info : " + e.message);
+        }
+    }
+}
 
         async function clorePaiementsBloqués(payment) {
             try {
+                // 1. On informe ton serveur
                 await fetch('https://wadcox44-github-io.vercel.app/api/approve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ paymentId: payment.identifier })
                 });
+                // 2. On finalise sur le réseau Pi
                 await Pi.completePayment(payment.identifier);
-            } catch (e) { console.error(e); }
+                console.log("Paiement clos avec succès.");
+            } catch (e) { 
+                console.error("Erreur de clôture:", e); 
+            }
         }
 
         async function donnerPi() {
-            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
-            if (montant === null || isNaN(montant) || parseFloat(montant) < 1) {
-                alert("Veuillez entrer un montant valide (minimum 1 Pi).");
+            if (typeof Pi === 'undefined') {
+                alert("🚀 Action requise : Ouvrez ce site dans PI BROWSER.");
                 return;
             }
 
+            const montant = prompt("Entrez le montant de votre don (minimum 1 Pi) :", "1");
+            if (!montant || isNaN(montant) || parseFloat(montant) < 1) return;
+
             try {
-                await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                const auth = await Pi.authenticate(['username', 'payments'], clorePaiementsBloqués);
+                
                 await Pi.createPayment({
                     amount: parseFloat(montant),
-                    memo: "Don de soutien JeuxVideo.Pi",
+                    memo: "Don JeuxVideo.Pi - " + Date.now(),
                     metadata: { type: "don_libre" }
                 }, {
                     onReadyForServerApproval: function(paymentId) {
@@ -213,18 +263,27 @@
                     },
                     onReadyForServerCompletion: function(paymentId, txid) {
                         Pi.completePayment(paymentId);
-                        alert("Un immense merci pour votre soutien de " + montant + " Pi !");
+                        alert("Merci infiniment pour votre don !");
                     },
                     onCancel: function(paymentId) { },
                     onError: function(error, payment) {
-                        if(payment) { clorePaiementsBloqués(payment); }
+                        if(payment) clorePaiementsBloqués(payment);
+                        else alert("Erreur : " + error.message);
                     }
                 });
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         document.getElementById('pay_button').onclick = donnerPi;
     </script>
 </body>
 </html>
+
+
+
+
+
+
 
