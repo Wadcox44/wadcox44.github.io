@@ -1,73 +1,121 @@
-<script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const size = 15;
-    let currentColor = "#5A7A94";
-    let goldLimit = 50;
-    let goldUsed = 0;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOLD PIXEL - Saison 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffaa00; --matte: #5A7A94; --bg: #050b14; }
+        body { background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; text-align: center; margin: 0; padding: 20px; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        
+        /* Zone de dessin */
+        #canvas-container { margin: 20px auto; position: relative; width: 300px; height: 300px; border: 2px solid var(--matte); }
+        canvas { background: #fff; cursor: crosshair; }
 
-    // --- CHARGEMENT INITIAL ---
-    window.onload = loadGallery;
+        /* Galerie */
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 30px; }
+        .art-card { background: rgba(255,255,255,0.05); border: 1px solid var(--matte); padding: 10px; border-radius: 8px; }
+        .art-card img { width: 100%; border-radius: 4px; }
+        .vote-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); cursor: pointer; border-radius: 4px; padding: 5px 10px; margin-top: 5px; }
+        .voted { background: var(--gold); color: black; }
 
-    async function loadGallery() {
-        const response = await fetch('/api/gallery');
-        const data = await response.json();
-        renderGallery(data);
-    }
+        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; cursor: pointer; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .btn-save { background: var(--gold); color: black; }
+    </style>
+</head>
+<body>
 
-    function renderGallery(arts) {
-        const gallery = document.getElementById("gallery");
-        gallery.innerHTML = ""; // On vide avant de remplir
-        arts.forEach(art => {
-            let card = document.createElement("div");
-            card.className = "art-card";
-            card.innerHTML = `
-                <img src="${art.img}">
-                <div class="art-info">
-                    <span class="art-user">@${art.name}</span>
-                    <button class="vote-btn" onclick="voteForArt(${art.id}, this)">
-                        👍 <span class="vote-count">${art.votes}</span>
-                    </button>
-                </div>
-            `;
-            gallery.appendChild(card);
-        });
-    }
+    <h1>GOLD PIXEL</h1>
+    <p>Palette : <span style="color:var(--matte)">Matte</span> & <span style="color:var(--gold)">Gold</span></p>
 
-    // --- SAUVEGARDE SUR LE SERVEUR ---
-    async function saveArt() {
-        let name = prompt("Pseudo du Pionnier :");
-        if(!name) return;
+    <div id="canvas-container">
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </div>
 
-        let imgData = canvas.toDataURL();
+    <div class="controls">
+        <button class="btn btn-save" onclick="saveArt()">SAUVEGARDER (1 Pi)</button>
+        <button class="btn" style="background:#444" onclick="clearCanvas()">EFFACER</button>
+    </div>
 
-        const response = await fetch('/api/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, img: imgData })
-        });
+    <h2 style="margin-top:40px">Galerie des Saisons</h2>
+    <div id="gallery"></div>
 
-        if (response.ok) {
-            clearCanvas();
-            loadGallery(); // On rafraîchit la galerie pour tout le monde
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let currentColor = "#5A7A94"; // Couleur Matte par défaut
+
+        // Gestion du dessin simple (souris)
+        let painting = false;
+        canvas.addEventListener('mousedown', () => painting = true);
+        canvas.addEventListener('mouseup', () => { painting = false; ctx.beginPath(); });
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(e) {
+            if (!painting) return;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentColor;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
         }
-    }
 
-    // --- VOTE SUR LE SERVEUR ---
-    async function voteForArt(id, btn) {
-        if(btn.classList.contains('voted')) return;
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-        const response = await fetch('/api/vote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id })
-        });
+        // --- TES FONCTIONS DE RÉCUPÉRATION ---
+        window.onload = loadGallery;
 
-        if (response.ok) {
-            btn.classList.add('voted');
-            loadGallery(); // On recharge pour voir le nouveau score
+        async function loadGallery() {
+            try {
+                const response = await fetch('/api/gallery');
+                const data = await response.json();
+                renderGallery(data);
+            } catch (e) { console.log("Pas encore d'images dans la galerie"); }
         }
-    }
 
-    // ... (Garde tes fonctions clearCanvas et la gestion des couleurs ici)
-</script>
+        function renderGallery(arts) {
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = ""; 
+            arts.forEach(art => {
+                let card = document.createElement("div");
+                card.className = "art-card";
+                card.innerHTML = `
+                    <img src="${art.img}">
+                    <div class="art-info">
+                        <span class="art-user">@${art.name}</span>
+                        <button class="vote-btn" onclick="voteForArt(${art.id}, this)">
+                            👍 <span class="vote-count">${art.votes}</span>
+                        </button>
+                    </div>`;
+                gallery.appendChild(card);
+            });
+        }
+
+        async function saveArt() {
+            let name = prompt("Pseudo du Pionnier :");
+            if(!name) return;
+            let imgData = canvas.toDataURL();
+            const response = await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, img: imgData })
+            });
+            if (response.ok) { clearCanvas(); loadGallery(); }
+        }
+
+        async function voteForArt(id, btn) {
+            if(btn.classList.contains('voted')) return;
+            const response = await fetch('/api/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            if (response.ok) { btn.classList.add('voted'); loadGallery(); }
+        }
+    </script>
+</body>
+</html>
