@@ -9,13 +9,14 @@
         :root { --gold: #ffaa00; --bg: #050b14; }
         body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; touch-action: none; overflow-x: hidden; }
         
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; font-size: 1.2rem; }
 
-        /* CADRE DU JEU */
+        /* Correction du cadre : Il s'adapte maintenant au canevas */
         #viewport {
-            width: 95vw;
-            height: 50vh;
-            max-width: 600px;
+            width: 600px; /* Taille fixe identique au canvas pour éviter le vide */
+            height: 600px;
+            max-width: 95vw;
+            max-height: 95vw;
             border: 2px solid var(--gold);
             background: #000;
             position: relative;
@@ -23,34 +24,29 @@
             border-radius: 4px;
         }
 
-        #canvas-container { position: absolute; transform-origin: 0 0; image-rendering: pixelated; }
-        #grid-overlay { position: absolute; top: 0; left: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); }
+        #canvas-container { position: absolute; transform-origin: 0 0; image-rendering: pixelated; width: 600px; height: 600px; }
+        #grid-overlay { position: absolute; top: 0; left: 0; pointer-events: none; width: 600px; height: 600px; background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); }
         canvas { background: #081422; display: block; }
 
-        /* INTERFACE CLAIRE */
-        .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        
-        .tool-bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.7rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        .btn.active { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
+        .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .tool-bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 6px 10px; font-size: 0.65rem; cursor: pointer; border-radius: 4px; }
+        .btn.active { background: var(--gold); color: #000; }
 
-        /* L'OR EN RETRAIT */
-        .gold-section { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid var(--gold); }
-        .gold-btn { width: 30px; height: 30px; background: var(--gold); border: 2px solid #fff; cursor: pointer; border-radius: 4px; box-shadow: 0 0 10px var(--gold); }
-        .gold-btn.active { transform: scale(1.1); border-color: #fff; box-shadow: 0 0 20px var(--gold); }
-        .gold-counter { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--gold); }
+        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--gold); }
+        .gold-btn { width: 25px; height: 25px; background: var(--gold); border: 1px solid #fff; cursor: pointer; border-radius: 4px; }
 
-        /* PALETTE */
-        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 5px; }
+        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
         .color-btn { width: 22px; height: 22px; border-radius: 2px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         .color-btn.active { border: 2px solid #fff; transform: scale(1.1); }
 
-        /* GALERIE */
-        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; width: 95%; margin-top: 20px; padding-bottom: 40px; }
-        .art-card { background: #0d1e36; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.1); position: relative; }
-        .art-card img { width: 100%; border-radius: 2px; }
-        .del-btn { position: absolute; top: -5px; right: -5px; background: #ff3131; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; display: none; }
+        /* STYLE DE LA GALERIE (Visible sous le bouton) */
+        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 30px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 5px; }
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 90%; margin-top: 20px; padding-bottom: 50px; }
+        .art-card { background: #0d1e36; padding: 10px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.1); position: relative; }
+        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; }
+        .card-info { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .del-btn { position: absolute; top: -8px; right: -8px; background: #ff3131; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: none; z-index: 10; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -68,20 +64,21 @@
         <div class="tool-bar">
             <button id="drawBtn" class="btn active" onclick="setMode('draw')">PIXEL</button>
             <button id="eraseBtn" class="btn" onclick="setMode('erase')">GOMME</button>
-            <button id="moveBtn" class="btn" onclick="setMode('move')">PAN (DÉPLACER)</button>
-            <button class="btn" onclick="resetZoom()">RECENTRER</button>
+            <button id="moveBtn" class="btn" onclick="setMode('move')">DÉPLACER</button>
+            <button class="btn" onclick="resetView()">RECENTRER</button>
         </div>
 
-        <div class="gold-section">
+        <div class="gold-box">
             <div id="goldBtn" class="gold-btn" onclick="selectGold()"></div>
-            <div class="gold-counter">OR : <span id="goldCount">0</span> / 15</div>
+            <div style="font-family:Orbitron; font-size:0.7rem; color:var(--gold)">OR : <span id="goldCount">0</span>/15</div>
         </div>
 
         <div class="palette" id="palette"></div>
         
-        <button class="btn" onclick="saveArt()" style="background:var(--gold); color:#000; width: 200px; font-size: 0.9rem;">PUBLIER L'ŒUVRE</button>
+        <button class="btn" onclick="saveArt()" style="background:var(--gold); color:#000; width:220px; font-weight:bold;">PUBLIER L'ŒUVRE</button>
     </div>
 
+    <div class="section-title">GALERIE DES SAISONS</div>
     <div id="gallery"></div>
 
     <script>
@@ -91,9 +88,8 @@
         const grid = document.getElementById("grid-overlay");
         const pSize = 15;
         let scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", lastColor = "#5A7A94", isDown = false, goldPixels = 0;
-        let myWorks = JSON.parse(localStorage.getItem('goldPixel_myWorks') || "[]");
+        let myWorks = JSON.parse(localStorage.getItem('gp_works') || "[]");
 
-        grid.style.width = grid.style.height = "600px";
         grid.style.backgroundSize = `${pSize}px ${pSize}px`;
 
         const colors = [
@@ -104,24 +100,14 @@
         ];
 
         colors.forEach(c => {
-            const b = document.createElement("div"); 
-            b.className = "color-btn"; b.style.background = c;
-            b.onclick = () => { 
-                color = lastColor = c; setMode('draw'); 
-                document.querySelectorAll('.color-btn, .gold-btn').forEach(x => x.classList.remove('active'));
-                b.classList.add('active');
-            };
+            const b = document.createElement("div"); b.className = "color-btn"; b.style.background = c;
+            b.onclick = () => { color = lastColor = c; setMode('draw'); document.querySelectorAll('.color-btn, .gold-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
             document.getElementById("palette").appendChild(b);
         });
 
-        function selectGold() { 
-            color = lastColor = "#ffaa00"; setMode('draw'); 
-            document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active'));
-            document.getElementById('goldBtn').classList.add('active');
-        }
-
+        function selectGold() { color = lastColor = "#ffaa00"; setMode('draw'); document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active')); document.getElementById('goldBtn').classList.add('active'); }
         function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
-        function resetZoom() { scale = 0.8; pos = {x: 10, y: 10}; updateTransform(); }
+        function resetView() { scale = 0.8; pos = {x: 10, y: 10}; updateTransform(); }
 
         function handleAction(e) {
             if(!isDown) return;
@@ -156,37 +142,44 @@
             document.getElementById("moveBtn").classList.toggle("active", m === 'move');
         }
 
+        // CHARGEMENT DE LA GALERIE
         async function loadGallery() {
             const res = await fetch('/api/gallery');
             const data = await res.json();
-            const gal = document.getElementById("gallery"); gal.innerHTML = "";
+            const gal = document.getElementById("gallery");
+            gal.innerHTML = "";
             data.reverse().forEach(art => {
                 const isMine = myWorks.includes(art.id);
-                gal.innerHTML += `<div class="art-card">
-                    <button class="del-btn" style="display:${isMine?'block':'none'}" onclick="deleteArt('${art.id}')">X</button>
-                    <img src="${art.img}">
-                    <div style="display:flex; justify:space-between; align-items:center; margin-top:5px;">
-                        <span style="font-size:0.7rem; color:var(--gold)">@${art.name}</span>
-                        <button class="btn" style="padding:2px 5px; font-size:0.5rem" onclick="vote('${art.id}')">👍 ${art.votes || 0}</button>
-                    </div>
-                </div>`;
+                gal.innerHTML += `
+                    <div class="art-card">
+                        <button class="del-btn" style="display:${isMine?'block':'none'}" onclick="deleteArt('${art.id}')">X</button>
+                        <img src="${art.img}">
+                        <div class="card-info">
+                            <span style="font-size:0.7rem; color:var(--gold)">@${art.name}</span>
+                            <button class="btn" style="padding:2px 6px; font-size:0.5rem" onclick="vote('${art.id}')">👍 ${art.votes}</button>
+                        </div>
+                    </div>`;
             });
         }
 
         async function saveArt() {
             const name = prompt("Pseudo :"); if(!name) return;
-            const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, img: canvas.toDataURL()}) });
+            const res = await fetch('/api/save', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ name, img: canvas.toDataURL() }) 
+            });
             const result = await res.json();
             myWorks.push(result.id);
-            localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks));
+            localStorage.setItem('gp_works', JSON.stringify(myWorks));
             loadGallery();
         }
 
         async function vote(id) { await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) }); loadGallery(); }
-        async function deleteArt(id) { if(confirm("Supprimer ?")) { await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) }); myWorks = myWorks.filter(i => i !== id); localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks)); loadGallery(); } }
+        async function deleteArt(id) { if(confirm("Supprimer ?")) { await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) }); myWorks = myWorks.filter(i => i !== id); localStorage.setItem('gp_works', JSON.stringify(myWorks)); loadGallery(); } }
 
         ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
-        resetZoom(); loadGallery();
+        resetView(); loadGallery();
     </script>
 </body>
 </html>
