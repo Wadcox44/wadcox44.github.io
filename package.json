@@ -1,13 +1,22 @@
 {
-  "name": "gold-pixel-portal",
-  "version": "1.0.0",
-  "description": "Portail JeuxVideo.Pi et jeu Gold Pixel",
+  "name": "gold-pixel-studio",
+  "version": "2.0.0",
+  "description": "Gold Pixel — Studio de création pixel art sur Pi Network",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^1.6.0"
-  }
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["pixel-art", "pi-network", "canvas", "gaming"],
+  "license": "MIT"
 }
