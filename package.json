@@ -1,7 +1,7 @@
 {
   "name": "gold-pixel-portal",
   "version": "1.0.0",
-  "description": "Portail JeuxVideo.Pi et jeu Gold Pixel",
+  "description": "Portail JeuxVideo.Pi",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
