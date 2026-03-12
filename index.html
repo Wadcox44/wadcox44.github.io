@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>JEUXVIDEO.PI | Portal Ecosystem</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEUXVIDEO.PI</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script> <style>
-        /* --- DESIGN SYSTEM JEUXVIDEO.PI (Palette Matte & Gold Néon) --- */
-        :root { 
-            --neon-blue: #00f3ff; /* Couleur signature du portail. */
-            --neon-purple: #bc13fe; /* Touche administrative pro. */
-            --bg: #050b14; /* Fond galaxie profond. */
-            --glass: rgba(16, 33, 62, 0.7); /* Effet translucide moderne. */
-        }
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        /* --- STYLE DE TON EMPIRE --- */
+        :root { --neon-blue: #00f3ff; --neon-orange: #ffaa00; --bg: #050b14; }
         
         body { 
             margin: 0; padding: 0; background: var(--bg); color: white; 
@@ -18,157 +16,136 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Animation Flicker : Effet néon qui crépite pour le titre. */
         @keyframes flicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-                text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-blue), 0 0 25px var(--neon-blue);
+                text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px var(--neon-blue), 0 0 30px var(--neon-blue);
             }
             20%, 22%, 55% { text-shadow: none; }
         }
 
-        header { padding: 45px 10px 20px; text-align: center; width: 100%; }
+        header { padding: 25px 5px 10px; text-align: center; width: 100%; }
         h1 { 
-            font-family: 'Orbitron', sans-serif; font-size: 2.6rem; margin: 0; 
+            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin: 0; 
             color: #fff; text-transform: uppercase; animation: flicker 3s infinite alternate;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
-        .pi-dot { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
+        .pi-text { color: var(--neon-orange); animation: none; text-shadow: 0 0 10px var(--neon-orange); }
 
-        .container { width: 92%; max-width: 550px; }
-        
+        /* --- SECTION GOLD PIXEL (LE JEU) --- */
+        .main-container { width: 95%; max-width: 500px; margin-top: 10px; }
         .section-label { 
-            font-family: 'Orbitron'; font-size: 0.85rem; color: var(--neon-blue); 
-            margin: 35px 0 15px; display: flex; align-items: center; gap: 10px;
-            text-transform: uppercase; border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-            padding-bottom: 8px;
+            font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue); 
+            margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase;
         }
 
-        /* Hero Banner : Focus sur ton projet Gold Pixel. */
-        .hero-banner {
-            width: 100%; height: 200px; border: 1px solid var(--neon-blue);
-            border-radius: 12px; position: relative; overflow: hidden;
+        .gold-pixel-hero {
+            width: 100%; height: 220px; border: 2px solid var(--neon-orange);
+            border-radius: 15px; position: relative; overflow: hidden;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: #000;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3); transition: 0.4s;
+            background: #000;
         }
-        .hero-banner:hover { box-shadow: 0 0 35px rgba(0, 243, 255, 0.3); transform: scale(1.02); }
-        .hero-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
-        .hero-txt {
-            position: absolute; font-family: 'Orbitron'; font-size: 2.2rem;
-            color: white; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 15px black;
+        .gold-pixel-hero:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 170, 0, 0.5); }
+        
+        /* L'image de fond depuis ton GitHub */
+        .gold-pixel-hero img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            opacity: 0.6; filter: brightness(0.8);
         }
 
-        /* Grille des applications listées. */
-        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
-        .game-card {
-            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px; padding: 22px 5px; text-align: center; cursor: pointer;
-            transition: 0.3s;
+        .gold-pixel-title {
+            position: absolute; font-family: 'Orbitron'; font-size: 2.5rem;
+            color: var(--neon-orange); font-weight: 900; letter-spacing: 5px;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.8), 0 0 10px var(--neon-orange);
+            text-align: center; width: 100%;
         }
-        .game-card:hover { border-color: var(--neon-blue); background: rgba(0, 243, 255, 0.1); }
-        .game-card h3 { margin: 10px 0 0; font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- ABONNEMENTS (Gratuit / Plus / Ultra) --- */
-        .pricing-hub {
-            margin-top: 50px; background: rgba(188, 19, 254, 0.04);
-            border: 1px solid var(--neon-purple); border-radius: 12px; padding: 25px;
+        /* --- GRILLE DES AUTRES JEUX --- */
+        .game-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; width: 100%; margin-top: 15px;
         }
-        .price-table { width: 100%; font-size: 0.9rem; border-collapse: collapse; margin-top: 15px; }
-        .price-table th { color: var(--neon-purple); text-align: left; padding-bottom: 12px; font-family: 'Orbitron'; font-size: 0.75rem; text-transform: uppercase; }
-        .price-table td { padding: 14px 0; border-bottom: 1px solid #1a2a3a; }
-        .pi-val { color: var(--neon-blue); font-weight: bold; }
+        .card {
+            background: rgba(16, 33, 62, 0.8); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 8px; padding: 12px 5px; text-align: center; cursor: pointer;
+        }
+        .card-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .card h3 { margin: 0; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; }
+        .empty { border: 1px dashed #444; opacity: 0.5; cursor: default; }
 
-        /* Zone de contact administratif pour les partenariats. */
-        .contact-area { width: 100%; padding: 55px 0; background: rgba(0,0,0,0.3); margin-top: 45px; display: flex; flex-direction: column; align-items: center; }
-        .form-box { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
-        input, textarea { background: #0f1a2e; border: 1px solid #222; color: white; padding: 16px; border-radius: 6px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; font-size: 1rem; }
-        input:focus, textarea:focus { border-color: var(--neon-blue); outline: none; }
-        .btn-submit { background: var(--neon-purple); border: none; padding: 18px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; color: white; transition: 0.3s; letter-spacing: 1px; }
-        .btn-submit:hover { background: white; color: var(--neon-purple); box-shadow: 0 0 25px white; transform: translateY(-2px); }
+        /* --- BOUTON DON --- */
+        .btn-don {
+            background: #0f1a2e; color: var(--neon-blue); padding: 16px; font-weight: 800; 
+            border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; border: 1px solid var(--neon-blue);
+            width: 100%; text-transform: uppercase; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-don:hover { background: var(--neon-blue); color: black; }
 
-        footer { font-size: 0.7rem; color: #444; padding: 50px; text-align: center; letter-spacing: 2px; font-family: 'Orbitron'; }
+        /* --- FORMULAIRE FORMSPREE --- */
+        .contact-area { width: 100%; padding: 30px 0; background: rgba(0,0,0,0.3); margin-top: 30px; display: flex; flex-direction: column; align-items: center; }
+        .form-container { width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; }
+        .btn-send { background: var(--neon-blue); border: none; padding: 14px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; width: 100%; }
+
+        footer { font-size: 0.7rem; color: #444; padding: 30px; text-align: center; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>JEUXVIDEO<span class="pi-dot">.PI</span></h1>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
     </header>
 
-    <div class="container">
-        <div class="section-label">📡 PROJET PRIORITAIRE</div>
-        <div class="hero-banner" onclick="window.location.href='https://gold-pixel.onrender.com'">
-            <img src="Images/Gold Pixel.png" alt="Gold Pixel Project">
-            <div class="hero-txt">GOLD PIXEL</div>
+    <div class="main-container">
+        <div class="section-label">⭐ Main Project</div>
+        
+        <div class="gold-pixel-hero" onclick="window.location.href='https://gold-pixel.onrender.com'">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel Image">
+            <div class="gold-pixel-title">GOLD PIXEL</div>
         </div>
 
-        <div class="section-label">🚀 RÉSEAU D'APPLICATIONS</div>
+        <div class="section-label" style="margin-top:25px;">🚀 Showcase</div>
         <div class="game-grid">
-            <div class="game-card" onclick="window.location.href='2048/index.html'">
-                <span style="font-size:2rem">🧩</span>
+            <div class="card" onclick="window.location.href='2048/index.html'">
+                <span class="card-icon">🧩</span>
                 <h3>2048 NEON</h3>
             </div>
-            <div class="game-card" style="opacity: 0.3; border-style: dashed;">
-                <span style="font-size:2rem">📡</span>
-                <h3>SLOT LIBRE</h3>
+            <div class="card empty">
+                <span class="card-icon">🎮</span>
+                <h3>SLOT DEV</h3>
             </div>
-            <div class="game-card" style="opacity: 0.3; border-style: dashed;">
-                <span style="font-size:2rem">📡</span>
-                <h3>SLOT LIBRE</h3>
+            <div class="card empty">
+                <span class="card-icon">📦</span>
+                <h3>VOTRE JEU</h3>
             </div>
         </div>
 
-        <div class="pricing-hub">
-            <div class="section-label" style="color: var(--neon-purple); border:none; margin:0; padding:0;">💼 PLANS DE PARTENARIAT</div>
-            <p style="font-size: 0.9rem; margin-top: 10px; color: #aaa;">Accédez à une audience de 55 millions de Pionniers.</p>
-            
-            <table class="price-table">
-                <tr>
-                    <th>OFFRE</th>
-                    <th>ABONNEMENT</th>
-                    <th>COMMISSION</th>
-                </tr>
-                <tr>
-                    <td><strong>Gratuit</strong></td>
-                    <td>0 Pi</td>
-                    <td class="pi-val">15%</td>
-                </tr>
-                <tr>
-                    <td><strong>Plus</strong></td>
-                    <td>5 Pi / mois</td>
-                    <td class="pi-val">12%</td>
-                </tr>
-                <tr>
-                    <td><strong>Ultra</strong></td>
-                    <td>45 Pi / an</td>
-                    <td class="pi-val">10%</td>
-                </tr>
-            </table>
-        </div>
+        <button id="pay_button" class="btn-don">SOUTENEZ LE PROJET (DON)</button>
     </div>
 
     <div class="contact-area">
-        <div style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:20px; font-size: 0.75rem; letter-spacing: 1px;">DÉPOSER UN DOSSIER</div>
-        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-box">
-            <input type="email" name="email" placeholder="Votre Email Professionnel" required>
-            <textarea name="message" rows="4" placeholder="Décrivez votre application ou votre service..." required></textarea>
-            <button type="submit" class="btn-submit">Soumettre le projet</button>
+        <div style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:15px;">PARTENARIATS</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST" class="form-container">
+            <input type="email" name="email" placeholder="Email" required>
+            <textarea name="message" rows="3" placeholder="Votre message..." required></textarea>
+            <button type="submit" class="btn-send">ENVOYER</button>
         </form>
     </div>
 
-    <footer>© 2026 JEUXVIDEO.PI - ADMINISTRATION DU RÉSEAU - PROPRIÉTÉ DE WADCOX</footer>
+    <footer>✔ Certifié WadCox | Écosystème Pi Network</footer>
 
     <script>
-        // --- INITIALISATION DU SDK PI ---
+        // --- LOGIQUE SDK PI (Gardée intacte) ---
         async function initPi() {
             try {
-                // Initialise la connexion avec le Pi Browser.
                 await Pi.init({ version: "2.0", sandbox: false });
-                console.log("Connecté au Réseau Pi");
-            } catch (e) { 
-                console.warn("Environnement hors Pi Browser détecté."); 
-            }
+                console.log("SDK Initialisé");
+            } catch (e) { console.warn("SDK non chargé"); }
         }
         initPi();
+
+        // Ajoute ici tes fonctions donnerPi() et clorePaiementsBloqués() comme avant
     </script>
 </body>
 </html>
