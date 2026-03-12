@@ -7,28 +7,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffaa00; --bg: #050b14; }
-        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; touch-action: none; overflow-x: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; }
         h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; font-size: 1.2rem; }
         
-        #viewport { width: 600px; height: 600px; max-width: 95vw; border: 2px solid var(--gold); background: #000; position: relative; overflow: hidden; box-sizing: content-box; border-radius: 4px; }
-        #canvas-container { position: absolute; transform-origin: 0 0; image-rendering: pixelated; }
-        #grid-overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
-        canvas { background: #081422; display: block; }
+        /* Note : Conteneur principal fixe pour éviter que le canevas ne sorte de l'écran */
+        #viewport {
+            width: 600px; height: 600px;
+            max-width: 95vw; border: 2px solid var(--gold);
+            background: #000; position: relative;
+            overflow: hidden; border-radius: 4px; box-shadow: 0 0 20px rgba(255,170,0,0.2);
+        }
+
+        #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; image-rendering: pixelated; }
+        #grid-overlay { position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; }
+        canvas { background: #081422; cursor: crosshair; }
 
         .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .format-bar { display: flex; gap: 5px; margin-bottom: 5px; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 6px 10px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
+        .format-bar { display: flex; gap: 8px; margin-bottom: 10px; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.65rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
         .btn.active { background: var(--gold); color: #000; }
-        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--gold); }
-        .gold-btn { width: 25px; height: 25px; background: var(--gold); border: 1px solid #fff; cursor: pointer; border-radius: 4px; }
-        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
-        .color-btn { width: 22px; height: 22px; border-radius: 2px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-        .color-btn.active { border: 2px solid #fff; transform: scale(1.1); }
         
-        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 30px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 5px; }
-        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; width: 90%; margin-top: 20px; padding-bottom: 50px; }
-        .art-card { background: #0d1e36; padding: 10px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.1); }
-        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; }
+        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid var(--gold); }
+        .gold-btn { width: 30px; height: 30px; background: var(--gold); border: 2px solid #fff; cursor: pointer; border-radius: 4px; }
+
+        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .color-btn { width: 25px; height: 25px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .color-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 10px #fff; }
+
+        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 40px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 10px; }
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 90%; margin-top: 20px; padding-bottom: 80px; }
+        .art-card { background: #0d1e36; padding: 10px; border-radius: 4px; border: 1px solid var(--gold); text-align: center; }
+        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -36,8 +45,8 @@
     <h1>GOLD PIXEL STUDIO</h1>
 
     <div class="format-bar">
-        <button id="fmt11" class="btn active" onclick="changeFormat(600, 600, '1:1')">1:1</button>
-        <button id="fmt169" class="btn" onclick="changeFormat(800, 450, '16:9')">16:9</button>
+        <button id="fmt11" class="btn active" onclick="changeFormat(600, 600, '1:1')">FORMAT 1:1</button>
+        <button id="fmt169" class="btn" onclick="changeFormat(800, 450, '16:9')">FORMAT 16:9</button>
     </div>
     
     <div id="viewport">
@@ -57,37 +66,39 @@
 
         <div class="gold-box">
             <div id="goldBtn" class="gold-btn" onclick="selectGold()"></div>
-            <div style="font-family:Orbitron; font-size:0.7rem; color:var(--gold)">OR : <span id="goldCount">0</span>/15</div>
+            <div style="font-family:Orbitron; font-size:0.8rem; color:var(--gold)">OR UTILISÉ : <span id="goldCount">0</span>/15</div>
         </div>
 
         <div class="palette" id="palette"></div>
-        <button class="btn" onclick="saveArt()" id="saveBtn" style="background:var(--gold); color:#000; width:220px; font-weight:bold;">PUBLIER L'ŒUVRE</button>
+        <button class="btn" id="publishBtn" onclick="saveArt()" style="background:var(--gold); color:#000; width:250px; font-weight:bold; margin-top:10px;">PUBLIER L'ŒUVRE</button>
     </div>
 
     <div class="section-title">GALERIE DES SAISONS</div>
-    <div id="gallery">Chargement de la galerie...</div>
+    <div id="gallery">Vérification de la galerie...</div>
 
     <script>
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
-        const viewport = document.getElementById("viewport");
         const container = document.getElementById("canvas-container");
         const grid = document.getElementById("grid-overlay");
+        const viewport = document.getElementById("viewport");
         
         let pSize = 15, cW = 600, cH = 600, scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", isDown = false, goldPixels = 0;
-        let myWorks = JSON.parse(localStorage.getItem('gp_works') || "[]");
 
+        // Note : Changement de format avec conservation du dessin (Photo avant redimensionnement)
         function changeFormat(w, h, label) {
             const temp = document.createElement('canvas');
             temp.width = canvas.width; temp.height = canvas.height;
             temp.getContext('2d').drawImage(canvas, 0, 0);
+            
             cW = w; cH = h;
             canvas.width = w; canvas.height = h;
-            viewport.style.width = w + "px"; viewport.style.height = h + "px";
-            container.style.width = w + "px"; container.style.height = h + "px";
-            grid.style.width = w + "px"; grid.style.height = h + "px";
+            viewport.style.width = Math.min(window.innerWidth * 0.95, w) + "px";
+            viewport.style.height = (Math.min(window.innerWidth * 0.95, w) * (h/w)) + "px";
+            
             ctx.fillStyle = "#081422"; ctx.fillRect(0, 0, w, h);
             ctx.drawImage(temp, (w - temp.width) / 2, (h - temp.height) / 2);
+            
             document.getElementById('fmt11').classList.toggle('active', label === '1:1');
             document.getElementById('fmt169').classList.toggle('active', label === '16:9');
             resetView();
@@ -105,25 +116,40 @@
         });
 
         function selectGold() { color = "#ffaa00"; setMode('draw'); document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active')); document.getElementById('goldBtn').classList.add('active'); }
+        
         function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
-        function resetView() { scale = window.innerWidth < cW ? (window.innerWidth * 0.9 / cW) : 1; pos = {x: 0, y: 0}; updateTransform(); }
+        
+        function resetView() { 
+            const vRect = viewport.getBoundingClientRect();
+            scale = vRect.width / cW; 
+            pos = { x: 0, y: 0 }; 
+            updateTransform(); 
+        }
 
         function handleAction(e) {
             if(!isDown) return;
             const ev = e.touches ? e.touches[0] : e;
             const rect = canvas.getBoundingClientRect();
-            if(mode === 'move') { pos.x += ev.movementX || 0; pos.y += ev.movementY || 0; updateTransform(); return; }
+            if(mode === 'move') { pos.x += (ev.movementX || 0); pos.y += (ev.movementY || 0); updateTransform(); return; }
+            
             const x = Math.floor((ev.clientX - rect.left) / (pSize * scale)) * pSize;
             const y = Math.floor((ev.clientY - rect.top) / (pSize * scale)) * pSize;
             if (x < 0 || x >= cW || y < 0 || y >= cH) return;
+
             const pixelData = ctx.getImageData(x + 1, y + 1, 1, 1).data;
             const isTargetGold = pixelData[0] === 255 && pixelData[1] === 170 && pixelData[2] === 0;
-            if(mode === 'draw' && color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
-            if(mode === 'erase' && isTargetGold) goldPixels--;
-            if(mode === 'draw' && color === "#ffaa00" && !isTargetGold) goldPixels++;
-            if(mode === 'draw' && color !== "#ffaa00" && isTargetGold) goldPixels--;
-            ctx.fillStyle = mode === 'erase' ? "#081422" : color;
-            ctx.fillRect(x, y, pSize, pSize);
+
+            if(mode === 'draw') {
+                if(color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
+                if(color === "#ffaa00" && !isTargetGold) goldPixels++;
+                if(color !== "#ffaa00" && isTargetGold) goldPixels--;
+                ctx.fillStyle = color; ctx.fillRect(x, y, pSize, pSize);
+            } else if(mode === 'erase') {
+                if(isTargetGold) goldPixels--;
+                ctx.fillStyle = "#081422"; ctx.fillRect(0, 0, 0, 0); // Note : Technique pour gommer sans vider
+                ctx.clearRect(x, y, pSize, pSize);
+                ctx.fillStyle = "#081422"; ctx.fillRect(x, y, pSize, pSize);
+            }
             document.getElementById("goldCount").innerText = Math.max(0, goldPixels);
         }
 
@@ -139,53 +165,44 @@
             document.getElementById("moveBtn").classList.toggle("active", m === 'move');
         }
 
-        // Note : CHARGEMENT BLINDÉ DE LA GALERIE
+        // Note : CHARGEMENT FORCÉ DE LA GALERIE
         async function loadGallery() {
+            const gal = document.getElementById("gallery");
             try {
-                const res = await fetch('/api/gallery?t=' + Date.now()); // Note : Empêche le cache navigateur
+                const res = await fetch('/api/gallery?cache=' + Date.now());
                 const data = await res.json();
-                const gal = document.getElementById("gallery");
-                if (data.length === 0) { gal.innerHTML = "Aucune œuvre pour le moment."; return; }
+                if(!data || data.length === 0) { gal.innerHTML = "Aucune œuvre publiée pour le moment."; return; }
                 gal.innerHTML = "";
                 data.reverse().forEach(art => {
-                    const card = document.createElement('div');
-                    card.className = "art-card";
-                    card.innerHTML = `<img src="${art.img}"><div class="card-info"><span style="font-size:0.7rem; color:var(--gold)">@${art.name}</span></div>`;
-                    gal.appendChild(card);
+                    gal.innerHTML += `<div class="art-card"><img src="${art.img}"><p style="color:var(--gold); font-size:0.8rem;">@${art.name}</p></div>`;
                 });
-            } catch (e) { console.error("Erreur galerie:", e); }
+            } catch (e) { gal.innerHTML = "Erreur de connexion à la galerie."; }
         }
 
-        // Note : SAUVEGARDE ET RECHARGEMENT FORCÉ
         async function saveArt() {
-            const name = prompt("Pseudo :"); if(!name) return;
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "ENVOI EN COURS...";
-            btn.disabled = true;
-
+            const name = prompt("Ton pseudo d'artiste :"); if(!name) return;
+            const btn = document.getElementById('publishBtn');
+            btn.innerText = "PUBLICATION..."; btn.disabled = true;
+            
             try {
                 const res = await fetch('/api/save', { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ name, img: canvas.toDataURL() }) 
+                    body: JSON.stringify({ name, img: canvas.toDataURL("image/png") }) 
                 });
-                if(res.ok) {
-                    const result = await res.json();
-                    myWorks.push(result.id);
-                    localStorage.setItem('gp_works', JSON.stringify(myWorks));
-                    console.log("Sauvegarde réussie, rafraîchissement...");
-                    await loadGallery(); // Note : On attend que la galerie soit chargée
-                    alert("Œuvre publiée avec succès !");
+                if(res.ok) { 
+                    alert("Bravo ! Ton œuvre est dans la galerie."); 
+                    await loadGallery(); 
                 }
-            } catch (e) { alert("Erreur lors de l'envoi."); }
+            } catch (e) { alert("Petit souci technique lors de l'envoi..."); }
             
-            btn.innerText = "PUBLIER L'ŒUVRE";
-            btn.disabled = false;
+            btn.innerText = "PUBLIER L'ŒUVRE"; btn.disabled = false;
         }
 
-        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
-        grid.style.backgroundImage = "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)";
+        // Note : Initialisation
         ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
+        grid.style.backgroundImage = "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)";
+        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
         resetView(); loadGallery();
     </script>
 </body>
