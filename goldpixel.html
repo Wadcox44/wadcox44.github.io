@@ -8,9 +8,7 @@
     <style>
         :root {
             --gold: #ffaa00;
-            --matte: #5A7A94;
             --bg: #050b14;
-            --border-gold: rgba(255, 170, 0, 0.4);
         }
 
         body {
@@ -21,182 +19,131 @@
             flex-direction: column;
             align-items: center;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
             color: var(--gold);
             text-shadow: 0 0 10px var(--gold);
-            margin-bottom: 5px;
-            text-transform: uppercase;
+            margin: 10px 0;
+            font-size: 1.8rem;
         }
 
-        .subtitle {
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-            color: #ccc;
-        }
-
-        /* --- ZONE DU CANEVAS --- */
         #canvas-container {
-            position: relative;
             background: #081422;
             border: 2px solid var(--gold);
-            box-shadow: 0 0 20px rgba(255, 170, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
             padding: 5px;
             border-radius: 4px;
+            max-width: 95vw;
         }
 
         canvas {
             display: block;
-            background: #081422; /* Note : Fond sombre forcé */
+            background: #081422;
             cursor: crosshair;
             touch-action: none;
         }
 
-        /* --- CONTRÔLES ET PALETTES --- */
-        .controls {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .palette {
-            display: flex;
-            gap: 20px;
+        /* --- NOUVELLE GRILLE DE COULEURS --- */
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr); /* 10 colonnes pour 20+ couleurs */
+            gap: 8px;
             background: rgba(255, 255, 255, 0.05);
-            padding: 12px 25px;
-            border-radius: 50px;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
             border: 1px solid rgba(255, 170, 0, 0.2);
         }
 
         .color-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid transparent;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px; /* Carré pour un look plus technique */
+            border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.2s;
         }
 
+        .color-btn:hover { transform: scale(1.15); z-index: 2; }
         .color-btn.active {
-            border-color: #fff;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
             transform: scale(1.2);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-matte { background-color: var(--matte); }
-        .btn-gold { 
-            background-color: var(--gold); 
-            box-shadow: 0 0 10px var(--gold); 
-        }
-
-        /* --- BOUTONS D'ACTION --- */
-        .actions {
-            display: flex;
-            gap: 15px;
-        }
-
+        .actions { display: flex; gap: 10px; margin-bottom: 30px; }
         .btn {
             background: transparent;
             border: 1px solid var(--gold);
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
-            padding: 12px 25px;
+            padding: 10px 15px;
             cursor: pointer;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.7rem;
             border-radius: 4px;
-            transition: all 0.2s;
         }
-
-        .btn:hover {
-            background: var(--gold);
-            color: #000;
-            box-shadow: 0 0 20px var(--gold);
-        }
-
-        .btn-clear {
-            border-color: #444;
-            color: #888;
-        }
-
-        /* --- GALERIE --- */
-        #gallery-title {
-            margin-top: 50px;
-            font-family: 'Orbitron';
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-        }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
 
         #gallery {
-            margin-top: 25px;
             width: 100%;
             max-width: 900px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            padding-bottom: 50px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
         }
-
-        .art-card {
-            background: #0d1e36;
-            border: 1px solid rgba(255,170,0,0.1);
-            padding: 12px;
-            border-radius: 8px;
-            transition: transform 0.3s;
-        }
-
-        .art-card:hover { transform: translateY(-5px); border-color: var(--gold); }
-
-        .art-card img {
-            width: 100%;
-            border-radius: 4px;
-            background: #081422;
-        }
-
-        .art-user {
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: var(--gold);
-            font-weight: bold;
-        }
+        .art-card { background: #0d1e36; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,170,0,0.1); }
+        .art-card img { width: 100%; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <h1>GOLD PIXEL</h1>
-    <div class="subtitle">Palette : <span style="color:var(--matte)">Matte</span> & <span style="color:var(--gold)">Gold</span></div>
 
     <div id="canvas-container">
         <canvas id="canvas" width="500" height="350"></canvas>
     </div>
 
-    <div class="controls">
-        <div class="palette">
-            <div class="color-btn btn-matte active" onclick="setColor('#5A7A94', this)"></div>
-            <div class="color-btn btn-gold" onclick="setColor('#ffaa00', this)"></div>
-        </div>
+    <div class="palette-grid" id="palette"></div>
 
-        <div class="actions">
-            <button class="btn" onclick="saveArt()">SAUVEGARDER (1 Pi)</button>
-            <button class="btn btn-clear" onclick="clearCanvas()">EFFACER</button>
-        </div>
+    <div class="actions">
+        <button class="btn" onclick="saveArt()">SAUVEGARDER (1 Pi)</button>
+        <button class="btn" onclick="clearCanvas()" style="border-color:#444; color:#888;">EFFACER</button>
     </div>
 
-    <div id="gallery-title">GALERIE DES SAISONS</div>
+    <div style="font-family:'Orbitron'; margin-bottom:20px;">GALERIE DES SAISONS</div>
     <div id="gallery"></div>
 
     <script>
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
+        const paletteEl = document.getElementById("palette");
         let currentColor = "#5A7A94";
 
-        // Note : On force le fond sombre dès le départ
+        // --- LISTE DES 20 COULEURS (MATTE, GOLD, ET PLUS) ---
+        const colors = [
+            "#5A7A94", "#ffaa00", "#FFD700", "#FFFFFF", "#000000",
+            "#FF3131", "#FF5E3A", "#FF914D", "#FFBD59", "#CCFF00",
+            "#22FF00", "#00D9FF", "#0088FF", "#5271FF", "#8C52FF",
+            "#FF577F", "#FF66C4", "#CB6CE6", "#808080", "#333333"
+        ];
+
+        // Génération des boutons de couleurs
+        colors.forEach(color => {
+            const btn = document.createElement("div");
+            btn.className = "color-btn";
+            btn.style.backgroundColor = color;
+            if(color === currentColor) btn.classList.add("active");
+            btn.onclick = () => {
+                currentColor = color;
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+            paletteEl.appendChild(btn);
+        });
+
         function initCanvas() {
             ctx.fillStyle = "#081422";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -204,50 +151,47 @@
         initCanvas();
 
         let painting = false;
-
-        function startPosition(e) {
-            painting = true;
-            draw(e);
-        }
-
-        function finishedPosition() {
-            painting = false;
-            ctx.beginPath();
-        }
-
         function draw(e) {
             if (!painting) return;
             ctx.lineWidth = 10;
             ctx.lineCap = "round";
             ctx.strokeStyle = currentColor;
-
             const rect = canvas.getBoundingClientRect();
-            // Gestion souris ou tactile
             const clientX = e.clientX || (e.touches && e.touches[0].clientX);
             const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-            
-            const x = clientX - rect.left;
-            const y = clientY - rect.top;
-
-            ctx.lineTo(x, y);
+            ctx.lineTo(clientX - rect.left, clientY - rect.top);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(x, y);
+            ctx.moveTo(clientX - rect.left, clientY - rect.top);
         }
 
-        canvas.addEventListener("mousedown", startPosition);
-        canvas.addEventListener("mouseup", finishedPosition);
+        canvas.addEventListener("mousedown", () => painting = true);
+        canvas.addEventListener("mouseup", () => { painting = false; ctx.beginPath(); });
         canvas.addEventListener("mousemove", draw);
-        
-        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); startPosition(e.touches[0]); });
-        canvas.addEventListener("touchend", finishedPosition);
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); painting = true; draw(e.touches[0]); });
+        canvas.addEventListener("touchend", () => { painting = false; ctx.beginPath(); });
         canvas.addEventListener("touchmove", (e) => { e.preventDefault(); draw(e.touches[0]); });
 
-        function setColor(color, el) {
-            currentColor = color;
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-            el.classList.add('active');
+        function clearCanvas() { if(confirm("Effacer ?")) initCanvas(); }
+
+        async function loadGallery() {
+            const res = await fetch('/api/gallery');
+            const data = await res.json();
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = "";
+            data.reverse().forEach(art => {
+                gallery.innerHTML += `<div class="art-card"><img src="${art.img}"><div style="color:var(--gold); font-size:0.8rem; margin-top:5px;">@${art.name}</div></div>`;
+            });
         }
 
-        function clearCanvas() {
-            if(confirm("Effacer tout le canevas ?"))
+        async function saveArt() {
+            let name = prompt("Pseudo :");
+            if(!name) return;
+            await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, img: canvas.toDataURL() })
+            });
+            loadGallery();
+        }
+        window.onload = loadGallery;
