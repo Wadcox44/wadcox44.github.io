@@ -1,13 +1,13 @@
 {
-  "name": "gold-pixel-portal", // Le nom de ton projet passionné
-  "version": "1.0.0", // La version de départ
-  "description": "Portail JeuxVideo.Pi et jeu Gold Pixel", // Ce que fait ton projet
-  "main": "server.js", // Le fichier principal que Render doit lire
+  "name": "gold-pixel-portal",
+  "version": "1.0.0",
+  "description": "Portail JeuxVideo.Pi et jeu Gold Pixel",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js" // La commande pour démarrer le moteur
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2", // La pièce manquante pour ton serveur !
-    "axios": "^1.6.0" // On garde axios pour tes futures requêtes API
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
   }
 }
