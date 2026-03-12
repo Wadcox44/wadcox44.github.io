@@ -6,212 +6,203 @@
     <title>GOLD PIXEL - Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffaa00; --bg: #050b14; --cell: #081422; }
+        :root { --gold: #ffaa00; --bg: #050b14; --red: #ff3131; }
         body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; touch-action: none; }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 10px 0; font-size: 1.5rem; }
-
-        /* Container avec masque pour le zoom */
-        #viewport {
-            width: 90vw;
-            height: 60vh;
-            max-width: 500px;
-            max-height: 500px;
-            border: 2px solid var(--gold);
-            overflow: hidden;
-            position: relative;
-            background: #000;
-            cursor: grab;
-            border-radius: 4px;
-        }
-
-        canvas { 
-            image-rendering: pixelated; 
-            background: var(--cell);
-            transform-origin: 0 0; 
-        }
-
-        .interface { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px 0; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; font-size: 1.2rem; }
         
-        .palette-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; }
-        .color-btn { width: 22px; height: 22px; border-radius: 2px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .color-btn.active { border: 2px solid #fff; box-shadow: 0 0 5px #fff; }
+        /* Note : Le Viewport avec la grille pour voir les pixels vides */
+        #viewport { 
+            width: 600px; height: 600px; max-width: 95vw; 
+            border: 2px solid var(--gold); background: #000; 
+            position: relative; overflow: hidden; border-radius: 4px;
+        }
+        #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; image-rendering: pixelated; }
+        #grid-overlay { 
+            position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+        }
+        canvas { background: #081422; display: block; }
 
-        .controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; }
+        .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .format-bar { display: flex; gap: 8px; margin-bottom: 5px; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
         .btn.active { background: var(--gold); color: #000; }
+        .btn-del { border-color: var(--red); color: var(--red); font-size: 0.5rem; padding: 4px; width: 100%; margin-top: 5px; }
         
-        .zoom-info { font-size: 0.7rem; color: var(--gold); font-family: 'Orbitron'; margin-bottom: 5px; }
+        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid var(--gold); }
+        .gold-btn { width: 30px; height: 30px; background: var(--gold); border: 2px solid #fff; cursor: pointer; border-radius: 4px; position: relative; }
+        .gold-btn.active::after { content: '✓'; position: absolute; color: white; left: 7px; top: 2px; font-weight: bold; }
 
-        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; width: 90%; margin-top: 20px; }
-        .art-card { background: #0d1e36; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.1); text-align: center; }
-        .art-card img { width: 100%; image-rendering: pixelated; }
+        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .color-btn { width: 25px; height: 25px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .color-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 8px #fff; }
+
+        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 30px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 5px; }
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 95%; margin-top: 20px; padding-bottom: 80px; }
+        .art-card { background: #0d1e36; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.2); }
+        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; }
     </style>
 </head>
 <body>
 
-    <h1>GOLD PIXEL</h1>
-    <div class="zoom-info">ZOOM: <span id="zoomLevel">100</span>% (Molette ou Pincez)</div>
+    <h1>GOLD PIXEL STUDIO</h1>
 
-    <div id="viewport">
-        <canvas id="canvas" width="600" height="600"></canvas>
+    <div class="format-bar">
+        <button id="fmt11" class="btn active" onclick="changeFormat(600, 600, '1:1')">FORMAT 1:1</button>
+        <button id="fmt169" class="btn" onclick="changeFormat(800, 450, '16:9')">FORMAT 16:9</button>
     </div>
-
-    <div class="interface">
-        <div class="palette-grid" id="palette"></div>
-        
-        <div class="controls">
-            <button id="drawTool" class="btn active" onclick="setTool('draw')">CRAYON</button>
-            <button id="moveTool" class="btn" onclick="setTool('move')">DÉPLACER</button>
-            <button id="eraserTool" class="btn" onclick="setTool('eraser')">GOMME</button>
-            <button class="btn" onclick="resetView()">RECENTRER</button>
-            <button class="btn" onclick="saveArt()" style="background: var(--gold); color: black; border:none;">SAUVEGARDER</button>
+    
+    <div id="viewport">
+        <div id="canvas-container">
+            <canvas id="canvas" width="600" height="600"></canvas>
+            <div id="grid-overlay"></div>
         </div>
     </div>
 
+    <div class="ui">
+        <div class="tool-bar">
+            <button id="drawBtn" class="btn active" onclick="setMode('draw')">PIXEL</button>
+            <button id="eraseBtn" class="btn" onclick="setMode('erase')">GOMME</button>
+            <button id="moveBtn" class="btn" onclick="setMode('move')">DÉPLACER</button>
+            <button class="btn" onclick="resetView()">RECENTRER</button>
+        </div>
+
+        <div class="gold-box">
+            <div id="goldBtn" class="gold-btn" onclick="selectGold()"></div>
+            <div style="font-family:Orbitron; font-size:0.7rem; color:var(--gold)">OR UTILISÉ : <span id="goldCount">0</span>/15</div>
+        </div>
+
+        <div class="palette" id="palette"></div>
+        <button class="btn" id="publishBtn" onclick="saveArt()" style="background:var(--gold); color:#000; width:260px; font-weight:bold; margin-top:5px;">PUBLIER DANS LA GALERIE</button>
+    </div>
+
+    <div class="section-title">GALERIE DES SAISONS</div>
     <div id="gallery"></div>
 
     <script>
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
+        const container = document.getElementById("canvas-container");
+        const grid = document.getElementById("grid-overlay");
         const viewport = document.getElementById("viewport");
-        const zoomDisplay = document.getElementById("zoomLevel");
         
-        const pixelSize = 15;
-        let scale = 1;
-        let offset = { x: 0, y: 0 };
-        let isPanning = false;
-        let startPoint = { x: 0, y: 0 };
-        let currentTool = 'draw';
-        let currentColor = "#5A7A94";
-        let lastColor = "#5A7A94";
+        let pSize = 15, cW = 600, cH = 600, scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", isDown = false, goldPixels = 0;
+        let myUploads = JSON.parse(localStorage.getItem('gp_my_art') || "[]");
 
-        // --- GÉNÉRATION COULEURS ---
-        const colors = ["#5A7A94", "#ffaa00", "#FFD700", "#FFFFFF", "#000000", "#FF3131", "#FF5E3A", "#FF914D", "#FFBD59", "#CCFF00", "#22FF00", "#00D9FF", "#0088FF", "#5271FF", "#8C52FF", "#FF577F", "#FF66C4", "#CB6CE6", "#808080", "#333333"];
-        
-        colors.forEach(color => {
-            const btn = document.createElement("div");
-            btn.className = "color-btn";
-            btn.style.backgroundColor = color;
-            if(color === currentColor) btn.classList.add("active");
-            btn.onclick = () => {
-                setTool('draw');
-                currentColor = color;
-                lastColor = color;
-                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            };
-            document.getElementById("palette").appendChild(btn);
+        // Note : GESTION DES FORMATS 1:1 et 16:9
+        function changeFormat(w, h, label) {
+            const temp = document.createElement('canvas');
+            temp.width = canvas.width; temp.height = canvas.height;
+            temp.getContext('2d').drawImage(canvas, 0, 0);
+            cW = w; cH = h;
+            canvas.width = w; canvas.height = h;
+            grid.style.backgroundSize = `${pSize}px ${pSize}px`;
+            ctx.fillStyle = "#081422"; ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(temp, (w - temp.width) / 2, (h - temp.height) / 2);
+            document.querySelectorAll('.format-bar .btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(label === '1:1' ? 'fmt11' : 'fmt169').classList.add('active');
+            resetView();
+        }
+
+        const colors = ["#050b14","#333333","#5A7A94","#808080","#AAAAAA","#CCCCCC","#EEEEEE","#FFFFFF",
+                        "#4D3900","#806000","#B38600","#E6AC00","#FFD700","#FFEA00","#FFFF80","#FFFFCC",
+                        "#440000","#880000","#FF3131","#FF5E3A","#FF914D","#FFBD59","#FF66C4","#FFBDD4",
+                        "#003300","#22FF00","#CCFF00","#00D9FF","#0088FF","#5271FF","#8C52FF","#CB6CE6"];
+
+        colors.forEach(c => {
+            const b = document.createElement("div"); b.className = "color-btn"; b.style.background = c;
+            b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.color-btn, .gold-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
+            document.getElementById("palette").appendChild(b);
         });
 
-        // --- SYSTÈME DE GRILLE ET RENDU ---
-        function drawCanvas() {
-            canvas.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(${scale})`;
-            zoomDisplay.innerText = Math.round(scale * 100);
-        }
+        function selectGold() { color = "#ffaa00"; setMode('draw'); document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active')); document.getElementById('goldBtn').classList.add('active'); }
+        function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
+        function resetView() { scale = viewport.clientWidth / cW; pos = { x: 0, y: 0 }; updateTransform(); }
 
-        function initCanvas() {
-            ctx.fillStyle = "#081422";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Dessin de la grille initiale
-            ctx.strokeStyle = "rgba(255,255,255,0.05)";
-            ctx.lineWidth = 0.5;
-            for(let x=0; x<=canvas.width; x+=pixelSize) {
-                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
-            }
-            for(let y=0; y<=canvas.height; y+=pixelSize) {
-                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
-            }
-        }
-
-        // --- LOGIQUE ZOOM ET PAN ---
-        viewport.onwheel = (e) => {
-            e.preventDefault();
-            const zoomSpeed = 0.1;
-            const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
-            scale = Math.min(Math.max(0.5, scale + delta), 5);
-            drawCanvas();
-        };
-
-        function setTool(tool) {
-            currentTool = tool;
-            document.getElementById("drawTool").classList.toggle("active", tool === 'draw');
-            document.getElementById("moveTool").classList.toggle("active", tool === 'move');
-            document.getElementById("eraserTool").classList.toggle("active", tool === 'eraser');
-            viewport.style.cursor = tool === 'move' ? 'grabbing' : 'crosshair';
-            if(tool === 'eraser') currentColor = "#081422";
-            else if(tool === 'draw') currentColor = lastColor;
-        }
-
-        function handlePointerDown(e) {
-            if (currentTool === 'move' || e.button === 1) {
-                isPanning = true;
-                startPoint = { x: e.clientX - offset.x, y: e.clientY - offset.y };
-            } else {
-                paint(e);
-                canvas.onpointermove = paint;
-            }
-        }
-
-        function paint(e) {
-            if (currentTool === 'move') return;
+        function handleAction(e) {
+            if(!isDown) return;
+            const ev = e.touches ? e.touches[0] : e;
             const rect = canvas.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / (pixelSize * scale)) * pixelSize;
-            const y = Math.floor((e.clientY - rect.top) / (pixelSize * scale)) * pixelSize;
+            if(mode === 'move') { pos.x += (ev.movementX || 0); pos.y += (ev.movementY || 0); updateTransform(); return; }
             
-            ctx.fillStyle = currentColor;
-            ctx.fillRect(x, y, pixelSize, pixelSize);
-            
-            // Redessiner la bordure du pixel pour garder la grille propre
-            ctx.strokeStyle = "rgba(255,255,255,0.05)";
-            ctx.strokeRect(x, y, pixelSize, pixelSize);
+            const x = Math.floor((ev.clientX - rect.left) / (pSize * scale)) * pSize;
+            const y = Math.floor((ev.clientY - rect.top) / (pSize * scale)) * pSize;
+            if (x < 0 || x >= cW || y < 0 || y >= cH) return;
+
+            const pixelData = ctx.getImageData(x + 1, y + 1, 1, 1).data;
+            const isTargetGold = pixelData[0] === 255 && pixelData[1] === 170 && pixelData[2] === 0;
+
+            if(mode === 'draw') {
+                // Note : LIMITE DES 15 PIXELS D'OR
+                if(color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
+                if(color === "#ffaa00" && !isTargetGold) goldPixels++;
+                if(color !== "#ffaa00" && isTargetGold) goldPixels--;
+                ctx.fillStyle = color; ctx.fillRect(x, y, pSize, pSize);
+            } else if(mode === 'erase') {
+                if(isTargetGold) goldPixels--;
+                ctx.fillStyle = "#081422"; ctx.fillRect(x, y, pSize, pSize);
+            }
+            document.getElementById("goldCount").innerText = Math.max(0, goldPixels);
         }
 
-        viewport.onpointerdown = handlePointerDown;
-        window.onpointerup = () => { 
-            isPanning = false; 
-            canvas.onpointermove = null; 
-        };
-        
-        window.onpointermove = (e) => {
-            if (!isPanning) return;
-            offset.x = e.clientX - startPoint.x;
-            offset.y = e.clientY - startPoint.y;
-            drawCanvas();
-        };
+        canvas.onmousedown = (e) => { isDown = true; handleAction(e); };
+        window.onmousemove = handleAction; window.onmouseup = () => isDown = false;
+        canvas.ontouchstart = (e) => { isDown = true; handleAction(e); };
+        canvas.ontouchmove = handleAction; canvas.ontouchend = () => isDown = false;
 
-        function resetView() {
-            scale = 1;
-            offset = { x: 0, y: 0 };
-            drawCanvas();
-        }
-
-        // --- API ---
-        async function saveArt() {
-            let name = prompt("Pseudo du Pionnier :");
-            if(!name) return;
-            const imgData = canvas.toDataURL();
-            await fetch('/api/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, img: imgData })
-            });
-            loadGallery();
+        function setMode(m) {
+            mode = m;
+            document.getElementById("drawBtn").classList.toggle("active", m === 'draw');
+            document.getElementById("eraseBtn").classList.toggle("active", m === 'erase');
+            document.getElementById("moveBtn").classList.toggle("active", m === 'move');
         }
 
         async function loadGallery() {
-            const res = await fetch('/api/gallery');
+            const res = await fetch('/api/gallery?t=' + Date.now());
             const data = await res.json();
-            const gallery = document.getElementById("gallery");
-            gallery.innerHTML = "";
+            const gal = document.getElementById("gallery");
+            gal.innerHTML = "";
             data.reverse().forEach(art => {
-                gallery.innerHTML += `<div class="art-card"><img src="${art.img}"><div style="color:var(--gold); font-size:0.7rem; margin-top:5px;">@${art.name}</div></div>`;
+                const isMine = myUploads.includes(art.id);
+                gal.innerHTML += `
+                    <div class="art-card">
+                        <img src="${art.img}">
+                        <p style="color:var(--gold); font-size:0.6rem; margin:5px 0;">@${art.name}</p>
+                        ${isMine ? `<button class="btn btn-del" onclick="deleteArt('${art.id}')">SUPPRIMER</button>` : ''}
+                    </div>`;
             });
         }
 
-        initCanvas();
-        drawCanvas();
-        loadGallery();
+        async function saveArt() {
+            const name = prompt("Pseudo :"); if(!name) return;
+            const btn = document.getElementById('publishBtn');
+            btn.innerText = "PUBLICATION..."; btn.disabled = true;
+            const img = canvas.toDataURL("image/jpeg", 0.8);
+            const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, img }) });
+            if(res.ok) {
+                const data = await res.json();
+                myUploads.push(data.id);
+                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
+                await loadGallery();
+                alert("Œuvre publiée !");
+            }
+            btn.innerText = "PUBLIER DANS LA GALERIE"; btn.disabled = false;
+        }
+
+        async function deleteArt(id) {
+            if(!confirm("Supprimer définitivement ?")) return;
+            const res = await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+            if(res.ok) {
+                myUploads = myUploads.filter(i => i !== id);
+                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
+                loadGallery();
+            }
+        }
+
+        ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
+        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
+        resetView(); loadGallery();
     </script>
 </body>
 </html>
