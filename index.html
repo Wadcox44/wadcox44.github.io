@@ -1,81 +1,192 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Gold Pixel — JeuxVideo.Pi</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <style>
-    :root { --bg:#0b0f14; --panel:#121926; --text:#e7eef8; --muted:#9fb0c5; --stroke:#223047; --primary:#2f6fed; --success:#00ff00; }
-    body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display:flex; height:100vh; overflow: hidden; }
-    .left { width: 320px; padding:20px; border-right:1px solid var(--stroke); background: var(--panel); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
-    .card { border:1px solid var(--stroke); background: rgba(255,255,255,0.03); border-radius:12px; padding:15px; }
-    .label { font-size: 11px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px; }
-    .swatches { display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; }
-    .swatch { aspect-ratio: 1/1; border-radius:6px; cursor:pointer; border: 2px solid rgba(255,255,255,0.1); transition: transform 0.1s; }
-    .swatch:hover { transform: scale(1.05); }
-    .swatch.active { border-color: white; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-    .status { padding:12px; border-radius:8px; text-align: center; font-weight: bold; border: 1px solid var(--success); color: var(--success); background: rgba(0, 255, 0, 0.05); }
-    .main { flex:1; position:relative; background:#0a0f16; display:flex; align-items:center; justify-content:center; }
-    canvas { background: #161b22; border: 1px solid var(--stroke); cursor: crosshair; image-rendering: pixelated; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEUXVIDEO.PI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        :root { 
+            --neon-blue: #00f3ff; 
+            --neon-gold: #ffaa00; 
+            --bg: #050b14; 
+            --width-max: 500px; 
+        }
+        
+        body { 
+            margin: 0; padding: 0; background: var(--bg); color: white; 
+            font-family: 'Rajdhani', sans-serif; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* BARRE DE DON FIXE */
+        .top-donation-bar {
+            position: sticky; top: 0; width: 100%; z-index: 1000;
+            background: rgba(10, 20, 35, 0.95); border-bottom: 1px solid var(--neon-blue);
+            backdrop-filter: blur(8px); display: flex; justify-content: center;
+            align-items: center; padding: 10px 0; gap: 15px;
+        }
+        .bar-label { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-don-min { 
+            background: transparent; border: 1px solid var(--neon-blue); color: white;
+            font-family: 'Orbitron'; font-size: 0.65rem; padding: 5px 15px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-don-min:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
+
+        /* HEADER COMPACT */
+        header { padding: 15px 0 5px 0; text-align: center; width: 100%; }
+        h1 { font-family: 'Orbitron'; font-size: 1.8rem; margin: 0; text-shadow: 0 0 15px var(--neon-blue); }
+        .pi-text { color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-gold); }
+
+        section {
+            width: 90%; max-width: var(--width-max); padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .category-title {
+            font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-blue);
+            border-left: 3px solid var(--neon-gold); padding-left: 10px;
+            margin-bottom: 15px; text-transform: uppercase;
+        }
+
+        /* MAIN PROJECT - ZÉRO CONTOUR BLANC */
+        .hero-card {
+            width: 100%; height: 230px; background: #000; 
+            border: 2px solid rgba(255, 170, 0, 0.4); /* Contour Gold de base voyant mais pas trop */
+            border-radius: 12px; overflow: hidden; cursor: pointer; position: relative;
+            display: flex; align-items: center; justify-content: center; transition: 0.5s;
+        }
+        /* Fix contour blanc : scale légèrement supérieur et background noir */
+        .hero-card img { 
+            width: 101%; height: 101%; object-fit: cover; 
+            filter: brightness(0.6); transition: 0.8s ease; 
+            display: block; outline: none; border: none;
+        }
+        .hero-overlay-text { 
+            position: absolute; font-family: 'Orbitron'; font-size: 2.2rem; 
+            color: var(--neon-gold); letter-spacing: 5px; font-weight: 900; 
+            transition: 0.5s ease; text-align: center; pointer-events: none; 
+        }
+
+        .hero-card:hover { border-color: var(--neon-gold); box-shadow: 0 0 35px rgba(255, 170, 0, 0.5); }
+        .hero-card:hover img { transform: scale(1.1); filter: brightness(0.85); }
+        .hero-card:hover .hero-overlay-text { letter-spacing: 12px; text-shadow: 0 0 30px var(--neon-gold); }
+
+        /* DEVELOPER SHOWCASE & SLOTS */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 20px; }
+        .card {
+            background: rgba(16, 33, 62, 0.4); border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 10px; height: 130px; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s;
+        }
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: 0.8s; }
+        .card h3 { position: absolute; bottom: 8px; margin: 0; font-size: 0.55rem; font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; }
+
+        /* Slots avec Croix Jaune */
+        .card-dev-slot { border: 1px dashed rgba(255, 170, 0, 0.5); background: rgba(255, 170, 0, 0.02); }
+        .dev-icon { font-size: 1.8rem; color: var(--neon-gold); margin-bottom: 5px; transition: 0.5s; }
+        .dev-text { font-size: 0.5rem; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+
+        .card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
+        .card-dev-slot:hover .dev-icon { transform: scale(1.2) rotate(90deg); color: var(--neon-blue); }
+
+        /* OFFER SCANNING */
+        @keyframes scan { 0% { left: -100%; } 30% { left: 100%; } 100% { left: 100%; } }
+        .offer-container {
+            width: 100%; background: rgba(0, 243, 255, 0.03);
+            border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 12px;
+            padding: 20px 0; text-align: center; position: relative; overflow: hidden;
+        }
+        .offer-container::before { content: ""; position: absolute; top: 0; width: 100%; height: 100%; background: linear-gradient(120deg, transparent, rgba(0, 243, 255, 0.1), transparent); animation: scan 4s infinite linear; }
+        .offer-main-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin-bottom: 15px; letter-spacing: 1px; }
+        .offer-grid { display: flex; justify-content: space-around; position: relative; }
+        .offer-point strong { display: block; font-size: 0.7rem; font-family: 'Orbitron'; color: white; margin-bottom: 4px; }
+        .offer-point span { font-size: 0.55rem; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+
+        /* FORMULAIRE DE CONTACT RÉCUPÉRÉ */
+        .contact-title { font-family: 'Orbitron'; color: var(--neon-blue); font-size: 0.9rem; margin: 20px 0 15px 0; text-align: center; }
+        form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { 
+            background: #0f1a2e; border: 1px solid #333; color: white; padding: 12px; 
+            border-radius: 4px; font-family: 'Rajdhani'; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--neon-blue); }
+        .btn-send { 
+            background: var(--neon-blue); border: none; padding: 15px; font-weight: bold; 
+            border-radius: 4px; font-family: 'Orbitron'; cursor: pointer; color: #000; 
+            margin-top: 10px; transition: 0.3s; 
+        }
+        .btn-send:hover { box-shadow: 0 0 20px var(--neon-blue); transform: scale(1.02); }
+
+        footer { font-size: 0.7rem; color: #444; padding: 40px 0; text-align: center; }
+    </style>
 </head>
 <body>
-  <aside class="left">
-    <h1>Gold Pixel</h1>
-    <div class="card">
-      <div class="label">Pack Actif</div>
-      <div style="background:var(--primary); padding:10px; border-radius:8px; text-align:center; font-weight: 600;">Pack Essentiel (60s)</div>
+
+    <div class="top-donation-bar">
+        <span class="bar-label">Support the Project:</span>
+        <button class="btn-don-min">1 Pi</button>
+        <button class="btn-don-min">10 Pi</button>
+        <button class="btn-don-min">Custom</button>
     </div>
-    <div class="card">
-      <div class="label">Couleurs</div>
-      <div id="palette" class="swatches"></div>
-    </div>
-    <div class="status">✅ Connecté</div>
-  </aside>
-  <main class="main">
-    <canvas id="grille" width="512" height="512"></canvas>
-  </main>
-<script>
-  const socket = io("http://localhost:3000", { transports: ['websocket'] });
-  const canvas = document.getElementById("grille");
-  const ctx = canvas.getContext("2d");
-  let selectedColor = "#FF0000";
-  const couleurs = ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FFA500", "#FF00FF", "#00FFFF", "#8B4513", "#808080", "#FFC0CB"];
 
-  // Palette
-  const paletteDiv = document.getElementById("palette");
-  couleurs.forEach(color => {
-    const div = document.createElement("div");
-    div.className = "swatch";
-    div.style.background = color;
-    if(color === selectedColor) div.classList.add("active");
-    div.onclick = () => {
-      selectedColor = color;
-      document.querySelectorAll(".swatch").forEach(s => s.classList.remove("active"));
-      div.classList.add("active");
-    };
-    paletteDiv.appendChild(div);
-  });
+    <header>
+        <h1>JEUXVIDEO<span class="pi-text">.PI</span></h1>
+    </header>
 
-  socket.on('init_canvas', (data) => {
-    for(let i=0; i < data.length / 3; i++) {
-      ctx.fillStyle = `rgb(${data[i*3]}, ${data[i*3+1]}, ${data[i*3+2]})`;
-      ctx.fillRect(i % 512, Math.floor(i / 512), 1, 1);
-    }
-  });
+    <section>
+        <div class="category-title">⭐ Main Project</div>
+        <div class="hero-card" onclick="window.location.href='https://goldpixel.netlify.app/'">
+            <img src="Images/Gold Pixel.png" alt="Gold Pixel">
+            <div class="hero-overlay-text">GOLD PIXEL</div>
+        </div>
+    </section>
 
-  socket.on('pixel_update', ({x, y, color}) => {
-    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-    ctx.fillRect(x, y, 1, 1);
-  });
+    <section>
+        <div class="category-title">🚀 Developer Showcase</div>
+        <div class="game-grid">
+            <div class="card" onclick="window.location.href='2048/index.html'">
+                <img src="Images/miniature 2048.jpg" alt="2048 Neon">
+                <h3>2048 NEON</h3>
+            </div>
+            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
+            </div>
+            <div class="card card-dev-slot" onclick="document.getElementById('contact-form').scrollIntoView();">
+                <div class="dev-icon">✚</div>
+                <div class="dev-text">Available</div>
+                <h3>Deploy Here</h3>
+            </div>
+        </div>
 
-  canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / (rect.width / 512));
-    const y = Math.floor((e.clientY - rect.top) / (rect.height / 512));
-    const r = parseInt(selectedColor.slice(1,3), 16), g = parseInt(selectedColor.slice(3,5), 16), b = parseInt(selectedColor.slice(5,7), 16);
-    socket.emit('claim_pixel', { x, y, color: [r, g, b] });
-  });
-</script>
+        <div class="offer-container">
+            <div class="offer-main-title">DEVELOPER OFFER : NO CHARGE *</div>
+            <div class="offer-grid">
+                <div class="offer-point"><strong>Premium Slot</strong><span>Priority Access</span></div>
+                <div class="offer-point" style="border-left: 1px solid rgba(0, 243, 255, 0.1); border-right: 1px solid rgba(0, 243, 255, 0.1);">
+                    <strong>0 Pi Rent</strong><span>No Monthly Cost</span>
+                </div>
+                <div class="offer-point"><strong>0% Fee</strong><span>On Transactions</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact-form" style="border:none;">
+        <div class="contact-title">CONTACT & DEPLOYMENT</div>
+        <form action="https://formspree.io/f/xwvoaroz" method="POST">
+            <input type="text" name="name" placeholder="Project / Dev Name" required>
+            <input type="email" name="email" placeholder="Contact Email" required>
+            <textarea name="message" rows="4" placeholder="Link to your game or description..." required></textarea>
+            <button type="submit" class="btn-send">SUBMIT MY GAME</button>
+        </form>
+    </section>
+
+    <footer>✔ Certified WadCox | Pi Network Ecosystem</footer>
+
 </body>
 </html>
+
