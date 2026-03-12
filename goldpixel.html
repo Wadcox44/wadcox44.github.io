@@ -124,6 +124,19 @@ Save your creation and it will appear in the public gallery.
 
 </div>
 
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const size = 10;
+let color = "black";
+
+const colors = [
+"black","red","blue","green","yellow",
+"orange","purple","pink","brown","gray"
+];
+
 .color{
 width:28px;
 height:28px;
@@ -138,18 +151,6 @@ transition:transform 0.1s;
 transform:scale(1.2);
 border-color:#d4af37;
 }
-<script>
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const size = 10;
-let color = "black";
-
-const colors = [
-"black","red","blue","green","yellow",
-"orange","purple","pink","brown","gray"
-];
 
 const palette = document.getElementById("palette");
 
