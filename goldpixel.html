@@ -11,7 +11,6 @@
             --matte: #5A7A94;
             --bg: #050b14;
             --border-gold: rgba(255, 170, 0, 0.4);
-            --glow-gold: 0 0 15px rgba(255, 170, 0, 0.2);
         }
 
         body {
@@ -27,69 +26,78 @@
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
             color: var(--gold);
             text-shadow: 0 0 10px var(--gold);
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             text-transform: uppercase;
         }
 
-        /* --- LE CANEVAS --- */
+        .subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            color: #ccc;
+        }
+
+        /* --- ZONE DU CANEVAS --- */
         #canvas-container {
             position: relative;
-            background: #081422; /* Fond sombre pour le canevas */
-            border: 2px solid var(--gold); /* Contour doré */
-            box-shadow: var(--glow-gold);
+            background: #081422;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.15);
             padding: 5px;
             border-radius: 4px;
         }
 
         canvas {
             display: block;
-            background: #081422;
+            background: #081422; /* Note : Fond sombre forcé */
             cursor: crosshair;
+            touch-action: none;
         }
 
-        /* --- PALETTES DE COULEURS --- */
+        /* --- CONTRÔLES ET PALETTES --- */
         .controls {
             margin-top: 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .palette {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 50px;
-            border: 1px solid rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.2);
         }
 
         .color-btn {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: all 0.3s ease;
         }
 
         .color-btn.active {
             border-color: #fff;
             transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
         .btn-matte { background-color: var(--matte); }
-        .btn-gold { background-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .btn-gold { 
+            background-color: var(--gold); 
+            box-shadow: 0 0 10px var(--gold); 
+        }
 
         /* --- BOUTONS D'ACTION --- */
         .actions {
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
         .btn {
@@ -97,20 +105,149 @@
             border: 1px solid var(--gold);
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
-            padding: 10px 20px;
+            padding: 12px 25px;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 0.7rem;
-            transition: all 0.3s;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
         .btn:hover {
             background: var(--gold);
             color: #000;
-            box-shadow: 0 0 15px var(--gold);
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        .btn-clear {
+            border-color: #444;
+            color: #888;
         }
 
         /* --- GALERIE --- */
+        #gallery-title {
+            margin-top: 50px;
+            font-family: 'Orbitron';
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
         #gallery {
-            margin-top: 40px;
+            margin-top: 25px;
             width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        .art-card {
+            background: #0d1e36;
+            border: 1px solid rgba(255,170,0,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+
+        .art-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+
+        .art-card img {
+            width: 100%;
+            border-radius: 4px;
+            background: #081422;
+        }
+
+        .art-user {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GOLD PIXEL</h1>
+    <div class="subtitle">Palette : <span style="color:var(--matte)">Matte</span> & <span style="color:var(--gold)">Gold</span></div>
+
+    <div id="canvas-container">
+        <canvas id="canvas" width="500" height="350"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="palette">
+            <div class="color-btn btn-matte active" onclick="setColor('#5A7A94', this)"></div>
+            <div class="color-btn btn-gold" onclick="setColor('#ffaa00', this)"></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" onclick="saveArt()">SAUVEGARDER (1 Pi)</button>
+            <button class="btn btn-clear" onclick="clearCanvas()">EFFACER</button>
+        </div>
+    </div>
+
+    <div id="gallery-title">GALERIE DES SAISONS</div>
+    <div id="gallery"></div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let currentColor = "#5A7A94";
+
+        // Note : On force le fond sombre dès le départ
+        function initCanvas() {
+            ctx.fillStyle = "#081422";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        initCanvas();
+
+        let painting = false;
+
+        function startPosition(e) {
+            painting = true;
+            draw(e);
+        }
+
+        function finishedPosition() {
+            painting = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+            ctx.lineWidth = 10;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = currentColor;
+
+            const rect = canvas.getBoundingClientRect();
+            // Gestion souris ou tactile
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener("mousedown", startPosition);
+        canvas.addEventListener("mouseup", finishedPosition);
+        canvas.addEventListener("mousemove", draw);
+        
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); startPosition(e.touches[0]); });
+        canvas.addEventListener("touchend", finishedPosition);
+        canvas.addEventListener("touchmove", (e) => { e.preventDefault(); draw(e.touches[0]); });
+
+        function setColor(color, el) {
+            currentColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function clearCanvas() {
+            if(confirm("Effacer tout le canevas ?"))
