@@ -1,70 +1,209 @@
-// --- IMPORTATION DES OUTILS DE BASE ---
-const express = require('express'); // Charge Express pour gérer les routes du portail
-const path = require('path'); // Module pour gérer les chemins de fichiers proprement
-const app = express(); // Initialise l'application web
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOLD PIXEL - Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffaa00; --bg: #050b14; --red: #ff3131; }
+        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; touch-action: none; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; font-size: 1.2rem; }
+        
+        /* Note : Viewport dynamique qui s'ajuste au canevas */
+        #viewport { 
+            width: auto; height: auto; max-width: 95vw; 
+            border: 2px solid var(--gold); background: #000; 
+            position: relative; overflow: hidden; border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        #canvas-container { position: relative; image-rendering: pixelated; display: flex; }
+        #grid-overlay { 
+            position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+        }
+        canvas { background: #081422; display: block; max-width: 100%; height: auto; }
 
-// --- MIDDLEWARES DE CONFIGURATION ---
-// Note : Permet au serveur de lire les données JSON envoyées par le jeu (images, votes)
-// On met une limite à 5mb pour que les dessins haute définition passent sans souci !
-app.use(express.json({ limit: '5mb' })); 
+        .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .format-bar { display: flex; gap: 8px; margin-bottom: 5px; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
+        .btn.active { background: var(--gold); color: #000; }
+        .btn-del { border-color: var(--red); color: var(--red); font-size: 0.5rem; padding: 4px; width: 100%; margin-top: 5px; }
+        
+        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid var(--gold); }
+        .gold-btn { width: 30px; height: 30px; background: var(--gold); border: 2px solid #fff; cursor: pointer; border-radius: 4px; position: relative; }
+        .gold-btn.active::after { content: '✓'; position: absolute; color: white; left: 7px; top: 2px; font-weight: bold; }
 
-// Note : Rend tous les fichiers du dossier racine accessibles (CSS, JS, etc.)
-app.use(express.static(__dirname)); 
+        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .color-btn { width: 25px; height: 25px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .color-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 8px #fff; }
 
-// Note : Force l'accès au dossier Images (avec majuscule) pour tes visuels passionnés
-app.use('/Images', express.static(path.join(__dirname, 'Images')));
+        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 30px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 5px; }
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 95%; margin-top: 20px; padding-bottom: 80px; }
+        .art-card { background: #0d1e36; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.2); }
+        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; }
+    </style>
+</head>
+<body>
 
-// --- BASE DE DONNÉES TEMPORAIRE (Mémoire vive) ---
-// Note : En attendant une vraie DB, on stocke les œuvres de la saison ici
-let galleryData = []; 
+    <h1>GOLD PIXEL STUDIO</h1>
 
-// --- ROUTES DU PORTAIL ---
+    <div class="format-bar">
+        <button id="fmt11" class="btn active" onclick="changeFormat(600, 600, '1:1')">FORMAT 1:1</button>
+        <button id="fmt169" class="btn" onclick="changeFormat(800, 450, '16:9')">FORMAT 16:9</button>
+    </div>
+    
+    <div id="viewport">
+        <div id="canvas-container">
+            <canvas id="canvas" width="600" height="600"></canvas>
+            <div id="grid-overlay"></div>
+        </div>
+    </div>
 
-// Route d'accueil (Index)
-app.get('/', (req, res) => { 
-    res.sendFile(path.join(__dirname, 'index.html')); 
-});
+    <div class="ui">
+        <div class="tool-bar">
+            <button id="drawBtn" class="btn active" onclick="setMode('draw')">PIXEL</button>
+            <button id="eraseBtn" class="btn" onclick="setMode('erase')">GOMME</button>
+            <button id="moveBtn" class="btn" onclick="setMode('move')">DÉPLACER</button>
+            <button class="btn" onclick="resetView()">RECENTRER</button>
+        </div>
 
-// Route spécifique pour Gold Pixel
-app.get('/goldpixel', (req, res) => {
-    res.sendFile(path.join(__dirname, 'goldpixel.html'));
-});
+        <div class="gold-box">
+            <div id="goldBtn" class="gold-btn" onclick="selectGold()"></div>
+            <div style="font-family:Orbitron; font-size:0.7rem; color:var(--gold)">OR UTILISÉ : <span id="goldCount">0</span>/15</div>
+        </div>
 
-// --- API GOLD PIXEL (Le moteur du jeu) ---
+        <div class="palette" id="palette"></div>
+        <button class="btn" id="publishBtn" onclick="saveArt()" style="background:var(--gold); color:#000; width:260px; font-weight:bold; margin-top:5px;">PUBLIER DANS LA GALERIE</button>
+    </div>
 
-// Note : Récupérer toutes les œuvres de la Galerie des Saisons
-app.get('/api/gallery', (req, res) => {
-    res.json(galleryData);
-});
+    <div class="section-title">GALERIE DES SAISONS</div>
+    <div id="gallery"></div>
 
-// Note : Sauvegarder un nouveau dessin (coût : 1 Pi en théorie)
-app.post('/api/save', (req, res) => {
-    const newArt = { 
-        id: Date.now(), 
-        name: req.body.name, 
-        img: req.body.img, 
-        votes: 0 
-    };
-    galleryData.push(newArt);
-    console.log(`🎨 Nouvelle œuvre ajoutée par @${newArt.name}`);
-    res.status(200).send({ message: "Chef-d'œuvre enregistré !" });
-});
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const container = document.getElementById("canvas-container");
+        const grid = document.getElementById("grid-overlay");
+        const viewport = document.getElementById("viewport");
+        
+        let pSize = 15, cW = 600, cH = 600, scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", isDown = false, goldPixels = 0;
+        let myUploads = JSON.parse(localStorage.getItem('gp_my_art') || "[]");
 
-// Note : Système de vote pour les œuvres préférées des Pionniers
-app.post('/api/vote', (req, res) => {
-    const id = req.body.id;
-    const art = galleryData.find(a => a.id === id);
-    if (art) {
-        art.votes++;
-        res.status(200).send({ votes: art.votes });
-    } else {
-        res.status(404).send({ message: "Œuvre non trouvée" });
-    }
-});
+        // Note : On ajuste maintenant le rebord orange dynamiquement
+        function changeFormat(w, h, label) {
+            const temp = document.createElement('canvas');
+            temp.width = canvas.width; temp.height = canvas.height;
+            temp.getContext('2d').drawImage(canvas, 0, 0);
+            cW = w; cH = h;
+            canvas.width = w; canvas.height = h;
+            container.style.width = w + "px";
+            container.style.height = h + "px";
+            grid.style.backgroundSize = `${pSize}px ${pSize}px`;
+            ctx.fillStyle = "#081422"; ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(temp, (w - temp.width) / 2, (h - temp.height) / 2);
+            document.querySelectorAll('.format-bar .btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(label === '1:1' ? 'fmt11' : 'fmt169').classList.add('active');
+            resetView();
+        }
 
-// --- LANCEMENT DU SERVEUR ---
-const PORT = process.env.PORT || 3000; 
-app.listen(PORT, () => { 
-    console.log(`🚀 Le Portail JeuxVideo.Pi est en ligne sur le port ${PORT}`); 
-    console.log(`✨ Prêt pour le Grand Nettoyage du dernier week-end du mois !`);
-});
+        const colors = ["#050b14","#333333","#5A7A94","#808080","#AAAAAA","#CCCCCC","#EEEEEE","#FFFFFF",
+                        "#4D3900","#806000","#B38600","#E6AC00","#FFD700","#FFEA00","#FFFF80","#FFFFCC",
+                        "#440000","#880000","#FF3131","#FF5E3A","#FF914D","#FFBD59","#FF66C4","#FFBDD4",
+                        "#003300","#22FF00","#CCFF00","#00D9FF","#0088FF","#5271FF","#8C52FF","#CB6CE6"];
+
+        colors.forEach(c => {
+            const b = document.createElement("div"); b.className = "color-btn"; b.style.background = c;
+            b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.color-btn, .gold-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
+            document.getElementById("palette").appendChild(b);
+        });
+
+        function selectGold() { color = "#ffaa00"; setMode('draw'); document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active')); document.getElementById('goldBtn').classList.add('active'); }
+        function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
+        
+        function resetView() { 
+            const availableWidth = Math.min(600, window.innerWidth * 0.95);
+            scale = availableWidth / cW; 
+            pos = { x: 0, y: 0 }; 
+            updateTransform(); 
+        }
+
+        function handleAction(e) {
+            if(!isDown) return;
+            const ev = e.touches ? e.touches[0] : e;
+            const rect = canvas.getBoundingClientRect();
+            if(mode === 'move') { pos.x += (ev.movementX || 0); pos.y += (ev.movementY || 0); updateTransform(); return; }
+            const x = Math.floor((ev.clientX - rect.left) / (pSize * scale)) * pSize;
+            const y = Math.floor((ev.clientY - rect.top) / (pSize * scale)) * pSize;
+            if (x < 0 || x >= cW || y < 0 || y >= cH) return;
+            const pixelData = ctx.getImageData(x + 1, y + 1, 1, 1).data;
+            const isTargetGold = pixelData[0] === 255 && pixelData[1] === 170 && pixelData[2] === 0;
+            if(mode === 'draw') {
+                if(color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
+                if(color === "#ffaa00" && !isTargetGold) goldPixels++;
+                if(color !== "#ffaa00" && isTargetGold) goldPixels--;
+                ctx.fillStyle = color; ctx.fillRect(x, y, pSize, pSize);
+            } else if(mode === 'erase') {
+                if(isTargetGold) goldPixels--;
+                ctx.fillStyle = "#081422"; ctx.fillRect(x, y, pSize, pSize);
+            }
+            document.getElementById("goldCount").innerText = Math.max(0, goldPixels);
+        }
+
+        canvas.onmousedown = (e) => { isDown = true; handleAction(e); };
+        window.onmousemove = handleAction; window.onmouseup = () => isDown = false;
+        canvas.ontouchstart = (e) => { isDown = true; handleAction(e); };
+        canvas.ontouchmove = handleAction; canvas.ontouchend = () => isDown = false;
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById("drawBtn").classList.toggle("active", m === 'draw');
+            document.getElementById("eraseBtn").classList.toggle("active", m === 'erase');
+            document.getElementById("moveBtn").classList.toggle("active", m === 'move');
+        }
+
+        async function loadGallery() {
+            const res = await fetch('/api/gallery?t=' + Date.now());
+            const data = await res.json();
+            const gal = document.getElementById("gallery");
+            gal.innerHTML = "";
+            data.reverse().forEach(art => {
+                const isMine = myUploads.includes(art.id);
+                gal.innerHTML += `<div class="art-card"><img src="${art.img}"><p style="color:var(--gold); font-size:0.6rem; margin:5px 0;">@${art.name}</p>${isMine ? `<button class="btn btn-del" onclick="deleteArt('${art.id}')">SUPPRIMER</button>` : ''}</div>`;
+            });
+        }
+
+        async function saveArt() {
+            const name = prompt("Pseudo :"); if(!name) return;
+            const btn = document.getElementById('publishBtn');
+            btn.innerText = "PUBLICATION..."; btn.disabled = true;
+            const img = canvas.toDataURL("image/jpeg", 0.8);
+            const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, img }) });
+            if(res.ok) {
+                const data = await res.json();
+                myUploads.push(data.id);
+                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
+                await loadGallery();
+                alert("Œuvre publiée !");
+            }
+            btn.innerText = "PUBLIER DANS LA GALERIE"; btn.disabled = false;
+        }
+
+        async function deleteArt(id) {
+            if(!confirm("Supprimer définitivement ?")) return;
+            const res = await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+            if(res.ok) {
+                myUploads = myUploads.filter(i => i !== id);
+                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
+                loadGallery();
+            }
+        }
+
+        ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
+        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
+        container.style.width = "600px"; container.style.height = "600px";
+        resetView(); loadGallery();
+    </script>
+</body>
+</html>
