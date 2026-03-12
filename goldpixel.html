@@ -1,84 +1,213 @@
-<style>
-    /* Ajouts styles pour les votes et la galerie */
-    .art-card { position: relative; background: #0d1e36; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,170,0,0.2); }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOLD PIXEL - Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #ffaa00; --bg: #050b14; }
+        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; touch-action: none; overflow-x: hidden; }
+        
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 10px 0; font-size: 1.2rem; }
+
+        /* ZONE DE DESSIN */
+        #work-area { width: 90vw; height: 50vh; border: 2px solid var(--gold); position: relative; overflow: hidden; background: #000; border-radius: 4px; }
+        #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; image-rendering: pixelated; }
+        #grid-overlay { position: absolute; top: 0; left: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); }
+        canvas { background: #081422; display: block; }
+
+        /* INTERFACE */
+        .ui { width: 100%; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .main-tools { display: flex; align-items: center; gap: 10px; }
+        .tool-group { display: flex; gap: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px; }
+        
+        /* PALETTE CLASSÉE */
+        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.1); }
+        .color-btn { width: 22px; height: 22px; border-radius: 2px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .color-btn.active { border: 2px solid #fff; box-shadow: 0 0 8px #fff; transform: scale(1.1); }
+        
+        /* BOUTON OR UNIQUE */
+        .gold-special { width: 34px; height: 34px; background: var(--gold); border: 2px solid #fff; border-radius: 4px; cursor: pointer; box-shadow: 0 0 15px var(--gold); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.8; } }
+
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 6px 10px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
+        .btn.active { background: var(--gold); color: #000; }
+
+        /* GALERIE & VOTES */
+        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; width: 95%; margin-top: 20px; padding-bottom: 50px; }
+        .art-card { background: #0d1e36; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,170,0,0.1); position: relative; transition: 0.3s; }
+        .art-card img { width: 100%; border-radius: 2px; }
+        .vote-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .vote-btn { background: rgba(255,170,0,0.1); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-family: 'Orbitron'; }
+        .del-btn { position: absolute; top: -5px; right: -5px; background: #ff3131; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; z-index: 5; display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>GOLD PIXEL STUDIO</h1>
     
-    .vote-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-    
-    .vote-btn { background: rgba(255,170,0,0.1); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; border-radius: 4px; padding: 2px 8px; font-family: 'Orbitron'; font-size: 0.7rem; transition: 0.3s; }
-    .vote-btn:hover { background: var(--gold); color: #000; }
+    <div id="work-area">
+        <div id="canvas-container">
+            <canvas id="canvas" width="600" height="600"></canvas>
+            <div id="grid-overlay"></div>
+        </div>
+    </div>
 
-    .del-btn { position: absolute; top: -8px; right: -8px; background: #ff3131; color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: none; z-index: 5; }
-</style>
+    <div class="ui">
+        <div class="main-tools">
+            <div class="tool-group">
+                <button id="drawBtn" class="btn active" onclick="setMode('draw')">✏️</button>
+                <button id="eraseBtn" class="btn" onclick="setMode('erase')">🧽</button>
+            </div>
+            <div id="goldBtn" class="gold-special" onclick="selectGold()"></div>
+            <div class="tool-group">
+                <button class="btn" onclick="adjustZoom(0.2)">+</button>
+                <button class="btn" onclick="adjustZoom(-0.2)">-</button>
+                <button id="moveBtn" class="btn" onclick="setMode('move')">PAN</button>
+            </div>
+        </div>
 
-<div id="gallery"></div>
+        <div style="font-size:0.65rem; color:var(--gold); font-family:'Orbitron';">OR PRÉCIEUX : <span id="goldCount">0</span>/15</div>
+        
+        <div class="palette" id="palette"></div>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn" onclick="saveArt()" style="background:var(--gold); color:#000; border:none; padding:10px 20px;">PUBLIER</button>
+            <button class="btn" onclick="resetZoom()">RECENTRER</button>
+        </div>
+    </div>
 
-<script>
-    // Note : Stockage local pour savoir quelles œuvres nous appartiennent
-    let myWorks = JSON.parse(localStorage.getItem('goldPixel_myWorks') || "[]");
+    <div id="gallery"></div>
 
-    async function loadGallery() {
-        const res = await fetch('/api/gallery');
-        const data = await res.json();
-        const gal = document.getElementById("gallery");
-        gal.innerHTML = "";
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const container = document.getElementById("canvas-container");
+        const grid = document.getElementById("grid-overlay");
+        const pSize = 15;
+        let scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", lastColor = "#5A7A94", isDown = false, goldPixels = 0;
+        let myWorks = JSON.parse(localStorage.getItem('goldPixel_myWorks') || "[]");
 
-        data.reverse().forEach(art => {
-            // On vérifie si l'œuvre est à nous
-            const isMine = myWorks.includes(art.id);
+        grid.style.width = grid.style.height = "600px";
+        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
+
+        // Note : Palette de 32 couleurs classées par nuances
+        const colors = [
+            // Matte & Grayscale
+            "#050b14", "#333333", "#5A7A94", "#808080", "#AAAAAA", "#CCCCCC", "#EEEEEE", "#FFFFFF",
+            // Or & Jaunes
+            "#4D3900", "#806000", "#B38600", "#E6AC00", "#FFD700", "#FFEA00", "#FFFF80", "#FFFFCC",
+            // Chauds (Rouge/Orange/Rose)
+            "#440000", "#880000", "#FF3131", "#FF5E3A", "#FF914D", "#FFBD59", "#FF66C4", "#FFBDD4",
+            // Froids (Vert/Bleu/Violet)
+            "#003300", "#22FF00", "#CCFF00", "#00D9FF", "#0088FF", "#5271FF", "#8C52FF", "#CB6CE6"
+        ];
+
+        colors.forEach(c => {
+            const b = document.createElement("div"); 
+            b.className = "color-btn"; 
+            b.style.background = c;
+            if(c === color) b.classList.add('active');
+            b.onclick = () => { 
+                color = lastColor = c; setMode('draw'); 
+                document.querySelectorAll('.color-btn, .gold-special').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+            };
+            document.getElementById("palette").appendChild(b);
+        });
+
+        function selectGold() { 
+            color = lastColor = "#ffaa00"; setMode('draw'); 
+            document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active'));
+            document.getElementById('goldBtn').classList.add('active');
+        }
+
+        function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
+        function adjustZoom(amt) { scale = Math.min(Math.max(0.5, scale + amt), 4); updateTransform(); }
+        function resetZoom() { scale = 1; pos = {x:0, y:0}; updateTransform(); }
+
+        function handleAction(e) {
+            if(!isDown) return;
+            const ev = e.touches ? e.touches[0] : e;
+            const rect = canvas.getBoundingClientRect();
+            if(mode === 'move') { pos.x += ev.movementX || 0; pos.y += ev.movementY || 0; updateTransform(); return; }
             
-            gal.innerHTML += `
-                <div class="art-card">
-                    ${isMine ? `<button class="del-btn" style="display:block" onclick="deleteArt('${art.id}')">X</button>` : ''}
-                    <img src="${art.img}">
-                    <div class="vote-bar">
-                        <span style="font-size:0.7rem; color:var(--gold)">@${art.name}</span>
-                        <button class="vote-btn" onclick="vote('${art.id}')">👍 ${art.votes}</button>
-                    </div>
-                </div>`;
-        });
-    }
+            const x = Math.floor((ev.clientX - rect.left) / (pSize * scale)) * pSize;
+            const y = Math.floor((ev.clientY - rect.top) / (pSize * scale)) * pSize;
 
-    async function saveArt() {
-        const name = prompt("Pseudo du Pionnier :");
-        if(!name) return;
-        
-        const response = await fetch('/api/save', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ name, img: canvas.toDataURL() })
-        });
-        
-        const result = await response.json();
-        // On enregistre l'ID dans notre navigateur
-        myWorks.push(result.id);
-        localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks));
-        
-        loadGallery();
-    }
+            const pixelData = ctx.getImageData(x + 1, y + 1, 1, 1).data;
+            const isTargetGold = pixelData[0] === 255 && pixelData[1] === 170 && pixelData[2] === 0;
 
-    async function vote(id) {
-        // Optionnel : On pourrait limiter à 1 vote par personne ici aussi
-        await fetch('/api/vote', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id })
-        });
-        loadGallery();
-    }
+            if(mode === 'draw' && color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
+            if(mode === 'erase' && isTargetGold) goldPixels--;
+            if(mode === 'draw' && color === "#ffaa00" && !isTargetGold) goldPixels++;
+            if(mode === 'draw' && color !== "#ffaa00" && isTargetGold) goldPixels--;
 
-    async function deleteArt(id) {
-        if(!confirm("Supprimer votre œuvre ?")) return;
-        await fetch('/api/delete', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id })
-        });
-        // Retirer de notre liste locale
-        myWorks = myWorks.filter(item => item !== id);
-        localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks));
-        loadGallery();
-    }
+            ctx.fillStyle = mode === 'erase' ? "#081422" : color;
+            ctx.fillRect(x, y, pSize, pSize);
+            document.getElementById("goldCount").innerText = Math.max(0, goldPixels);
+        }
 
-    // ... (Reste du code canvas initCanvas etc.) ...
-    window.onload = loadGallery;
-</script>
+        canvas.onmousedown = (e) => { isDown = true; handleAction(e); };
+        window.onmousemove = handleAction; window.onmouseup = () => isDown = false;
+        canvas.ontouchstart = (e) => { e.preventDefault(); isDown = true; handleAction(e); };
+        canvas.ontouchmove = handleAction; canvas.ontouchend = () => isDown = false;
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById("drawBtn").classList.toggle("active", m === 'draw');
+            document.getElementById("moveBtn").classList.toggle("active", m === 'move');
+            document.getElementById("eraseBtn").classList.toggle("active", m === 'erase');
+        }
+
+        async function loadGallery() {
+            const res = await fetch('/api/gallery');
+            const data = await res.json();
+            const gal = document.getElementById("gallery");
+            gal.innerHTML = "";
+            data.reverse().forEach(art => {
+                const isMine = myWorks.includes(art.id);
+                gal.innerHTML += `
+                    <div class="art-card">
+                        <button class="del-btn" style="display:${isMine?'block':'none'}" onclick="deleteArt('${art.id}')">X</button>
+                        <img src="${art.img}">
+                        <div class="vote-bar">
+                            <span style="font-size:0.7rem; color:var(--gold)">@${art.name}</span>
+                            <button class="vote-btn" onclick="vote('${art.id}')">👍 ${art.votes}</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function saveArt() {
+            const name = prompt("Pseudo du Pionnier :"); if(!name) return;
+            const res = await fetch('/api/save', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, img: canvas.toDataURL()})
+            });
+            const result = await res.json();
+            myWorks.push(result.id);
+            localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks));
+            loadGallery();
+        }
+
+        async function vote(id) {
+            await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) });
+            loadGallery();
+        }
+
+        async function deleteArt(id) {
+            if(!confirm("Supprimer votre œuvre ?")) return;
+            await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) });
+            myWorks = myWorks.filter(i => i !== id);
+            localStorage.setItem('goldPixel_myWorks', JSON.stringify(myWorks));
+            loadGallery();
+        }
+
+        ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
+        updateTransform(); loadGallery();
+    </script>
+</body>
+</html>
