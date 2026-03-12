@@ -1,0 +1,73 @@
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const size = 15;
+    let currentColor = "#5A7A94";
+    let goldLimit = 50;
+    let goldUsed = 0;
+
+    // --- CHARGEMENT INITIAL ---
+    window.onload = loadGallery;
+
+    async function loadGallery() {
+        const response = await fetch('/api/gallery');
+        const data = await response.json();
+        renderGallery(data);
+    }
+
+    function renderGallery(arts) {
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = ""; // On vide avant de remplir
+        arts.forEach(art => {
+            let card = document.createElement("div");
+            card.className = "art-card";
+            card.innerHTML = `
+                <img src="${art.img}">
+                <div class="art-info">
+                    <span class="art-user">@${art.name}</span>
+                    <button class="vote-btn" onclick="voteForArt(${art.id}, this)">
+                        👍 <span class="vote-count">${art.votes}</span>
+                    </button>
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
+    }
+
+    // --- SAUVEGARDE SUR LE SERVEUR ---
+    async function saveArt() {
+        let name = prompt("Pseudo du Pionnier :");
+        if(!name) return;
+
+        let imgData = canvas.toDataURL();
+
+        const response = await fetch('/api/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, img: imgData })
+        });
+
+        if (response.ok) {
+            clearCanvas();
+            loadGallery(); // On rafraîchit la galerie pour tout le monde
+        }
+    }
+
+    // --- VOTE SUR LE SERVEUR ---
+    async function voteForArt(id, btn) {
+        if(btn.classList.contains('voted')) return;
+
+        const response = await fetch('/api/vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+
+        if (response.ok) {
+            btn.classList.add('voted');
+            loadGallery(); // On recharge pour voir le nouveau score
+        }
+    }
+
+    // ... (Garde tes fonctions clearCanvas et la gestion des couleurs ici)
+</script>
