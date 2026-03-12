@@ -1,42 +1,56 @@
-const express = require('express');
-const path = require('path');
-const app = express();
+// --- CONFIGURATION DU SERVEUR GOLD PIXEL ---
+const express = require('express'); // Importation d'Express pour gérer les requêtes
+const path = require('path'); // Outil pour gérer les chemins de fichiers
+const app = express(); // Création de l'application
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.static(__dirname));
+// Note : Augmentation de la limite pour accepter les images en haute définition
+app.use(express.json({ limit: '10mb' })); 
+// Note : Rend les fichiers du dossier actuel accessibles (HTML, JS, CSS)
+app.use(express.static(__dirname)); 
 
+// Stockage en mémoire (sera réinitialisé lors du reset mensuel)
 let galleryData = []; 
 
-// API : Sauvegarder avec un ID unique
+// --- ROUTES PRINCIPALES ---
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
+app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
+
+// --- API DE LA GALERIE ---
+
+// Note : Récupérer toutes les œuvres
+app.get('/api/gallery', (req, res) => { res.json(galleryData); });
+
+// Note : Sauvegarder une nouvelle œuvre avec ID unique
 app.post('/api/save', (req, res) => {
     const newArt = { 
-        id: Date.now().toString(),
+        id: Date.now().toString(), // Identifiant unique pour la suppression
         name: req.body.name, 
         img: req.body.img, 
-        votes: 0 // Initialisation des votes
+        votes: 0 // Compteur de likes initial
     };
     galleryData.push(newArt);
-    res.status(200).send({ id: newArt.id }); // On renvoie l'ID au joueur
+    res.status(200).send({ id: newArt.id });
 });
 
-// API : Voter pour une œuvre
+// Note : Voter pour un chef-d'œuvre
 app.post('/api/vote', (req, res) => {
     const art = galleryData.find(a => a.id === req.body.id);
     if (art) {
         art.votes++;
         res.status(200).send({ votes: art.votes });
     } else {
-        res.status(404).send("Introuvable");
+        res.status(404).send("Art introuvable");
     }
 });
 
-// API : Supprimer
+// Note : Supprimer uniquement sa propre œuvre
 app.post('/api/delete', (req, res) => {
     galleryData = galleryData.filter(art => art.id !== req.body.id);
     res.status(200).send({ message: "Supprimé" });
 });
 
-app.get('/api/gallery', (req, res) => { res.json(galleryData); });
-
+// --- DÉMARRAGE ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Serveur Gold Pixel actif sur ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Gold Pixel en ligne sur le port ${PORT}`);
+});
