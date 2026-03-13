@@ -1,39 +1,34 @@
-const express = require('express'); // Note : Framework web
-const path = require('path'); // Note : Gestion des chemins
-const { MongoClient } = require('mongodb'); // Note : Client MongoDB Cloud
-const { v4: uuid } = require('uuid'); // Note : Identifiants uniques
+const express = require('express'); // Note : Framework pour gérer le serveur
+const path = require('path'); // Note : Utilitaire pour les chemins de fichiers
+const { MongoClient } = require('mongodb'); // Note : Driver pour MongoDB Cloud
+const { v4: uuid } = require('uuid'); // Note : Pour générer des IDs uniques
 
-const app = express(); // Note : Instance serveur
-const PORT = process.env.PORT || 10000; // Note : Port Render
+const app = express(); // Note : Instance Express
+const PORT = process.env.PORT || 10000; // Note : Port pour Render
 
-// Note : PROTECTION ACTIVÉE. On utilise la variable d'environnementMONGO_URI définie sur Render.
+// Note : SECURITE - Utilise la variable d'environnement MONGO_URI définie sur Render
 const uri = process.env.MONGO_URI; 
 const client = new MongoClient(uri);
 let db, gallery;
 
 async function connectDB() {
   try {
-    // Note : On vérifie si la variable est bien présente pour éviter les plantages
-    if (!uri) {
-      console.error("❌ Erreur : La variable MONGO_URI n'est pas définie sur Render !");
-      return;
-    }
+    if (!uri) { console.error("❌ Erreur : MONGO_URI non définie sur Render !"); return; }
     await client.connect();
-    db = client.db("goldpixel_db"); // Note : Nom de ta base
-    gallery = db.collection("artworks"); // Note : Ta collection d'images
-    console.log("✅ Gold Pixel est connecté au Cloud MongoDB (Mode Sécurisé) !");
-  } catch (e) { 
-    console.error("❌ Erreur de connexion Cloud :", e); 
-  }
+    db = client.db("goldpixel_db"); // Note : Nom de la base de données
+    gallery = db.collection("artworks"); // Note : Collection des œuvres
+    console.log("✅ Gold Pixel est connecté au Cloud MongoDB !");
+  } catch (e) { console.error("❌ Erreur connexion DB:", e); }
 }
 connectDB();
 
-app.use(express.json({ limit: '15mb' })); // Note : Pour les gros pixels
-app.use(express.static(__dirname)); // Note : Sert index.html et goldpixel.html
+app.use(express.json({ limit: '15mb' })); // Note : Pour les images haute définition
+app.use(express.static(__dirname)); // Note : Sert les fichiers à la racine
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
 
+// Note : API Galerie - Récupère les œuvres triées par date
 app.get('/api/gallery', async (req, res) => {
   try {
     const arts = await gallery.find({}).sort({createdAt: -1}).toArray();
@@ -41,6 +36,7 @@ app.get('/api/gallery', async (req, res) => {
   } catch (e) { res.status(500).json([]); }
 });
 
+// Note : API Sauvegarde - Enregistre l'œuvre dans le Cloud
 app.post('/api/save', async (req, res) => {
   try {
     const { name, title, img } = req.body;
@@ -54,9 +50,10 @@ app.post('/api/save', async (req, res) => {
     };
     await gallery.insertOne(artwork);
     res.json({ id: artwork.id });
-  } catch (e) { res.status(500).json({ error: "Échec" }); }
+  } catch (e) { res.status(500).json({ error: "Échec sauvegarde" }); }
 });
 
+// Note : API Vote
 app.post('/api/vote', async (req, res) => {
   const { id } = req.body;
   await gallery.updateOne({ id: id }, { $inc: { votes: 1 } });
@@ -64,6 +61,4 @@ app.post('/api/vote', async (req, res) => {
   res.json({ votes: art ? art.votes : 0 });
 });
 
-app.listen(PORT, () => { 
-  console.log(`🚀 Gold Pixel Studio tourne sur le port ${PORT}`); 
-});
+app.listen(PORT, () => { console.log(`🚀 Gold Pixel Studio en ligne sur le port ${PORT}`); });
