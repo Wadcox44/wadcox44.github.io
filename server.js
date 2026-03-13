@@ -1,91 +1,52 @@
-const express  = require('express'); // Note : Framework pour gérer le serveur
-const fs        = require('fs'); // Note : Gestion des fichiers
-const path      = require('path'); // Note : Gestion des chemins dossiers
-const { v4: uuid } = require('uuid'); // Note : Pour générer des IDs uniques
+const express  = require('express'); // Note : Framework web
+const fs        = require('fs'); // Note : Système de fichiers
+const path      = require('path'); // Note : Gestion des dossiers
+const { v4: uuid } = require('uuid'); // Note : Générateur d'identifiants
 
-const app  = express(); // Note : Initialisation
-const PORT = process.env.PORT || 10000; // Note : Port par défaut de Render
+const app  = express(); // Note : Création de l'application
+const PORT = process.env.PORT || 10000; // Note : Port pour le déploiement Render
 
-/* ── Dossier galerie ── */
-const GALLERY_DIR  = path.join(__dirname, 'gallery');
-const GALLERY_FILE = path.join(GALLERY_DIR, 'artworks.json');
+const GALLERY_DIR  = path.join(__dirname, 'gallery'); // Note : Dossier de stockage
+const GALLERY_FILE = path.join(GALLERY_DIR, 'artworks.json'); // Note : Base de données JSON
 
-// Note : Création auto des dossiers de stockage
-if (!fs.existsSync(GALLERY_DIR)) fs.mkdirSync(GALLERY_DIR, { recursive: true });
-if (!fs.existsSync(GALLERY_FILE)) fs.writeFileSync(GALLERY_FILE, '[]', 'utf8');
+if (!fs.existsSync(GALLERY_DIR)) fs.mkdirSync(GALLERY_DIR, { recursive: true }); // Note : Créer dossier si absent
+if (!fs.existsSync(GALLERY_FILE)) fs.writeFileSync(GALLERY_FILE, '[]', 'utf8'); // Note : Créer fichier si absent
 
-/* ── Helpers lecture/écriture ── */
-function readGallery() {
-  try { return JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); }
-  catch { return []; }
-}
-function writeGallery(data) {
-  fs.writeFileSync(GALLERY_FILE, JSON.stringify(data, null, 2), 'utf8');
-}
+function readGallery() { try { return JSON.parse(fs.readFileSync(GALLERY_FILE, 'utf8')); } catch { return []; } } // Note : Lire JSON
+function writeGallery(data) { fs.writeFileSync(GALLERY_FILE, JSON.stringify(data, null, 2), 'utf8'); } // Note : Écrire JSON
 
-/* ── Middleware ── */
-app.use(express.json({ limit: '10mb' })); // Note : Autorise les images un peu plus lourdes
-// NOTE CRUCIALE : On utilise __dirname (la racine) car tes fichiers ne sont pas dans /public
-app.use(express.static(__dirname)); 
+app.use(express.json({ limit: '10mb' })); // Note : Supporte les images base64
+app.use(express.static(__dirname)); // Note : TRÈS IMPORTANT - Sert les fichiers à la racine pour Render
 
-/* Note : On sert les fichiers depuis la racine */
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); }); // Note : Page accueil
+app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); }); // Note : Page studio
 
-// Note : Route pour accéder directement au studio
-app.get('/goldpixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'goldpixel.html'));
-});
+app.get('/api/gallery', (req, res) => { res.json(readGallery()); }); // Note : Route API galerie
 
-/* ══════════════════════════════════════════
-   API GALLERY
-══════════════════════════════════════════ */
-app.get('/api/gallery', (req, res) => {
-  const data = readGallery();
-  res.json(data);
-});
-
-app.post('/api/save', (req, res) => {
+app.post('/api/save', (req, res) => { // Note : Route API sauvegarde
   const { name, img } = req.body;
-  if (!name || !img) return res.status(400).json({ error: 'champs requis' });
-  
   const data = readGallery();
-  if (data.length >= 500) return res.status(429).json({ error: 'galerie pleine' });
-
-  const artwork = {
-    id: uuid(),
-    name: String(name).slice(0, 32).replace(/[<>"']/g, ''),
-    img,
-    votes: 0,
-    createdAt: new Date().toISOString()
-  };
-
+  if (data.length >= 500) return res.status(429).json({ error: 'Galerie pleine' });
+  const artwork = { id: uuid(), name: String(name).slice(0, 32), img, votes: 0, createdAt: new Date().toISOString() };
   data.push(artwork);
   writeGallery(data);
   res.json({ id: artwork.id });
 });
 
-app.post('/api/vote', (req, res) => {
+app.post('/api/vote', (req, res) => { // Note : Route API votes
   const { id } = req.body;
   const data = readGallery();
   const art = data.find(a => a.id === id);
-  if (!art) return res.status(404).json({ error: 'non trouvé' });
-  art.votes = (art.votes || 0) + 1;
-  writeGallery(data);
-  res.json({ votes: art.votes });
+  if (art) { art.votes = (art.votes || 0) + 1; writeGallery(data); res.json({ votes: art.votes }); }
+  else { res.status(404).json({ error: 'Non trouvé' }); }
 });
 
-app.post('/api/delete', (req, res) => {
+app.post('/api/delete', (req, res) => { // Note : Route API suppression
   const { id } = req.body;
   const data = readGallery();
-  const index = data.findIndex(a => a.id === id);
-  if (index === -1) return res.status(404).json({ error: 'non trouvé' });
-  data.splice(index, 1);
-  writeGallery(data);
-  res.json({ ok: true });
+  const idx = data.findIndex(a => a.id === id);
+  if (idx !== -1) { data.splice(idx, 1); writeGallery(data); res.json({ ok: true }); }
+  else { res.status(404).json({ error: 'Non trouvé' }); }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Gold Pixel Studio — Port ${PORT}`);
-});
+app.listen(PORT, () => { console.log(`✅ Studio Gold Pixel en ligne (Port ${PORT})`); }); // Note : Lancement
