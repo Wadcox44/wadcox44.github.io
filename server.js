@@ -1,15 +1,16 @@
-const express  = require('express');
-const fs        = require('fs');
-const path      = require('path');
-const { v4: uuid } = require('uuid');
+const express  = require('express'); // Note : Framework pour gérer le serveur
+const fs        = require('fs'); // Note : Gestion des fichiers
+const path      = require('path'); // Note : Gestion des chemins dossiers
+const { v4: uuid } = require('uuid'); // Note : Pour générer des IDs uniques
 
-const app  = express();
-const PORT = process.env.PORT || 3000;
+const app  = express(); // Note : Initialisation
+const PORT = process.env.PORT || 10000; // Note : Port par défaut de Render
 
 /* ── Dossier galerie ── */
 const GALLERY_DIR  = path.join(__dirname, 'gallery');
 const GALLERY_FILE = path.join(GALLERY_DIR, 'artworks.json');
 
+// Note : Création auto des dossiers de stockage
 if (!fs.existsSync(GALLERY_DIR)) fs.mkdirSync(GALLERY_DIR, { recursive: true });
 if (!fs.existsSync(GALLERY_FILE)) fs.writeFileSync(GALLERY_FILE, '[]', 'utf8');
 
@@ -23,104 +24,68 @@ function writeGallery(data) {
 }
 
 /* ── Middleware ── */
-app.use(express.json({ limit: '8mb' }));   // images base64 pouvant être lourdes
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: '10mb' })); // Note : Autorise les images un peu plus lourdes
+// NOTE CRUCIALE : On utilise __dirname (la racine) car tes fichiers ne sont pas dans /public
+app.use(express.static(__dirname)); 
 
-/* Serve index.html depuis public/ */
+/* Note : On sert les fichiers depuis la racine */
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Note : Route pour accéder directement au studio
+app.get('/goldpixel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'goldpixel.html'));
 });
 
 /* ══════════════════════════════════════════
-   GET /api/gallery
-   Retourne toutes les œuvres (triées par date, plus récente en dernier)
+   API GALLERY
 ══════════════════════════════════════════ */
 app.get('/api/gallery', (req, res) => {
   const data = readGallery();
   res.json(data);
 });
 
-/* ══════════════════════════════════════════
-   POST /api/save
-   Corps : { name: string, img: string (base64 dataURL) }
-   Sauvegarde l'œuvre et renvoie { id }
-══════════════════════════════════════════ */
 app.post('/api/save', (req, res) => {
   const { name, img } = req.body;
-
-  if (!name || !img) {
-    return res.status(400).json({ error: 'name et img requis' });
-  }
-  if (typeof img !== 'string' || !img.startsWith('data:image/')) {
-    return res.status(400).json({ error: 'format image invalide' });
-  }
-  // Taille max ~4MB base64
-  if (img.length > 5_000_000) {
-    return res.status(413).json({ error: 'image trop lourde' });
-  }
-
+  if (!name || !img) return res.status(400).json({ error: 'champs requis' });
+  
   const data = readGallery();
-
-  // Limite : max 500 œuvres dans la galerie
-  if (data.length >= 500) {
-    return res.status(429).json({ error: 'galerie pleine' });
-  }
+  if (data.length >= 500) return res.status(429).json({ error: 'galerie pleine' });
 
   const artwork = {
-    id:        uuid(),
-    name:      String(name).slice(0, 32).replace(/[<>"']/g, ''),
+    id: uuid(),
+    name: String(name).slice(0, 32).replace(/[<>"']/g, ''),
     img,
-    votes:     0,
+    votes: 0,
     createdAt: new Date().toISOString()
   };
 
   data.push(artwork);
   writeGallery(data);
-
   res.json({ id: artwork.id });
 });
 
-/* ══════════════════════════════════════════
-   POST /api/vote
-   Corps : { id: string }
-   Incrémente le vote et renvoie { votes }
-══════════════════════════════════════════ */
 app.post('/api/vote', (req, res) => {
   const { id } = req.body;
-  if (!id) return res.status(400).json({ error: 'id requis' });
-
   const data = readGallery();
-  const art  = data.find(a => a.id === id);
-  if (!art)  return res.status(404).json({ error: 'œuvre non trouvée' });
-
+  const art = data.find(a => a.id === id);
+  if (!art) return res.status(404).json({ error: 'non trouvé' });
   art.votes = (art.votes || 0) + 1;
   writeGallery(data);
-
   res.json({ votes: art.votes });
 });
 
-/* ══════════════════════════════════════════
-   POST /api/delete
-   Corps : { id: string }
-   Supprime l'œuvre
-══════════════════════════════════════════ */
 app.post('/api/delete', (req, res) => {
   const { id } = req.body;
-  if (!id) return res.status(400).json({ error: 'id requis' });
-
-  const data    = readGallery();
-  const index   = data.findIndex(a => a.id === id);
-  if (index === -1) return res.status(404).json({ error: 'œuvre non trouvée' });
-
+  const data = readGallery();
+  const index = data.findIndex(a => a.id === id);
+  if (index === -1) return res.status(404).json({ error: 'non trouvé' });
   data.splice(index, 1);
   writeGallery(data);
-
   res.json({ ok: true });
 });
 
-/* ══════════════════════════════════════════
-   Démarrage
-══════════════════════════════════════════ */
 app.listen(PORT, () => {
-  console.log(`✅  Gold Pixel Studio — http://localhost:${PORT}`);
+  console.log(`✅ Gold Pixel Studio — Port ${PORT}`);
 });
