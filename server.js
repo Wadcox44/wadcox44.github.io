@@ -7,7 +7,7 @@ const app = express(); // Note : Initialisation de l'application
 const PORT = process.env.PORT || 10000; // Note : Port dynamique imposé par Render
 
 // Note : UTILISE TON LIEN ICI (N'oublie pas de mettre ton vrai mot de passe !)
-const uri = "mongodb+srv://thoneick:TON_MOT_DE_PASSE_ICI@goldpixel.g5fuvd8.mongodb.net/?appName=GoldPixel"; 
+const uri = "mongodb+srv://thoneick:ZmIcoT2WuLDSV1WJ@goldpixel.g5fuvd8.mongodb.net/?appName=GoldPixel"; 
 const client = new MongoClient(uri);
 let db, gallery;
 
