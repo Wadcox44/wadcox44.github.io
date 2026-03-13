@@ -21,15 +21,17 @@ async function connectDB() {
 }
 connectDB();
 
+// ─── MIDDLEWARES ───
+// express.json DOIT être avant toutes les routes POST
 app.use(express.json({ limit: '20mb' }));
-app.use(express.static(__dirname));
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
-app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
+// ─── ROUTES API (avant express.static pour éviter le 405) ───
 
 // GET - Toutes les œuvres
 app.get('/api/gallery', async (req, res) => {
   try {
+    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const arts = await gallery.find({}).sort({ createdAt: -1 }).toArray();
     res.json(arts);
   } catch (e) { res.status(500).json([]); }
@@ -38,6 +40,7 @@ app.get('/api/gallery', async (req, res) => {
 // GET - Top 10 les plus likées
 app.get('/api/top10', async (req, res) => {
   try {
+    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const arts = await gallery.find({}).sort({ votes: -1 }).limit(10).toArray();
     res.json(arts);
   } catch (e) { res.status(500).json([]); }
@@ -46,6 +49,7 @@ app.get('/api/top10', async (req, res) => {
 // POST - Sauvegarder une œuvre
 app.post('/api/save', async (req, res) => {
   try {
+    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const { name, title, img } = req.body;
     if (!name || !title || !img) return res.status(400).json({ error: "Données manquantes" });
     const artwork = {
@@ -59,12 +63,16 @@ app.post('/api/save', async (req, res) => {
     };
     await gallery.insertOne(artwork);
     res.json({ id: artwork.id, success: true });
-  } catch (e) { res.status(500).json({ error: "Échec sauvegarde" }); }
+  } catch (e) {
+    console.error("Erreur /api/save :", e);
+    res.status(500).json({ error: "Échec sauvegarde" });
+  }
 });
 
-// POST - Voter pour une œuvre (anti-doublon par session via IP)
+// POST - Voter pour une œuvre
 app.post('/api/vote', async (req, res) => {
   try {
+    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID manquant" });
     const art = await gallery.findOne({ id });
@@ -72,17 +80,27 @@ app.post('/api/vote', async (req, res) => {
     await gallery.updateOne({ id }, { $inc: { votes: 1 } });
     const updated = await gallery.findOne({ id });
     res.json({ votes: updated ? updated.votes : 0 });
-  } catch (e) { res.status(500).json({ error: "Erreur vote" }); }
+  } catch (e) {
+    console.error("Erreur /api/vote :", e);
+    res.status(500).json({ error: "Erreur vote" });
+  }
 });
 
 // DELETE - Supprimer une œuvre (admin)
 app.delete('/api/artwork/:id', async (req, res) => {
   try {
+    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const { id } = req.params;
     await gallery.deleteOne({ id });
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: "Erreur suppression" }); }
 });
+
+// ─── FICHIERS STATIQUES (après les routes API) ───
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
+app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
 
 app.listen(PORT, () => {
   console.log(`🚀 Gold Pixel v3.0 est prêt sur le port ${PORT}`);
