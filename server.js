@@ -1,47 +1,46 @@
-const express = require('express'); // Note : Framework pour gérer les requêtes HTTP
-const path = require('path'); // Note : Utilitaire pour les chemins de dossiers et fichiers
-const { MongoClient } = require('mongodb'); // Note : Client officiel pour se connecter à MongoDB
-const { v4: uuid } = require('uuid'); // Note : Module pour générer des identifiants uniques
+const express = require('express'); // Note : Framework web
+const path = require('path'); // Note : Gestion des chemins
+const { MongoClient } = require('mongodb'); // Note : Client MongoDB Cloud
+const { v4: uuid } = require('uuid'); // Note : Identifiants uniques
 
-const app = express(); // Note : Initialisation de l'application
-const PORT = process.env.PORT || 10000; // Note : Port dynamique imposé par Render
+const app = express(); // Note : Instance serveur
+const PORT = process.env.PORT || 10000; // Note : Port Render
 
-// Note : UTILISE TON LIEN ICI (N'oublie pas de mettre ton vrai mot de passe !)
-const uri = "mongodb+srv://thoneick:ZmIcoT2WuLDSV1WJ@goldpixel.g5fuvd8.mongodb.net/?appName=GoldPixel"; 
+// Note : PROTECTION ACTIVÉE. On utilise la variable d'environnementMONGO_URI définie sur Render.
+const uri = process.env.MONGO_URI; 
 const client = new MongoClient(uri);
 let db, gallery;
 
-// Note : Fonction pour connecter le serveur à ta base de données Cloud
 async function connectDB() {
   try {
+    // Note : On vérifie si la variable est bien présente pour éviter les plantages
+    if (!uri) {
+      console.error("❌ Erreur : La variable MONGO_URI n'est pas définie sur Render !");
+      return;
+    }
     await client.connect();
-    db = client.db("goldpixel_db"); // Note : Crée ou utilise la base nommée goldpixel_db
-    gallery = db.collection("artworks"); // Note : Utilise la collection artworks pour les dessins
-    console.log("✅ Gold Pixel est connecté au Cloud MongoDB !");
+    db = client.db("goldpixel_db"); // Note : Nom de ta base
+    gallery = db.collection("artworks"); // Note : Ta collection d'images
+    console.log("✅ Gold Pixel est connecté au Cloud MongoDB (Mode Sécurisé) !");
   } catch (e) { 
-    console.error("❌ Erreur de connexion MongoDB :", e); 
+    console.error("❌ Erreur de connexion Cloud :", e); 
   }
 }
-connectDB(); // Note : Lancement de la connexion
+connectDB();
 
-app.use(express.json({ limit: '15mb' })); // Note : Augmente la limite pour recevoir les images pixelisées
-app.use(express.static(__dirname)); // Note : Sert les fichiers index.html et goldpixel.html depuis la racine
+app.use(express.json({ limit: '15mb' })); // Note : Pour les gros pixels
+app.use(express.static(__dirname)); // Note : Sert index.html et goldpixel.html
 
-// Note : Route pour la page d'accueil (JeuxVideo.Pi)
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
-
-// Note : Route pour accéder au Studio de dessin
 app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
 
-// Note : API pour récupérer toutes les œuvres sauvegardées dans le Cloud
 app.get('/api/gallery', async (req, res) => {
   try {
     const arts = await gallery.find({}).sort({createdAt: -1}).toArray();
     res.json(arts);
-  } catch (e) { res.status(500).json({error: "Erreur lors du chargement de la galerie"}); }
+  } catch (e) { res.status(500).json([]); }
 });
 
-// Note : API pour enregistrer un nouveau dessin dans MongoDB
 app.post('/api/save', async (req, res) => {
   try {
     const { name, title, img } = req.body;
@@ -55,20 +54,16 @@ app.post('/api/save', async (req, res) => {
     };
     await gallery.insertOne(artwork);
     res.json({ id: artwork.id });
-  } catch (e) { res.status(500).json({error: "Erreur lors de la sauvegarde"}); }
+  } catch (e) { res.status(500).json({ error: "Échec" }); }
 });
 
-// Note : API pour gérer les votes (incrémentation de 1)
 app.post('/api/vote', async (req, res) => {
-  try {
-    const { id } = req.body;
-    await gallery.updateOne({ id: id }, { $inc: { votes: 1 } });
-    const art = await gallery.findOne({ id: id });
-    res.json({ votes: art ? art.votes : 0 });
-  } catch (e) { res.status(500).json({error: "Erreur de vote"}); }
+  const { id } = req.body;
+  await gallery.updateOne({ id: id }, { $inc: { votes: 1 } });
+  const art = await gallery.findOne({ id: id });
+  res.json({ votes: art ? art.votes : 0 });
 });
 
-// Note : Démarrage du serveur
 app.listen(PORT, () => { 
-  console.log(`🚀 Gold Pixel Studio est prêt sur le port ${PORT}`); 
+  console.log(`🚀 Gold Pixel Studio tourne sur le port ${PORT}`); 
 });
