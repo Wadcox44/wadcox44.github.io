@@ -21,6 +21,15 @@ async function connectDB() {
 }
 connectDB();
 
+// ─── CORS permissif (même origine Render) ───
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 // ─── MIDDLEWARES ───
 // express.json DOIT être avant toutes les routes POST
 app.use(express.json({ limit: '20mb' }));
