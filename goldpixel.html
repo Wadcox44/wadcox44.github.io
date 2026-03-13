@@ -3,85 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GOLD PIXEL — Studio</title>
+  <title>GOLD PIXEL — Studio Officiel</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --gold: #ffaa00; --bg: #050b14; --bg2: #0d1e36; }
-    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; display: flex; flex-direction: column; align-items: center; margin: 0; }
+    :root { --gold: #ffaa00; --gold2: #ffe066; --bg: #050b14; --bg2: #0d1e36; }
+    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; }
+    
     .header { padding: 20px; text-align: center; }
-    .site-title { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 10px var(--gold); letter-spacing: 2px; }
-    #viewport { width: 90vw; max-width: 800px; aspect-ratio: 16/9; border: 2px solid var(--gold); background: #000; position: relative; overflow: hidden; }
-    #main-canvas { width: 800px; height: 450px; image-rendering: pixelated; display: block; }
-    .ui { width: 90vw; max-width: 600px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
-    .palette { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
-    .c-btn { aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 1px solid #333; }
-    .c-btn.active { border: 2px solid #fff; transform: scale(1.1); }
-    .btn-publish { background: var(--gold); color: #000; border: none; padding: 15px; font-family: 'Orbitron'; font-weight: 900; border-radius: 5px; cursor: pointer; }
-    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; width: 90vw; margin-top: 30px; }
-    .art-card { background: var(--bg2); border: 1px solid #333; border-radius: 8px; overflow: hidden; }
-    .art-card img { width: 100%; image-rendering: pixelated; }
-    .art-info { padding: 10px; font-size: 0.8rem; }
+    .site-title { font-family: 'Orbitron'; font-size: 1.8rem; color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 3px; }
+    
+    #viewport { width: 95vw; max-width: 800px; aspect-ratio: 16/9; border: 3px solid var(--gold); border-radius: 12px; position: relative; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(255, 170, 0, 0.2); }
+    #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+    #main-canvas { display: block; background: #081422; image-rendering: pixelated; width: 800px; height: 450px; }
+
+    .ui { width: 95vw; max-width: 650px; display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding-bottom: 50px; }
+    
+    /* Note : Outils de dessin */
+    .tool-bar { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .btn-tool { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.7rem; cursor: pointer; border-radius: 4px; }
+    .btn-tool.active { background: var(--gold); color: #000; }
+
+    /* Note : Mise en avant de l'OR */
+    .gold-status { display: flex; align-items: center; gap: 15px; background: rgba(255,170,0,0.1); padding: 12px; border-radius: 10px; border: 2px solid var(--gold); box-shadow: 0 0 10px var(--gold); }
+    .gold-swatch { width: 45px; height: 45px; background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); border: 2px solid #fff; border-radius: 8px; cursor: pointer; position: relative; transition: 0.3s; }
+    .gold-swatch.active { transform: scale(1.1); box-shadow: 0 0 15px #fff; }
+
+    /* Note : Palette 36 couleurs */
+    .palette { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+    .c-btn { aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+    .c-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 10px #fff; }
+    
+    .btn-publish { background: var(--gold); color: #000; font-family: 'Orbitron'; font-weight: 900; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1rem; }
+
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 95vw; margin-top: 40px; }
+    .art-card { background: var(--bg2); border: 1px solid rgba(255,170,0,0.2); border-radius: 12px; overflow: hidden; }
+    .art-card img { width: 100%; image-rendering: pixelated; aspect-ratio: 16/9; }
+    .art-info { padding: 15px; }
   </style>
 </head>
 <body>
-  <div class="header"><div class="site-title">GOLD PIXEL STUDIO</div></div>
-  <div id="viewport"><canvas id="main-canvas" width="800" height="450"></canvas></div>
-  <div class="ui">
-    <div class="palette" id="palette"></div>
-    <button class="btn-publish" onclick="publish()">▲ PUBLIER DANS LE CLOUD</button>
-    <div id="gallery"></div>
+
+<div class="header">
+  <div class="site-title">GOLD PIXEL STUDIO</div>
+</div>
+
+<div id="viewport">
+  <div id="canvas-container">
+    <canvas id="main-canvas" width="800" height="450"></canvas>
+  </div>
+</div>
+
+<div class="ui">
+  <div class="tool-bar">
+    <button id="btn-draw" class="btn-tool active" onclick="setMode('draw')">✏ PIXEL</button>
+    <button id="btn-erase" class="btn-tool" onclick="setMode('erase')">◻ GOMME</button>
+    <button id="btn-move" class="btn-tool" onclick="setMode('move')">✥ DÉPLACER</button>
+    <button class="btn-tool" onclick="resetView()">⊙ RECENTRER</button>
   </div>
 
-  <script>
-    const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#000000","#00AAFF","#003880","#22DD44","#005511","#FF3131","#FF8800","#ffaa00","#8C52FF"];
-    const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d');
-    let color = "#FFFFFF", isDown = false;
+  <div class="gold-status">
+    <div id="gold-swatch" class="gold-swatch" onclick="selectGold()"></div>
+    <div style="font-family:Orbitron; font-size:.8rem; color:var(--gold)">RÉSERVE D'OR : <span id="goldCount">0</span>/15 PX</div>
+  </div>
 
-    COLORS.forEach(c => {
-      const b = document.createElement('div'); b.className = 'c-btn'; b.style.backgroundColor = c;
-      b.onclick = () => { color = c; };
-      document.getElementById('palette').appendChild(b);
-    });
+  <div class="palette" id="palette"></div>
+  
+  <button class="btn-publish" onclick="publish()">▲ PUBLIER DANS LE CLOUD</button>
+</div>
 
-    canvas.onmousedown = () => isDown = true;
-    window.onmouseup = () => isDown = false;
-    canvas.onmousemove = (e) => {
-      if(!isDown) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / (rect.width / 800) / 15) * 15;
-      const y = Math.floor((e.clientY - rect.top) / (rect.height / 450) / 15) * 15;
-      ctx.fillStyle = color; ctx.fillRect(x, y, 15, 15);
-      localStorage.setItem('gp_save', canvas.toDataURL());
-    };
+<div id="gallery"></div>
 
-    async function publish() {
-      const name = prompt("Ton pseudo ?");
-      const title = prompt("Titre de l'œuvre ?");
-      const img = canvas.toDataURL('image/jpeg', 0.8);
-      const res = await fetch('/api/save', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ name, title, img })
-      });
-      if(res.ok) { alert("Publié !"); loadGallery(); }
-    }
+<script>
+// Palette étendue à 36 couleurs (Matte + Vives)
+const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#050b14","#000000","#C8E8FF","#7AB8F0","#00AAFF","#0066CC","#003880","#1A2533","#00f3ff","#006688","#CCFFCC","#88FF88","#22DD44","#009922","#005511","#003308","#CCFF00","#66BB00","#FFDBAC","#F1C27D","#E0AC69","#8D5524","#633919","#FFEECC","#FF8800","#CC0000","#FF3131","#FF66CC","#F7FE2E","#8C52FF"];
+const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('canvas-container'), viewport = document.getElementById('viewport');
+let scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = '#FFFFFF', isDown = false, goldPixels = 0;
 
-    async function loadGallery() {
-      const res = await fetch('/api/gallery');
-      const data = await res.json();
-      const gal = document.getElementById('gallery');
-      gal.innerHTML = data.map(art => `
-        <div class="art-card">
-          <img src="${art.img}">
-          <div class="art-info"><b>${art.title}</b> par @${art.name}</div>
-        </div>
-      `).join('');
-    }
+// Génération de la palette
+const pal = document.getElementById('palette');
+COLORS.forEach(c => {
+  const b = document.createElement('div'); b.className = 'c-btn'; b.style.background = c;
+  b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.c-btn, .gold-swatch').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
+  pal.appendChild(b);
+});
 
-    const saved = localStorage.getItem('gp_save');
-    if(saved) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0); i.src = saved; }
-    else { ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450); }
-    loadGallery();
-  </script>
+function selectGold() { color = '#ffaa00'; setMode('draw'); document.querySelectorAll('.c-btn').forEach(x => x.classList.remove('active')); document.getElementById('gold-swatch').classList.add('active'); }
+function setMode(m) { mode = m; document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active')); if(document.getElementById('btn-'+m)) document.getElementById('btn-'+m).classList.add('active'); }
+function updateTransform() { container.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`; }
+function resetView() { scale = viewport.offsetWidth / 800; pos = { x: 0, y: 0 }; updateTransform(); }
+
+// Dessin
+canvas.onmousedown = (e) => { isDown = true; paint(e); };
+window.onmousemove = (e) => { if(isDown && mode === 'move') { pos.x += e.movementX; pos.y += e.movementY; updateTransform(); } else paint(e); };
+window.onmouseup = () => isDown = false;
+
+function paint(e) {
+  if(!isDown || mode === 'move') return;
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor(((e.clientX - rect.left) / (rect.width / 800)) / 15) * 15;
+  const y = Math.floor(((e.clientY - rect.top) / (rect.height / 450)) / 15) * 15;
+  if (mode === 'erase') { ctx.fillStyle = '#081422'; ctx.fillRect(x, y, 15, 15); }
+  else { ctx.fillStyle = color; ctx.fillRect(x, y, 15, 15); }
+  localStorage.setItem('gp_backup', canvas.toDataURL());
+}
+
+async function publish() {
+  const name = prompt("Pseudo ?");
+  const title = prompt("Titre ?");
+  const img = canvas.toDataURL('image/jpeg', 0.8);
+  const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, title, img }) });
+  if(res.ok) { alert("Publié ! ✨"); loadGallery(); }
+}
+
+async function loadGallery() {
+  const res = await fetch('/api/gallery');
+  const data = await res.json();
+  const gal = document.getElementById('gallery');
+  gal.innerHTML = data.map(art => `
+    <div class="art-card">
+      <img src="${art.img}">
+      <div class="art-info">
+        <div style="font-family:Orbitron; color:var(--gold);">${art.title}</div>
+        <div style="font-size:0.8rem; color:#888;">par @${art.name}</div>
+        <div style="margin-top:10px;"><button onclick="vote('${art.id}')" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:4px 10px; cursor:pointer; border-radius:4px;">⭐ ${art.votes}</button></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function vote(id) {
+  await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+  loadGallery();
+}
+
+ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450);
+const saved = localStorage.getItem('gp_backup');
+if(saved) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0); i.src = saved; }
+window.onresize = resetView;
+resetView();
+loadGallery();
+</script>
 </body>
 </html>
