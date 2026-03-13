@@ -19,756 +19,177 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; }
     body {
-      background: var(--bg);
-      color: #fff;
-      font-family: 'Rajdhani', sans-serif;
-      min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center;
-      overflow-x: hidden;
-      touch-action: none;
-      -webkit-font-smoothing: antialiased;
+      background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden; touch-action: none; -webkit-font-smoothing: antialiased;
     }
-    ::selection { background: var(--gold); color: #000; }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--gold); }
-
-    /* ── SCANLINES ── */
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.045) 2px, rgba(0,0,0,.045) 4px);
     }
-
-    /* ── HEADER ── */
-    .header {
-      width: 100%; padding: 18px 0 10px;
-      text-align: center; position: relative; z-index: 2;
-    }
-    .site-title {
-      font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900;
-      color: var(--gold); letter-spacing: 3px;
-      text-shadow: 0 0 18px var(--gold), 0 0 40px rgba(255,170,0,.3);
-    }
-    .site-sub {
-      font-family: 'Share Tech Mono', monospace; font-size: .58rem;
-      color: rgba(255,255,255,.35); letter-spacing: 3px; margin-top: 4px;
-    }
-
-    /* ── FORMAT BAR ── */
-    .format-bar {
-      display: flex; gap: 8px; margin: 10px 0 12px;
-      position: relative; z-index: 2;
-    }
-    .btn {
-      background: transparent; border: 1px solid var(--gold);
-      color: var(--gold); font-family: 'Orbitron', monospace;
-      padding: 7px 14px; font-size: .58rem; letter-spacing: 1px;
-      cursor: pointer; border-radius: 4px; transition: all .2s;
-    }
-    .btn:hover { background: rgba(255,170,0,.12); }
+    .header { width: 100%; padding: 18px 0 10px; text-align: center; position: relative; z-index: 2; }
+    .site-title { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900; color: var(--gold); letter-spacing: 3px; text-shadow: 0 0 18px var(--gold); }
+    .site-sub { font-family: 'Share Tech Mono', monospace; font-size: .58rem; color: rgba(255,255,255,.35); letter-spacing: 3px; margin-top: 4px; }
+    .format-bar { display: flex; gap: 8px; margin: 10px 0 12px; position: relative; z-index: 2; }
+    .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 7px 14px; font-size: .58rem; cursor: pointer; border-radius: 4px; }
     .btn.active { background: var(--gold); color: #000; box-shadow: 0 0 14px rgba(255,170,0,.4); }
-
-    /* ── VIEWPORT ── */
-    #viewport {
-      position: relative; z-index: 2;
-      border: 2px solid var(--gold);
-      border-radius: 8px; overflow: hidden;
-      background: #000;
-      box-shadow: 0 0 30px rgba(255,170,0,.2), 0 0 60px rgba(255,170,0,.07);
-      /* taille définie par JS */
-      touch-action: none;
-      cursor: crosshair;
-    }
-    #viewport.mode-move  { cursor: grab; }
-    #viewport.mode-erase { cursor: cell; }
-
-    #canvas-container {
-      position: absolute; top: 0; left: 0;
-      transform-origin: 0 0;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-    }
+    #viewport { position: relative; z-index: 2; border: 2px solid var(--gold); border-radius: 8px; overflow: hidden; background: #000; box-shadow: 0 0 30px rgba(255,170,0,.2); touch-action: none; cursor: crosshair; }
+    #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; image-rendering: pixelated; }
     #main-canvas { display: block; background: #081422; }
-
-    /* Grille overlay */
-    #grid-overlay {
-      position: absolute; inset: 0; pointer-events: none;
-      background-image:
-        linear-gradient(to right,  rgba(255,255,255,.055) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,.055) 1px, transparent 1px);
-    }
-
-    /* ── UI ── */
-    .ui {
-      width: 100%; max-width: 560px;
-      padding: 14px 16px; display: flex; flex-direction: column;
-      align-items: center; gap: 12px; position: relative; z-index: 2;
-    }
-
-    /* Toolbar */
-    .tool-bar { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; }
-
-    /* Gold box */
-    .gold-box {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(255,170,0,.07);
-      padding: 9px 18px; border-radius: 8px;
-      border: 1px solid var(--gold);
-      width: 100%; justify-content: center;
-    }
-    .gold-swatch {
-      width: 32px; height: 32px;
-      background: radial-gradient(circle at 35% 35%, var(--gold2), var(--gold));
-      border: 2px solid rgba(255,255,255,.5); border-radius: 5px;
-      cursor: pointer; position: relative; transition: .2s;
-      box-shadow: 0 0 10px rgba(255,170,0,.5);
-      flex-shrink: 0;
-    }
+    #grid-overlay { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.055) 1px, transparent 1px); }
+    .ui { width: 100%; max-width: 560px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; z-index: 2; }
+    .gold-box { display: flex; align-items: center; gap: 12px; background: rgba(255,170,0,.07); padding: 9px 18px; border-radius: 8px; border: 1px solid var(--gold); width: 100%; justify-content: center; }
+    .gold-swatch { width: 32px; height: 32px; background: radial-gradient(circle at 35% 35%, var(--gold2), var(--gold)); border: 2px solid rgba(255,255,255,.5); border-radius: 5px; cursor: pointer; position: relative; }
     .gold-swatch.active { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 18px var(--gold); }
-    .gold-swatch.active::after {
-      content: '✓'; position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: .8rem; color: #000;
-    }
-    .gold-info { font-family: 'Orbitron', monospace; font-size: .65rem; color: var(--gold); }
-    .gold-bar-wrap { flex: 1; max-width: 120px; }
-    .gold-bar-bg {
-      height: 5px; background: rgba(255,170,0,.15);
-      border-radius: 100px; overflow: hidden; border: 1px solid rgba(255,170,0,.2);
-    }
-    .gold-bar-fill {
-      height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2));
-      border-radius: 100px; transition: width .3s;
-      box-shadow: 0 0 6px var(--gold);
-      width: 0%;
-    }
-
-    /* Palette */
-    .palette-wrap { width: 100%; }
-    .palette-label {
-      font-family: 'Share Tech Mono', monospace; font-size: .52rem;
-      color: rgba(255,255,255,.3); letter-spacing: 2px;
-      text-transform: uppercase; margin-bottom: 7px; text-align: center;
-    }
-    .palette {
-      display: grid; grid-template-columns: repeat(8, 1fr);
-      gap: 5px;
-    }
-    .c-btn {
-      aspect-ratio: 1; border-radius: 3px; cursor: pointer;
-      border: 1px solid rgba(255,255,255,.15);
-      transition: transform .15s, box-shadow .15s;
-    }
-    .c-btn:hover { transform: scale(1.12); z-index: 1; }
-    .c-btn.active {
-      border: 2px solid #fff;
-      transform: scale(1.18);
-      box-shadow: 0 0 10px rgba(255,255,255,.6);
-      z-index: 2;
-    }
-
-    /* Current color preview */
-    .cur-color-row {
-      display: flex; align-items: center; gap: 10px; font-family: 'Share Tech Mono', monospace; font-size: .55rem; color: rgba(255,255,255,.35);
-    }
-    #cur-swatch {
-      width: 22px; height: 22px; border-radius: 3px;
-      border: 1px solid rgba(255,255,255,.3);
-      background: #5A7A94;
-    }
-
-    /* Publish button */
-    .btn-publish {
-      width: 100%; padding: 13px;
-      background: var(--gold); color: #000;
-      font-family: 'Orbitron', monospace; font-weight: 700;
-      font-size: .72rem; letter-spacing: 1px;
-      border: none; border-radius: 4px; cursor: pointer;
-      transition: all .25s; position: relative; overflow: hidden;
-    }
-    .btn-publish::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.25) 50%,transparent 65%);
-      transform: translateX(-120%);
-    }
-    .btn-publish:hover { box-shadow: 0 0 24px rgba(255,170,0,.5); }
-    .btn-publish:hover::after { animation: shine .6s ease forwards; }
-    .btn-publish:disabled { opacity: .5; cursor: default; }
-    @keyframes shine { to { transform: translateX(130%); } }
-
-    /* ── GALLERY ── */
-    .gallery-header {
-      font-family: 'Orbitron', monospace; color: var(--gold);
-      font-size: .82rem; letter-spacing: 2px;
-      border-bottom: 1px solid var(--gold);
-      width: 90%; max-width: 560px;
-      text-align: center; padding-bottom: 8px;
-      margin: 28px 0 18px;
-      position: relative; z-index: 2;
-    }
-    .gallery-sub {
-      font-family: 'Share Tech Mono', monospace; font-size: .52rem;
-      color: rgba(255,255,255,.3); letter-spacing: 2px; margin-top: 4px;
-    }
-
-    #gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 14px;
-      width: 90%; max-width: 560px;
-      margin-bottom: 60px;
-      position: relative; z-index: 2;
-    }
-    .art-card {
-      background: var(--bg2);
-      border: 1px solid rgba(255,170,0,.18);
-      border-radius: 8px; padding: 9px;
-      display: flex; flex-direction: column; gap: 8px;
-      transition: border-color .25s, transform .25s;
-    }
-    .art-card:hover { border-color: rgba(255,170,0,.5); transform: translateY(-3px); }
-    .art-card img {
-      width: 100%; image-rendering: pixelated;
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 3px; display: block;
-    }
-    .art-card-footer {
-      display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    }
-    .art-author {
-      font-family: 'Orbitron', monospace; font-size: .5rem;
-      color: var(--gold); white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
-    }
-    .art-actions { display: flex; gap: 5px; align-items: center; }
-
-    /* Vote button */
-    .btn-vote {
-      display: flex; align-items: center; gap: 4px;
-      background: transparent; border: 1px solid rgba(255,170,0,.3);
-      border-radius: 4px; color: var(--gold);
-      font-family: 'Orbitron', monospace; font-size: .48rem;
-      padding: 3px 8px; cursor: pointer; transition: all .2s;
-      white-space: nowrap;
-    }
-    .btn-vote:hover { background: rgba(255,170,0,.1); border-color: var(--gold); }
-    .btn-vote.voted { background: rgba(255,170,0,.2); border-color: var(--gold); box-shadow: 0 0 8px rgba(255,170,0,.2); }
-    .btn-vote.voted { cursor: default; }
-
-    /* Delete button */
-    .btn-del {
-      background: transparent; border: 1px solid rgba(255,49,49,.35);
-      color: var(--red); font-family: 'Orbitron', monospace;
-      font-size: .45rem; padding: 3px 7px;
-      border-radius: 4px; cursor: pointer; transition: all .2s;
-      white-space: nowrap;
-    }
-    .btn-del:hover { background: rgba(255,49,49,.12); border-color: var(--red); }
-
-    /* Loading gallery */
-    .gallery-loading {
-      font-family: 'Share Tech Mono', monospace; font-size: .65rem;
-      color: rgba(255,170,0,.5); text-align: center; padding: 30px;
-      letter-spacing: 2px; width: 100%;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .gallery-loading { animation: blink 1.5s ease-in-out infinite; }
-
-    /* Empty gallery */
-    .gallery-empty {
-      font-family: 'Share Tech Mono', monospace; font-size: .6rem;
-      color: rgba(255,255,255,.2); text-align: center; padding: 30px;
-      letter-spacing: 1px; width: 100%;
-    }
-
-    /* ── TOAST ── */
-    #toast {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%) translateY(60px);
-      background: rgba(8,20,36,.98); border: 1px solid var(--gold);
-      color: var(--gold); font-family: 'Orbitron', monospace; font-size: .6rem;
-      letter-spacing: 1px; padding: 10px 22px; border-radius: 4px;
-      z-index: 9999; opacity: 0; transition: all .3s; pointer-events: none;
-      white-space: nowrap; box-shadow: 0 0 20px rgba(255,170,0,.2);
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #toast.cy { border-color: var(--cy); color: var(--cy); box-shadow: 0 0 20px rgba(0,243,255,.2); }
-    #toast.red { border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(255,49,49,.2); }
-
-    /* ── MOBILE ── */
-    @media (max-width: 480px) {
-      .site-title { font-size: 1.1rem; }
-      .palette { grid-template-columns: repeat(8, 1fr); gap: 4px; }
-      .c-btn { border-radius: 2px; }
-      #gallery { grid-template-columns: repeat(2, 1fr); }
-    }
+    .gold-swatch.active::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000; }
+    .gold-bar-bg { height: 5px; background: rgba(255,170,0,.15); border-radius: 100px; overflow: hidden; width: 100px; }
+    .gold-bar-fill { height: 100%; background: var(--gold); width: 0%; transition: width .3s; }
+    .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; width: 100%; }
+    .c-btn { aspect-ratio: 1; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,.15); }
+    .c-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 10px #fff; }
+    .btn-publish { width: 100%; padding: 13px; background: var(--gold); color: #000; font-family: 'Orbitron'; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; }
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; width: 90%; max-width: 560px; margin-top: 20px; padding-bottom: 50px; }
+    .art-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 9px; }
+    .art-card img { width: 100%; image-rendering: pixelated; border-radius: 3px; }
+    .art-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.6rem; color: var(--gold); font-family: 'Orbitron'; }
+    .btn-vote { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+    .btn-vote.voted { background: var(--gold); color: #000; }
+    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1000; }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <div class="header">
   <div class="site-title">GOLD PIXEL STUDIO</div>
   <div class="site-sub">CRÉEZ · PUBLIEZ · VOTEZ</div>
 </div>
-
-<!-- FORMAT -->
 <div class="format-bar">
-  <button id="fmt11"  class="btn active" onclick="changeFormat(600,600,'1:1')">FORMAT 1:1</button>
-  <button id="fmt169" class="btn"        onclick="changeFormat(800,450,'16:9')">FORMAT 16:9</button>
+  <button id="fmt11" class="btn active" onclick="changeFormat(600,600,'1:1')">FORMAT 1:1</button>
+  <button id="fmt169" class="btn" onclick="changeFormat(800,450,'16:9')">FORMAT 16:9</button>
 </div>
-
-<!-- VIEWPORT CANVAS -->
 <div id="viewport">
   <div id="canvas-container">
     <canvas id="main-canvas" width="600" height="600"></canvas>
     <div id="grid-overlay"></div>
   </div>
 </div>
-
-<!-- UI -->
 <div class="ui">
-
-  <!-- OUTILS -->
   <div class="tool-bar">
-    <button id="btn-draw"   class="btn active" onclick="setMode('draw')">✏ PIXEL</button>
-    <button id="btn-erase"  class="btn"        onclick="setMode('erase')">◻ GOMME</button>
-    <button id="btn-move"   class="btn"        onclick="setMode('move')">✥ DÉPLACER</button>
-    <button                 class="btn"        onclick="resetView()">⊙ RECENTRER</button>
+    <button id="btn-draw" class="btn active" onclick="setMode('draw')">✏ PIXEL</button>
+    <button id="btn-erase" class="btn" onclick="setMode('erase')">◻ GOMME</button>
+    <button id="btn-move" class="btn" onclick="setMode('move')">✥ DÉPLACER</button>
+    <button class="btn" onclick="resetView()">⊙ RECENTRER</button>
   </div>
-
-  <!-- OR -->
   <div class="gold-box">
-    <div id="gold-swatch" class="gold-swatch" onclick="selectGold()" title="Couleur Or (max 30)"></div>
-    <div class="gold-info">OR : <span id="goldCount">0</span> / 30</div>
-    <div class="gold-bar-wrap">
-      <div class="gold-bar-bg"><div class="gold-bar-fill" id="goldBar"></div></div>
-    </div>
+    <div id="gold-swatch" class="gold-swatch" onclick="selectGold()"></div>
+    <div style="font-family:Orbitron; font-size:.65rem; color:var(--gold)">OR : <span id="goldCount">0</span>/30</div>
+    <div class="gold-bar-bg"><div class="gold-bar-fill" id="goldBar"></div></div>
   </div>
-
-  <!-- COULEUR ACTIVE -->
-  <div class="cur-color-row">
-    <div id="cur-swatch"></div>
-    <span>COULEUR ACTIVE</span>
-    <span id="cur-hex">#5A7A94</span>
-  </div>
-
-  <!-- PALETTE 32 couleurs -->
-  <div class="palette-wrap">
-    <div class="palette-label">PALETTE — 32 COULEURS</div>
-    <div class="palette" id="palette"></div>
-  </div>
-
-  <!-- PUBLIER -->
-  <button class="btn-publish" id="publishBtn" onclick="saveArt()">
-    ▲ PUBLIER DANS LA GALERIE
-  </button>
-
+  <div class="palette" id="palette"></div>
+  <button class="btn-publish" id="publishBtn" onclick="saveArt()">▲ PUBLIER DANS LA GALERIE</button>
 </div>
-
-<!-- GALERIE -->
-<div class="gallery-header">
-  GALERIE DES SAISONS
-  <div class="gallery-sub" id="gallery-count">CHARGEMENT...</div>
-</div>
-<div id="gallery"><div class="gallery-loading">CHARGEMENT DE LA GALERIE...</div></div>
-
+<div id="gallery"></div>
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════
-   PALETTE 32 couleurs — triées par teinte, clair→foncé
-═══════════════════════════════════════════════ */
-const COLORS = [
-  // Noirs / Gris
-  "#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#050b14","#000000",
-  // Bleus / Cyans
-  "#C8E8FF","#7AB8F0","#00AAFF","#0066CC","#003880","#001840","#00f3ff","#006688",
-  // Verts
-  "#CCFFCC","#88FF88","#22DD44","#009922","#005511","#003308","#CCFF00","#66BB00",
-  // Rouges / Roses / Oranges
-  "#FFEECC","#FFBB66","#FF8800","#FF4400","#CC0000","#880000","#FF66CC","#CC0066",
-];
+const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#050b14","#000000","#C8E8FF","#7AB8F0","#00AAFF","#0066CC","#003880","#001840","#00f3ff","#006688","#CCFFCC","#88FF88","#22DD44","#009922","#005511","#003308","#CCFF00","#66BB00","#FFEECC","#FFBB66","#FF8800","#FF4400","#CC0000","#880000","#FF66CC","#CC0066"];
+const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('canvas-container'), grid = document.getElementById('grid-overlay'), viewport = document.getElementById('viewport');
+const PIXEL = 15, GOLD_MAX = 30, GOLD_HEX = '#ffaa00';
+let cW = 600, cH = 600, scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = '#5A7A94', isDown = false, goldPixels = 0;
+let myUploads = JSON.parse(localStorage.getItem('gp_uploads') || '[]'), myVotes = JSON.parse(localStorage.getItem('gp_votes') || '[]');
 
-/* ═══════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════ */
-const canvas    = document.getElementById('main-canvas');
-const ctx       = canvas.getContext('2d');
-const container = document.getElementById('canvas-container');
-const grid      = document.getElementById('grid-overlay');
-const viewport  = document.getElementById('viewport');
-
-const PIXEL     = 15;    // taille d'un pixel logique
-const GOLD_MAX  = 30;
-const GOLD_HEX  = '#ffaa00';
-
-let cW = 600, cH = 600;
-let scale = 1, pos = { x: 0, y: 0 };
-let mode  = 'draw';
-let color = '#5A7A94';
-let isDown = false;
-let goldPixels = 0;
-let lastTouch  = null;
-let lastDist   = null;
-
-let myUploads = JSON.parse(localStorage.getItem('gp_uploads') || '[]');
-let myVotes   = JSON.parse(localStorage.getItem('gp_votes')   || '[]');
-
-/* ═══════════════════════════════════════════════
-   INIT PALETTE
-═══════════════════════════════════════════════ */
 const pal = document.getElementById('palette');
 COLORS.forEach(c => {
-  const b = document.createElement('div');
-  b.className = 'c-btn';
-  b.style.background = c;
-  b.title = c;
-  b.onclick = () => {
-    color = c;
-    setMode('draw');
-    document.querySelectorAll('.c-btn, .gold-swatch').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    updateCurSwatch();
-  };
+  const b = document.createElement('div'); b.className = 'c-btn'; b.style.background = c;
+  b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.c-btn, .gold-swatch').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
   pal.appendChild(b);
 });
 
-function selectGold() {
-  color = GOLD_HEX;
-  setMode('draw');
-  document.querySelectorAll('.c-btn').forEach(x => x.classList.remove('active'));
-  document.getElementById('gold-swatch').classList.add('active');
-  updateCurSwatch();
-}
-
-function updateCurSwatch() {
-  document.getElementById('cur-swatch').style.background = color;
-  document.getElementById('cur-hex').textContent = color.toUpperCase();
-}
-
-function updateGoldUI() {
-  document.getElementById('goldCount').textContent = goldPixels;
-  document.getElementById('goldBar').style.width = (goldPixels / GOLD_MAX * 100) + '%';
-}
-
-/* ═══════════════════════════════════════════════
-   VIEWPORT SIZING
-═══════════════════════════════════════════════ */
-function sizeViewport() {
-  const vw = Math.min(window.innerWidth * 0.95, 560);
-  const ratio = cH / cW;
-  viewport.style.width  = vw + 'px';
-  viewport.style.height = (vw * ratio) + 'px';
-}
-
-function resetView() {
-  const vw = parseFloat(viewport.style.width) || viewport.clientWidth;
-  scale = vw / cW;
-  pos   = { x: 0, y: 0 };
-  updateTransform();
-}
-
-function updateTransform() {
-  container.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`;
-}
+function selectGold() { color = GOLD_HEX; setMode('draw'); document.querySelectorAll('.c-btn').forEach(x => x.classList.remove('active')); document.getElementById('gold-swatch').classList.add('active'); }
+function updateGoldUI() { document.getElementById('goldCount').textContent = goldPixels; document.getElementById('goldBar').style.width = (goldPixels/GOLD_MAX*100)+'%'; }
+function updateTransform() { container.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`; }
+function resetView() { const vw = viewport.clientWidth; scale = vw / cW; pos = { x: 0, y: 0 }; updateTransform(); }
 
 function changeFormat(w, h, label) {
-  const tmp = document.createElement('canvas');
-  tmp.width = canvas.width; tmp.height = canvas.height;
+  const tmp = document.createElement('canvas'); tmp.width = canvas.width; tmp.height = canvas.height;
   tmp.getContext('2d').drawImage(canvas, 0, 0);
-  cW = w; cH = h;
-  canvas.width = w; canvas.height = h;
+  cW = w; cH = h; canvas.width = w; canvas.height = h;
   ctx.fillStyle = '#081422'; ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(tmp, Math.round((w - tmp.width) / 2), Math.round((h - tmp.height) / 2));
-  grid.style.backgroundSize = `${PIXEL}px ${PIXEL}px`;
+  ctx.drawImage(tmp, Math.round((w-tmp.width)/2), Math.round((h-tmp.height)/2));
   document.querySelectorAll('.format-bar .btn').forEach(b => b.classList.remove('active'));
   document.getElementById(label === '1:1' ? 'fmt11' : 'fmt169').classList.add('active');
-  goldPixels = countGold();
-  updateGoldUI();
-  sizeViewport();
-  resetView();
+  grid.style.backgroundSize = `${PIXEL}px ${PIXEL}px`;
+  sizeViewport(); resetView();
 }
 
-/* ═══════════════════════════════════════════════
-   DESSIN
-═══════════════════════════════════════════════ */
-function isGoldPixel(x, y) {
-  const d = ctx.getImageData(x + 1, y + 1, 1, 1).data;
-  return d[0] === 255 && d[1] === 170 && d[2] === 0;
-}
+function sizeViewport() { const vw = Math.min(window.innerWidth * 0.95, 560); viewport.style.width = vw + 'px'; viewport.style.height = (vw * (cH/cW)) + 'px'; }
 
-function countGold() {
-  let n = 0;
-  for (let x = 0; x < cW; x += PIXEL)
-    for (let y = 0; y < cH; y += PIXEL)
-      if (isGoldPixel(x, y)) n++;
-  return n;
-}
-
-function canvasPos(clientX, clientY) {
+function paint(e) {
+  if(!isDown || mode === 'move') return;
   const rect = canvas.getBoundingClientRect();
-  const x = Math.floor((clientX - rect.left) / (PIXEL * scale)) * PIXEL;
-  const y = Math.floor((clientY - rect.top)  / (PIXEL * scale)) * PIXEL;
-  return { x, y };
-}
-
-function paint(clientX, clientY) {
-  const { x, y } = canvasPos(clientX, clientY);
+  const ev = e.touches ? e.touches[0] : e;
+  const x = Math.floor((ev.clientX - rect.left) / (PIXEL * scale)) * PIXEL;
+  const y = Math.floor((ev.clientY - rect.top) / (PIXEL * scale)) * PIXEL;
   if (x < 0 || x >= cW || y < 0 || y >= cH) return;
-  const wasGold = isGoldPixel(x, y);
+  
+  const d = ctx.getImageData(x+1, y+1, 1, 1).data;
+  const wasGold = (d[0] === 255 && d[1] === 170 && d[2] === 0);
 
   if (mode === 'erase') {
-    if (wasGold) { goldPixels = Math.max(0, goldPixels - 1); }
-    ctx.fillStyle = '#081422';
-    ctx.fillRect(x, y, PIXEL, PIXEL);
-  } else if (mode === 'draw') {
-    if (color === GOLD_HEX && goldPixels >= GOLD_MAX && !wasGold) {
-      toast('Maximum 30 pixels dorés !', 'red');
-      return;
-    }
-    if (color === GOLD_HEX && !wasGold) goldPixels++;
-    if (color !== GOLD_HEX && wasGold)  goldPixels = Math.max(0, goldPixels - 1);
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, PIXEL, PIXEL);
+    if(wasGold) goldPixels--;
+    ctx.fillStyle = '#081422'; ctx.fillRect(x, y, PIXEL, PIXEL);
+  } else {
+    if(color === GOLD_HEX && goldPixels >= GOLD_MAX && !wasGold) return;
+    if(color === GOLD_HEX && !wasGold) goldPixels++;
+    if(color !== GOLD_HEX && wasGold) goldPixels--;
+    ctx.fillStyle = color; ctx.fillRect(x, y, PIXEL, PIXEL);
   }
   updateGoldUI();
 }
 
-/* ═══════════════════════════════════════════════
-   EVENTS SOURIS
-═══════════════════════════════════════════════ */
-viewport.addEventListener('mousedown', e => {
-  isDown = true;
-  if (mode !== 'move') paint(e.clientX, e.clientY);
-});
-window.addEventListener('mousemove', e => {
-  if (!isDown) return;
-  if (mode === 'move') {
-    pos.x += e.movementX; pos.y += e.movementY;
-    updateTransform();
-  } else {
-    paint(e.clientX, e.clientY);
-  }
-});
-window.addEventListener('mouseup', () => isDown = false);
+viewport.onmousedown = (e) => { isDown = true; paint(e); };
+window.onmousemove = (e) => { if(isDown && mode === 'move') { pos.x += e.movementX; pos.y += e.movementY; updateTransform(); } else paint(e); };
+window.onmouseup = () => isDown = false;
 
-/* ═══════════════════════════════════════════════
-   EVENTS TACTILE — pinch zoom + pan + dessin
-═══════════════════════════════════════════════ */
-viewport.addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (e.touches.length === 1) {
-    isDown = true;
-    lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    if (mode !== 'move') paint(e.touches[0].clientX, e.touches[0].clientY);
-  } else if (e.touches.length === 2) {
-    isDown = false;
-    lastDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-  }
-}, { passive: false });
+function setMode(m) { mode = m; viewport.className = 'mode-'+m; document.getElementById('btn-draw').classList.toggle('active', m==='draw'); document.getElementById('btn-erase').classList.toggle('active', m==='erase'); document.getElementById('btn-move').classList.toggle('active', m==='move'); }
 
-viewport.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    // Pinch zoom
-    const dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    if (lastDist) {
-      const delta = dist / lastDist;
-      const newScale = Math.min(Math.max(scale * delta, 0.5), 8);
-      // Zoom vers le centre
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      const rect = viewport.getBoundingClientRect();
-      const ox = cx - rect.left - pos.x;
-      const oy = cy - rect.top  - pos.y;
-      pos.x += ox - ox * (newScale / scale);
-      pos.y += oy - oy * (newScale / scale);
-      scale = newScale;
-      updateTransform();
-    }
-    lastDist = dist;
-  } else if (e.touches.length === 1 && isDown) {
-    const t = e.touches[0];
-    if (mode === 'move' && lastTouch) {
-      pos.x += t.clientX - lastTouch.x;
-      pos.y += t.clientY - lastTouch.y;
-      updateTransform();
-    } else {
-      paint(t.clientX, t.clientY);
-    }
-    lastTouch = { x: t.clientX, y: t.clientY };
-  }
-}, { passive: false });
-
-viewport.addEventListener('touchend', e => {
-  if (e.touches.length < 2) lastDist = null;
-  if (e.touches.length === 0) { isDown = false; lastTouch = null; }
-});
-
-/* ═══════════════════════════════════════════════
-   MODE
-═══════════════════════════════════════════════ */
-function setMode(m) {
-  mode = m;
-  document.getElementById('btn-draw').classList.toggle('active', m === 'draw');
-  document.getElementById('btn-erase').classList.toggle('active', m === 'erase');
-  document.getElementById('btn-move').classList.toggle('active', m === 'move');
-  viewport.className = 'mode-' + m;
-}
-
-/* ═══════════════════════════════════════════════
-   GALERIE — API
-═══════════════════════════════════════════════ */
 async function loadGallery() {
   const gal = document.getElementById('gallery');
-  try {
-    const res  = await fetch('/api/gallery?t=' + Date.now());
-    const data = await res.json();
-    document.getElementById('gallery-count').textContent =
-      data.length + ' ŒUVRE' + (data.length !== 1 ? 'S' : '');
-
-    if (!data.length) {
-      gal.innerHTML = '<div class="gallery-empty">AUCUNE ŒUVRE POUR LE MOMENT — SOYEZ LE PREMIER !</div>';
-      return;
-    }
-
-    gal.innerHTML = '';
-    [...data].reverse().forEach(art => {
-      const isMine  = myUploads.includes(art.id);
-      const hasVoted = myVotes.includes(art.id);
-      const votes   = art.votes || 0;
-
-      const card = document.createElement('div');
-      card.className = 'art-card';
-      card.id = 'card-' + art.id;
-      card.innerHTML = `
-        <img src="${art.img}" alt="Œuvre de @${art.name}" loading="lazy">
-        <div class="art-card-footer">
-          <span class="art-author">@${art.name}</span>
-          <div class="art-actions">
-            <button
-              class="btn-vote${hasVoted ? ' voted' : ''}"
-              onclick="${hasVoted ? '' : `vote('${art.id}', this)`}"
-              title="${hasVoted ? 'Déjà voté' : 'Voter pour cette œuvre'}"
-            >
-              ★ ${votes}
-            </button>
-            ${isMine ? `<button class="btn-del" onclick="deleteArt('${art.id}')">✕</button>` : ''}
-          </div>
-        </div>`;
-      gal.appendChild(card);
-    });
-  } catch {
-    gal.innerHTML = '<div class="gallery-empty">IMPOSSIBLE DE CHARGER LA GALERIE</div>';
-  }
+  const res = await fetch('/api/gallery?t='+Date.now());
+  const data = await res.json();
+  gal.innerHTML = '';
+  [...data].reverse().forEach(art => {
+    const card = document.createElement('div'); card.className = 'art-card';
+    const isMine = myUploads.includes(art.id);
+    card.innerHTML = `<img src="${art.img}"><div class="art-card-footer"><span>@${art.name}</span><div><button class="btn-vote ${myVotes.includes(art.id)?'voted':''}" onclick="vote('${art.id}', this)">★ ${art.votes}</button>${isMine?`<button onclick="deleteArt('${art.id}')" style="background:none; border:none; color:red; margin-left:10px; cursor:pointer;">✕</button>`:''}</div></div>`;
+    gal.appendChild(card);
+  });
 }
 
 async function saveArt() {
-  const name = prompt('Votre pseudo :');
-  if (!name || !name.trim()) return;
-  const btn = document.getElementById('publishBtn');
-  btn.textContent = 'PUBLICATION EN COURS...'; btn.disabled = true;
-  try {
-    const img = canvas.toDataURL('image/jpeg', 0.82);
-    const res  = await fetch('/api/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim(), img })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      myUploads.push(data.id);
-      localStorage.setItem('gp_uploads', JSON.stringify(myUploads));
-      await loadGallery();
-      toast('Œuvre publiée avec succès ! 🎨', '');
-    } else {
-      toast('Erreur lors de la publication', 'red');
-    }
-  } catch {
-    toast('Erreur réseau', 'red');
-  }
-  btn.textContent = '▲ PUBLIER DANS LA GALERIE'; btn.disabled = false;
-}
-
-async function deleteArt(id) {
-  if (!confirm('Supprimer définitivement cette œuvre ?')) return;
-  try {
-    const res = await fetch('/api/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    if (res.ok) {
-      myUploads = myUploads.filter(i => i !== id);
-      localStorage.setItem('gp_uploads', JSON.stringify(myUploads));
-      document.getElementById('card-' + id)?.remove();
-      toast('Œuvre supprimée', 'cy');
-    }
-  } catch {
-    toast('Erreur réseau', 'red');
-  }
+  const name = prompt('Pseudo :'); if(!name) return;
+  const img = canvas.toDataURL('image/jpeg', 0.8);
+  const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, img }) });
+  if(res.ok) { const data = await res.json(); myUploads.push(data.id); localStorage.setItem('gp_uploads', JSON.stringify(myUploads)); loadGallery(); toast("Publié !"); }
 }
 
 async function vote(id, btn) {
-  if (myVotes.includes(id)) return;
-  try {
-    const res = await fetch('/api/vote', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      myVotes.push(id);
-      localStorage.setItem('gp_votes', JSON.stringify(myVotes));
-      btn.classList.add('voted');
-      btn.onclick = null;
-      btn.innerHTML = '★ ' + data.votes;
-      btn.title = 'Déjà voté';
-      toast('Vote enregistré ! ★', '');
-    }
-  } catch {
-    toast('Erreur réseau', 'red');
-  }
+  if(myVotes.includes(id)) return;
+  const res = await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+  if(res.ok) { myVotes.push(id); localStorage.setItem('gp_votes', JSON.stringify(myVotes)); loadGallery(); }
 }
 
-/* Polling toutes les 30s pour galerie live */
-setInterval(loadGallery, 30000);
-
-/* ═══════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════ */
-let _toastTimer;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show' + (type ? ' ' + type : '');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.className = '', 3200);
+async function deleteArt(id) {
+  if(!confirm('Supprimer ?')) return;
+  await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+  loadGallery();
 }
 
-/* ═══════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════ */
-ctx.fillStyle = '#081422';
-ctx.fillRect(0, 0, cW, cH);
-grid.style.backgroundSize = `${PIXEL}px ${PIXEL}px`;
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.className = 'show'; setTimeout(() => t.className = '', 2000); }
 
-sizeViewport();
-resetView();
-window.addEventListener('resize', () => { sizeViewport(); resetView(); });
-
-loadGallery();
+ctx.fillStyle = '#081422'; ctx.fillRect(0,0,600,600);
+sizeViewport(); resetView(); loadGallery();
 </script>
 </body>
 </html>
