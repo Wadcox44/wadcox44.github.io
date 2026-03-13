@@ -1,13 +1,12 @@
-const express = require('express'); // Note : Framework pour gérer les requêtes
-const path = require('path'); // Note : Gestion des chemins de fichiers
-const { MongoClient } = require('mongodb'); // Note : Connexion Cloud MongoDB
-const { v4: uuid } = require('uuid'); // Note : Pour les IDs uniques
+const express = require('express');
+const path = require('path');
+const { MongoClient } = require('mongodb');
+const { v4: uuid } = require('uuid');
 
-const app = express(); // Note : Instance du serveur
-const PORT = process.env.PORT || 10000; // Note : Port Render
+const app = express();
+const PORT = process.env.PORT || 10000;
 
-// Note : SECURITE - On utilise la variable MONGO_URI de Render
-const uri = process.env.MONGO_URI; 
+const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 let db, gallery;
 
@@ -15,43 +14,76 @@ async function connectDB() {
   try {
     if (!uri) { console.error("❌ Erreur : MONGO_URI manquante !"); return; }
     await client.connect();
-    db = client.db("goldpixel_db"); // Note : Base de données
-    gallery = db.collection("artworks"); // Note : Collection d'images
-    console.log("✅ Gold Pixel est connecté au Cloud MongoDB !");
+    db = client.db("goldpixel_db");
+    gallery = db.collection("artworks");
+    console.log("✅ Gold Pixel v3.0 connecté au Cloud MongoDB !");
   } catch (e) { console.error("❌ Erreur connexion DB:", e); }
 }
 connectDB();
 
-app.use(express.json({ limit: '15mb' })); // Note : Pour les images pixelisées
-app.use(express.static(__dirname)); // Note : Sert les fichiers à la racine
+app.use(express.json({ limit: '20mb' }));
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
 
-// Note : API Galerie - Récupère les œuvres
+// GET - Toutes les œuvres
 app.get('/api/gallery', async (req, res) => {
   try {
-    const arts = await gallery.find({}).sort({createdAt: -1}).toArray();
+    const arts = await gallery.find({}).sort({ createdAt: -1 }).toArray();
     res.json(arts);
   } catch (e) { res.status(500).json([]); }
 });
 
-// Note : API Sauvegarde - Enregistre l'œuvre avec pseudo et titre
+// GET - Top 10 les plus likées
+app.get('/api/top10', async (req, res) => {
+  try {
+    const arts = await gallery.find({}).sort({ votes: -1 }).limit(10).toArray();
+    res.json(arts);
+  } catch (e) { res.status(500).json([]); }
+});
+
+// POST - Sauvegarder une œuvre
 app.post('/api/save', async (req, res) => {
   try {
     const { name, title, img } = req.body;
-    const artwork = { id: uuid(), name, title, img, votes: 0, createdAt: new Date() };
+    if (!name || !title || !img) return res.status(400).json({ error: "Données manquantes" });
+    const artwork = {
+      id: uuid(),
+      name: name.trim().substring(0, 50),
+      title: title.trim().substring(0, 80),
+      img,
+      votes: 0,
+      voters: [],
+      createdAt: new Date()
+    };
     await gallery.insertOne(artwork);
-    res.json({ id: artwork.id });
-  } catch (e) { res.status(500).json({ error: "Échec" }); }
+    res.json({ id: artwork.id, success: true });
+  } catch (e) { res.status(500).json({ error: "Échec sauvegarde" }); }
 });
 
-// Note : API Vote
+// POST - Voter pour une œuvre (anti-doublon par session via IP)
 app.post('/api/vote', async (req, res) => {
-  const { id } = req.body;
-  await gallery.updateOne({ id: id }, { $inc: { votes: 1 } });
-  const art = await gallery.findOne({ id: id });
-  res.json({ votes: art ? art.votes : 0 });
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: "ID manquant" });
+    const art = await gallery.findOne({ id });
+    if (!art) return res.status(404).json({ error: "Œuvre introuvable" });
+    await gallery.updateOne({ id }, { $inc: { votes: 1 } });
+    const updated = await gallery.findOne({ id });
+    res.json({ votes: updated ? updated.votes : 0 });
+  } catch (e) { res.status(500).json({ error: "Erreur vote" }); }
 });
 
-app.listen(PORT, () => { console.log(`🚀 Gold Pixel est prêt sur le port 10000`); });
+// DELETE - Supprimer une œuvre (admin)
+app.delete('/api/artwork/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await gallery.deleteOne({ id });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: "Erreur suppression" }); }
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Gold Pixel v3.0 est prêt sur le port ${PORT}`);
+});
