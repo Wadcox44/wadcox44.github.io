@@ -1,19 +1,19 @@
 const express = require('express'); // Note : Framework pour gérer le serveur
-const path = require('path'); // Note : Utilitaire pour les chemins de fichiers
-const { MongoClient } = require('mongodb'); // Note : Driver pour MongoDB Cloud
-const { v4: uuid } = require('uuid'); // Note : Pour générer des IDs uniques
+const path = require('path'); // Note : Utilitaire pour les dossiers
+const { MongoClient } = require('mongodb'); // Note : Connexion Cloud MongoDB
+const { v4: uuid } = require('uuid'); // Note : Identifiants uniques pour les œuvres
 
-const app = express(); // Note : Instance Express
-const PORT = process.env.PORT || 10000; // Note : Port pour Render
+const app = express(); // Note : Instance du serveur
+const PORT = process.env.PORT || 10000; // Note : Port Render
 
-// Note : SECURITE - Utilise la variable d'environnement MONGO_URI définie sur Render
+// Note : SECURITE - Lien récupéré via les variables d'environnement Render
 const uri = process.env.MONGO_URI; 
 const client = new MongoClient(uri);
 let db, gallery;
 
 async function connectDB() {
   try {
-    if (!uri) { console.error("❌ Erreur : MONGO_URI non définie sur Render !"); return; }
+    if (!uri) { console.error("❌ Erreur : MONGO_URI manquante !"); return; }
     await client.connect();
     db = client.db("goldpixel_db"); // Note : Nom de la base de données
     gallery = db.collection("artworks"); // Note : Collection des œuvres
@@ -22,13 +22,13 @@ async function connectDB() {
 }
 connectDB();
 
-app.use(express.json({ limit: '15mb' })); // Note : Pour les images haute définition
-app.use(express.static(__dirname)); // Note : Sert les fichiers à la racine
+app.use(express.json({ limit: '15mb' })); // Note : Pour les images pixelisées
+app.use(express.static(__dirname)); // Note : Sert les fichiers racine
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
 
-// Note : API Galerie - Récupère les œuvres triées par date
+// Note : API GALERIE - Récupère toutes les oeuvres sauvegardées
 app.get('/api/gallery', async (req, res) => {
   try {
     const arts = await gallery.find({}).sort({createdAt: -1}).toArray();
@@ -36,7 +36,7 @@ app.get('/api/gallery', async (req, res) => {
   } catch (e) { res.status(500).json([]); }
 });
 
-// Note : API Sauvegarde - Enregistre l'œuvre dans le Cloud
+// Note : API SAUVEGARDE - Enregistre pseudo, titre, image et votes
 app.post('/api/save', async (req, res) => {
   try {
     const { name, title, img } = req.body;
@@ -50,10 +50,10 @@ app.post('/api/save', async (req, res) => {
     };
     await gallery.insertOne(artwork);
     res.json({ id: artwork.id });
-  } catch (e) { res.status(500).json({ error: "Échec sauvegarde" }); }
+  } catch (e) { res.status(500).json({ error: "Échec" }); }
 });
 
-// Note : API Vote
+// Note : API VOTE - Incrémente le compteur de 1 dans MongoDB
 app.post('/api/vote', async (req, res) => {
   const { id } = req.body;
   await gallery.updateOne({ id: id }, { $inc: { votes: 1 } });
