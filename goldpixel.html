@@ -246,7 +246,7 @@
     .c-btn:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.4); }
     .c-btn.active { border: 2px solid #fff; box-shadow: 0 0 10px #fff; transform: scale(1.1); }
 
-    /* Bouton OR spécial — même taille que les swatches, centré */
+    /* Bouton OR spécial — taille identique aux swatches de palette */
     .gold-row {
       display: flex;
       align-items: center;
@@ -256,17 +256,14 @@
     }
 
     #gold-swatch {
-      /* Même dimensions qu'un swatch de palette */
-      aspect-ratio: 1;
-      width: calc((100% - 40px) / 9); /* identique aux .c-btn dans la grille 9 colonnes */
-      min-width: 28px;
-      max-width: 42px;
+      /* Taille fixe = même aspect-ratio 1:1, taille cohérente avec les c-btn */
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 35%, #ffaa00 55%, #fcf6ba 75%, #b38728 100%);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 4px;
       cursor: none;
       flex-shrink: 0;
-      /* Glow permanent, s'intensifie quand actif */
       animation: goldGlowIdle 2s infinite alternate;
     }
     @keyframes goldGlowIdle {
@@ -868,6 +865,22 @@ function paintPixelOnCanvas(col, row, fillColor) {
   ctx.strokeRect(col * PX, row * PX, PX, PX);
 }
 
+// Efface proprement une cellule : clearRect total puis refond le fond + 1 trait de grille
+function eraseCell(col, row) {
+  const x = col * PX, y = row * PX;
+  // 1. Effacement complet (pas de strokeRect qui s'accumule)
+  ctx.clearRect(x, y, PX, PX);
+  // 2. Fond de la cellule
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(x, y, PX, PX);
+  // 3. Un seul trait de grille fin, dessiné une seule fois
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.rect(x + 0.25, y + 0.25, PX - 0.5, PX - 0.5);
+  ctx.stroke();
+}
+
 // ══════════════════════════════════════════════
 //  PALETTE
 // ══════════════════════════════════════════════
@@ -989,12 +1002,7 @@ function handleDraw(clientX, clientY) {
         if (c2 >= 0 && c2 < COLS && r2 >= 0 && r2 < ROWS) {
           if (pixelGrid[c2][r2] === GOLD_COLOR) goldUsed = Math.max(0, goldUsed - 1);
           pixelGrid[c2][r2] = null;
-          // Effacer ce pixel avec la vraie couleur de fond
-          ctx.fillStyle = BG_COLOR;
-          ctx.fillRect(c2 * PX, r2 * PX, PX, PX);
-          ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-          ctx.lineWidth = 0.5;
-          ctx.strokeRect(c2 * PX, r2 * PX, PX, PX);
+          eraseCell(c2, r2);
         }
       }
     }
@@ -1257,10 +1265,23 @@ function showToast(msg) {
 // ══════════════════════════════════════════════
 drawBase();
 loadBackup();
-window.addEventListener('resize', resetView);
+window.addEventListener('resize', () => { resetView(); syncGoldSwatchSize(); });
 resetView();
+syncGoldSwatchSize();
 loadGallery();
 loadTop10();
+
+// Synchronise la taille du swatch OR avec celle des swatches de palette
+function syncGoldSwatchSize() {
+  const firstSwatch = document.querySelector('.c-btn');
+  if (!firstSwatch) return;
+  const size = firstSwatch.getBoundingClientRect().width;
+  if (size > 0) {
+    const gs = document.getElementById('gold-swatch');
+    gs.style.width = size + 'px';
+    gs.style.height = size + 'px';
+  }
+}
 </script>
 </body>
 </html>
