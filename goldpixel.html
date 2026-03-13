@@ -6,194 +6,82 @@
   <title>GOLD PIXEL — Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --gold: #ffaa00; --gold2: #ffe066; --bg: #050b14; --bg2: #0d1e36; }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-    
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 10px var(--gold); } 50% { box-shadow: 0 0 25px var(--gold); } }
-
-    .header { width: 100%; padding: 20px; text-align: center; cursor: pointer; }
-    .site-title { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 4px; }
-    
-    #viewport { width: 95vw; max-width: 800px; aspect-ratio: 16/9; position: relative; border: 3px solid var(--gold); border-radius: 12px; overflow: hidden; background: #000; margin-bottom: 20px; }
-    #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-    #main-canvas { display: block; background: #081422; image-rendering: pixelated; width: 800px; height: 450px; }
-    #grid-overlay { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 15px 15px; }
-
-    .ui { width: 95vw; max-width: 600px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
-    .tool-bar { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    .gold-box { display: flex; align-items: center; gap: 15px; background: rgba(255,170,0,.1); padding: 12px; border-radius: 10px; border: 2px solid var(--gold); animation: pulse 3s infinite; }
-    .gold-swatch { width: 50px; height: 50px; background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); background-size: 200% 100%; animation: shimmer 3s linear infinite; border: 2px solid #fff; border-radius: 8px; cursor: pointer; position: relative; }
-    .gold-swatch.active::after { content: '👑'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    
+    :root { --gold: #ffaa00; --bg: #050b14; --bg2: #0d1e36; }
+    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; display: flex; flex-direction: column; align-items: center; margin: 0; }
+    .header { padding: 20px; text-align: center; }
+    .site-title { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 10px var(--gold); letter-spacing: 2px; }
+    #viewport { width: 90vw; max-width: 800px; aspect-ratio: 16/9; border: 2px solid var(--gold); background: #000; position: relative; overflow: hidden; }
+    #main-canvas { width: 800px; height: 450px; image-rendering: pixelated; display: block; }
+    .ui { width: 90vw; max-width: 600px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
     .palette { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
-    .c-btn { aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,.1); }
-    .c-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 10px #fff; }
-    
-    .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: .7rem; cursor: pointer; border-radius: 4px; }
-    .btn.active { background: var(--gold); color: #000; }
-    .btn-publish { background: var(--gold); color: #000; font-family: 'Orbitron'; font-weight: 900; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; }
-
-    .stats-bar { background: var(--bg2); padding: 15px; border-radius: 10px; width: 100%; margin-bottom: 20px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
-    .player-tag { color: var(--gold); cursor: pointer; text-decoration: underline; margin-right: 12px; font-weight: bold; }
-    
-    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 95vw; max-width: 1100px; padding-bottom: 100px; }
-    .art-card { background: var(--bg2); border: 1px solid rgba(255,170,0,0.2); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-    .art-card img { width: 100%; image-rendering: pixelated; aspect-ratio: 16/9; background: #000; cursor: pointer; }
-    .art-info { padding: 12px; }
-    .art-title { font-family: 'Orbitron'; font-size: 0.9rem; color: #fff; margin-bottom: 5px; }
-    .art-author { font-size: 0.8rem; color: var(--gold); cursor: pointer; }
-    .art-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
-    .vote-btn { background: none; border: 1px solid #444; color: #fff; padding: 4px 12px; border-radius: 20px; cursor: pointer; }
-    .vote-btn.voted { border-color: var(--gold); color: var(--gold); }
-    .del-btn { color: #ff3131; font-size: 0.7rem; cursor: pointer; background: none; border: none; font-family: 'Orbitron'; }
+    .c-btn { aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 1px solid #333; }
+    .c-btn.active { border: 2px solid #fff; transform: scale(1.1); }
+    .btn-publish { background: var(--gold); color: #000; border: none; padding: 15px; font-family: 'Orbitron'; font-weight: 900; border-radius: 5px; cursor: pointer; }
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; width: 90vw; margin-top: 30px; }
+    .art-card { background: var(--bg2); border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+    .art-card img { width: 100%; image-rendering: pixelated; }
+    .art-info { padding: 10px; font-size: 0.8rem; }
   </style>
 </head>
 <body>
-
-<div class="header" onclick="viewAll()">
-  <div class="site-title">GOLD PIXEL STUDIO</div>
-</div>
-
-<div id="viewport">
-  <div id="canvas-container">
-    <canvas id="main-canvas" width="800" height="450"></canvas>
-    <div id="grid-overlay"></div>
-  </div>
-</div>
-
-<div class="ui">
-  <div class="tool-bar">
-    <button id="btn-draw" class="btn active" onclick="setMode('draw')">✏ PIXEL</button>
-    <button id="btn-erase" class="btn" onclick="setMode('erase')">◻ GOMME</button>
-    <button id="btn-move" class="btn" onclick="setMode('move')">✥ DÉPLACER</button>
-    <button class="btn" onclick="resetView()">⊙ RECENTRER</button>
-    <button class="btn" style="color:#ff3131; border-color:#ff3131" onclick="clearCanvas()">🗑 EFFACER TOUT</button>
-  </div>
-  <div class="gold-box">
-    <div id="gold-swatch" class="gold-swatch" onclick="selectGold()"></div>
-    <div style="font-family:Orbitron; font-size:.7rem; color:var(--gold)">RÉSERVE D'OR : <span id="goldCount">0</span>/50</div>
-  </div>
-  <div class="palette" id="palette"></div>
-  <button class="btn-publish" onclick="saveArt()">▲ PUBLIER DANS LA GALERIE</button>
-
-  <div class="stats-bar">
-    <div style="font-family:Orbitron; margin-bottom:10px; color:var(--gold)">🏆 TOP JOUEURS :</div>
-    <div id="player-list">...</div>
+  <div class="header"><div class="site-title">GOLD PIXEL STUDIO</div></div>
+  <div id="viewport"><canvas id="main-canvas" width="800" height="450"></canvas></div>
+  <div class="ui">
+    <div class="palette" id="palette"></div>
+    <button class="btn-publish" onclick="publish()">▲ PUBLIER DANS LE CLOUD</button>
+    <div id="gallery"></div>
   </div>
 
-  <div style="font-family:Orbitron; color:var(--gold); margin-bottom:15px;" id="gal-title">DERNIÈRES ŒUVRES</div>
-  <div id="gallery"></div>
-</div>
+  <script>
+    const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#000000","#00AAFF","#003880","#22DD44","#005511","#FF3131","#FF8800","#ffaa00","#8C52FF"];
+    const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d');
+    let color = "#FFFFFF", isDown = false;
 
-<script>
-const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#050b14","#000000","#C8E8FF","#7AB8F0","#00AAFF","#0066CC","#003880","#1A2533","#00f3ff","#006688","#CCFFCC","#88FF88","#22DD44","#009922","#005511","#003308","#CCFF00","#66BB00","#FFDBAC","#F1C27D","#E0AC69","#8D5524","#633919","#FFEECC","#FF8800","#CC0000","#FF3131","#FF66CC","#F7FE2E","#8C52FF"];
-const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('canvas-container'), viewport = document.getElementById('viewport');
-const PIXEL = 15, GOLD_MAX = 50, GOLD_HEX = '#ffaa00';
-let scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = '#FFFFFF', isDown = false, goldPixels = 0, currentFilter = null;
-
-let myWorks = JSON.parse(localStorage.getItem('gp_my_works') || '[]');
-let myVotes = JSON.parse(localStorage.getItem('gp_votes') || '[]');
-
-const pal = document.getElementById('palette');
-COLORS.forEach(c => {
-  const b = document.createElement('div'); b.className = 'c-btn'; b.style.background = c;
-  b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.c-btn, .gold-swatch').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
-  pal.appendChild(b);
-});
-
-function selectGold() { color = GOLD_HEX; setMode('draw'); document.querySelectorAll('.c-btn').forEach(x => x.classList.remove('active')); document.getElementById('gold-swatch').classList.add('active'); }
-function updateGoldUI() { document.getElementById('goldCount').textContent = goldPixels; }
-function setMode(m) { mode = m; document.querySelectorAll('.tool-bar .btn').forEach(b => b.classList.remove('active')); if(m==='move') document.getElementById('btn-move').classList.add('active'); else if(document.getElementById('btn-'+m)) document.getElementById('btn-'+m).classList.add('active'); }
-function updateTransform() { container.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale})`; }
-function resetView() { scale = viewport.offsetWidth / 800; pos = { x: 0, y: 0 }; updateTransform(); }
-
-function saveLocal() { localStorage.setItem('gp_current_canvas', canvas.toDataURL()); localStorage.setItem('gp_current_gold', goldPixels); }
-function loadLocal() { 
-    const saved = localStorage.getItem('gp_current_canvas');
-    if(saved) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = saved; }
-    goldPixels = parseInt(localStorage.getItem('gp_current_gold') || '0');
-    updateGoldUI();
-}
-
-function clearCanvas() { if(confirm("Tout effacer ?")) { ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450); goldPixels=0; updateGoldUI(); saveLocal(); } }
-
-function paint(e) {
-  if(!isDown || mode === 'move') return;
-  const rect = canvas.getBoundingClientRect();
-  const ev = e.touches ? e.touches[0] : e;
-  const x = Math.floor((ev.clientX - rect.left) / (PIXEL * scale)) * PIXEL;
-  const y = Math.floor((ev.clientY - rect.top) / (PIXEL * scale)) * PIXEL;
-  if (x < 0 || x >= 800 || y < 0 || y >= 450) return;
-  const d = ctx.getImageData(x+1, y+1, 1, 1).data;
-  const wasGold = (d[0] === 255 && d[1] === 170 && d[2] === 0);
-  if (mode === 'erase') { if(wasGold) goldPixels--; ctx.fillStyle = '#081422'; ctx.fillRect(x, y, PIXEL, PIXEL); }
-  else {
-    if(color === GOLD_HEX && goldPixels >= GOLD_MAX && !wasGold) return;
-    if(color === GOLD_HEX && !wasGold) goldPixels++;
-    if(color !== GOLD_HEX && wasGold) goldPixels--;
-    ctx.fillStyle = color; ctx.fillRect(x, y, PIXEL, PIXEL);
-  }
-  updateGoldUI(); saveLocal(); 
-}
-
-viewport.onmousedown = (e) => { isDown = true; paint(e); };
-window.onmousemove = (e) => { if(isDown && mode === 'move') { pos.x += e.movementX; pos.y += e.movementY; updateTransform(); } else paint(e); };
-window.onmouseup = () => isDown = false;
-
-async function loadGallery() {
-  try {
-    const res = await fetch('/api/gallery?t='+Date.now());
-    const data = await res.json();
-    const gal = document.getElementById('gallery');
-    const pList = document.getElementById('player-list');
-    const playerStats = {};
-    data.forEach(art => { playerStats[art.name] = (playerStats[art.name] || 0) + (art.votes || 0); });
-    pList.innerHTML = Object.entries(playerStats).sort((a,b) => b[1] - a[1]).map(([name, v]) => `<span class="player-tag" onclick="filterPlayer('${name}')">${name} (${v}★)</span>`).join('');
-    gal.innerHTML = '';
-    let filtered = currentFilter ? data.filter(a => a.name === currentFilter) : data;
-    [...filtered].reverse().forEach(art => {
-      const isMine = myWorks.includes(art.id);
-      const hasVoted = myVotes.includes(art.id);
-      const card = document.createElement('div'); card.className = 'art-card';
-      card.innerHTML = `<img src="${art.img}" onclick="viewArt('${art.img}')"><div class="art-info"><div class="art-title">${art.title || 'Sans titre'}</div><div class="art-author" onclick="filterPlayer('${art.name}')">@${art.name}</div><div class="art-footer"><button class="vote-btn ${hasVoted?'voted':''}" onclick="vote('${art.id}')">★ ${art.votes || 0}</button>${isMine ? `<button class="del-btn" onclick="deleteArt('${art.id}')">SUPPRIMER</button>` : ''}</div></div>`;
-      gal.appendChild(card);
+    COLORS.forEach(c => {
+      const b = document.createElement('div'); b.className = 'c-btn'; b.style.backgroundColor = c;
+      b.onclick = () => { color = c; };
+      document.getElementById('palette').appendChild(b);
     });
-  } catch(e) {}
-}
 
-function filterPlayer(n) { currentFilter = n; document.getElementById('gal-title').textContent = "ŒUVRES DE " + n.toUpperCase(); loadGallery(); }
-function viewAll() { currentFilter = null; document.getElementById('gal-title').textContent = "DERNIÈRES ŒUVRES"; loadGallery(); }
+    canvas.onmousedown = () => isDown = true;
+    window.onmouseup = () => isDown = false;
+    canvas.onmousemove = (e) => {
+      if(!isDown) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / (rect.width / 800) / 15) * 15;
+      const y = Math.floor((e.clientY - rect.top) / (rect.height / 450) / 15) * 15;
+      ctx.fillStyle = color; ctx.fillRect(x, y, 15, 15);
+      localStorage.setItem('gp_save', canvas.toDataURL());
+    };
 
-async function saveArt() {
-  const name = prompt('Ton Pseudo :'); if(!name) return;
-  const title = prompt('Nom de ton œuvre :'); if(!title) return;
-  const img = canvas.toDataURL('image/jpeg', 0.85);
-  const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, title, img }) });
-  const result = await res.json();
-  if(res.ok) { myWorks.push(result.id); localStorage.setItem('gp_my_works', JSON.stringify(myWorks)); loadGallery(); alert("Publié ! ✨"); }
-}
+    async function publish() {
+      const name = prompt("Ton pseudo ?");
+      const title = prompt("Titre de l'œuvre ?");
+      const img = canvas.toDataURL('image/jpeg', 0.8);
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, title, img })
+      });
+      if(res.ok) { alert("Publié !"); loadGallery(); }
+    }
 
-async function vote(id) {
-  if(myVotes.includes(id)) return;
-  const res = await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
-  if(res.ok) { myVotes.push(id); localStorage.setItem('gp_votes', JSON.stringify(myVotes)); loadGallery(); }
-}
+    async function loadGallery() {
+      const res = await fetch('/api/gallery');
+      const data = await res.json();
+      const gal = document.getElementById('gallery');
+      gal.innerHTML = data.map(art => `
+        <div class="art-card">
+          <img src="${art.img}">
+          <div class="art-info"><b>${art.title}</b> par @${art.name}</div>
+        </div>
+      `).join('');
+    }
 
-async function deleteArt(id) {
-  if(!confirm("Supprimer ?")) return;
-  const res = await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
-  if(res.ok) { myWorks = myWorks.filter(i => i !== id); localStorage.setItem('gp_my_works', JSON.stringify(myWorks)); loadGallery(); }
-}
-
-function viewArt(src) { window.open().document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;"><img src="${src}" style="max-width:100%;image-rendering:pixelated;"></body>`); }
-
-ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450);
-window.addEventListener('resize', resetView);
-loadLocal();
-setTimeout(resetView, 100);
-loadGallery();
-</script>
+    const saved = localStorage.getItem('gp_save');
+    if(saved) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0); i.src = saved; }
+    else { ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450); }
+    loadGallery();
+  </script>
 </body>
 </html>
