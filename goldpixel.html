@@ -3,51 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GOLD PIXEL — Studio Officiel</title>
+  <title>GOLD PIXEL</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --gold: #ffaa00; --gold2: #ffe066; --bg: #050b14; --bg2: #0d1e36; }
-    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; touch-action: none; }
+    :root { --gold: #ffaa00; --bg: #050b14; --bg2: #0d1e36; }
+    body { background: var(--bg); color: #fff; font-family: 'Rajdhani'; display: flex; flex-direction: column; align-items: center; margin: 0; touch-action: none; }
+    
     .header { padding: 15px; text-align: center; }
-    .site-title { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 2px; }
-    #viewport-container { position: relative; width: 95vw; max-width: 800px; margin-bottom: 10px; }
-    #viewport { width: 100%; aspect-ratio: 16/9; border: 2px solid var(--gold); border-radius: 8px; position: relative; overflow: hidden; background: #000; }
-    #main-canvas { display: block; background: #081422; image-rendering: pixelated; width: 800px; height: 450px; }
-    .coords { position: absolute; bottom: 5px; right: 10px; font-family: 'Orbitron'; font-size: 0.7rem; color: var(--gold); background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; z-index: 10; }
-    .ui { width: 95vw; max-width: 650px; display: flex; flex-direction: column; gap: 12px; }
+    .site-title { font-family: 'Orbitron'; font-size: 1.8rem; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+    
+    /* Canevas et Grille */
+    #viewport-container { position: relative; width: 95vw; max-width: 800px; border: 2px solid var(--gold); border-radius: 8px; overflow: hidden; }
+    #canvas-container { transform-origin: top left; }
+    #main-canvas { display: block; background: #081422; image-rendering: pixelated; }
+    .coords { position: absolute; bottom: 5px; right: 10px; font-family: 'Orbitron'; font-size: 0.7rem; color: var(--gold); background: rgba(0,0,0,0.7); padding: 2px 8px; border-radius: 4px; pointer-events: none; }
+
+    .ui { width: 95vw; max-width: 650px; display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+    
     .tool-bar { display: flex; gap: 8px; justify-content: center; }
-    .btn-tool { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 10px; font-size: 0.8rem; cursor: pointer; border-radius: 6px; }
-    .btn-tool.active { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
+    .btn-tool { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 10px 15px; cursor: pointer; border-radius: 6px; }
+    .btn-tool.active { background: var(--gold); color: #000; }
+
+    /* L'Or qui brille */
     .gold-status { display: flex; align-items: center; gap: 15px; background: rgba(255,170,0,0.1); padding: 10px; border-radius: 10px; border: 2px solid var(--gold); }
-    .gold-swatch { width: 50px; height: 50px; background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); border: 2px solid #fff; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-    .gold-swatch.active { animation: goldGlow 1.5s infinite alternate; }
-    @keyframes goldGlow { from { box-shadow: 0 0 5px #fff; transform: scale(1); } to { box-shadow: 0 0 20px var(--gold); transform: scale(1.1); } }
+    .gold-swatch { width: 50px; height: 50px; background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); border: 2px solid #fff; border-radius: 8px; cursor: pointer; }
+    .gold-swatch.active { animation: goldGlow 1.2s infinite alternate; }
+    @keyframes goldGlow { from { box-shadow: 0 0 5px #fff; } to { box-shadow: 0 0 20px var(--gold); transform: scale(1.05); } }
+
     .palette { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; }
     .c-btn { aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
     .c-btn.active { border: 2px solid #fff; box-shadow: 0 0 8px #fff; }
-    .btn-publish { background: var(--gold); color: #000; font-family: 'Orbitron'; font-weight: 900; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; }
     
-    /* SECTION GALERIE */
-    #gallery-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 40px; text-transform: uppercase; letter-spacing: 2px; }
-    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 95vw; margin-top: 20px; padding-bottom: 50px; }
-    .art-card { background: var(--bg2); border: 1px solid #333; border-radius: 12px; overflow: hidden; transition: 0.3s; }
-    .art-card:hover { border-color: var(--gold); }
-    .art-card img { width: 100%; image-rendering: pixelated; border-bottom: 1px solid #333; }
-    .art-meta { padding: 15px; display: flex; flex-direction: column; gap: 5px; }
-    .art-title { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
-    .art-author { font-size: 0.8rem; color: #888; }
-    .art-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-    .vote-count { font-family: 'Orbitron'; color: #fff; font-size: 0.8rem; }
-    .btn-vote { background: transparent; border: 1px solid #444; color: #fff; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-    .btn-vote:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-publish { background: var(--gold); color: #000; font-family: 'Orbitron'; font-weight: 900; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; }
+
+    /* Modal de publication */
+    #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg2); padding: 25px; border: 2px solid var(--gold); border-radius: 12px; z-index: 100; width: 80%; max-width: 400px; box-shadow: 0 0 50px #000; }
+    #modal input { width: 90%; padding: 10px; margin: 10px 0; background: #050b14; border: 1px solid #444; color: #fff; font-family: 'Rajdhani'; }
+    #modal button { background: var(--gold); border: none; padding: 10px 20px; font-family: 'Orbitron'; cursor: pointer; width: 100%; margin-top: 10px; }
+
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 95vw; margin-top: 40px; padding-bottom: 50px; }
+    .art-card { background: var(--bg2); border: 1px solid #333; border-radius: 10px; overflow: hidden; }
+    .art-card img { width: 100%; image-rendering: pixelated; }
   </style>
 </head>
 <body>
 
-<div class="header"><div class="site-title">GOLD PIXEL STUDIO</div></div>
+<div class="header"><div class="site-title">GOLD PIXEL</div></div>
 
 <div id="viewport-container">
-  <div id="viewport"><canvas id="main-canvas" width="800" height="450"></canvas></div>
+  <div id="canvas-container">
+    <canvas id="main-canvas" width="800" height="450"></canvas>
+  </div>
   <div class="coords">X: <span id="valX">0</span> | Y: <span id="valY">0</span></div>
 </div>
 
@@ -55,32 +61,40 @@
   <div class="tool-bar">
     <button id="btn-draw" class="btn-tool active" onclick="setMode('draw')">✏ PIXEL</button>
     <button id="btn-erase" class="btn-tool" onclick="setMode('erase')">◻ GOMME</button>
+    <button class="btn-tool" onclick="resetView()">⊙ RECENTRER</button>
   </div>
   <div class="gold-status">
     <div id="gold-swatch" class="gold-swatch" onclick="selectGold()"></div>
     <div style="font-family:Orbitron; font-size:.8rem; color:var(--gold)">RÉSERVE D'OR : <span id="goldCount">50</span>/50 PX</div>
   </div>
   <div class="palette" id="palette"></div>
-  <button class="btn-publish" onclick="publish()">▲ PUBLIER DANS LE CLOUD</button>
+  <button class="btn-publish" onclick="openModal()">▲ PUBLIER DANS LA GALERIE PARTAGÉE</button>
 </div>
 
-<h2 id="gallery-title">Galerie des Saisons</h2>
+<div id="modal">
+  <div style="font-family:Orbitron; color:var(--gold); margin-bottom:15px;">PUBLICATION</div>
+  <input type="text" id="p-name" placeholder="Ton Pseudo">
+  <input type="text" id="p-title" placeholder="Nom de ton œuvre">
+  <button onclick="publish()">ENVOYER DANS LA GALERIE</button>
+  <button onclick="document.getElementById('modal').style.display='none'" style="background:#444; color:#fff;">ANNULER</button>
+</div>
+
+<h2 style="font-family:Orbitron; color:var(--gold); margin-top:50px;">GALERIE DES SAISONS</h2>
 <div id="gallery"></div>
 
 <script>
 const COLORS = ["#FFFFFF","#CCCCCC","#888888","#444444","#222222","#111111","#050b14","#000000","#C8E8FF","#7AB8F0","#00AAFF","#0066CC","#003880","#1A2533","#00f3ff","#006688","#CCFFCC","#88FF88","#22DD44","#009922","#005511","#003308","#CCFF00","#66BB00","#FFDBAC","#F1C27D","#E0AC69","#8D5524","#633919","#FFEECC","#FF8800","#CC0000","#FF3131","#FF66CC","#F7FE2E","#8C52FF"];
-const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d');
+const canvas = document.getElementById('main-canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('canvas-container');
 let mode = 'draw', color = '#FFFFFF', isDown = false;
 
-// Note : Dessine la grille initiale
-function drawGrid() {
-  ctx.fillStyle = '#081422'; ctx.fillRect(0, 0, 800, 450);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+// Note : Dessine la grille de carrés vides
+function drawBase() {
+  ctx.fillStyle = '#081422'; ctx.fillRect(0,0,800,450);
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
   for(let x=0; x<=800; x+=15) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,450); ctx.stroke(); }
   for(let y=0; y<=450; y+=15) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(800,y); ctx.stroke(); }
 }
 
-// Note : Construit la palette de 36 couleurs
 const pal = document.getElementById('palette');
 COLORS.forEach(c => {
   const b = document.createElement('div'); b.className = 'c-btn'; b.style.background = c;
@@ -89,7 +103,8 @@ COLORS.forEach(c => {
 });
 
 function selectGold() { color = '#ffaa00'; setMode('draw'); document.querySelectorAll('.c-btn').forEach(x => x.classList.remove('active')); document.getElementById('gold-swatch').classList.add('active'); }
-function setMode(m) { mode = m; document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active')); document.getElementById('btn-'+m).classList.add('active'); }
+function setMode(m) { mode = m; document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active')); document.getElementById('btn-'+m)?.classList.add('active'); }
+function resetView() { container.style.transform = `scale(${document.getElementById('viewport-container').offsetWidth/800})`; }
 
 function handleInput(e) {
   if(!isDown) return;
@@ -98,8 +113,10 @@ function handleInput(e) {
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
   const x = Math.floor(((clientX - rect.left) * (800 / rect.width)) / 15) * 15;
   const y = Math.floor(((clientY - rect.top) * (450 / rect.height)) / 15) * 15;
+  
   document.getElementById('valX').textContent = Math.floor(x/15);
   document.getElementById('valY').textContent = Math.floor(y/15);
+
   if(x >= 0 && x < 800 && y >= 0 && y < 450) {
     ctx.fillStyle = (mode === 'erase') ? '#081422' : color;
     ctx.fillRect(x, y, 15, 15);
@@ -115,16 +132,23 @@ window.addEventListener('touchmove', (e) => { handleInput(e); e.preventDefault()
 window.addEventListener('mouseup', () => isDown = false);
 window.addEventListener('touchend', () => isDown = false);
 
-// Note : Sauvegarde Cloud avec Pseudo et Titre
+function openModal() { document.getElementById('modal').style.display = 'block'; }
+
 async function publish() {
-  const name = prompt("Ton pseudo de joueur ?"), title = prompt("Titre de ton oeuvre ?");
-  if(!name || !title) return;
+  const name = document.getElementById('p-name').value;
+  const title = document.getElementById('p-title').value;
+  if(!name || !title) return alert("Remplis les infos !");
+  
   const img = canvas.toDataURL('image/jpeg', 0.8);
   const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, title, img }) });
-  if(res.ok) { alert("Ton oeuvre est dans la Galerie ! ✨"); loadGallery(); }
+  
+  if(res.ok) { 
+    alert("C'est en ligne ! ✨"); 
+    document.getElementById('modal').style.display = 'none';
+    loadGallery(); 
+  }
 }
 
-// Note : Charge la galerie depuis MongoDB et crée les cartes
 async function loadGallery() {
   const res = await fetch('/api/gallery');
   const data = await res.json();
@@ -132,28 +156,24 @@ async function loadGallery() {
   gal.innerHTML = data.map(art => `
     <div class="art-card">
       <img src="${art.img}">
-      <div class="art-meta">
-        <span class="art-title">${art.title}</span>
-        <span class="art-author">par @${art.name}</span>
-        <div class="art-footer">
-          <span class="vote-count" id="v-${art.id}">⭐ ${art.votes || 0}</span>
-          <button class="btn-vote" onclick="vote('${art.id}')">VOTER</button>
-        </div>
+      <div style="padding:15px;">
+        <div style="font-family:Orbitron; color:var(--gold);">${art.title}</div>
+        <div style="font-size:0.8rem; color:#888;">par @${art.name}</div>
+        <button onclick="vote('${art.id}')" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:4px 10px; cursor:pointer; margin-top:10px; border-radius:4px;">⭐ ${art.votes}</button>
       </div>
     </div>
   `).join('');
 }
 
 async function vote(id) {
-  const res = await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
-  const result = await res.json();
-  document.getElementById(`v-${id}`).textContent = `⭐ ${result.votes}`;
+  await fetch('/api/vote', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+  loadGallery();
 }
 
-drawGrid();
+drawBase();
 const saved = localStorage.getItem('gp_backup');
 if(saved) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0); i.src = saved; }
-loadGallery();
+window.onresize = resetView; resetView(); loadGallery();
 </script>
 </body>
 </html>
