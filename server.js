@@ -7,6 +7,15 @@ const app  = express();
 const PORT = process.env.PORT || 10000;
 
 // ════════════════════════════════════════════
+//  VALIDATION PI NETWORK (ÉTAPE 10)
+//  À placer ici pour être accessible immédiatement
+// ════════════════════════════════════════════
+app.get('/.well-known/pi-network/validation-key.txt', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.send('TON_CODE_SECRET_ICI'); // 👈 REMPLACE PAR TA CLÉ DE L'ÉTAPE 10
+});
+
+// ════════════════════════════════════════════
 //  VARIABLES D'ENVIRONNEMENT (Render)
 //  MONGO_URI         → MongoDB Atlas
 //  ANTHROPIC_API_KEY → Modération IA Claude
