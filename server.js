@@ -16,6 +16,14 @@ app.get('/.well-known/pi-network/validation-key.txt', (req, res) => {
 });
 
 // ════════════════════════════════════════════
+//  DEUXIÈME ROUTE DE VALIDATION (Pour le portail Pi)
+// ════════════════════════════════════════════
+app.get('/validation-key.txt', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.send('b9f3cc9cb3dc0bb0420c080d7a05c34369d934d01f5e62c80ca23a19d1d75bc1d02ded8c7b2a958b4d6c79cfc5a6080938afe54be75e3bc9ea81b702b54cc7aa');
+});
+
+// ════════════════════════════════════════════
 //  VARIABLES D'ENVIRONNEMENT (Render)
 //  MONGO_URI         → MongoDB Atlas
 //  ANTHROPIC_API_KEY → Modération IA Claude
