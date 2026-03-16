@@ -21,11 +21,28 @@ async function connectDB() {
 }
 connectDB();
 
-// ─── CORS permissif (même origine Render) ───
+// ─── CORS — autorise GitHub Pages + Render ───
+const ALLOWED_ORIGINS = [
+  'https://gold-pixel.onrender.com',  // Render lui-même
+  /\.github\.io$/,                     // Tous les GitHub Pages
+  /\.github\.com$/,
+  'http://localhost:3000',             // Dev local
+  'http://localhost:10000',
+];
+
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '';
+  const allowed = ALLOWED_ORIGINS.some(o =>
+    typeof o === 'string' ? o === origin : o.test(origin)
+  );
+  // En prod Render, accepter aussi les requêtes sans origin (ex: mobile)
+  if (allowed || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    res.header('Access-Control-Allow-Origin', '*'); // permissif pour debug
+  }
   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
