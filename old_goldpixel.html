@@ -1,208 +1,1321 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLD PIXEL - Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #ffaa00; --bg: #050b14; --red: #ff3131; }
-        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow-x: hidden; touch-action: none; }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-shadow: 0 0 10px var(--gold); margin: 15px 0; font-size: 1.2rem; }
-        
-        /* Note : Le Viewport avec la grille pour voir les pixels vides */
-        #viewport { 
-            width: 600px; height: 600px; max-width: 95vw; 
-            border: 2px solid var(--gold); background: #000; 
-            position: relative; overflow: hidden; border-radius: 4px;
-        }
-        #canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; image-rendering: pixelated; }
-        #grid-overlay { 
-            position: absolute; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%;
-            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
-                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-        }
-        canvas { background: #081422; display: block; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GOLD PIXEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #ffaa00;
+      --gold2: #fcf6ba;
+      --gold3: #bf953f;
+      --bg: #050b14;
+      --bg2: #0a1628;
+      --bg3: #0d1e36;
+      --border: rgba(255,170,0,0.3);
+    }
 
-        .ui { width: 100%; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .format-bar { display: flex; gap: 8px; margin-bottom: 5px; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: 'Orbitron'; padding: 8px 12px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
-        .btn.active { background: var(--gold); color: #000; }
-        .btn-del { border-color: var(--red); color: var(--red); font-size: 0.5rem; padding: 4px; width: 100%; margin-top: 5px; }
-        
-        .gold-box { display: flex; align-items: center; gap: 10px; background: rgba(255,170,0,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid var(--gold); }
-        .gold-btn { width: 30px; height: 30px; background: var(--gold); border: 2px solid #fff; cursor: pointer; border-radius: 4px; position: relative; }
-        .gold-btn.active::after { content: '✓'; position: absolute; color: white; left: 7px; top: 2px; font-weight: bold; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
-        .color-btn { width: 25px; height: 25px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .color-btn.active { border: 2px solid #fff; transform: scale(1.1); box-shadow: 0 0 8px #fff; }
+    body {
+      cursor: default;
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      touch-action: none;
+      user-select: none;
+    }
 
-        .section-title { font-family: 'Orbitron'; color: var(--gold); margin-top: 30px; border-bottom: 1px solid var(--gold); width: 80%; text-align: center; padding-bottom: 5px; }
-        #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 95%; margin-top: 20px; padding-bottom: 80px; }
-        .art-card { background: #0d1e36; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,170,0,0.2); }
-        .art-card img { width: 100%; image-rendering: pixelated; border: 1px solid #1a2a44; }
-    </style>
+    /* Curseur main uniquement sur le canevas */
+    #viewport-container { cursor: none; }
+    #viewport-container.pan-mode { cursor: grab !important; }
+    #viewport-container.pan-mode:active { cursor: grabbing !important; }
+
+    #custom-cursor {
+      position: fixed;
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-6px, -4px);
+      display: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,170,0,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 80% 80%, rgba(0,102,204,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── HEADER : titre centré, logo à gauche ─── */
+    .header {
+      width: 100%;
+      text-align: center;
+      padding: 20px 15px 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      position: absolute;
+      right: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .logo-icon svg { width: 100%; height: 100%; }
+
+    .site-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 30%, #ffaa00 55%, #fcf6ba 75%, #bf953f 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: goldShimmer 4s linear infinite;
+      letter-spacing: 0.08em;
+    }
+    @keyframes goldShimmer {
+      0%   { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .header-sub {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      color: rgba(255,170,0,0.5);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* ─── CANEVAS ─── */
+    #viewport-container {
+      position: relative;
+      width: 95vw;
+      max-width: 880px;
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #030810;
+      box-shadow: 0 0 30px rgba(255,170,0,0.15), inset 0 0 20px rgba(0,0,0,0.5);
+      touch-action: none;
+      z-index: 1;
+    }
+
+    #canvas-wrapper { width: 100%; overflow: hidden; position: relative; }
+    #canvas-container { transform-origin: top left; will-change: transform; display: block; line-height: 0; }
+
+    #main-canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .coords {
+      position: absolute;
+      bottom: 8px; right: 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem;
+      color: var(--gold);
+      background: rgba(0,0,0,0.75);
+      padding: 3px 10px;
+      border-radius: 4px;
+      pointer-events: none;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(255,170,0,0.2);
+    }
+
+    /* ─── UI ─── */
+    .ui {
+      width: 95vw;
+      max-width: 880px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+      z-index: 1;
+    }
+
+    .zoom-bar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+    .zoom-indicator {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.6rem;
+      color: rgba(255,170,0,0.6);
+      min-width: 45px;
+      text-align: center;
+    }
+
+    .tool-bar {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-tool {
+      background: transparent;
+      border: 1px solid rgba(255,170,0,0.4);
+      color: rgba(255,170,0,0.8);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem;
+      padding: 9px 11px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .btn-tool:hover { border-color: var(--gold); color: var(--gold); background: rgba(255,170,0,0.08); }
+    .btn-tool.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 700; }
+    .btn-tool.danger { border-color: rgba(255,50,50,0.5); color: rgba(255,100,100,0.8); }
+    .btn-tool.danger:hover { background: rgba(200,30,30,0.3); color: #ff6666; border-color: #ff4444; }
+
+    /* Bouton PAN spécial quand actif */
+    #btn-pan.active { background: #3399ff; border-color: #3399ff; color: #000; }
+
+    .eraser-size-bar {
+      display: none;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+    }
+    .eraser-size-bar.visible { display: flex; }
+    .size-btn {
+      background: transparent;
+      border: 1px solid rgba(255,170,0,0.3);
+      color: rgba(255,170,0,0.7);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.6rem;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .size-btn.active { background: rgba(255,170,0,0.2); border-color: var(--gold); color: var(--gold); }
+
+    /* ─── PALETTE ─── */
+    .palette-section {
+      background: rgba(10,22,40,0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .palette-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.6rem;
+      color: rgba(255,170,0,0.5);
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+    }
+
+    /* Grille 9 colonnes pour les couleurs normales */
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .c-btn {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .c-btn:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.4); }
+    .c-btn.active { border: 2px solid #fff; box-shadow: 0 0 10px #fff; transform: scale(1.1); }
+
+    /* ─── RANGÉE MÉTAUX : Argent | Or | Bronze centrés avec espacement égal ─── */
+    .metals-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 10px;
+      padding: 6px 0 0;
+    }
+
+    /* Les 3 colonnes de métaux, équidistantes et centrées */
+    .metals-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      /* On limite la largeur à 3/9 de la palette = 1/3 */
+      width: calc(3 * (100% / 9) + 2 * 5px);
+      gap: 5px;
+    }
+
+    .metal-swatch {
+      aspect-ratio: 1;
+      width: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: transform 0.15s;
+    }
+    .metal-swatch:hover { transform: scale(1.1); }
+    .metal-swatch.active { border: 2px solid #fff; transform: scale(1.1); }
+
+    /* OR — animation brillance continue */
+    #gold-swatch {
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 35%, #ffaa00 55%, #fcf6ba 75%, #b38728 100%);
+      animation: goldPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes goldPulse {
+      0%,100% { box-shadow: 0 0 4px 1px rgba(255,200,0,0.5); }
+      50%      { box-shadow: 0 0 16px 5px rgba(255,200,0,1), 0 0 6px 2px #fffbe0; }
+    }
+    #gold-swatch.active {
+      animation: goldPulseActive 1s ease-in-out infinite;
+      border: 2px solid #fff !important;
+    }
+    @keyframes goldPulseActive {
+      0%,100% { box-shadow: 0 0 10px 3px rgba(255,200,0,0.8); transform: scale(1.0); }
+      50%      { box-shadow: 0 0 28px 8px var(--gold), 0 0 10px 3px #fff; transform: scale(1.12); }
+    }
+
+    /* ARGENT */
+    #silver-swatch {
+      background: linear-gradient(135deg, #888 0%, #f0f0f0 40%, #C0C0C0 60%, #999 100%);
+    }
+    #silver-swatch.active { box-shadow: 0 0 12px #ddd; border: 2px solid #fff !important; }
+
+    /* BRONZE */
+    #bronze-swatch {
+      background: linear-gradient(135deg, #7c4f1e 0%, #e8a96a 40%, #cd7f32 60%, #a0612b 100%);
+    }
+    #bronze-swatch.active { box-shadow: 0 0 12px #cd7f32; border: 2px solid #fff !important; }
+
+    /* Étiquettes sous chaque métal */
+    .metals-labels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      width: calc(3 * (100% / 9) + 2 * 5px);
+      gap: 5px;
+    }
+    .metal-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.42rem;
+      color: rgba(255,170,0,0.6);
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+    .metal-label.silver { color: rgba(192,192,192,0.7); }
+    .metal-label.bronze { color: rgba(205,127,50,0.8); }
+
+    /* Compteur OR centré sous l'ensemble, aligné sur la colonne OR (col du milieu) */
+    .gold-reserve {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: rgba(255,170,0,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,170,0,0.15);
+      /* Même largeur que les 3 métaux */
+      width: calc(3 * (100% / 9) + 2 * 5px);
+    }
+    .gold-info {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem;
+      color: var(--gold);
+      white-space: nowrap;
+      text-align: center;
+    }
+    .gold-bar { width: 100%; height: 5px; background: rgba(255,170,0,0.12); border-radius: 3px; overflow: hidden; }
+    .gold-bar-fill { height: 100%; background: linear-gradient(90deg, #bf953f, #ffaa00, #fcf6ba); border-radius: 3px; transition: width 0.3s ease; }
+
+    /* ─── BOUTON PUBLIER ─── */
+    .btn-publish {
+      background: linear-gradient(135deg, #bf953f, #ffaa00, #fcf6ba, #ffaa00, #bf953f);
+      background-size: 200% auto;
+      color: #000;
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: background-position 0.4s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(255,170,0,0.25);
+    }
+    .btn-publish:hover { background-position: right center; transform: translateY(-1px); box-shadow: 0 6px 30px rgba(255,170,0,0.4); }
+    .btn-publish:active { transform: scale(0.98); }
+    .btn-publish:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    /* ─── MODAL ─── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal {
+      background: var(--bg3);
+      padding: 28px 24px;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 30px rgba(255,170,0,0.1);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.92) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-title { font-family: 'Orbitron', monospace; color: var(--gold); font-size: 1rem; margin-bottom: 18px; letter-spacing: 0.1em; }
+
+    #modal input {
+      width: 100%; padding: 11px 14px; margin-bottom: 12px;
+      background: #050b14; border: 1px solid rgba(255,170,0,0.3);
+      color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem;
+      border-radius: 6px; outline: none; transition: border-color 0.2s;
+    }
+    #modal input:focus { border-color: var(--gold); }
+    #modal input::placeholder { color: rgba(255,255,255,0.25); }
+
+    .modal-status {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.62rem;
+      min-height: 18px;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+      color: rgba(255,170,0,0.8);
+    }
+    .modal-status.error { color: #ff6666; }
+    .modal-status.success { color: #44ff88; }
+
+    .modal-btns { display: flex; gap: 10px; }
+    .modal-btns button {
+      flex: 1; padding: 11px;
+      font-family: 'Orbitron', monospace; font-size: 0.7rem;
+      border: none; border-radius: 6px; cursor: pointer;
+      letter-spacing: 0.05em; transition: all 0.2s;
+    }
+    .modal-btn-confirm { background: var(--gold); color: #000; font-weight: 700; }
+    .modal-btn-confirm:hover { background: #fcf6ba; }
+    .modal-btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15) !important; }
+
+    /* ─── SECTIONS ─── */
+    .section-block { width: 95vw; max-width: 880px; margin-top: 50px; z-index: 1; }
+    .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.9rem, 3vw, 1.2rem);
+      background: linear-gradient(90deg, var(--gold3), var(--gold), var(--gold2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      letter-spacing: 0.06em; white-space: nowrap;
+    }
+    .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,170,0,0.4), transparent); }
+
+    /* ─── GALERIE ─── */
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding-bottom: 20px; }
+    .art-card { background: var(--bg2); border: 1px solid rgba(255,170,0,0.15); border-radius: 10px; overflow: hidden; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .art-card:hover { transform: translateY(-3px); border-color: rgba(255,170,0,0.5); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+    .art-card-header { padding: 10px 14px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .art-card-title { font-family: 'Orbitron', monospace; font-size: 0.7rem; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .art-card-author { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .art-card img { width: 100%; display: block; image-rendering: pixelated; }
+    .art-card-footer { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+    .art-date { font-size: 0.65rem; color: rgba(255,255,255,0.2); }
+    .btn-vote { background: transparent; border: 1px solid rgba(255,170,0,0.35); color: rgba(255,170,0,0.8); font-family: 'Orbitron', monospace; font-size: 0.65rem; padding: 5px 12px; cursor: pointer; border-radius: 5px; transition: all 0.2s; }
+    .btn-vote:hover { background: rgba(255,170,0,0.15); border-color: var(--gold); color: var(--gold); }
+    .btn-vote.voted { background: rgba(255,170,0,0.2); border-color: var(--gold); color: var(--gold); }
+
+    /* ─── TOP 10 ─── */
+    #top10-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-card { display: flex; align-items: center; gap: 14px; background: var(--bg2); border: 1px solid rgba(255,170,0,0.12); border-radius: 10px; padding: 10px 14px; transition: border-color 0.2s; }
+    .top-card:hover { border-color: rgba(255,170,0,0.4); }
+    .top-card.rank-1 { border-color: rgba(255,215,0,0.5); background: rgba(255,170,0,0.07); }
+    .top-card.rank-2 { border-color: rgba(192,192,192,0.4); }
+    .top-card.rank-3 { border-color: rgba(205,127,50,0.4); }
+    .rank-badge { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; min-width: 36px; text-align: center; }
+    .rank-1 .rank-badge { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
+    .rank-2 .rank-badge { color: #c0c0c0; }
+    .rank-3 .rank-badge { color: #cd7f32; }
+    .rank-other .rank-badge { color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+    .top-thumb { width: 64px; height: 36px; image-rendering: pixelated; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; object-fit: cover; background: #081422; }
+    .top-info { flex: 1; min-width: 0; }
+    .top-title { font-family: 'Orbitron', monospace; font-size: 0.68rem; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-author { font-size: 0.7rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .top-votes { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--gold); white-space: nowrap; }
+
+    /* Miniature placeholder Top10 quand pas d'image réelle */
+    .top-thumb-placeholder { width: 64px; height: 36px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #081422; font-size: 1.2rem; }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(10,22,40,0.95); border: 1px solid var(--gold);
+      color: var(--gold); font-family: 'Orbitron', monospace; font-size: 0.68rem;
+      padding: 12px 24px; border-radius: 8px; z-index: 9999;
+      transition: transform 0.3s ease; letter-spacing: 0.06em;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.6); white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    .gallery-loading { text-align: center; font-family: 'Orbitron', monospace; font-size: 0.7rem; color: rgba(255,170,0,0.4); padding: 40px; letter-spacing: 0.15em; }
+    .bottom-spacer { height: 60px; }
+
+    @media (max-width: 480px) {
+      .palette, .metals-row, .metals-labels { gap: 3px; }
+      .btn-tool { padding: 8px 8px; font-size: 0.56rem; }
+    }
+  </style>
 </head>
 <body>
 
-    <h1>GOLD PIXEL STUDIO</h1>
+<!-- ─── CURSEUR MAIN PIXEL VINTAGE ─── -->
+<div id="custom-cursor">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- Contour noir externe -->
+    <rect x="9"  y="1"  width="6" height="2" fill="#000"/>
+    <rect x="7"  y="3"  width="2" height="2" fill="#000"/>
+    <rect x="15" y="3"  width="2" height="2" fill="#000"/>
+    <rect x="7"  y="5"  width="2" height="8" fill="#000"/>
+    <rect x="15" y="5"  width="2" height="2" fill="#000"/>
+    <rect x="15" y="7"  width="2" height="2" fill="#000"/>
+    <rect x="17" y="7"  width="2" height="2" fill="#000"/>
+    <rect x="15" y="9"  width="2" height="2" fill="#000"/>
+    <rect x="19" y="9"  width="2" height="2" fill="#000"/>
+    <rect x="17" y="9"  width="2" height="2" fill="#000"/>
+    <rect x="21" y="11" width="2" height="2" fill="#000"/>
+    <rect x="19" y="11" width="2" height="2" fill="#000"/>
+    <rect x="5"  y="13" width="2" height="2" fill="#000"/>
+    <rect x="5"  y="15" width="2" height="12" fill="#000"/>
+    <rect x="7"  y="25" width="2" height="2" fill="#000"/>
+    <rect x="9"  y="27" width="2" height="2" fill="#000"/>
+    <rect x="11" y="27" width="12" height="2" fill="#000"/>
+    <rect x="23" y="11" width="2" height="16" fill="#000"/>
+    <rect x="7"  y="13" width="2" height="2" fill="#000"/>
 
-    <div class="format-bar">
-        <button id="fmt11" class="btn active" onclick="changeFormat(600, 600, '1:1')">FORMAT 1:1</button>
-        <button id="fmt169" class="btn" onclick="changeFormat(800, 450, '16:9')">FORMAT 16:9</button>
+    <!-- Corps main — noir intérieur -->
+    <rect x="9"  y="3"  width="6" height="2" fill="#1a1a1a"/>
+    <rect x="9"  y="5"  width="6" height="8" fill="#1a1a1a"/>
+    <rect x="7"  y="13" width="16" height="12" fill="#1a1a1a"/>
+
+    <!-- Doigt index — couleurs arc-en-ciel -->
+    <rect x="10" y="2"  width="2" height="2" fill="#ff0000"/>
+    <rect x="12" y="2"  width="2" height="2" fill="#ff6600"/>
+    <rect x="10" y="4"  width="2" height="2" fill="#ffff00"/>
+    <rect x="12" y="4"  width="2" height="2" fill="#00cc00"/>
+    <rect x="10" y="6"  width="2" height="2" fill="#00aaff"/>
+    <rect x="12" y="6"  width="2" height="2" fill="#8800ff"/>
+    <rect x="10" y="8"  width="2" height="2" fill="#ff00cc"/>
+    <rect x="12" y="8"  width="2" height="2" fill="#ff0000"/>
+    <rect x="10" y="10" width="2" height="2" fill="#ff6600"/>
+    <rect x="12" y="10" width="2" height="2" fill="#ffff00"/>
+
+    <!-- Paume — couleurs arc-en-ciel sur le contour -->
+    <rect x="8"  y="14" width="2" height="2" fill="#ff0000"/>
+    <rect x="8"  y="16" width="2" height="2" fill="#ffff00"/>
+    <rect x="8"  y="18" width="2" height="2" fill="#00cc00"/>
+    <rect x="8"  y="20" width="2" height="2" fill="#00aaff"/>
+    <rect x="8"  y="22" width="2" height="2" fill="#8800ff"/>
+    <rect x="8"  y="24" width="2" height="2" fill="#ff00cc"/>
+    <rect x="21" y="14" width="2" height="2" fill="#ff6600"/>
+    <rect x="21" y="16" width="2" height="2" fill="#00cc00"/>
+    <rect x="21" y="18" width="2" height="2" fill="#00aaff"/>
+    <rect x="21" y="20" width="2" height="2" fill="#ff0000"/>
+    <rect x="21" y="22" width="2" height="2" fill="#ffff00"/>
+    <rect x="21" y="24" width="2" height="2" fill="#8800ff"/>
+
+    <!-- Paume intérieure — gris foncé -->
+    <rect x="10" y="14" width="10" height="12" fill="#2a2a2a"/>
+
+    <!-- Doigts repliés — petits rectangles colorés -->
+    <rect x="15" y="8"  width="2" height="4" fill="#ff6600"/>
+    <rect x="17" y="10" width="2" height="4" fill="#00cc00"/>
+    <rect x="19" y="12" width="2" height="2" fill="#00aaff"/>
+  </svg>
+</div>
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="logo-wrapper">
+    <div class="logo-icon">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gF" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fcf6ba"/>
+            <stop offset="40%" stop-color="#ffaa00"/>
+            <stop offset="100%" stop-color="#bf953f"/>
+          </linearGradient>
+          <linearGradient id="gR" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8a6200"/>
+            <stop offset="100%" stop-color="#bf953f"/>
+          </linearGradient>
+          <linearGradient id="gT" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ffaa00"/>
+            <stop offset="100%" stop-color="#fcf6ba"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="10" y="18" width="24" height="24" fill="url(#gF)" filter="url(#glow)"/>
+        <polygon points="34,18 42,10 42,34 34,42" fill="url(#gR)"/>
+        <polygon points="10,18 18,10 42,10 34,18" fill="url(#gT)"/>
+        <rect x="13" y="21" width="6" height="6" fill="rgba(255,255,255,0.4)" rx="1"/>
+        <rect x="13" y="29" width="3" height="3" fill="rgba(255,255,255,0.15)" rx="0.5"/>
+        <rect x="10" y="18" width="24" height="24" fill="none" stroke="rgba(255,200,0,0.5)" stroke-width="0.5"/>
+        <polygon points="34,18 42,10 42,34 34,42" fill="none" stroke="rgba(255,200,0,0.3)" stroke-width="0.5"/>
+        <polygon points="10,18 18,10 42,10 34,18" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+      </svg>
     </div>
-    
-    <div id="viewport">
-        <div id="canvas-container">
-            <canvas id="canvas" width="600" height="600"></canvas>
-            <div id="grid-overlay"></div>
-        </div>
+    <div class="site-title">GOLD PIXEL</div>
+  </div>
+  <div class="header-sub">Studio Pixel Art · Pi Network</div>
+</div>
+
+<!-- ─── CANEVAS ─── -->
+<div id="viewport-container">
+  <div id="canvas-wrapper">
+    <div id="canvas-container">
+      <canvas id="main-canvas"></canvas>
     </div>
+  </div>
+  <div class="coords">X: <span id="valX">0</span> | Y: <span id="valY">0</span></div>
+</div>
 
-    <div class="ui">
-        <div class="tool-bar">
-            <button id="drawBtn" class="btn active" onclick="setMode('draw')">PIXEL</button>
-            <button id="eraseBtn" class="btn" onclick="setMode('erase')">GOMME</button>
-            <button id="moveBtn" class="btn" onclick="setMode('move')">DÉPLACER</button>
-            <button class="btn" onclick="resetView()">RECENTRER</button>
-        </div>
+<!-- ─── UI ─── -->
+<div class="ui">
 
-        <div class="gold-box">
-            <div id="goldBtn" class="gold-btn" onclick="selectGold()"></div>
-            <div style="font-family:Orbitron; font-size:0.7rem; color:var(--gold)">OR UTILISÉ : <span id="goldCount">0</span>/15</div>
-        </div>
+  <div class="zoom-bar">
+    <button class="btn-tool" onclick="zoomOut()">－</button>
+    <span class="zoom-indicator" id="zoomLabel">100%</span>
+    <button class="btn-tool" onclick="zoomIn()">＋</button>
+    <button class="btn-tool" onclick="resetView()" style="margin-left:8px;">⊙ RECENTRER</button>
+  </div>
 
-        <div class="palette" id="palette"></div>
-        <button class="btn" id="publishBtn" onclick="saveArt()" style="background:var(--gold); color:#000; width:260px; font-weight:bold; margin-top:5px;">PUBLIER DANS LA GALERIE</button>
+  <div class="tool-bar">
+    <button id="btn-draw"  class="btn-tool active" onclick="setMode('draw')">✏ PIXEL</button>
+    <button id="btn-erase" class="btn-tool"         onclick="setMode('erase')">◻ GOMME</button>
+    <button id="btn-pan"   class="btn-tool"         onclick="setMode('pan')" title="Activer pour déplacer/zoomer sans dessiner">✋ NAVIGATION</button>
+    <button                class="btn-tool danger"  onclick="clearAll()">✕ EFFACER TOUT</button>
+  </div>
+
+  <div class="eraser-size-bar" id="eraser-size-bar">
+    <span style="font-size:0.6rem;color:rgba(255,170,0,0.5);letter-spacing:0.1em;">TAILLE :</span>
+    <button class="size-btn active" id="sz-small" onclick="setEraserSize('small')">PETIT (1×1)</button>
+    <button class="size-btn"        id="sz-big"   onclick="setEraserSize('big')">GRAND (3×3)</button>
+  </div>
+
+  <div class="palette-section">
+    <div class="palette-label">PALETTE DE COULEURS</div>
+    <div class="palette" id="palette"></div>
+
+    <!-- Métaux précieux : ARGENT | OR | BRONZE — centrés, équidistants -->
+    <div class="metals-wrapper">
+      <div class="metals-row">
+        <div id="silver-swatch" class="metal-swatch" onclick="selectMetal('silver')" title="Argent"></div>
+        <div id="gold-swatch"   class="metal-swatch" onclick="selectMetal('gold')"   title="Or — 50px max"></div>
+        <div id="bronze-swatch" class="metal-swatch" onclick="selectMetal('bronze')" title="Bronze"></div>
+      </div>
+      <div class="metals-labels">
+        <div class="metal-label silver">ARGENT</div>
+        <div class="metal-label">✦ OR</div>
+        <div class="metal-label bronze">BRONZE</div>
+      </div>
+      <!-- Compteur OR centré sous les 3 métaux -->
+      <div class="gold-reserve">
+        <div class="gold-info">✦ OR : <span id="goldCount">50</span>/50 PX</div>
+        <div class="gold-bar"><div class="gold-bar-fill" id="goldBarFill" style="width:100%"></div></div>
+      </div>
     </div>
+  </div>
 
-    <div class="section-title">GALERIE DES SAISONS</div>
-    <div id="gallery"></div>
+  <button class="btn-publish" id="btn-publish" onclick="openModal()">▲ PARTAGER SUR LA GALERIE PARTAGÉE</button>
+</div>
 
-    <script>
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        const container = document.getElementById("canvas-container");
-        const grid = document.getElementById("grid-overlay");
-        const viewport = document.getElementById("viewport");
-        
-        let pSize = 15, cW = 600, cH = 600, scale = 1, pos = { x: 0, y: 0 }, mode = 'draw', color = "#5A7A94", isDown = false, goldPixels = 0;
-        let myUploads = JSON.parse(localStorage.getItem('gp_my_art') || "[]");
+<!-- ─── MODAL ─── -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-title">✦ PUBLICATION</div>
+    <input type="text" id="p-name"  placeholder="Ton pseudo"     maxlength="30" autocomplete="off">
+    <input type="text" id="p-title" placeholder="Nom de l'œuvre" maxlength="60" autocomplete="off">
+    <div class="modal-status" id="modal-status"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-confirm" id="btn-send" onclick="publish()">ENVOYER</button>
+      <button class="modal-btn-cancel"  id="btn-cancel-modal" onclick="closeModal()">ANNULER</button>
+    </div>
+  </div>
+</div>
 
-        // Note : GESTION DES FORMATS 1:1 et 16:9
-        function changeFormat(w, h, label) {
-            const temp = document.createElement('canvas');
-            temp.width = canvas.width; temp.height = canvas.height;
-            temp.getContext('2d').drawImage(canvas, 0, 0);
-            cW = w; cH = h;
-            canvas.width = w; canvas.height = h;
-            grid.style.backgroundSize = `${pSize}px ${pSize}px`;
-            ctx.fillStyle = "#081422"; ctx.fillRect(0, 0, w, h);
-            ctx.drawImage(temp, (w - temp.width) / 2, (h - temp.height) / 2);
-            document.querySelectorAll('.format-bar .btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(label === '1:1' ? 'fmt11' : 'fmt169').classList.add('active');
-            resetView();
-        }
+<!-- ─── TOP 10 ─── -->
+<div class="section-block">
+  <div class="section-header">
+    <span class="section-title">✦ CLASSEMENT TOP 10</span>
+    <div class="section-line"></div>
+  </div>
+  <div id="top10-list"><div class="gallery-loading">CHARGEMENT...</div></div>
+</div>
 
-        const colors = ["#050b14","#333333","#5A7A94","#808080","#AAAAAA","#CCCCCC","#EEEEEE","#FFFFFF",
-                        "#4D3900","#806000","#B38600","#E6AC00","#FFD700","#FFEA00","#FFFF80","#FFFFCC",
-                        "#440000","#880000","#FF3131","#FF5E3A","#FF914D","#FFBD59","#FF66C4","#FFBDD4",
-                        "#003300","#22FF00","#CCFF00","#00D9FF","#0088FF","#5271FF","#8C52FF","#CB6CE6"];
+<!-- ─── GALERIE ─── -->
+<div class="section-block">
+  <div class="section-header">
+    <span class="section-title">GALERIE DES CRÉATIONS</span>
+    <div class="section-line"></div>
+  </div>
+  <div id="gallery"><div class="gallery-loading">CHARGEMENT...</div></div>
+</div>
 
-        colors.forEach(c => {
-            const b = document.createElement("div"); b.className = "color-btn"; b.style.background = c;
-            b.onclick = () => { color = c; setMode('draw'); document.querySelectorAll('.color-btn, .gold-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); };
-            document.getElementById("palette").appendChild(b);
-        });
+<div class="bottom-spacer"></div>
+<div id="toast"></div>
 
-        function selectGold() { color = "#ffaa00"; setMode('draw'); document.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active')); document.getElementById('goldBtn').classList.add('active'); }
-        function updateTransform() { container.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`; }
-        function resetView() { scale = viewport.clientWidth / cW; pos = { x: 0, y: 0 }; updateTransform(); }
+<script>
+// ════════════════════════════════════════════
+//  CONSTANTES
+// ════════════════════════════════════════════
+const COLS     = 80, ROWS = 45, PX = 10;
+const CANVAS_W = COLS * PX;   // 800
+const CANVAS_H = ROWS * PX;   // 450
+const MAX_GOLD = 50;
+const BG_COLOR = '#081422';
 
-        function handleAction(e) {
-            if(!isDown) return;
-            const ev = e.touches ? e.touches[0] : e;
-            const rect = canvas.getBoundingClientRect();
-            if(mode === 'move') { pos.x += (ev.movementX || 0); pos.y += (ev.movementY || 0); updateTransform(); return; }
-            
-            const x = Math.floor((ev.clientX - rect.left) / (pSize * scale)) * pSize;
-            const y = Math.floor((ev.clientY - rect.top) / (pSize * scale)) * pSize;
-            if (x < 0 || x >= cW || y < 0 || y >= cH) return;
+const COLORS = [
+  '#FFFFFF','#DDDDDD','#AAAAAA','#777777','#444444','#222222','#111111','#000000',
+  '#C8E8FF','#7AB8F0','#00AAFF','#0066CC','#003880','#001840','#00f3ff','#006688',
+  '#CCFFCC','#88FF88','#22DD44','#009922','#005511','#003308','#CCFF00','#66BB00',
+  '#FFDBAC','#F1C27D','#E0AC69','#8D5524','#633919','#3B1F0A',
+  '#FFEECC','#FF8800','#FF4400','#CC0000','#FF3131','#FF66CC'
+];
 
-            const pixelData = ctx.getImageData(x + 1, y + 1, 1, 1).data;
-            const isTargetGold = pixelData[0] === 255 && pixelData[1] === 170 && pixelData[2] === 0;
+const METAL = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
 
-            if(mode === 'draw') {
-                // Note : LIMITE DES 15 PIXELS D'OR
-                if(color === "#ffaa00" && goldPixels >= 15 && !isTargetGold) return;
-                if(color === "#ffaa00" && !isTargetGold) goldPixels++;
-                if(color !== "#ffaa00" && isTargetGold) goldPixels--;
-                ctx.fillStyle = color; ctx.fillRect(x, y, pSize, pSize);
-            } else if(mode === 'erase') {
-                if(isTargetGold) goldPixels--;
-                ctx.fillStyle = "#081422"; ctx.fillRect(x, y, pSize, pSize);
-            }
-            document.getElementById("goldCount").innerText = Math.max(0, goldPixels);
-        }
+// ════════════════════════════════════════════
+//  API BASE URL — fonctionne sur Render et en local
+// ════════════════════════════════════════════
+const API = window.location.origin;
+const canvas     = document.getElementById('main-canvas');
+const ctx        = canvas.getContext('2d');
+const container  = document.getElementById('canvas-container');
+const viewportEl = document.getElementById('viewport-container');
 
-        canvas.onmousedown = (e) => { isDown = true; handleAction(e); };
-        window.onmousemove = handleAction; window.onmouseup = () => isDown = false;
-        canvas.ontouchstart = (e) => { isDown = true; handleAction(e); };
-        canvas.ontouchmove = handleAction; canvas.ontouchend = () => isDown = false;
+canvas.width  = CANVAS_W;
+canvas.height = CANVAS_H;
 
-        function setMode(m) {
-            mode = m;
-            document.getElementById("drawBtn").classList.toggle("active", m === 'draw');
-            document.getElementById("eraseBtn").classList.toggle("active", m === 'erase');
-            document.getElementById("moveBtn").classList.toggle("active", m === 'move');
-        }
+let mode       = 'draw';
+let color      = '#FFFFFF';
+let isDown     = false;
+let eraserSize = 'small';
+let goldUsed   = 0;
+let currentScale = 1;
+let panOffset  = { x: 0, y: 0 };
 
-        async function loadGallery() {
-            const res = await fetch('/api/gallery?t=' + Date.now());
-            const data = await res.json();
-            const gal = document.getElementById("gallery");
-            gal.innerHTML = "";
-            data.reverse().forEach(art => {
-                const isMine = myUploads.includes(art.id);
-                gal.innerHTML += `
-                    <div class="art-card">
-                        <img src="${art.img}">
-                        <p style="color:var(--gold); font-size:0.6rem; margin:5px 0;">@${art.name}</p>
-                        ${isMine ? `<button class="btn btn-del" onclick="deleteArt('${art.id}')">SUPPRIMER</button>` : ''}
-                    </div>`;
-            });
-        }
+// Pinch-to-zoom (mode PAN uniquement)
+let pinchDist      = null;
+let pinchScaleStart = 1;
+let panActive      = false;
+let panStart       = { x: 0, y: 0 };
+let panOffsetStart = { x: 0, y: 0 };
 
-        async function saveArt() {
-            const name = prompt("Pseudo :"); if(!name) return;
-            const btn = document.getElementById('publishBtn');
-            btn.innerText = "PUBLICATION..."; btn.disabled = true;
-            const img = canvas.toDataURL("image/jpeg", 0.8);
-            const res = await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, img }) });
-            if(res.ok) {
-                const data = await res.json();
-                myUploads.push(data.id);
-                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
-                await loadGallery();
-                alert("Œuvre publiée !");
-            }
-            btn.innerText = "PUBLIER DANS LA GALERIE"; btn.disabled = false;
-        }
+let pixelGrid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
 
-        async function deleteArt(id) {
-            if(!confirm("Supprimer définitivement ?")) return;
-            const res = await fetch('/api/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
-            if(res.ok) {
-                myUploads = myUploads.filter(i => i !== id);
-                localStorage.setItem('gp_my_art', JSON.stringify(myUploads));
-                loadGallery();
-            }
-        }
+// ════════════════════════════════════════════
+//  CURSEUR MAIN — visible seulement sur le canevas
+// ════════════════════════════════════════════
+const cursorEl = document.getElementById('custom-cursor');
 
-        ctx.fillStyle = "#081422"; ctx.fillRect(0,0,600,600);
-        grid.style.backgroundSize = `${pSize}px ${pSize}px`;
-        resetView(); loadGallery();
-    </script>
+document.addEventListener('mousemove', e => {
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top  = e.clientY + 'px';
+});
+viewportEl.addEventListener('mouseenter', () => { cursorEl.style.display = 'block'; });
+viewportEl.addEventListener('mouseleave', () => { cursorEl.style.display = 'none';  });
+
+// ════════════════════════════════════════════
+//  DESSIN DU CANEVAS
+// ════════════════════════════════════════════
+function drawBase() {
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  for (let c = 0; c <= COLS; c++) {
+    ctx.beginPath(); ctx.moveTo(c * PX, 0); ctx.lineTo(c * PX, CANVAS_H); ctx.stroke();
+  }
+  for (let r = 0; r <= ROWS; r++) {
+    ctx.beginPath(); ctx.moveTo(0, r * PX); ctx.lineTo(CANVAS_W, r * PX); ctx.stroke();
+  }
+}
+
+function redrawAll() {
+  drawBase();
+  for (let c = 0; c < COLS; c++)
+    for (let r = 0; r < ROWS; r++)
+      if (pixelGrid[c][r]) paintCell(c, r, pixelGrid[c][r]);
+}
+
+function paintCell(col, row, fillColor) {
+  ctx.fillStyle = fillColor;
+  ctx.fillRect(col * PX, row * PX, PX, PX);
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(col * PX, row * PX, PX, PX);
+}
+
+// ── Effacement PROPRE : clearRect + fond + 1 seul trait de grille ──
+function eraseCell(col, row) {
+  const x = col * PX, y = row * PX;
+  ctx.clearRect(x, y, PX, PX);
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(x, y, PX, PX);
+  // Trait de grille : on dessine uniquement les 4 bords intérieurs (0.5px, inset)
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.rect(x + 0.25, y + 0.25, PX - 0.5, PX - 0.5);
+  ctx.stroke();
+}
+
+// ════════════════════════════════════════════
+//  PALETTE
+// ════════════════════════════════════════════
+const pal = document.getElementById('palette');
+COLORS.forEach(c => {
+  const b = document.createElement('div');
+  b.className = 'c-btn';
+  b.style.background = c;
+  b.title = c;
+  b.onclick = () => {
+    color = c;
+    setMode('draw');
+    document.querySelectorAll('.c-btn, .metal-swatch').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  };
+  pal.appendChild(b);
+});
+
+function selectMetal(type) {
+  if (type === 'gold' && goldUsed >= MAX_GOLD) {
+    showToast("RÉSERVE D'OR ÉPUISÉE ! (50/50)");
+    return;
+  }
+  color = METAL[type];
+  setMode('draw');
+  document.querySelectorAll('.c-btn, .metal-swatch').forEach(x => x.classList.remove('active'));
+  document.getElementById(type + '-swatch').classList.add('active');
+}
+
+function updateGoldCounter() {
+  const rem = MAX_GOLD - goldUsed;
+  document.getElementById('goldCount').textContent = rem;
+  document.getElementById('goldBarFill').style.width = (rem / MAX_GOLD * 100) + '%';
+  if (rem <= 0 && color === METAL.gold) {
+    color = '#FFFFFF';
+    document.getElementById('gold-swatch').classList.remove('active');
+  }
+}
+
+// ════════════════════════════════════════════
+//  MODES & OUTILS
+// ════════════════════════════════════════════
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.btn-tool').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn-' + m);
+  if (btn) btn.classList.add('active');
+
+  const eraserBar = document.getElementById('eraser-size-bar');
+  eraserBar.classList.toggle('visible', m === 'erase');
+
+  // En mode gomme : on sélectionne la couleur de fond comme couleur active
+  // → paintCell() dessine exactement BG_COLOR = résultat identique au fond, zéro trace
+  if (m === 'erase') {
+    // La couleur courante devient BG_COLOR, mais on garde l'ancienne en mémoire
+    // pour la restaurer si on change de mode
+    document.querySelectorAll('.c-btn, .metal-swatch').forEach(x => x.classList.remove('active'));
+  }
+
+  if (m === 'pan') {
+    viewportEl.classList.add('pan-mode');
+    cursorEl.style.display = 'none';
+  } else {
+    viewportEl.classList.remove('pan-mode');
+  }
+}
+
+function setEraserSize(sz) {
+  eraserSize = sz;
+  document.getElementById('sz-small').classList.toggle('active', sz === 'small');
+  document.getElementById('sz-big').classList.toggle('active', sz === 'big');
+}
+
+function clearAll() {
+  if (!confirm('Effacer tout le canevas ?')) return;
+  pixelGrid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
+  goldUsed  = 0;
+  updateGoldCounter();
+  drawBase();
+  localStorage.removeItem('gp_grid_v3');
+  localStorage.removeItem('gp_gold_v3');
+  showToast('CANEVAS EFFACÉ');
+}
+
+// ════════════════════════════════════════════
+//  ZOOM & PAN
+// ════════════════════════════════════════════
+function applyTransform() {
+  container.style.transform = `translate(${panOffset.x}px,${panOffset.y}px) scale(${currentScale})`;
+  document.getElementById('zoomLabel').textContent = Math.round(currentScale * 100) + '%';
+}
+
+function resetView() {
+  // Calcule l'échelle pour que le canevas 800px tienne exactement dans le viewport
+  const vw = viewportEl.clientWidth;
+  currentScale = vw / CANVAS_W;
+  panOffset = { x: 0, y: 0 };
+  applyTransform();
+}
+
+function zoomIn()  { currentScale = Math.min(currentScale * 1.25, 5);  applyTransform(); }
+function zoomOut() { currentScale = Math.max(currentScale / 1.25, 0.2); applyTransform(); }
+
+// ════════════════════════════════════════════
+//  DESSIN — coordonnées
+// ════════════════════════════════════════════
+function getCanvasPos(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const x    = (clientX - rect.left) * (CANVAS_W / rect.width);
+  const y    = (clientY - rect.top)  * (CANVAS_H / rect.height);
+  return { col: Math.floor(x / PX), row: Math.floor(y / PX) };
+}
+
+function handleDraw(clientX, clientY) {
+  const { col, row } = getCanvasPos(clientX, clientY);
+  document.getElementById('valX').textContent = Math.max(0, Math.min(col, COLS - 1));
+  document.getElementById('valY').textContent = Math.max(0, Math.min(row, ROWS - 1));
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+
+  if (mode === 'erase') {
+    const half = eraserSize === 'big' ? 1 : 0;
+    for (let dc = -half; dc <= half; dc++) {
+      for (let dr = -half; dr <= half; dr++) {
+        const c2 = col + dc, r2 = row + dr;
+        if (c2 < 0 || c2 >= COLS || r2 < 0 || r2 >= ROWS) continue;
+        // Si la cellule était de l'or, libérer le compteur
+        if (pixelGrid[c2][r2] === METAL.gold) goldUsed = Math.max(0, goldUsed - 1);
+        // On peint avec BG_COLOR : même résultat qu'effacer, sans aucune trace
+        pixelGrid[c2][r2] = null;
+        paintCell(c2, r2, BG_COLOR);
+      }
+    }
+    updateGoldCounter();
+
+  } else if (mode === 'draw') {
+    if (color === METAL.gold) {
+      if (goldUsed >= MAX_GOLD) { showToast("RÉSERVE D'OR ÉPUISÉE !"); return; }
+      if (pixelGrid[col][row] !== METAL.gold) goldUsed++;
+    } else {
+      if (pixelGrid[col][row] === METAL.gold) goldUsed = Math.max(0, goldUsed - 1);
+    }
+    pixelGrid[col][row] = color;
+    paintCell(col, row, color);
+    updateGoldCounter();
+  }
+  saveBackup();
+}
+
+// ════════════════════════════════════════════
+//  EVENTS SOURIS
+// ════════════════════════════════════════════
+viewportEl.addEventListener('mousedown', e => {
+  if (mode === 'pan') {
+    panActive      = true;
+    panStart       = { x: e.clientX, y: e.clientY };
+    panOffsetStart = { ...panOffset };
+    return;
+  }
+  isDown = true;
+  handleDraw(e.clientX, e.clientY);
+});
+
+window.addEventListener('mousemove', e => {
+  if (mode === 'pan' && panActive) {
+    panOffset.x = panOffsetStart.x + (e.clientX - panStart.x);
+    panOffset.y = panOffsetStart.y + (e.clientY - panStart.y);
+    applyTransform();
+    return;
+  }
+  if (isDown) handleDraw(e.clientX, e.clientY);
+});
+
+window.addEventListener('mouseup', () => { isDown = false; panActive = false; });
+
+// Coords en temps réel
+viewportEl.addEventListener('mousemove', e => {
+  if (mode === 'pan') return;
+  const { col, row } = getCanvasPos(e.clientX, e.clientY);
+  document.getElementById('valX').textContent = Math.max(0, Math.min(col, COLS - 1));
+  document.getElementById('valY').textContent = Math.max(0, Math.min(row, ROWS - 1));
+});
+
+// ════════════════════════════════════════════
+//  EVENTS TACTILES
+//  - Mode DRAW/ERASE : 1 doigt = dessine, 2 doigts = ignorés (aucun pixel)
+//  - Mode PAN        : 1 doigt = déplace, 2 doigts = pinch zoom
+// ════════════════════════════════════════════
+viewportEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+
+  if (mode === 'pan') {
+    if (e.touches.length === 1) {
+      panActive      = true;
+      panStart       = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      panOffsetStart = { ...panOffset };
+    } else if (e.touches.length === 2) {
+      panActive  = false;
+      pinchDist  = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchScaleStart = currentScale;
+    }
+  } else {
+    // Mode dessin/gomme : seulement 1 doigt, 2 doigts = rien
+    if (e.touches.length === 1) {
+      isDown = true;
+      handleDraw(e.touches[0].clientX, e.touches[0].clientY);
+    }
+    // 2 doigts : on arrête le dessin, on ne fait rien
+    if (e.touches.length >= 2) {
+      isDown = false;
+    }
+  }
+}, { passive: false });
+
+viewportEl.addEventListener('touchmove', e => {
+  e.preventDefault();
+
+  if (mode === 'pan') {
+    if (e.touches.length === 1 && panActive) {
+      panOffset.x = panOffsetStart.x + (e.touches[0].clientX - panStart.x);
+      panOffset.y = panOffsetStart.y + (e.touches[0].clientY - panStart.y);
+      applyTransform();
+    } else if (e.touches.length === 2 && pinchDist !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      currentScale = Math.max(0.2, Math.min(5, pinchScaleStart * (dist / pinchDist)));
+      applyTransform();
+    }
+  } else {
+    if (e.touches.length === 1 && isDown) {
+      handleDraw(e.touches[0].clientX, e.touches[0].clientY);
+      const { col, row } = getCanvasPos(e.touches[0].clientX, e.touches[0].clientY);
+      document.getElementById('valX').textContent = Math.max(0, Math.min(col, COLS - 1));
+      document.getElementById('valY').textContent = Math.max(0, Math.min(row, ROWS - 1));
+    }
+  }
+}, { passive: false });
+
+viewportEl.addEventListener('touchend', e => {
+  if (e.touches.length === 0) { isDown = false; panActive = false; }
+  if (e.touches.length < 2)   { pinchDist = null; }
+}, { passive: false });
+
+// ════════════════════════════════════════════
+//  SAUVEGARDE LOCALE
+// ════════════════════════════════════════════
+function saveBackup() {
+  try {
+    localStorage.setItem('gp_grid_v3', JSON.stringify(pixelGrid));
+    localStorage.setItem('gp_gold_v3', String(goldUsed));
+  } catch(e) {}
+}
+
+function loadBackup() {
+  try {
+    const saved     = localStorage.getItem('gp_grid_v3');
+    const savedGold = localStorage.getItem('gp_gold_v3');
+    if (saved) {
+      pixelGrid = JSON.parse(saved);
+      goldUsed  = savedGold ? parseInt(savedGold) : 0;
+      redrawAll();
+      updateGoldCounter();
+    }
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════
+//  MODAL & PUBLICATION
+// ════════════════════════════════════════════
+function openModal() {
+  document.getElementById('modal-status').textContent = '';
+  document.getElementById('modal-status').className   = 'modal-status';
+  document.getElementById('btn-send').disabled        = false;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('p-name').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+async function publish() {
+  const name  = document.getElementById('p-name').value.trim();
+  const title = document.getElementById('p-title').value.trim();
+  const statusEl = document.getElementById('modal-status');
+  const sendBtn  = document.getElementById('btn-send');
+
+  if (!name || !title) {
+    statusEl.textContent = '⚠ REMPLIS TON PSEUDO ET LE TITRE !';
+    statusEl.className   = 'modal-status error';
+    return;
+  }
+
+  // UI : état envoi en cours
+  sendBtn.disabled    = true;
+  statusEl.textContent = '⏳ ENVOI EN COURS...';
+  statusEl.className   = 'modal-status';
+
+  // Encode en JPEG pour réduire la taille (PNG 800×450 = ~2MB, JPEG 0.85 = ~200KB)
+  const img = canvas.toDataURL('image/jpeg', 0.85);
+
+  try {
+    const res = await fetch(`${API}/api/save`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name, title, img })
+    });
+
+    if (res.ok) {
+      statusEl.textContent = '✦ PUBLIÉ AVEC SUCCÈS !';
+      statusEl.className   = 'modal-status success';
+      setTimeout(() => {
+        closeModal();
+        loadGallery();
+        loadTop10();
+        showToast('✦ ŒUVRE PUBLIÉE DANS LA GALERIE !');
+      }, 1200);
+    } else {
+      let errMsg = 'ERREUR ' + res.status;
+      try { const j = await res.json(); if (j.error) errMsg += ' : ' + j.error; } catch(_) {}
+      statusEl.textContent = '✗ ' + errMsg;
+      statusEl.className   = 'modal-status error';
+      sendBtn.disabled     = false;
+    }
+  } catch (err) {
+    statusEl.textContent = '✗ CONNEXION IMPOSSIBLE — VÉRIFIE RENDER';
+    statusEl.className   = 'modal-status error';
+    sendBtn.disabled     = false;
+  }
+}
+
+// ════════════════════════════════════════════
+//  GALERIE
+// ════════════════════════════════════════════
+async function loadGallery() {
+  const gal = document.getElementById('gallery');
+  gal.innerHTML = '<div class="gallery-loading">CHARGEMENT...</div>';
+  try {
+    const res  = await fetch(`${API}/api/gallery`);
+    const data = await res.json();
+    if (!data.length) {
+      gal.innerHTML = '<div class="gallery-loading">AUCUNE CRÉATION POUR L\'INSTANT</div>';
+      return;
+    }
+    gal.innerHTML = data.map(art => `
+      <div class="art-card">
+        <div class="art-card-header">
+          <div class="art-card-title">${esc(art.title)}</div>
+          <div class="art-card-author">par @${esc(art.name)}</div>
+        </div>
+        <img src="${art.img}" alt="${esc(art.title)}" loading="lazy">
+        <div class="art-card-footer">
+          <span class="art-date">${fmtDate(art.createdAt)}</span>
+          <button class="btn-vote" onclick="vote('${art.id}',this)">⭐ ${art.votes}</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    gal.innerHTML = '<div class="gallery-loading">ERREUR DE CHARGEMENT</div>';
+  }
+}
+
+// ════════════════════════════════════════════
+//  TOP 10 — données réelles + fallback 10 fictifs
+// ════════════════════════════════════════════
+const FAKE_TOP10 = [
+  { rank:1,  title:'DRAGON PIXEL',       author:'PixelMaster_Pi',  votes:342, emoji:'🐉' },
+  { rank:2,  title:'COUCHER DE SOLEIL',  author:'ArtistePi01',     votes:289, emoji:'🌅' },
+  { rank:3,  title:'CHÂTEAU DORÉ',       author:'GoldKnight',      votes:241, emoji:'🏰' },
+  { rank:4,  title:'GALAXIE NOIRE',      author:'SpacePixel',      votes:198, emoji:'🌌' },
+  { rank:5,  title:'RENARD DES NEIGES',  author:'FoxyArt',         votes:176, emoji:'🦊' },
+  { rank:6,  title:'VILLE NÉON',         author:'CyberPainter',    votes:155, emoji:'🌆' },
+  { rank:7,  title:'PHÉNIX OR',          author:'GoldBird_Pi',     votes:134, emoji:'🔥' },
+  { rank:8,  title:'LUNE ET MER',        author:'LunarArt',        votes:112, emoji:'🌙' },
+  { rank:9,  title:'ROBOT ANTIQUE',      author:'RetroBot',        votes:98,  emoji:'🤖' },
+  { rank:10, title:'FORÊT MYSTIQUE',     author:'NaturePixel',     votes:87,  emoji:'🌲' },
+];
+
+const MEDALS = ['🥇','🥈','🥉'];
+
+async function loadTop10() {
+  const list = document.getElementById('top10-list');
+  list.innerHTML = '<div class="gallery-loading">CHARGEMENT...</div>';
+
+  let data = [];
+  try {
+    const res = await fetch(`${API}/api/top10`);
+    data = await res.json();
+  } catch(_) {}
+
+  // Si moins de 10 résultats réels, on complète avec les fictifs
+  const items = data.length >= 10 ? data.slice(0, 10) : data;
+  const needFake = items.length < 10;
+
+  if (!items.length && needFake) {
+    // Aucune donnée réelle : afficher les 10 fictifs
+    list.innerHTML = FAKE_TOP10.map(f => renderFakeTop(f)).join('');
+    return;
+  }
+
+  // Données réelles disponibles
+  const realHTML = items.map((art, i) => {
+    const rankClass = i < 3 ? `rank-${i+1}` : 'rank-other';
+    const badge     = i < 3 ? MEDALS[i] : `#${i+1}`;
+    return `
+      <div class="top-card ${rankClass}">
+        <div class="rank-badge">${badge}</div>
+        <img class="top-thumb" src="${art.img}" alt="${esc(art.title)}" onerror="this.style.display='none'">
+        <div class="top-info">
+          <div class="top-title">${esc(art.title)}</div>
+          <div class="top-author">@${esc(art.name)}</div>
+        </div>
+        <div class="top-votes">⭐ ${art.votes}</div>
+      </div>`;
+  }).join('');
+
+  // Compléter avec fictifs si nécessaire
+  const fakeHTML = needFake
+    ? FAKE_TOP10.slice(items.length, 10).map((f, i) => {
+        const rank = items.length + i + 1;
+        return renderFakeTop({ ...f, rank });
+      }).join('')
+    : '';
+
+  list.innerHTML = realHTML + fakeHTML;
+}
+
+function renderFakeTop(f) {
+  const rankClass = f.rank <= 3 ? `rank-${f.rank}` : 'rank-other';
+  const badge     = f.rank <= 3 ? MEDALS[f.rank - 1] : `#${f.rank}`;
+  return `
+    <div class="top-card ${rankClass}">
+      <div class="rank-badge">${badge}</div>
+      <div class="top-thumb-placeholder">${f.emoji}</div>
+      <div class="top-info">
+        <div class="top-title">${esc(f.title)}</div>
+        <div class="top-author">@${esc(f.author)} <span style="color:rgba(255,170,0,0.3);font-size:0.55rem;">(test)</span></div>
+      </div>
+      <div class="top-votes">⭐ ${f.votes}</div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════
+//  VOTE
+// ════════════════════════════════════════════
+async function vote(id, btn) {
+  btn.classList.add('voted');
+  btn.disabled = true;
+  try {
+    const res  = await fetch(`${API}/api/vote`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ id })
+    });
+    const data = await res.json();
+    btn.textContent = `⭐ ${data.votes}`;
+    loadTop10();
+  } catch(e) {
+    btn.classList.remove('voted');
+    btn.disabled = false;
+  }
+}
+
+// ════════════════════════════════════════════
+//  UTILITAIRES
+// ════════════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+drawBase();
+loadBackup();
+
+// resetView APRÈS que le DOM soit rendu (pour avoir clientWidth correct)
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    resetView();
+    loadGallery();
+    loadTop10();
+  });
+});
+
+window.addEventListener('resize', resetView);
+</script>
 </body>
 </html>
