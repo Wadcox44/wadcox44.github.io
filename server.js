@@ -106,10 +106,14 @@ app.delete('/api/artwork/:id', async (req, res) => {
 });
 
 // ─── FICHIERS STATIQUES (après les routes API) ───
-app.use(express.static(path.join(__dirname), {
-  // Ne pas servir de fichiers pour les routes /api/*
-  index: false
-}));
+// Middleware de garde : express.static NE doit JAMAIS intercepter /api/*
+// car il répond 405 sur les POST, écrasant nos routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) return next(); // sauter le static pour /api
+  next();
+});
+
+app.use(express.static(path.join(__dirname), { index: false }));
 
 // Routes HTML explicites
 app.get('/', (req, res) => {
