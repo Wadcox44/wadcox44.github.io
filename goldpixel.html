@@ -27,8 +27,9 @@
       flex-direction: column;
       align-items: center;
       overflow-x: hidden;
-      touch-action: none;
+      /* PAS de touch-action:none ici — cela bloquerait le scroll sur mobile */
       user-select: none;
+      -webkit-user-select: none;
     }
 
     /* Curseur main uniquement sur le canevas */
@@ -725,9 +726,15 @@ const COLORS = [
 const METAL = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
 
 // ════════════════════════════════════════════
-//  API BASE URL — fonctionne sur Render et en local
+//  API BASE URL
+//  window.location.origin = https://ton-app.onrender.com
+//  Les routes API sont toujours à la RACINE du serveur
 // ════════════════════════════════════════════
 const API = window.location.origin;
+
+// Debug : affiche l'URL de base au chargement (visible dans la console)
+console.log('🔗 API base URL:', API);
+
 const canvas     = document.getElementById('main-canvas');
 const ctx        = canvas.getContext('2d');
 const container  = document.getElementById('canvas-container');
@@ -788,26 +795,26 @@ function redrawAll() {
       if (pixelGrid[c][r]) paintCell(c, r, pixelGrid[c][r]);
 }
 
+// ── Effacement PROPRE : fond uniquement, AUCUN strokeRect (évite les traces blanches) ──
+// La grille de fond est redessinée via drawBase() lors du redrawAll().
+// Sur une cellule individuelle, on repose juste le fond : la grille environnante
+// reste visible grâce aux lignes continues dessinées par drawBase().
+function eraseCell(col, row) {
+  const x = col * PX, y = row * PX;
+  // Remplissage fond seul — pas de strokeRect qui laisserait un contour blanc
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(x, y, PX, PX);
+}
+
 function paintCell(col, row, fillColor) {
   ctx.fillStyle = fillColor;
   ctx.fillRect(col * PX, row * PX, PX, PX);
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(col * PX, row * PX, PX, PX);
-}
-
-// ── Effacement PROPRE : clearRect + fond + 1 seul trait de grille ──
-function eraseCell(col, row) {
-  const x = col * PX, y = row * PX;
-  ctx.clearRect(x, y, PX, PX);
-  ctx.fillStyle = BG_COLOR;
-  ctx.fillRect(x, y, PX, PX);
-  // Trait de grille : on dessine uniquement les 4 bords intérieurs (0.5px, inset)
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  ctx.rect(x + 0.25, y + 0.25, PX - 0.5, PX - 0.5);
-  ctx.stroke();
+  // Contour très subtil uniquement sur les pixels colorés (pas sur BG_COLOR)
+  if (fillColor !== BG_COLOR) {
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(col * PX + 0.25, row * PX + 0.25, PX - 0.5, PX - 0.5);
+  }
 }
 
 // ════════════════════════════════════════════
@@ -935,11 +942,9 @@ function handleDraw(clientX, clientY) {
       for (let dr = -half; dr <= half; dr++) {
         const c2 = col + dc, r2 = row + dr;
         if (c2 < 0 || c2 >= COLS || r2 < 0 || r2 >= ROWS) continue;
-        // Si la cellule était de l'or, libérer le compteur
         if (pixelGrid[c2][r2] === METAL.gold) goldUsed = Math.max(0, goldUsed - 1);
-        // On peint avec BG_COLOR : même résultat qu'effacer, sans aucune trace
         pixelGrid[c2][r2] = null;
-        paintCell(c2, r2, BG_COLOR);
+        eraseCell(c2, r2); // ← fond pur, aucun strokeRect blanc
       }
     }
     updateGoldCounter();
@@ -994,10 +999,12 @@ viewportEl.addEventListener('mousemove', e => {
 
 // ════════════════════════════════════════════
 //  EVENTS TACTILES
-//  - Mode DRAW/ERASE : 1 doigt = dessine, 2 doigts = ignorés (aucun pixel)
+//  - Mode DRAW/ERASE : 1 doigt = dessine (preventDefault), 2 doigts = ignorés
 //  - Mode PAN        : 1 doigt = déplace, 2 doigts = pinch zoom
+//  - Hors viewport   : scroll naturel préservé
 // ════════════════════════════════════════════
 viewportEl.addEventListener('touchstart', e => {
+  // Toujours preventDefault sur le viewport pour éviter scroll accidentel pendant dessin
   e.preventDefault();
 
   if (mode === 'pan') {
@@ -1014,12 +1021,10 @@ viewportEl.addEventListener('touchstart', e => {
       pinchScaleStart = currentScale;
     }
   } else {
-    // Mode dessin/gomme : seulement 1 doigt, 2 doigts = rien
     if (e.touches.length === 1) {
       isDown = true;
       handleDraw(e.touches[0].clientX, e.touches[0].clientY);
     }
-    // 2 doigts : on arrête le dessin, on ne fait rien
     if (e.touches.length >= 2) {
       isDown = false;
     }
@@ -1111,20 +1116,22 @@ async function publish() {
     return;
   }
 
-  // UI : état envoi en cours
-  sendBtn.disabled    = true;
+  sendBtn.disabled     = true;
   statusEl.textContent = '⏳ ENVOI EN COURS...';
   statusEl.className   = 'modal-status';
 
-  // Encode en JPEG pour réduire la taille (PNG 800×450 = ~2MB, JPEG 0.85 = ~200KB)
-  const img = canvas.toDataURL('image/jpeg', 0.85);
+  const img      = canvas.toDataURL('image/jpeg', 0.85);
+  const endpoint = `${API}/api/save`;
+  console.log('📤 POST vers :', endpoint);
 
   try {
-    const res = await fetch(`${API}/api/save`, {
+    const res = await fetch(endpoint, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ name, title, img })
     });
+
+    console.log('📥 Réponse status :', res.status, res.statusText);
 
     if (res.ok) {
       statusEl.textContent = '✦ PUBLIÉ AVEC SUCCÈS !';
@@ -1137,12 +1144,17 @@ async function publish() {
       }, 1200);
     } else {
       let errMsg = 'ERREUR ' + res.status;
-      try { const j = await res.json(); if (j.error) errMsg += ' : ' + j.error; } catch(_) {}
+      try {
+        const j = await res.json();
+        if (j.error) errMsg += ' : ' + j.error;
+        console.error('❌ Erreur API:', j);
+      } catch(_) {}
       statusEl.textContent = '✗ ' + errMsg;
       statusEl.className   = 'modal-status error';
       sendBtn.disabled     = false;
     }
   } catch (err) {
+    console.error('❌ Erreur réseau:', err);
     statusEl.textContent = '✗ CONNEXION IMPOSSIBLE — VÉRIFIE RENDER';
     statusEl.className   = 'modal-status error';
     sendBtn.disabled     = false;
