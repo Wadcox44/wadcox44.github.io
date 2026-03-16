@@ -1124,9 +1124,10 @@ async function publish() {
   statusEl.textContent = '⏳ ENVOI EN COURS...';
   statusEl.className   = 'modal-status';
 
-  const img      = canvas.toDataURL('image/jpeg', 0.85);
+  // WebP sans perte (quality 1.0) : idéal pour le pixel art
+  // Plus léger que PNG, plus net que JPEG, parfait pour MongoDB
+  const img      = canvas.toDataURL('image/webp', 1.0);
   const endpoint = `${API}/api/save`;
-  console.log('📤 POST vers :', endpoint);
 
   try {
     const res = await fetch(endpoint, {
