@@ -106,10 +106,24 @@ app.delete('/api/artwork/:id', async (req, res) => {
 });
 
 // ─── FICHIERS STATIQUES (après les routes API) ───
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname), {
+  // Ne pas servir de fichiers pour les routes /api/*
+  index: false
+}));
 
-app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
-app.get('/goldpixel', (req, res) => { res.sendFile(path.join(__dirname, 'goldpixel.html')); });
+// Routes HTML explicites
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/goldpixel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'goldpixel.html'));
+});
+
+// Catch-all pour les routes /api/* inconnues → JSON 404 propre
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: `Route API inconnue : ${req.method} ${req.path}` });
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Gold Pixel v3.0 est prêt sur le port ${PORT}`);
