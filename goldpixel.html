@@ -117,6 +117,8 @@
       position: relative;
       width: 95vw;
       max-width: 880px;
+      /* Ratio 16:9 strict : hauteur = largeur × (9/16) = largeur × 0.5625 */
+      aspect-ratio: 16 / 9;
       border: 2px solid var(--gold);
       border-radius: 10px;
       overflow: hidden;
@@ -126,7 +128,12 @@
       z-index: 1;
     }
 
-    #canvas-wrapper { width: 100%; overflow: hidden; position: relative; }
+    #canvas-wrapper {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
     #canvas-container { transform-origin: top left; will-change: transform; display: block; line-height: 0; }
 
     #main-canvas {
@@ -960,7 +967,7 @@ function handleDraw(clientX, clientY) {
     paintCell(col, row, color);
     updateGoldCounter();
   }
-  saveBackup();
+  // Pas de saveBackup() : le canevas repart toujours vide au chargement
 }
 
 // ════════════════════════════════════════════
@@ -1313,10 +1320,13 @@ function showToast(msg) {
 }
 
 // ════════════════════════════════════════════
-//  INIT
+//  INIT — canevas toujours vide au chargement
 // ════════════════════════════════════════════
 drawBase();
-loadBackup();
+// NE PAS appeler loadBackup() : le canevas repart toujours à zéro
+// La galerie partagée est la seule persistance (MongoDB)
+localStorage.removeItem('gp_grid_v3');
+localStorage.removeItem('gp_gold_v3');
 
 // resetView APRÈS que le DOM soit rendu (pour avoir clientWidth correct)
 requestAnimationFrame(() => {
