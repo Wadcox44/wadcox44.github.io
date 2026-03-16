@@ -536,120 +536,57 @@ footer a:hover { color: var(--cy); }
 <div id="toast"></div>
 
 <script>
+  /* ── INITIALISATION PI SDK ── */
+  const Pi = window.Pi;
+  // On initialise en mode sandbox pour tes tests sur navigateur PC
+  Pi.init({ version: "2.0", sandbox: true }); 
 
-/* ── BG CANVAS ── */
-(function() {
-  const c = document.getElementById('bg-canvas');
-  const ctx = c.getContext('2d');
-  let W, H, pts = [];
-  function resize() {
-    W = c.width = window.innerWidth;
-    H = c.height = window.innerHeight;
-    pts = [];
-    const n = Math.min(Math.floor(W * H / 22000), 55);
-    for (let i = 0; i < n; i++) pts.push({
-      x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25,
-      r: Math.random()*1.2+.3, a: Math.random()*Math.PI*2
-    });
+  let currentUser = null;
+
+  async function authPi() {
+    try {
+      // On demande le pseudo et l'autorisation de paiement
+      const scopes = ['username', 'payments'];
+      const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+      
+      currentUser = auth.user;
+      console.log("Joueur connecté au portail :", currentUser.username);
+      
+      // On change le message de bienvenue sur le portail
+      const sub = document.querySelector('.logo-sub');
+      sub.innerHTML = `Bienvenue, <span style="color:var(--or)">@${currentUser.username}</span>`;
+      
+      // OPTIONNEL : Stocker le pseudo localement pour plus de rapidité
+      localStorage.setItem('pi_user', currentUser.username);
+
+    } catch (err) {
+      console.error("L'utilisateur a refusé la connexion ou erreur :", err);
+    }
   }
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='rgba(0,160,210,.04)'; ctx.lineWidth=1;
-    for(let x=0;x<W;x+=55){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(let y=0;y<H;y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    pts.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>W) p.vx*=-1;
-      if(p.y<0||p.y>H) p.vy*=-1;
-      p.a+=.007;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(0,200,255,${.25+.2*Math.sin(p.a)})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
+
+  // On lance l'authentification au chargement
+  authPi();
+
+  function onIncompletePaymentFound(payment) {
+    // Gestion des paiements interrompus (obligatoire pour le SDK)
+    console.log("Paiement incomplet :", payment);
   }
-  window.addEventListener('resize', resize);
-  resize(); draw();
-})();
 
-/* ── LANG ── */
-let lang = 'fr';
-function setLang(l) {
-  lang = l;
-  document.documentElement.setAttribute('data-lang', l);
-  document.querySelectorAll('.lang-btn').forEach(b =>
-    b.classList.toggle('on', b.textContent.includes(l.toUpperCase()))
-  );
-  document.querySelectorAll('[data-fr][data-en]').forEach(el => {
-    const val = el.getAttribute('data-' + l);
-    if (!val) return;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
-    else if (el.tagName === 'BUTTON' || el.tagName === 'A') el.textContent = val;
-    else el.innerHTML = val;
-  });
-  const t = {
-    fr: { name:'Nom / Pseudo Pi', email:'Email de contact', game:'Nom du jeu', url:'https://votre-jeu.com (optionnel)', msg:'Description de votre jeu et vos attentes...', cat:'Catégorie du jeu', o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre'] },
-    en: { name:'Name / Pi Username', email:'Contact Email', game:'Game Name', url:'https://your-game.com (optional)', msg:'Describe your game and expectations...', cat:'Game category', o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other'] }
-  }[l];
-  const g = id => document.getElementById(id);
-  if(g('fi-name'))   g('fi-name').placeholder  = t.name;
-  if(g('fi-email'))  g('fi-email').placeholder = t.email;
-  if(g('fi-game'))   g('fi-game').placeholder  = t.game;
-  if(g('fi-url'))    g('fi-url').placeholder   = t.url;
-  if(g('fi-msg'))    g('fi-msg').placeholder   = t.msg;
-  if(g('fi-cat-ph')) g('fi-cat-ph').textContent = t.cat;
-  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{ const el=g(id); if(el) el.textContent=t.o[i]; });
-}
-
-/* ── DON ── */
-let selAmt = '3';
-function pick(el, v) {
-  document.querySelectorAll('.btn-don:not(.envoyer)').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel'); selAmt = v;
-}
-function sendDon() {
-  if (selAmt === '?') {
-    const v = prompt(lang==='fr' ? 'Montant en Pi :' : 'Amount in Pi:');
-    if (!v || isNaN(v)) return;
-    selAmt = v;
+  /* ── L'ASTUCE POUR ENVOYER LE PSEUDO AU JEU ── */
+  function launchGame(gameUrl) {
+    if (currentUser) {
+      // On ajoute le pseudo dans l'URL (ex: goldpixel?user=Raphael)
+      // C'est la méthode la plus simple et efficace !
+      window.location.href = `${gameUrl}?user=${currentUser.username}`;
+    } else {
+      // Si pas connecté, on connecte puis on lance
+      authPi().then(() => {
+        if(currentUser) window.location.href = `${gameUrl}?user=${currentUser.username}`;
+      });
+    }
   }
-  toast(lang==='fr' ? `Don de ${selAmt} Pi — Merci beaucoup ! 🙏` : `Donation of ${selAmt} Pi — Thank you! 🙏`, 'gold');
-}
-
-/* ── FORM ── */
-function handleForm(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  fetch(e.target.action, { method:'POST', body:fd, headers:{'Accept':'application/json'} })
-    .then(() => {
-      document.getElementById('dev-form').style.display = 'none';
-      document.getElementById('form-ok').style.display = 'block';
-    })
-    .catch(() => toast(lang==='fr' ? 'Erreur — veuillez réessayer' : 'Error — please retry', ''));
-}
-
-/* ── SCROLL ── */
-function goToContact() {
-  document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── TOAST ── */
-let _t;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show' + (type==='gold' ? ' gold' : '');
-  clearTimeout(_t); _t = setTimeout(() => el.className='', 3400);
-}
-
-/* ── REVEAL ── */
-const ro = new IntersectionObserver(
-  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); }),
-  { threshold: .1 }
-);
-document.querySelectorAll('.rv').forEach(el => ro.observe(el));
-setTimeout(() => document.querySelectorAll('.rv').forEach(el => el.classList.add('in')), 650);
+  
+  // Reste de tes fonctions (BG Canvas, Lang, etc.) ...
 </script>
 </body>
 </html>
