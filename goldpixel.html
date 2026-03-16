@@ -733,14 +733,11 @@ const COLORS = [
 const METAL = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
 
 // ════════════════════════════════════════════
-//  API BASE URL
-//  window.location.origin = https://ton-app.onrender.com
-//  Les routes API sont toujours à la RACINE du serveur
+//  API BASE URL — serveur Render (fixe)
+//  Le HTML est hébergé sur GitHub Pages (statique)
+//  mais l'API tourne sur Render → URL absolue obligatoire
 // ════════════════════════════════════════════
-const API = window.location.origin;
-
-// Debug : affiche l'URL de base au chargement (visible dans la console)
-console.log('🔗 API base URL:', API);
+const API = 'https://gold-pixel.onrender.com';
 
 const canvas     = document.getElementById('main-canvas');
 const ctx        = canvas.getContext('2d');
