@@ -48,6 +48,12 @@ app.get('/api/gallery', async (req, res) => { // Route pour récupérer les imag
   } catch (e) { res.status(500).json([]); }
 });
 
+// Route pour simuler un classement vide et éviter l'erreur 404
+app.get('/api/top10', (req, res) => res.json([])); 
+
+// Route pour simuler une liste de joueurs vide et éviter l'erreur 404
+app.get('/api/all-players', (req, res) => res.json([]));
+
 app.post('/api/save', async (req, res) => { // Route pour enregistrer un nouveau dessin
   try {
     const { name, title, img } = req.body; // Récupère le nom, le titre et l'image envoyés par le jeu
