@@ -71,10 +71,14 @@ app.post('/api/save', async (req, res) => {
 // --- FICHIERS STATIQUES ---
 // --- GESTION DES FICHIERS (PORTAIL + GOLD PIXEL) ---
 
-// Note : On crée un accès spécial pour Gold Pixel via l'URL /goldpixel
-// Permet d'accéder à Gold Pixel via l'URL /goldpixel sans rien supprimer du portail
-app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
+// --- ACCÈS UNIQUE POUR GOLD PIXEL LITE ---
+// Note : On utilise l'URL /goldpixel pour accéder au dossier Games/GoldPixel
+app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'GoldPixel')));
 
+// Note : On s'assure que si l'utilisateur tape l'URL, le serveur renvoie bien l'index.html
+app.get('/goldpixel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', 'GoldPixel', 'index.html'));
+});
 // Note : On garde l'accès au portail JeuxVideo.Pi pour la racine du site
 app.use(express.static(path.join(__dirname)));
 
@@ -83,9 +87,5 @@ app.get('/validation-key.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'validation-key.txt'));
 });
 app.use('/gold-pixel', express.static(path.join(__dirname, 'Games/Goldpixel')));
-
-app.get('/gold-pixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Games/Goldpixel/goldpixel.html'));
-});
 
 app.listen(PORT, () => console.log(`🚀 Serveur actif sur le port ${PORT}`));
