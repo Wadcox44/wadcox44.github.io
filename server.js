@@ -72,7 +72,7 @@ app.post('/api/save', async (req, res) => {
 // --- GESTION DES FICHIERS (PORTAIL + GOLD PIXEL) ---
 
 // Note : On crée un accès spécial pour Gold Pixel via l'URL /goldpixel
-// Il va chercher les fichiers dans Games/Goldpixel
+// Permet d'accéder à Gold Pixel via l'URL /goldpixel sans rien supprimer du portail
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
 
 // Note : On garde l'accès au portail JeuxVideo.Pi pour la racine du site
