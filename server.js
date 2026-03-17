@@ -69,7 +69,19 @@ app.post('/api/save', async (req, res) => {
 });
 
 // --- FICHIERS STATIQUES ---
-app.use(express.static(path.join(__dirname))); 
+// --- GESTION DES FICHIERS (PORTAIL + GOLD PIXEL) ---
+
+// Note : On crée un accès spécial pour Gold Pixel via l'URL /goldpixel
+// Il va chercher les fichiers dans Games/Goldpixel
+app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
+
+// Note : On garde l'accès au portail JeuxVideo.Pi pour la racine du site
+app.use(express.static(path.join(__dirname)));
+
+// Note : On force l'accès à la clé de validation pour le bot de Pi Network
+app.get('/validation-key.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'validation-key.txt'));
+});
 app.use('/gold-pixel', express.static(path.join(__dirname, 'Games/Goldpixel')));
 
 app.get('/gold-pixel', (req, res) => {
