@@ -5,6 +5,20 @@ const { v4: uuid } = require('uuid');
 
 const app = express();
 
+const cors = require('cors'); // Importation du module CORS
+
+// Autorise le Pi Browser et le SDK à communiquer avec ton serveur
+app.use(cors({
+    origin: ["https://app-cdn.minepi.com", "https://minepi.com"],
+    credentials: true
+}));
+
+// Ta route de santé avec un petit bonus de sécurité pour Pi
+app.get('/health', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.status(200).send('OK');
+});
+
 // Route de santé pour confirmer au Pi Browser que le serveur est actif
 app.get('/health', (req, res) => {
   res.status(200).send('OK'); // Envoie un code 200 (succès) pour la vérification
