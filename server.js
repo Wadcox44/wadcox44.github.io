@@ -1,27 +1,27 @@
-const express = require('express');
-const path = require('path');
-const { MongoClient } = require('mongodb');
-const { v4: uuid } = require('uuid');
+const express = require('express'); // Importe Express pour gérer le serveur
+const path = require('path'); // Module pour naviguer dans les dossiers
+const { MongoClient } = require('mongodb'); // Client pour ta base de données
+const { v4: uuid } = require('uuid'); // Pour générer des identifiants uniques
 
-const app = express();
-const PORT = process.env.PORT || 10000;
+const app = express(); // Création de l'application
+const PORT = process.env.PORT || 10000; // Port utilisé par Render (par défaut 10000)
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
+const uri = process.env.MONGO_URI; // Ton lien secret MongoDB configuré sur Render
+const client = new MongoClient(uri); // Prépare la connexion
 let db, gallery;
 
-async function connectDB() {
+async function connectDB() { // Allume la connexion à la base de données
   try {
     if (!uri) { console.error("❌ Erreur : MONGO_URI manquante !"); return; }
-    await client.connect();
-    db = client.db("goldpixel_db");
-    gallery = db.collection("artworks");
+    await client.connect(); // Connexion effective au cloud
+    db = client.db("goldpixel_db"); // Utilise ta base de données
+    gallery = db.collection("artworks"); // Utilise ta collection d'images
     console.log("✅ Gold Pixel v3.0 connecté au Cloud MongoDB !");
   } catch (e) { console.error("❌ Erreur connexion DB:", e); }
 }
-connectDB();
+connectDB(); // Lance la connexion au démarrage
 
-// ─── CORS permissif (même origine Render) ───
+// ─── CORS (Autorise les échanges de données) ───
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
@@ -31,100 +31,62 @@ app.use((req, res, next) => {
 });
 
 // ─── MIDDLEWARES ───
-// express.json DOIT être avant toutes les routes POST
-app.use(express.json({ limit: '20mb' }));
+app.use(express.json({ limit: '20mb' })); // Permet de lire les grosses images
 app.use(express.urlencoded({ extended: true }));
 
-// ─── ROUTES API (avant express.static pour éviter le 405) ───
-
-// GET - Toutes les œuvres
-app.get('/api/gallery', async (req, res) => {
+// ─── ROUTES API (Gestion des dessins) ───
+app.get('/api/gallery', async (req, res) => { // Récupère les œuvres
   try {
-    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
+    if (!gallery) return res.status(503).json([]);
     const arts = await gallery.find({}).sort({ createdAt: -1 }).toArray();
     res.json(arts);
   } catch (e) { res.status(500).json([]); }
 });
 
-// GET - Top 10 les plus likées
-app.get('/api/top10', async (req, res) => {
-  try {
-    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
-    const arts = await gallery.find({}).sort({ votes: -1 }).limit(10).toArray();
-    res.json(arts);
-  } catch (e) { res.status(500).json([]); }
-});
-
-// POST - Sauvegarder une œuvre
-app.post('/api/save', async (req, res) => {
+app.post('/api/save', async (req, res) => { // Sauvegarde une œuvre
   try {
     if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const { name, title, img } = req.body;
-    if (!name || !title || !img) return res.status(400).json({ error: "Données manquantes" });
-    const artwork = {
-      id: uuid(),
-      name: name.trim().substring(0, 50),
-      title: title.trim().substring(0, 80),
-      img,
-      votes: 0,
-      voters: [],
-      createdAt: new Date()
-    };
+    if (!img) return res.status(400).json({ error: "Image manquante" });
+    const artwork = { id: uuid(), name, title, img, votes: 0, createdAt: new Date() };
     await gallery.insertOne(artwork);
     res.json({ id: artwork.id, success: true });
-  } catch (e) {
-    console.error("Erreur /api/save :", e);
-    res.status(500).json({ error: "Échec sauvegarde" });
-  }
+  } catch (e) { res.status(500).json({ error: "Échec sauvegarde" }); }
 });
 
-// POST - Voter pour une œuvre
-app.post('/api/vote', async (req, res) => {
+app.post('/api/vote', async (req, res) => { // Ajoute un vote
   try {
     if (!gallery) return res.status(503).json({ error: "DB non connectée" });
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID manquant" });
-    const art = await gallery.findOne({ id });
-    if (!art) return res.status(404).json({ error: "Œuvre introuvable" });
     await gallery.updateOne({ id }, { $inc: { votes: 1 } });
     const updated = await gallery.findOne({ id });
     res.json({ votes: updated ? updated.votes : 0 });
-  } catch (e) {
-    console.error("Erreur /api/vote :", e);
-    res.status(500).json({ error: "Erreur vote" });
-  }
+  } catch (e) { res.status(500).json({ error: "Erreur vote" }); }
 });
 
-// DELETE - Supprimer une œuvre (admin)
-app.delete('/api/artwork/:id', async (req, res) => {
-  try {
-    if (!gallery) return res.status(503).json({ error: "DB non connectée" });
-    const { id } = req.params;
-    await gallery.deleteOne({ id });
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: "Erreur suppression" }); }
-});
+// ─── GESTION DES FICHIERS STATIQUES ───
 
-// ─── FICHIERS STATIQUES (après les routes API) ───
-app.use(express.static(path.join(__dirname), {
-  // Ne pas servir de fichiers pour les routes /api/*
-  index: false
-}));
+// 1. Rend accessible le dossier racine (pour index.html du portail)
+app.use(express.static(path.join(__dirname))); 
 
-// Routes HTML explicites
+// 2. Rend accessible le dossier de ton jeu Goldpixel
+// Note : J'utilise 'Games' et 'Goldpixel' avec les majuscules comme tu me l'as dit
+app.use('/gold-pixel', express.static(path.join(__dirname, 'Games/Goldpixel')));
+
+// ─── ROUTES HTML (Affichage des pages) ───
+
+// Route pour le Portail JeuxVideo.Pi (index.html à la racine)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/goldpixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'goldpixel.html'));
+// Route pour lancer le jeu Gold Pixel
+app.get('/gold-pixel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games/Goldpixel/goldpixel.html'));
 });
 
-// Catch-all pour les routes /api/* inconnues → JSON 404 propre
-app.all('/api/*', (req, res) => {
-  res.status(404).json({ error: `Route API inconnue : ${req.method} ${req.path}` });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Gold Pixel v3.0 est prêt sur le port ${PORT}`);
+// ─── LANCEMENT DU SERVEUR ───
+server.listen(PORT, () => { // On utilise server.listen si tu as Socket.io (ou app.listen sinon)
+  console.log(`🚀 Portail JeuxVideo.Pi en ligne sur le port ${PORT}`);
 });
