@@ -75,10 +75,11 @@ app.post('/api/save', async (req, res) => {
 // Note : On utilise l'URL /goldpixel pour accéder au dossier Games/GoldPixel
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'GoldPixel')));
 
-// Note : On s'assure que si l'utilisateur tape l'URL, le serveur renvoie bien l'index.html
+// Note : ON FORCE L'OUVERTURE DE GOLDPIXEL.HTML (et pas index.html)
 app.get('/goldpixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Games', 'GoldPixel', 'index.html'));
+  res.sendFile(path.join(__dirname, 'Games', 'GoldPixel', 'goldpixel.html'));
 });
+
 // Note : On garde l'accès au portail JeuxVideo.Pi pour la racine du site
 app.use(express.static(path.join(__dirname)));
 
