@@ -68,25 +68,26 @@ app.post('/api/save', async (req, res) => {
   } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
-// --- FICHIERS STATIQUES ---
-// --- GESTION DES FICHIERS (PORTAIL + GOLD PIXEL) ---
+// --- GESTION DES CLÉS ET DES DOSSIERS (ANTI-BUG) ---
 
-// --- ACCÈS UNIQUE POUR GOLD PIXEL LITE ---
-// Note : On utilise l'URL /goldpixel pour accéder au dossier Games/GoldPixel
+// Note : On récupère les deux clés distinctes depuis tes variables Render
+const keyJeuxVideo = process.env.PI_API_KEY_JEUXVIDEO || "";
+const keyGoldPixel = process.env.PI_API_KEY_GOLDPIXEL || "";
+
+// Note : Cette route affiche les deux clés pour que le bot Pi valide les deux projets
+app.get('/validation-key.txt', (req, res) => {
+  res.send(`${keyJeuxVideo}\n${keyGoldPixel}`); 
+});
+
+// Note : Accès au dossier GoldPixel (on respecte bien les majuscules Games/GoldPixel)
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'GoldPixel')));
 
-// Note : ON FORCE L'OUVERTURE DE GOLDPIXEL.HTML (et pas index.html)
+// Note : On force l'ouverture de goldpixel.html pour ton jeu Gold Pixel Lite
 app.get('/goldpixel', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', 'GoldPixel', 'goldpixel.html'));
 });
 
-// Note : On garde l'accès au portail JeuxVideo.Pi pour la racine du site
+// Note : On garde le portail JeuxVideo.Pi (la racine) en dernier pour ne pas bloquer les autres routes
 app.use(express.static(path.join(__dirname)));
-
-// Note : On force l'accès à la clé de validation pour le bot de Pi Network
-app.get('/validation-key.txt', (req, res) => {
-  res.sendFile(path.join(__dirname, 'validation-key.txt'));
-});
-app.use('/gold-pixel', express.static(path.join(__dirname, 'Games/Goldpixel')));
 
 app.listen(PORT, () => console.log(`🚀 Serveur actif sur le port ${PORT}`));
