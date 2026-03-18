@@ -68,26 +68,30 @@ app.post('/api/save', async (req, res) => {
   } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
-// --- GESTION DES CLÉS ET DES DOSSIERS (ANTI-BUG) ---
+// --- GESTION DES CLÉS ET DES DOSSIERS (VERSION FINALE) ---
 
-// Note : On récupère les deux clés distinctes depuis tes variables Render
+// Note : On récupère les deux clés depuis tes variables Render
 const keyJeuxVideo = process.env.PI_API_KEY_JEUXVIDEO || "";
 const keyGoldPixel = process.env.PI_API_KEY_GOLDPIXEL || "";
 
-// Note : Cette route affiche les deux clés pour que le bot Pi valide les deux projets
+// Note : Route de validation (OK : tu as confirmé que ça marche !)
 app.get('/validation-key.txt', (req, res) => {
   res.send(`${keyJeuxVideo}\n${keyGoldPixel}`); 
 });
 
-// Note : Accès au dossier GoldPixel (on respecte bien les majuscules Games/GoldPixel)
-app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'GoldPixel')));
+// Note : Dossier Games/Goldpixel (Correction du 'p' minuscule selon ton image)
+app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
 
-// Note : On force l'ouverture de goldpixel.html pour ton jeu Gold Pixel Lite
+// Note : Route pour servir goldpixel.html
 app.get('/goldpixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Games', 'GoldPixel', 'goldpixel.html'));
+  res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), (err) => {
+    if (err) {
+      res.status(404).send("Erreur : Fichier goldpixel.html introuvable dans Games/Goldpixel");
+    }
+  });
 });
 
-// Note : On garde le portail JeuxVideo.Pi (la racine) en dernier pour ne pas bloquer les autres routes
+// Note : On garde le portail à la racine en dernier
 app.use(express.static(path.join(__dirname)));
 
 app.listen(PORT, () => console.log(`🚀 Serveur actif sur le port ${PORT}`));
