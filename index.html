@@ -6,12 +6,10 @@
 <title>JEUXVIDEO.PI — Pi Network Gaming</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
 <script>
-    // Initialise la connexion avec le Pi Browser pour valider le domaine
-    Pi.init({ version: "2.0" }); 
+  Pi.init({ version: "2.0", sandbox: false });
 </script>
-  <style>
+<style>
 
 :root {
   --cy: #00f3ff;
@@ -53,14 +51,86 @@ body::before {
   background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);
 }
 
+/* ── AUTH OVERLAY ── */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(5,11,20,.97);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  transition: opacity .5s;
+}
+#auth-overlay.hide { opacity: 0; pointer-events: none; }
+.auth-logo {
+  font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 900;
+  letter-spacing: 2px; color: #fff;
+  text-shadow: 0 0 20px var(--cy);
+}
+.auth-logo span { color: var(--or); }
+.auth-sub {
+  font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+  color: #C8D8E8; letter-spacing: 3px; text-transform: uppercase;
+}
+.auth-btn {
+  background: transparent; border: 1px solid var(--cy);
+  color: var(--cy); font-family: 'Orbitron', monospace;
+  font-size: .7rem; letter-spacing: 1.5px; padding: 14px 32px;
+  cursor: pointer; transition: all .25s; margin-top: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.auth-btn:hover { background: var(--cy); color: #000; box-shadow: var(--glow-cy); }
+.auth-note {
+  font-size: .58rem; color: rgba(200,216,232,.4);
+  font-family: 'Share Tech Mono', monospace; text-align: center;
+  letter-spacing: 1px;
+}
+.auth-spinner {
+  width: 24px; height: 24px;
+  border: 2px solid rgba(0,243,255,.2);
+  border-top-color: var(--cy);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── COUNTRY MODAL ── */
+#country-modal {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(5,11,20,.97);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px;
+}
+#country-modal.show { display: flex; }
+.cm-title {
+  font-family: 'Orbitron', monospace; font-size: .85rem;
+  color: var(--cy); letter-spacing: 2px;
+}
+.cm-sub { font-size: .8rem; color: #C8D8E8; text-align: center; padding: 0 24px; }
+#country-select {
+  background: rgba(15,26,46,.9); border: 1px solid var(--cy);
+  color: #fff; padding: 10px 16px; border-radius: 4px;
+  font-family: 'Rajdhani', sans-serif; font-size: 1rem;
+  width: 240px; outline: none;
+}
+.cm-btn {
+  background: var(--or); border: none; color: #000;
+  font-family: 'Orbitron', monospace; font-size: .7rem;
+  letter-spacing: 1px; padding: 12px 28px; cursor: pointer;
+}
+
 /* ── DON BAR ── */
 .don-bar {
   position: sticky; top: 0; width: 100%; z-index: 500;
   background: rgba(5,11,20,.96);
   border-bottom: 1px solid var(--cy);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  display: flex; justify-content: center; align-items: center;
-  padding: 9px 12px; gap: 10px; flex-wrap: wrap;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 12px; gap: 4px;
+}
+.don-bar-top {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; flex-wrap: wrap; width: 100%;
 }
 .don-label {
   font-family: 'Orbitron', monospace;
@@ -68,6 +138,11 @@ body::before {
   letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
 }
 .don-label::before { content: '♥ '; color: rgba(255,170,0,.7); }
+.don-desc {
+  font-size: .52rem; color: rgba(200,216,232,.45);
+  font-family: 'Share Tech Mono', monospace; letter-spacing: .5px;
+  text-align: center; padding: 0 4px;
+}
 .btn-don {
   background: transparent; border: 1px solid var(--cy);
   color: rgba(255,255,255,.75);
@@ -77,6 +152,20 @@ body::before {
 .btn-don:hover, .btn-don.sel { background: var(--cy); color: #000; box-shadow: var(--glow-cy); }
 .btn-don.envoyer { border-color: var(--or); color: var(--or); }
 .btn-don.envoyer:hover { background: var(--or); color: #000; box-shadow: var(--glow-or); }
+
+/* ── USER BAR ── */
+.user-bar {
+  display: none; align-items: center; justify-content: flex-end;
+  width: 90%; max-width: var(--max);
+  padding: 6px 0 0; gap: 8px; position: relative; z-index: 2;
+}
+.user-bar.visible { display: flex; }
+.user-chip {
+  font-family: 'Orbitron', monospace; font-size: .52rem;
+  color: var(--or); letter-spacing: 1px;
+  background: rgba(255,170,0,.08); border: 1px solid rgba(255,170,0,.25);
+  padding: 3px 10px; border-radius: 100px;
+}
 
 /* ── LANG + HEADER ── */
 .lang-row {
@@ -237,7 +326,6 @@ section:last-of-type { border-bottom: none; }
   line-height: 1.65; margin-bottom: 20px;
 }
 
-/* Grille avantages — adaptée au dark */
 .avantages-grid {
   display: grid; grid-template-columns: repeat(2, 1fr);
   gap: 9px; margin-bottom: 20px;
@@ -254,20 +342,12 @@ section:last-of-type { border-bottom: none; }
   background: linear-gradient(90deg, var(--cy), transparent);
   opacity: 0; transition: opacity .3s;
 }
-.av-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0,243,255,.38);
-  box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 0 14px rgba(0,243,255,.1);
-}
+.av-card:hover { transform: translateY(-4px); border-color: rgba(0,243,255,.38); box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 0 14px rgba(0,243,255,.1); }
 .av-card:hover::before { opacity: 1; }
 .av-icon { font-size: 1.5rem; margin-bottom: 8px; }
-.av-title {
-  font-family: 'Orbitron', monospace; font-size: .6rem;
-  color: var(--cy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;
-}
+.av-title { font-family: 'Orbitron', monospace; font-size: .6rem; color: var(--cy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
 .av-text { font-size: .78rem; color: #C8D8E8; line-height: 1.55; }
 
-/* CTA développeur */
 .cta-devs {
   display: block; width: 100%; padding: 13px;
   background: transparent; border: 1px solid var(--or);
@@ -278,15 +358,11 @@ section:last-of-type { border-bottom: none; }
   position: relative; overflow: hidden;
 }
 .cta-devs::after {
-  content: '';
-  position: absolute; inset: 0;
+  content: ''; position: absolute; inset: 0;
   background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.15) 50%,transparent 65%);
   transform: translateX(-120%);
 }
-.cta-devs:hover {
-  background: var(--or); color: #000;
-  box-shadow: var(--glow-or);
-}
+.cta-devs:hover { background: var(--or); color: #000; box-shadow: var(--glow-or); }
 .cta-devs:hover::after { animation: shine .6s ease forwards; }
 @keyframes shine { to { transform: translateX(130%); } }
 
@@ -303,9 +379,7 @@ input, textarea, select {
   width: 100%; outline: none; transition: .3s;
   -webkit-appearance: none; appearance: none;
 }
-input:focus, textarea:focus, select:focus {
-  border-color: var(--cy); box-shadow: 0 0 8px rgba(0,243,255,.15);
-}
+input:focus, textarea:focus, select:focus { border-color: var(--cy); box-shadow: 0 0 8px rgba(0,243,255,.15); }
 input::placeholder, textarea::placeholder { color: #C8D8E8; }
 select option { background: #0d1828; color: #fff; }
 textarea { min-height: 88px; resize: vertical; line-height: 1.55; }
@@ -316,23 +390,12 @@ textarea { min-height: 88px; resize: vertical; line-height: 1.55; }
   letter-spacing: 1px; cursor: pointer; color: #000;
   margin-top: 4px; transition: .3s; position: relative; overflow: hidden;
 }
-.btn-send::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(105deg,transparent 35%,#C8D8E8 50%,transparent 65%);
-  transform: translateX(-120%);
-}
+.btn-send::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg,transparent 35%,#C8D8E8 50%,transparent 65%); transform: translateX(-120%); }
 .btn-send:hover { box-shadow: 0 0 24px var(--cy); }
 .btn-send:hover::after { animation: shine .6s ease forwards; }
-.form-note {
-  font-size: .58rem; color: #C8D8E8; text-align: center;
-  margin-top: 8px; letter-spacing: .5px; line-height: 1.6;
-  font-family: 'Share Tech Mono', monospace;
-}
+.form-note { font-size: .58rem; color: #C8D8E8; text-align: center; margin-top: 8px; letter-spacing: .5px; line-height: 1.6; font-family: 'Share Tech Mono', monospace; }
 
-#form-ok {
-  display: none; text-align: center; padding: 28px 16px;
-  background: rgba(0,243,255,.04); border: 1px solid rgba(0,243,255,.2); border-radius: 8px;
-}
+#form-ok { display: none; text-align: center; padding: 28px 16px; background: rgba(0,243,255,.04); border: 1px solid rgba(0,243,255,.2); border-radius: 8px; }
 .ok-ico { font-size: 2.4rem; margin-bottom: 10px; }
 .ok-title { font-family: 'Orbitron', monospace; font-size: .85rem; color: var(--cy); margin-bottom: 8px; letter-spacing: 1px; }
 .ok-sub { font-size: .8rem; color: #C8D8E8; line-height: 1.6; }
@@ -373,18 +436,69 @@ footer a:hover { color: var(--cy); }
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- ── DON BAR ── -->
-<div class="don-bar">
-  <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Soutenir le portail :</span>
-  <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
-  <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
-  <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
-  <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Autre</button>
-  <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Envoyer →</button>
+<!-- ── AUTH OVERLAY ── -->
+<div id="auth-overlay">
+  <div class="auth-logo">JEUXVIDEO<span>.PI</span></div>
+  <div class="auth-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Portail Gaming · Pi Network</div>
+  <button class="auth-btn" id="auth-btn" onclick="loginWithPi()">
+    <span id="auth-btn-icon">π</span>
+    <span id="auth-btn-text" data-fr="Connexion avec Pi Network" data-en="Sign in with Pi Network">Connexion avec Pi Network</span>
+  </button>
+  <div class="auth-note" data-fr="Authentification sécurisée via Pi Browser" data-en="Secure login via Pi Browser">Authentification sécurisée via Pi Browser</div>
 </div>
 
-<!-- ── LANG ── -->
-<div class="lang-row">
+<!-- ── COUNTRY MODAL ── -->
+<div id="country-modal">
+  <div class="cm-title" data-fr="🌍 Votre pays" data-en="🌍 Your country">🌍 Votre pays</div>
+  <div class="cm-sub" data-fr="Pour les classements par pays — demandé une seule fois." data-en="For country rankings — asked only once.">Pour les classements par pays — demandé une seule fois.</div>
+  <select id="country-select">
+    <option value="">-- Sélectionnez --</option>
+    <option value="FR">🇫🇷 France</option>
+    <option value="US">🇺🇸 United States</option>
+    <option value="GB">🇬🇧 United Kingdom</option>
+    <option value="DE">🇩🇪 Germany</option>
+    <option value="ES">🇪🇸 Spain</option>
+    <option value="IT">🇮🇹 Italy</option>
+    <option value="NG">🇳🇬 Nigeria</option>
+    <option value="IN">🇮🇳 India</option>
+    <option value="BR">🇧🇷 Brazil</option>
+    <option value="PH">🇵🇭 Philippines</option>
+    <option value="VN">🇻🇳 Vietnam</option>
+    <option value="ID">🇮🇩 Indonesia</option>
+    <option value="KR">🇰🇷 South Korea</option>
+    <option value="JP">🇯🇵 Japan</option>
+    <option value="CN">🇨🇳 China</option>
+    <option value="MX">🇲🇽 Mexico</option>
+    <option value="CA">🇨🇦 Canada</option>
+    <option value="AU">🇦🇺 Australia</option>
+    <option value="RU">🇷🇺 Russia</option>
+    <option value="OTHER">🌐 Other</option>
+  </select>
+  <button class="cm-btn" onclick="saveCountry()" data-fr="Confirmer →" data-en="Confirm →">Confirmer →</button>
+</div>
+
+<!-- ── DON BAR ── -->
+<div class="don-bar">
+  <div class="don-bar-top">
+    <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Soutenir le portail :</span>
+    <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
+    <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
+    <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
+    <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Autre</button>
+    <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Envoyer →</button>
+  </div>
+  <div class="don-desc" data-fr="Serveurs, nouvelles fonctionnalités et développement de la plateforme" data-en="Support the platform (servers, new features, development)">Serveurs, nouvelles fonctionnalités et développement de la plateforme</div>
+</div>
+
+<!-- ── USER BAR ── -->
+<div class="user-bar" id="user-bar">
+  <span class="user-chip" id="user-chip">π ---</span>
+  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
+  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+</div>
+
+<!-- ── LANG (fallback si non connecté) ── -->
+<div class="lang-row" id="lang-row">
   <button class="lang-btn on" onclick="setLang('fr')">🇫🇷 FR</button>
   <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
 </div>
@@ -402,23 +516,20 @@ footer a:hover { color: var(--cy); }
     <span class="sub" data-fr="SAISON 1 ACTIVE" data-en="SEASON 1 ACTIVE">SAISON 1 ACTIVE</span>
   </div>
 
-<div class="hero-card" onclick="window.location.href='/gold-pixel'">
-    <img id="gp-img" src="Images/Gold%20Pixel.png" alt="Gold Pixel">
-    
+  <div class="hero-card" onclick="window.location.href='/goldpixel'">
+    <img id="gp-img" src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.background='linear-gradient(135deg,#0a1628,#1a3050)';this.style.display='block'">
     <div class="hero-overlay">
-        <div class="hero-name">GOLD PIXEL</div>
-        <div class="hero-tag" data-fr="Conquérir · Défendre · Gagner des Pi" data-en="Conquer · Defend · Earn Pi">
-            Conquérir · Défendre · Gagner des Pi
-        </div>
+      <div class="hero-name">GOLD PIXEL</div>
+      <div class="hero-tag" data-fr="Créer · Partager · Voter" data-en="Create · Share · Vote">
+        Créer · Partager · Voter
+      </div>
     </div>
-
     <div class="badge-live">
-        <div class="live-dot"></div>
-        <span data-fr="EN DIRECT (MULTI)" data-en="LIVE (MULTI)">EN DIRECT (MULTI)</span>
+      <div class="live-dot"></div>
+      <span data-fr="PIXEL ART" data-en="PIXEL ART">PIXEL ART</span>
     </div>
-    
     <div class="badge-pi">π Pi Rewards</div>
-</div>
+  </div>
 
   <div class="stats-row rv">
     <div class="stat"><div class="stat-n">8K+</div><div class="stat-l" data-fr="Joueurs" data-en="Players">Joueurs</div></div>
@@ -541,8 +652,16 @@ footer a:hover { color: var(--cy); }
 <div id="toast"></div>
 
 <script>
+// ════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════
+const API = '';  // même domaine
+let piAccessToken = null;
+let piUsername    = null;
 
-/* ── BG CANVAS ── */
+// ════════════════════════════════════════════
+//  BG CANVAS
+// ════════════════════════════════════════════
 (function() {
   const c = document.getElementById('bg-canvas');
   const ctx = c.getContext('2d');
@@ -578,7 +697,105 @@ footer a:hover { color: var(--cy); }
   resize(); draw();
 })();
 
-/* ── LANG ── */
+// ════════════════════════════════════════════
+//  AUTHENTIFICATION PI NETWORK (SSO portail)
+// ════════════════════════════════════════════
+async function loginWithPi() {
+  const btn  = document.getElementById('auth-btn');
+  const icon = document.getElementById('auth-btn-icon');
+  const text = document.getElementById('auth-btn-text');
+
+  // Spinner
+  icon.innerHTML = '<div class="auth-spinner"></div>';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    const scopes = ['username', 'payments'];
+    const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
+
+    piAccessToken = authResult.accessToken;
+    piUsername    = authResult.user.username;
+
+    // Envoyer le token au backend
+    const r = await fetch(`${API}/api/auth/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessToken: piAccessToken })
+    });
+    const data = await r.json();
+
+    // Stocker le token pour les requêtes suivantes
+    sessionStorage.setItem('pi_token',    piAccessToken);
+    sessionStorage.setItem('pi_username', piUsername);
+
+    // Mettre à jour l'UI
+    onAuthSuccess(piUsername, data.user);
+
+    // Demander le pays si pas encore défini
+    if (!data.user?.country) {
+      setTimeout(() => document.getElementById('country-modal').classList.add('show'), 600);
+    }
+
+  } catch (err) {
+    console.error('Auth Pi erreur :', err);
+    icon.textContent = 'π';
+    text.textContent = lang === 'fr' ? 'Réessayer la connexion' : 'Retry login';
+    btn.style.pointerEvents = '';
+    toast(lang === 'fr' ? 'Connexion annulée ou erreur' : 'Login cancelled or error', '');
+  }
+}
+
+function onAuthSuccess(username, userDoc) {
+  // Masquer l'overlay
+  const overlay = document.getElementById('auth-overlay');
+  overlay.classList.add('hide');
+  setTimeout(() => overlay.style.display = 'none', 500);
+
+  // Afficher le chip utilisateur
+  document.getElementById('user-chip').textContent = `π ${username}`;
+  document.getElementById('user-bar').classList.add('visible');
+  document.getElementById('lang-row').style.display = 'none';
+}
+
+function onIncompletePaymentFound(payment) {
+  // Traitement des paiements incomplets (requis par Pi Network)
+  console.warn('Paiement incomplet trouvé :', payment.identifier);
+  fetch(`${API}/api/payment/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionStorage.getItem('pi_token')}` },
+    body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction?.txid })
+  }).catch(console.error);
+}
+
+// Vérifier si déjà connecté (session)
+window.addEventListener('load', () => {
+  const savedToken    = sessionStorage.getItem('pi_token');
+  const savedUsername = sessionStorage.getItem('pi_username');
+  if (savedToken && savedUsername) {
+    piAccessToken = savedToken;
+    piUsername    = savedUsername;
+    onAuthSuccess(savedUsername, {});
+  }
+});
+
+// ════════════════════════════════════════════
+//  PAYS
+// ════════════════════════════════════════════
+async function saveCountry() {
+  const val = document.getElementById('country-select').value;
+  if (!val) return;
+  await fetch(`${API}/api/user/country`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
+    body: JSON.stringify({ country: val })
+  });
+  document.getElementById('country-modal').classList.remove('show');
+  toast(lang === 'fr' ? `Pays enregistré : ${val} ✓` : `Country saved: ${val} ✓`, 'gold');
+}
+
+// ════════════════════════════════════════════
+//  LANG
+// ════════════════════════════════════════════
 let lang = 'fr';
 function setLang(l) {
   lang = l;
@@ -607,7 +824,9 @@ function setLang(l) {
   ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{ const el=g(id); if(el) el.textContent=t.o[i]; });
 }
 
-/* ── DON ── */
+// ════════════════════════════════════════════
+//  DON
+// ════════════════════════════════════════════
 let selAmt = '3';
 function pick(el, v) {
   document.querySelectorAll('.btn-don:not(.envoyer)').forEach(b => b.classList.remove('sel'));
@@ -619,10 +838,39 @@ function sendDon() {
     if (!v || isNaN(v)) return;
     selAmt = v;
   }
-  toast(lang==='fr' ? `Don de ${selAmt} Pi — Merci beaucoup ! 🙏` : `Donation of ${selAmt} Pi — Thank you! 🙏`, 'gold');
+  if (!piUsername) {
+    toast(lang==='fr' ? 'Connectez-vous d\'abord avec Pi !' : 'Please login with Pi first!', '');
+    return;
+  }
+  // Initier un paiement Pi Network
+  Pi.createPayment({
+    amount: parseFloat(selAmt),
+    memo: lang==='fr' ? `Don au portail JEUXVIDEO.PI` : `Donation to JEUXVIDEO.PI portal`,
+    metadata: { type: 'donation', username: piUsername }
+  }, {
+    onReadyForServerApproval: paymentId => {
+      fetch(`${API}/api/payment/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
+        body: JSON.stringify({ paymentId })
+      });
+    },
+    onReadyForServerCompletion: (paymentId, txid) => {
+      fetch(`${API}/api/payment/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
+        body: JSON.stringify({ paymentId, txid, type: 'donation' })
+      });
+      toast(lang==='fr' ? `Don de ${selAmt} Pi — Merci beaucoup ! 🙏` : `Donation of ${selAmt} Pi — Thank you! 🙏`, 'gold');
+    },
+    onCancel: () => toast(lang==='fr' ? 'Don annulé' : 'Donation cancelled', ''),
+    onError: (err) => toast('Erreur paiement Pi', '')
+  });
 }
 
-/* ── FORM ── */
+// ════════════════════════════════════════════
+//  FORM
+// ════════════════════════════════════════════
 function handleForm(e) {
   e.preventDefault();
   const fd = new FormData(e.target);
@@ -634,12 +882,13 @@ function handleForm(e) {
     .catch(() => toast(lang==='fr' ? 'Erreur — veuillez réessayer' : 'Error — please retry', ''));
 }
 
-/* ── SCROLL ── */
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
 function goToContact() {
   document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
 }
 
-/* ── TOAST ── */
 let _t;
 function toast(msg, type) {
   const el = document.getElementById('toast');
@@ -648,13 +897,14 @@ function toast(msg, type) {
   clearTimeout(_t); _t = setTimeout(() => el.className='', 3400);
 }
 
-/* ── REVEAL ── */
+// ════════════════════════════════════════════
+//  REVEAL
+// ════════════════════════════════════════════
 const ro = new IntersectionObserver(
-  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); }),
-  { threshold: .1 }
+  entries => entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }),
+  { threshold: 0.12 }
 );
 document.querySelectorAll('.rv').forEach(el => ro.observe(el));
-setTimeout(() => document.querySelectorAll('.rv').forEach(el => el.classList.add('in')), 650);
 </script>
 </body>
 </html>
