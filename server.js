@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-//  JEUXVIDEO.PI — Server v2.0
+//  JEUXVIDEO.PI — Server v2.1
 //  Hébergement : Render  |  DB : MongoDB Atlas
 //  Architecture : portail unique Pi Network
+//  Contacts (dev + recrutement) loggés en MongoDB
 // ═══════════════════════════════════════════════════════════════
 
 const express  = require('express');
@@ -16,6 +17,7 @@ const PORT = process.env.PORT || 10000;
 // ── ENV ──────────────────────────────────────────────────────────
 const MONGO_URI   = process.env.MONGO_URI        || '';
 const PI_API_KEY  = process.env.PI_API_KEY_JEUXVIDEO || '';   // une seule clé, un seul portail
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'changeme';     // pour /api/contact/list
 
 // ── CORS ─────────────────────────────────────────────────────────
 app.use(cors({
@@ -47,6 +49,8 @@ async function connectDB() {
     await artworks.createIndex({ views: -1 });
     await artworks.createIndex({ 'author.name': 1 });
     await users.createIndex({ piUsername: 1 }, { unique: true });
+    await db.collection('contacts').createIndex({ receivedAt: -1 });
+    await db.collection('contacts').createIndex({ type: 1 });
 
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté');
   } catch (e) {
@@ -189,7 +193,7 @@ app.post('/api/gallery/save', withPiUser(false), async (req, res) => {
     title:      title.slice(0, 60),
     img,
     password,   // stocké hashé en prod — simplifié ici
-    author:     { name: username, uid: req.piUser.uid },
+    author:     { name: username, uid: req.piUser?.uid || null },
     votes:      0,
     views:      0,
     status:     'pending',   // → 'approved' | 'rejected' après modération
@@ -365,6 +369,65 @@ app.post('/api/vote', withPiUser(false), async (req, res) => {
 });
 
 app.get('/api/player/:name', async (req, res) => res.redirect(`/api/game/goldpixel/player/${req.params.name}`));
+
+
+// ═══════════════════════════════════════════════════════════════
+//  /api/contact — Formulaires développeurs & recrutement
+//  Les données arrivent aussi via Formspree (email automatique)
+//  Cette route permet en plus de les stocker en MongoDB
+//  pour consultation/export via /api/contact/list
+// ═══════════════════════════════════════════════════════════════
+
+// POST /api/contact
+// Body : { type: 'developer-integration'|'recruitment', ...fields }
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { type, ...fields } = req.body;
+    if (!type) return res.status(400).json({ error: 'type requis' });
+
+    const contacts = db.collection('contacts');
+    const doc = {
+      type,
+      fields,
+      receivedAt: new Date(),
+      status: 'new',   // new | read | replied
+    };
+    await contacts.insertOne(doc);
+    res.json({ ok: true });
+  } catch (e) {
+    // Ne pas faire échouer l'UX si MongoDB est indisponible
+    console.error('Contact save error:', e.message);
+    res.json({ ok: true }); // on répond ok quand même (Formspree gère l'email)
+  }
+});
+
+// GET /api/contact/list — lister les candidatures (admin)
+// Protégé par un secret header simple
+app.get('/api/contact/list', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (secret !== process.env.ADMIN_SECRET) return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const contacts = db.collection('contacts');
+    const type   = req.query.type;   // filtrer par type si besoin
+    const filter = type ? { type } : {};
+    const data   = await contacts.find(filter).sort({ receivedAt: -1 }).limit(200).toArray();
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PATCH /api/contact/:id/status — marquer lu/répondu
+app.patch('/api/contact/:id/status', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (secret !== process.env.ADMIN_SECRET) return res.status(403).json({ error: 'Forbidden' });
+  const { status } = req.body;
+  if (!['new','read','replied'].includes(status)) return res.status(400).json({ error: 'status invalide' });
+  const { ObjectId } = require('mongodb');
+  const contacts = db.collection('contacts');
+  await contacts.updateOne({ _id: new ObjectId(req.params.id) }, { $set: { status } });
+  res.json({ ok: true });
+});
 
 // ═══════════════════════════════════════════════════════════════
 //  /api/payment — Monétisation Pi
