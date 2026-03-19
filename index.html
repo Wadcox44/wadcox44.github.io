@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-lang="fr">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -419,6 +419,16 @@ textarea { min-height: 88px; resize: vertical; line-height: 1.55; }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 #toast.gold { border-color: var(--or); color: var(--or); box-shadow: 0 0 22px rgba(255,170,0,.2); }
 
+
+/* ── NEWS ── */
+.news-list { display: flex; flex-direction: column; gap: 12px; }
+.news-card { background: rgba(10,22,40,.7); border: 1px solid rgba(0,243,255,.1); border-radius: 12px; padding: 16px 16px 14px; border-left: 3px solid var(--cy); transition: all .25s; }
+.news-card:hover { border-color: rgba(0,243,255,.4); transform: translateX(4px); }
+.news-date { font-family: 'Share Tech Mono', monospace; font-size: .55rem; color: rgba(200,216,232,.35); letter-spacing: 1px; margin-bottom: 6px; }
+.news-tag { display: inline-block; font-family: 'Orbitron', monospace; font-size: .46rem; letter-spacing: 1px; padding: 2px 8px; border-radius: 100px; margin-bottom: 7px; background: rgba(0,243,255,.08); color: rgba(0,243,255,.7); border: 1px solid rgba(0,243,255,.2); }
+.news-title { font-family: 'Orbitron', monospace; font-size: .7rem; color: #fff; margin-bottom: 8px; letter-spacing: .5px; }
+.news-body { font-size: .8rem; color: rgba(200,216,232,.65); line-height: 1.6; }
+
 /* ── FOOTER ── */
 footer {
   font-size: .6rem; color: #C8D8E8;
@@ -429,6 +439,291 @@ footer {
 footer span { color: rgba(0,243,255,.4); }
 footer a { color: #C8D8E8; text-decoration: none; transition: color .2s; }
 footer a:hover { color: var(--cy); }
+
+/* ════════════════════════════════════════
+   NAV PORTAIL — barre de navigation
+════════════════════════════════════════ */
+.portal-nav {
+  width: 90%; max-width: var(--max);
+  display: flex; gap: 6px; align-items: center;
+  padding: 10px 0 0; position: relative; z-index: 2;
+  flex-wrap: wrap;
+}
+.nav-btn {
+  background: transparent; border: 1px solid rgba(0,243,255,.18);
+  color: #C8D8E8; font-family: 'Orbitron', monospace;
+  font-size: .52rem; letter-spacing: 1px; padding: 6px 12px;
+  cursor: pointer; transition: all .2s; border-radius: 4px;
+  white-space: nowrap;
+}
+.nav-btn:hover { border-color: var(--cy); color: var(--cy); background: rgba(0,243,255,.06); }
+.nav-btn.active { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
+.nav-btn.shop {
+  border-color: rgba(255,170,0,.4); color: var(--or);
+  background: rgba(255,170,0,.05);
+  margin-left: auto;
+}
+.nav-btn.shop:hover { background: var(--or); color: #000; box-shadow: var(--glow-or); }
+
+/* ════════════════════════════════════════
+   VUES — sections principales
+════════════════════════════════════════ */
+.view { display: none; width: 90%; max-width: var(--max); }
+.view.active { display: block; }
+
+/* ════════════════════════════════════════
+   PAGE GOLD PIXEL — style Steam
+════════════════════════════════════════ */
+.gp-banner {
+  width: 100%; height: 200px;
+  background: linear-gradient(135deg, #0a1628 0%, #1a2a10 40%, #0a1628 100%);
+  border: 2px solid rgba(255,170,0,.5); border-radius: 12px;
+  overflow: hidden; position: relative; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.gp-banner-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,#0a1628,#0d2440,#0a1628);
+}
+.gp-banner-pixels {
+  position: absolute; inset: 0; opacity: .35;
+  background-image:
+    radial-gradient(circle, var(--or) 1px, transparent 1px),
+    radial-gradient(circle, var(--cy) 1px, transparent 1px);
+  background-size: 24px 24px, 48px 48px;
+  background-position: 0 0, 12px 12px;
+  animation: pixelDrift 8s linear infinite;
+}
+@keyframes pixelDrift { to { background-position: 24px 24px, 36px 36px; } }
+.gp-banner-content {
+  position: relative; z-index: 1; text-align: center;
+}
+.gp-banner-title {
+  font-family: 'Orbitron', monospace; font-size: 2.6rem; font-weight: 900;
+  color: var(--or); letter-spacing: 6px;
+  text-shadow: 0 0 30px var(--or), 0 0 60px rgba(255,170,0,.3);
+}
+.gp-banner-sub {
+  font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+  color: #C8D8E8; letter-spacing: 3px; margin-top: 8px;
+}
+.gp-badge-row {
+  display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap;
+}
+.gp-badge {
+  font-family: 'Orbitron', monospace; font-size: .48rem; letter-spacing: 1px;
+  padding: 3px 10px; border-radius: 100px;
+}
+.gp-badge.live { border: 1px solid var(--or); color: var(--or); }
+.gp-badge.free { border: 1px solid var(--cy); color: var(--cy); }
+.gp-badge.pi   { border: 1px solid rgba(255,255,255,.3); color: rgba(255,255,255,.6); }
+
+/* Screenshots */
+.gp-screenshots {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px;
+}
+.gp-shot {
+  aspect-ratio: 16/9; border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(255,170,0,.2);
+  background: var(--bg2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; transition: all .3s;
+  position: relative;
+}
+.gp-shot:hover { border-color: var(--or); transform: scale(1.04); box-shadow: 0 0 16px rgba(255,170,0,.2); }
+.gp-shot-label {
+  position: absolute; bottom: 5px; left: 0; right: 0; text-align: center;
+  font-family: 'Share Tech Mono', monospace; font-size: .45rem;
+  color: rgba(255,255,255,.4); letter-spacing: 1px;
+}
+
+/* Pitch */
+.gp-pitch {
+  background: rgba(10,20,36,.8); border: 1px solid rgba(0,243,255,.12);
+  border-radius: 10px; padding: 16px; margin-bottom: 14px;
+}
+.gp-pitch-title {
+  font-family: 'Orbitron', monospace; font-size: .68rem; color: var(--cy);
+  letter-spacing: 1.5px; margin-bottom: 10px; text-transform: uppercase;
+  border-left: 3px solid var(--or); padding-left: 10px;
+}
+.gp-pitch-text { font-size: .85rem; color: #C8D8E8; line-height: 1.7; }
+.gp-pitch-tags {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px;
+}
+.gp-tag {
+  font-family: 'Orbitron', monospace; font-size: .46rem; letter-spacing: 1px;
+  padding: 3px 9px; border: 1px solid rgba(0,243,255,.25);
+  color: rgba(0,243,255,.6); border-radius: 100px;
+}
+
+/* Dev word */
+.gp-devword {
+  background: rgba(255,170,0,.04); border: 1px solid rgba(255,170,0,.2);
+  border-radius: 10px; padding: 16px; margin-bottom: 18px;
+}
+.gp-devword-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.gp-dev-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg,var(--or),#bf953f);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.gp-dev-name {
+  font-family: 'Orbitron', monospace; font-size: .62rem; color: var(--or);
+}
+.gp-dev-role { font-size: .7rem; color: rgba(255,255,255,.35); margin-top: 2px; }
+.gp-devword-text { font-size: .82rem; color: #C8D8E8; line-height: 1.7; font-style: italic; }
+
+/* Bouton Jouer */
+.btn-play {
+  display: block; width: 100%; padding: 16px;
+  background: linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size: 200% auto;
+  color: #000; font-family: 'Orbitron', monospace; font-weight: 900;
+  font-size: .9rem; letter-spacing: 2px; border: none; border-radius: 8px;
+  cursor: pointer; transition: all .4s; text-decoration: none; text-align: center;
+  box-shadow: 0 4px 24px rgba(255,170,0,.3); margin-bottom: 18px;
+}
+.btn-play:hover { background-position: right center; box-shadow: 0 6px 36px rgba(255,170,0,.5); transform: translateY(-2px); }
+
+/* Stats jeu */
+.gp-stats {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 18px;
+}
+
+/* ════════════════════════════════════════
+   BOUTIQUE — Shop modal
+════════════════════════════════════════ */
+.shop-overlay {
+  display: none; position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.88); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.shop-overlay.open { display: flex; }
+.shop-panel {
+  width: 100%; max-width: var(--max);
+  background: var(--bg2); border: 1px solid rgba(255,170,0,.35);
+  border-radius: 18px 18px 0 0;
+  padding: 20px 20px 32px;
+  animation: slideUp .35s cubic-bezier(.22,1,.36,1);
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.shop-handle {
+  width: 40px; height: 4px; background: rgba(255,255,255,.15);
+  border-radius: 2px; margin: 0 auto 18px;
+}
+.shop-title {
+  font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--or);
+  letter-spacing: 2px; text-align: center; margin-bottom: 6px;
+}
+.shop-sub {
+  font-size: .72rem; color: rgba(200,216,232,.45);
+  text-align: center; margin-bottom: 20px;
+  font-family: 'Share Tech Mono', monospace; letter-spacing: .5px;
+}
+.shop-items { display: flex; flex-direction: column; gap: 10px; }
+.shop-item {
+  background: rgba(5,11,20,.6); border: 1px solid rgba(255,170,0,.18);
+  border-radius: 12px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; transition: all .25s; position: relative; overflow: hidden;
+}
+.shop-item::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(105deg,transparent 40%,rgba(255,170,0,.06) 50%,transparent 60%);
+  transform: translateX(-100%); transition: transform .4s;
+}
+.shop-item:hover { border-color: var(--or); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,170,0,.15); }
+.shop-item:hover::before { transform: translateX(100%); }
+.shop-item:active { transform: scale(.98); }
+.shop-item-icon { font-size: 1.8rem; flex-shrink: 0; }
+.shop-item-body { flex: 1; min-width: 0; }
+.shop-item-name {
+  font-family: 'Orbitron', monospace; font-size: .65rem; color: var(--or);
+  letter-spacing: 1px; margin-bottom: 3px;
+}
+.shop-item-desc { font-size: .75rem; color: rgba(200,216,232,.6); line-height: 1.4; }
+.shop-item-price {
+  font-family: 'Orbitron', monospace; font-size: .85rem; font-weight: 900;
+  color: #fff; white-space: nowrap;
+}
+.shop-item-price span { color: var(--or); }
+.shop-item.paying { opacity: .6; pointer-events: none; }
+.shop-status {
+  font-family: 'Orbitron', monospace; font-size: .6rem;
+  text-align: center; min-height: 20px; margin-top: 14px; letter-spacing: 1px;
+}
+.shop-status.ok  { color: #44ff88; }
+.shop-status.err { color: #ff6666; }
+.shop-close {
+  display: block; width: 100%; padding: 12px; margin-top: 14px;
+  background: transparent; border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.4); font-family: 'Orbitron', monospace;
+  font-size: .62rem; letter-spacing: 1px; cursor: pointer; border-radius: 8px;
+  transition: all .2s;
+}
+.shop-close:hover { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.7); }
+
+/* ════════════════════════════════════════
+   PAGE JEUX — catégories Steam-like
+════════════════════════════════════════ */
+.cat-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.cat-tab {
+  background: transparent; border: 1px solid rgba(0,243,255,.18);
+  color: rgba(200,216,232,.5); font-family: 'Orbitron', monospace;
+  font-size: .5rem; letter-spacing: 1px; padding: 5px 11px;
+  cursor: pointer; transition: all .2s; border-radius: 100px;
+}
+.cat-tab:hover { border-color: var(--cy); color: var(--cy); }
+.cat-tab.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
+.games-list { display: flex; flex-direction: column; gap: 10px; }
+.game-row {
+  display: flex; gap: 12px; align-items: center;
+  background: rgba(10,20,40,.7); border: 1px solid rgba(0,243,255,.1);
+  border-radius: 10px; padding: 12px 14px; cursor: pointer;
+  transition: all .25s;
+}
+.game-row:hover { border-color: rgba(0,243,255,.35); transform: translateX(4px); box-shadow: -3px 0 0 var(--cy); }
+.game-row-thumb {
+  width: 56px; height: 56px; border-radius: 8px; flex-shrink: 0;
+  background: var(--bg2); display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; border: 1px solid rgba(255,255,255,.06);
+  overflow: hidden;
+}
+.game-row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.game-row-body { flex: 1; min-width: 0; }
+.game-row-name {
+  font-family: 'Orbitron', monospace; font-size: .68rem; color: #fff;
+  margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.game-row-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.game-row-tag {
+  font-family: 'Share Tech Mono', monospace; font-size: .46rem;
+  padding: 1px 7px; border-radius: 100px; letter-spacing: .5px;
+  background: rgba(0,243,255,.08); color: rgba(0,243,255,.6);
+  border: 1px solid rgba(0,243,255,.15);
+}
+.game-row-tag.gold { background: rgba(255,170,0,.08); color: rgba(255,170,0,.7); border-color: rgba(255,170,0,.2); }
+.game-row-desc { font-size: .72rem; color: rgba(200,216,232,.4); line-height: 1.4; }
+.game-row-action {
+  font-family: 'Orbitron', monospace; font-size: .5rem; color: var(--cy);
+  white-space: nowrap; letter-spacing: 1px;
+}
+.game-row.coming { opacity: .45; cursor: default; }
+.game-row.coming:hover { transform: none; box-shadow: none; border-color: rgba(0,243,255,.1); }
+.games-coming-soon {
+  font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+  color: rgba(200,216,232,.25); text-align: center;
+  padding: 20px 0; letter-spacing: 2px;
+}
 
 </style>
 </head>
@@ -453,26 +748,16 @@ footer a:hover { color: var(--cy); }
   <div class="cm-sub" data-fr="Pour les classements par pays — demandé une seule fois." data-en="For country rankings — asked only once.">Pour les classements par pays — demandé une seule fois.</div>
   <select id="country-select">
     <option value="">-- Sélectionnez --</option>
-    <option value="FR">🇫🇷 France</option>
-    <option value="US">🇺🇸 United States</option>
-    <option value="GB">🇬🇧 United Kingdom</option>
-    <option value="DE">🇩🇪 Germany</option>
-    <option value="ES">🇪🇸 Spain</option>
-    <option value="IT">🇮🇹 Italy</option>
-    <option value="NG">🇳🇬 Nigeria</option>
-    <option value="IN">🇮🇳 India</option>
-    <option value="BR">🇧🇷 Brazil</option>
-    <option value="PH">🇵🇭 Philippines</option>
-    <option value="VN">🇻🇳 Vietnam</option>
-    <option value="ID">🇮🇩 Indonesia</option>
-    <option value="KR">🇰🇷 South Korea</option>
-    <option value="JP">🇯🇵 Japan</option>
-    <option value="CN">🇨🇳 China</option>
-    <option value="MX">🇲🇽 Mexico</option>
-    <option value="CA">🇨🇦 Canada</option>
-    <option value="AU">🇦🇺 Australia</option>
-    <option value="RU">🇷🇺 Russia</option>
-    <option value="OTHER">🌐 Other</option>
+    <option value="FR">🇫🇷 France</option><option value="US">🇺🇸 United States</option>
+    <option value="GB">🇬🇧 United Kingdom</option><option value="DE">🇩🇪 Germany</option>
+    <option value="ES">🇪🇸 Spain</option><option value="IT">🇮🇹 Italy</option>
+    <option value="NG">🇳🇬 Nigeria</option><option value="IN">🇮🇳 India</option>
+    <option value="BR">🇧🇷 Brazil</option><option value="PH">🇵🇭 Philippines</option>
+    <option value="VN">🇻🇳 Vietnam</option><option value="ID">🇮🇩 Indonesia</option>
+    <option value="KR">🇰🇷 South Korea</option><option value="JP">🇯🇵 Japan</option>
+    <option value="CN">🇨🇳 China</option><option value="MX">🇲🇽 Mexico</option>
+    <option value="CA">🇨🇦 Canada</option><option value="AU">🇦🇺 Australia</option>
+    <option value="RU">🇷🇺 Russia</option><option value="OTHER">🌐 Other</option>
   </select>
   <button class="cm-btn" onclick="saveCountry()" data-fr="Confirmer →" data-en="Confirm →">Confirmer →</button>
 </div>
@@ -487,20 +772,19 @@ footer a:hover { color: var(--cy); }
     <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Autre</button>
     <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Envoyer →</button>
   </div>
-  <div class="don-desc" data-fr="Serveurs, nouvelles fonctionnalités et développement de la plateforme" data-en="Support the platform (servers, new features, development)">Serveurs, nouvelles fonctionnalités et développement de la plateforme</div>
 </div>
 
 <!-- ── USER BAR ── -->
 <div class="user-bar" id="user-bar">
   <span class="user-chip" id="user-chip">π ---</span>
   <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
-  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
 </div>
 
-<!-- ── LANG (fallback si non connecté) ── -->
+<!-- ── LANG (fallback) ── -->
 <div class="lang-row" id="lang-row">
-  <button class="lang-btn on" onclick="setLang('fr')">🇫🇷 FR</button>
-  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
+  <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
 </div>
 
 <!-- ── HEADER ── -->
@@ -509,153 +793,298 @@ footer a:hover { color: var(--cy); }
   <div class="logo-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Portail Gaming · Pi Network</div>
 </header>
 
-<!-- ── §1 GOLD PIXEL ── -->
+<!-- ══ NAV PORTAIL ══ -->
+<nav class="portal-nav" id="portal-nav">
+  <button class="nav-btn active" onclick="showView('home')" data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
+  <button class="nav-btn" onclick="showView('games')" data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
+  <button class="nav-btn" onclick="showView('news')" data-fr="📰 News" data-en="📰 News">📰 News</button>
+  <button class="nav-btn" onclick="showView('developers')" data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
+  <button class="nav-btn shop" onclick="openShop()" data-fr="🛒 Shop" data-en="🛒 Shop">🛒 Shop</button>
+</nav>
+
+<!-- ══ VUE ACCUEIL ══ -->
+<div class="view active" id="view-home">
 <section>
   <div class="cat-title">
-    <span>⭐ <span data-fr="Projet Phare" data-en="Main Project">Projet Phare</span></span>
-    <span class="sub" data-fr="SAISON 1 ACTIVE" data-en="SEASON 1 ACTIVE">SAISON 1 ACTIVE</span>
+    <span>⭐ <span data-fr="Projet Phare" data-en="Featured Game">Featured Game</span></span>
+    <span class="sub" data-fr="SAISON 1 ACTIVE" data-en="SEASON 1 ACTIVE">SEASON 1 ACTIVE</span>
   </div>
-
-  <div class="hero-card" onclick="window.location.href='/goldpixel'">
+  <div class="hero-card" onclick="showView('goldpixel-page')">
     <img id="gp-img" src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.background='linear-gradient(135deg,#0a1628,#1a3050)';this.style.display='block'">
     <div class="hero-overlay">
       <div class="hero-name">GOLD PIXEL</div>
-      <div class="hero-tag" data-fr="Créer · Partager · Voter" data-en="Create · Share · Vote">
-        Créer · Partager · Voter
-      </div>
+      <div class="hero-tag" data-fr="Créer · Partager · Voter" data-en="Create · Share · Vote">Create · Share · Vote</div>
     </div>
-    <div class="badge-live">
-      <div class="live-dot"></div>
-      <span data-fr="PIXEL ART" data-en="PIXEL ART">PIXEL ART</span>
-    </div>
-    <div class="badge-pi">π Pi Rewards</div>
-  </div>
-
-  <div class="stats-row rv">
-    <div class="stat"><div class="stat-n">8K+</div><div class="stat-l" data-fr="Joueurs" data-en="Players">Joueurs</div></div>
-    <div class="stat"><div class="stat-n">45Kπ</div><div class="stat-l" data-fr="Distribués" data-en="Distributed">Distribués</div></div>
-    <div class="stat"><div class="stat-n">G10</div><div class="stat-l" data-fr="Grades" data-en="Grades">Grades</div></div>
-    <div class="stat"><div class="stat-n">★4.8</div><div class="stat-l" data-fr="Note" data-en="Rating">Note</div></div>
+    <div class="badge-live"><div class="live-dot"></div><span>PIXEL ART</span></div>
   </div>
 </section>
-
-<!-- ── §2 VITRINE DEVS ── -->
 <section>
-  <div class="cat-title rv">
-    <span>🚀 <span data-fr="Vitrine Développeurs" data-en="Developer Showcase">Vitrine Développeurs</span></span>
-  </div>
+  <div class="cat-title rv"><span>🚀 <span data-fr="Vitrine Développeurs" data-en="Developer Showcase">Developer Showcase</span></span></div>
   <div class="game-grid">
-    <div class="card rv d1" onclick="toast('2048 Neon — bientôt en ligne !','cy')">
+    <div class="card rv d1" onclick="showView('goldpixel-page')">
+      <img src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.display='none'">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);"></div>
+      <div class="card-label">GOLD PIXEL</div>
+    </div>
+    <div class="card rv d2" onclick="toast('2048 Neon — bientôt en ligne !','')">
       <div style="position:absolute;inset:0;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:2.2rem">🧩</div>
       <div class="card-label">2048 NEON</div>
     </div>
-    <div class="card slot rv d2" onclick="goToContact()">
+    <div class="card slot rv d3" onclick="showView('developers')">
       <div class="slot-icon">✚</div>
       <div class="slot-sub" data-fr="Disponible" data-en="Available">Disponible</div>
-      <div class="card-label" data-fr="Déployer ici" data-en="Deploy here">Déployer ici</div>
+      <div class="card-label" data-fr="Déployer ici" data-en="Deploy here">Deploy here</div>
     </div>
-    <div class="card slot rv d3" onclick="goToContact()">
-      <div class="slot-icon">✚</div>
-      <div class="slot-sub" data-fr="Disponible" data-en="Available">Disponible</div>
-      <div class="card-label" data-fr="Déployer ici" data-en="Deploy here">Déployer ici</div>
+  </div>
+  <a class="cta-devs rv" onclick="showView('developers')" style="margin-top:14px;display:block;" data-fr="SOUMETTRE VOTRE JEU →" data-en="SUBMIT YOUR GAME →">SUBMIT YOUR GAME →</a>
+</section>
+</div><!-- /view-home -->
+
+<!-- ══ VUE JEUX ══ -->
+<div class="view" id="view-games">
+<section style="border:none;padding-top:14px;">
+  <div class="cat-title rv"><span>🎮 <span data-fr="Tous les Jeux" data-en="All Games">Tous les Jeux</span></span></div>
+  <div class="cat-tabs">
+    <button class="cat-tab on" onclick="filterCat('all',this)" data-fr="Tous" data-en="All">Tous</button>
+    <button class="cat-tab" onclick="filterCat('pixel',this)">Pixel Art</button>
+    <button class="cat-tab" onclick="filterCat('puzzle',this)">Puzzle</button>
+    <button class="cat-tab" onclick="filterCat('arcade',this)">Arcade</button>
+    <button class="cat-tab" onclick="filterCat('coming',this)" data-fr="À venir" data-en="Coming Soon">À venir</button>
+  </div>
+  <div class="games-list" id="games-list">
+    <div class="game-row" data-cat="pixel" onclick="showView('goldpixel-page')">
+      <div class="game-row-thumb"><img src="Images/Gold%20Pixel.png" alt="" onerror="this.parentElement.textContent='🟡'"></div>
+      <div class="game-row-body">
+        <div class="game-row-name">GOLD PIXEL</div>
+        <div class="game-row-tags"><span class="game-row-tag gold">Pixel Art</span><span class="game-row-tag">Galerie</span><span class="game-row-tag">π Rewards</span></div>
+        <div class="game-row-desc" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="Draw, share and vote on 80×45 pixel art.">Dessine, partage et vote pour du pixel art 80×45.</div>
+      </div>
+      <div class="game-row-action">JOUER →</div>
+    </div>
+    <div class="game-row coming" data-cat="puzzle">
+      <div class="game-row-thumb">🧩</div>
+      <div class="game-row-body">
+        <div class="game-row-name">2048 NEON</div>
+        <div class="game-row-tags"><span class="game-row-tag">Puzzle</span><span class="game-row-tag">Classement</span></div>
+        <div class="game-row-desc" data-fr="Version néon du célèbre 2048. Bientôt disponible." data-en="Neon version of 2048. Coming soon.">Version néon du célèbre 2048. Bientôt disponible.</div>
+      </div>
+      <div class="game-row-action" style="color:rgba(200,216,232,.3)" data-fr="BIENTÔT" data-en="SOON">BIENTÔT</div>
+    </div>
+    <div class="game-row coming" data-cat="arcade">
+      <div class="game-row-thumb">🚀</div>
+      <div class="game-row-body">
+        <div class="game-row-name">SLOT PI</div>
+        <div class="game-row-tags"><span class="game-row-tag">Arcade</span><span class="game-row-tag">π Rewards</span></div>
+        <div class="game-row-desc" data-fr="Machine à sous Pi Network. En développement." data-en="Pi Network slot machine. In development.">Machine à sous Pi Network. En développement.</div>
+      </div>
+      <div class="game-row-action" style="color:rgba(200,216,232,.3)" data-fr="BIENTÔT" data-en="SOON">BIENTÔT</div>
+    </div>
+    <div class="game-row coming" data-cat="coming" onclick="showView('developers')" style="cursor:pointer;">
+      <div class="game-row-thumb">✚</div>
+      <div class="game-row-body">
+        <div class="game-row-name" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">VOTRE JEU ICI</div>
+        <div class="game-row-tags"><span class="game-row-tag">Slot libre</span></div>
+        <div class="game-row-desc" data-fr="Soumettez votre jeu pour rejoindre le portail." data-en="Submit your game to join the portal.">Soumettez votre jeu pour rejoindre le portail.</div>
+      </div>
+      <div class="game-row-action" style="color:var(--or)" data-fr="SOUMETTRE →" data-en="SUBMIT →">SOUMETTRE →</div>
     </div>
   </div>
 </section>
-
-<!-- ── §3 AVANTAGES DÉVELOPPEUR ── -->
-<section id="developers">
-  <div class="cat-title rv">
-    <span>💼 <span data-fr="Développeurs" data-en="Developers">Développeurs</span></span>
+</div><!-- /view-games -->
+<!-- ══ VUE NEWS ══ -->
+<div class="view" id="view-news">
+<section style="border:none;padding-top:14px;">
+  <div class="cat-title rv"><span>📰 <span data-fr="News & Actualités" data-en="News & Updates">News & Updates</span></span></div>
+  <div class="news-list">
+    <div class="news-card rv d1">
+      <div class="news-date">March 2026</div>
+      <div class="news-tag" data-fr="Lancement" data-en="Launch">Launch</div>
+      <div class="news-title" data-fr="JEUXVIDEO.PI est en ligne !" data-en="JEUXVIDEO.PI is live!">JEUXVIDEO.PI is live!</div>
+      <div class="news-body" data-fr="Le premier portail de jeux Pi Network est officiellement lancé. Gold Pixel est disponible dès maintenant." data-en="The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share, vote.">The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share, vote.</div>
+    </div>
+    <div class="news-card rv d2">
+      <div class="news-date">Coming soon</div>
+      <div class="news-tag" data-fr="Fonctionnalité" data-en="Feature">Feature</div>
+      <div class="news-title" data-fr="Challenge quotidien dans Gold Pixel" data-en="Daily Challenge in Gold Pixel">Daily Challenge in Gold Pixel</div>
+      <div class="news-body" data-fr="Un challenge pixel art chaque jour. Reproduis le modèle et gagne 10 pixels Or bonus !" data-en="A new pixel art challenge every day. Reproduce the template and earn 10 bonus Gold pixels!">A new pixel art challenge every day. Reproduce the template and earn 10 bonus Gold pixels!</div>
+    </div>
+    <div class="news-card rv d3">
+      <div class="news-date">Coming soon</div>
+      <div class="news-tag" data-fr="Jeux" data-en="Games">Games</div>
+      <div class="news-title" data-fr="2048 Neon arrive bientôt" data-en="2048 Neon coming soon">2048 Neon coming soon</div>
+      <div class="news-body" data-fr="Un 2048 néon sera bientôt disponible sur le portail." data-en="A neon-styled 2048 is coming to the portal. Currently in development.">A neon-styled 2048 is coming to the portal. Currently in development.</div>
+    </div>
+    <div class="news-card rv d1">
+      <div class="news-date">Open</div>
+      <div class="news-tag" data-fr="Développeurs" data-en="Developers">Developers</div>
+      <div class="news-title" data-fr="Soumettez votre jeu — gratuitement" data-en="Submit your game — for free">Submit your game — for free</div>
+      <div class="news-body" data-fr="0% de commission, Pi SDK sans frais. Postulez maintenant." data-en="0% commission, Pi SDK at no cost. Apply now.">0% commission, Pi SDK at no cost. Apply now.</div>
+    </div>
   </div>
+</section>
+</div><!-- /view-news -->
 
-  <div class="devs-headline rv" data-fr="Donnez à votre jeu la visibilité qu'il mérite sur Pi Network !" data-en="Give your game the visibility it deserves on Pi Network!">
-    Donnez à votre jeu la visibilité qu'il mérite sur Pi Network !
-  </div>
-  <div class="devs-sub rv" data-fr="Une page dédiée, des joueurs passionnés et une mise en avant de votre parcours. Rejoignez notre portail et faites découvrir votre création." data-en="A dedicated page, passionate players and a spotlight on your journey. Join our portal and get your game discovered.">
-    Une page dédiée, des joueurs passionnés et une mise en avant de votre parcours. Rejoignez notre portail et faites découvrir votre création.
-  </div>
 
+<!-- ══ VUE GOLD PIXEL — style Steam ══ -->
+<div class="view" id="view-goldpixel-page">
+<section style="border:none;padding-top:14px;">
+  <div class="gp-banner rv">
+    <div class="gp-banner-bg"></div>
+    <div class="gp-banner-pixels"></div>
+    <div class="gp-banner-content">
+      <div class="gp-banner-title">GOLD PIXEL</div>
+      <div class="gp-banner-sub">PIXEL ART · PI NETWORK · SAISON 1</div>
+      <div class="gp-badge-row">
+        <span class="gp-badge live">🔴 EN LIGNE</span>
+        <span class="gp-badge free">GRATUIT</span>
+        <span class="gp-badge pi">π Pi Rewards</span>
+      </div>
+    </div>
+  </div>
+  <div class="gp-screenshots rv">
+    <div class="gp-shot" style="background:linear-gradient(135deg,#0a1a30,#1a2a10);">🎨<div class="gp-shot-label">Éditeur 80×45</div></div>
+    <div class="gp-shot" style="background:linear-gradient(135deg,#0a1628,#0d2035);">🖼️<div class="gp-shot-label">Galerie</div></div>
+    <div class="gp-shot" style="background:linear-gradient(135deg,#1a1000,#0d1a00);">🏆<div class="gp-shot-label">Classements</div></div>
+  </div>
+  <div class="gp-stats rv">
+    <div class="stat"><div class="stat-n">80×45</div><div class="stat-l">Pixels</div></div>
+    <div class="stat"><div class="stat-n">3/j</div><div class="stat-l" data-fr="Publis" data-en="Posts">Publis</div></div>
+    <div class="stat"><div class="stat-n">50px</div><div class="stat-l">Or max</div></div>
+    <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Votes</div></div>
+  </div>
+  <a class="btn-play rv" href="/goldpixel" data-fr="▶ JOUER MAINTENANT — GRATUIT" data-en="▶ PLAY NOW — FREE">▶ JOUER MAINTENANT — GRATUIT</a>
+  <div class="gp-pitch rv">
+    <div class="gp-pitch-title" data-fr="À PROPOS DU JEU" data-en="ABOUT THE GAME">À PROPOS DU JEU</div>
+    <div class="gp-pitch-text" data-fr="Gold Pixel est un studio de création pixel art collaboratif intégré à Pi Network. Sur une grille de 80×45 pixels, chaque joueur dessine, partage et vote pour les œuvres de la communauté. Les pixels Or sont rares et précieux — utilisez-les avec sagesse. Chaque mois, la galerie est archivée et une nouvelle saison commence." data-en="Gold Pixel is a collaborative pixel art studio built on Pi Network. On an 80×45 grid, players draw, share and vote. Gold pixels are rare and precious. Each month the gallery archives and a new season begins.">Gold Pixel est un studio de création pixel art collaboratif intégré à Pi Network. Sur une grille de 80×45, chaque joueur dessine, partage et vote. Les pixels Or sont rares. Chaque mois, la galerie est archivée et une nouvelle saison commence.</div>
+    <div class="gp-pitch-tags">
+      <span class="gp-tag">Pixel Art</span><span class="gp-tag">Créatif</span><span class="gp-tag">Galerie</span>
+      <span class="gp-tag">Votes</span><span class="gp-tag">Classements</span><span class="gp-tag">π Rewards</span>
+    </div>
+  </div>
+  <div class="gp-devword rv">
+    <div class="gp-devword-header">
+      <div class="gp-dev-avatar">W</div>
+      <div>
+        <div class="gp-dev-name">WadCox</div>
+        <div class="gp-dev-role" data-fr="Développeur · JEUXVIDEO.PI" data-en="Developer · JEUXVIDEO.PI">Développeur · JEUXVIDEO.PI</div>
+      </div>
+    </div>
+    <div class="gp-devword-text" data-fr="« Gold Pixel est né d'une idée simple : offrir aux utilisateurs de Pi Network un espace créatif partagé. J'ai voulu que le pixel Or soit rare, presque précieux. La galerie archivée chaque mois, c'est notre mémoire collective. Merci à tous ceux qui font vivre ce portail. »" data-en="« Gold Pixel was born from a simple idea: give Pi Network users a shared creative space. I wanted Gold pixels to be rare and precious. The monthly archive is our collective memory. Thank you to everyone who keeps this portal alive. »">« Gold Pixel est né d'une idée simple : offrir aux utilisateurs de Pi Network un espace créatif partagé. J'ai voulu que le pixel Or soit rare, presque précieux. La galerie archivée chaque mois, c'est notre mémoire collective. Merci à tous. »</div>
+  </div>
+  <div class="cat-title rv" style="margin-bottom:10px;"><span>🛒 <span data-fr="Booster ce jeu" data-en="Boost this game">Booster ce jeu</span></span></div>
+  <button class="cta-devs rv" onclick="openShop()" style="margin-bottom:0;" data-fr="OUVRIR LA BOUTIQUE →" data-en="OPEN SHOP →">OUVRIR LA BOUTIQUE →</button>
+</section>
+</div><!-- /view-goldpixel-page -->
+
+<!-- ══ VUE DÉVELOPPEURS ══ -->
+<div class="view" id="view-developers">
+<section id="developers" style="border:none;padding-top:14px;">
+  <div class="cat-title rv"><span>💼 <span data-fr="Développeurs" data-en="Developers">Développeurs</span></span></div>
+  <div class="devs-headline rv" data-fr="Publiez votre jeu. Gratuitement. Sans commission." data-en="Publish your game. For free. Zero commission.">Publish your game. For free. Zero commission.</div>
+  <div class="devs-sub rv" data-fr="La seule plateforme Pi Network : 0% de commission et Pi SDK intégré sans frais." data-en="The only Pi Network platform: 0% commission and free Pi SDK integration.">The only Pi Network platform: 0% commission and free Pi SDK integration.</div>
+  <div class="av-card rv" style="margin-bottom:10px;border-color:rgba(255,170,0,.45);background:rgba(255,170,0,.05);">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-size:2.2rem;flex-shrink:0;">🏆</div>
+      <div>
+        <div class="av-title" style="color:var(--or);font-size:.72rem;" data-fr="0% DE COMMISSION — GARANTI À VIE" data-en="0% COMMISSION — GUARANTEED FOREVER">0% COMMISSION — GUARANTEED FOREVER</div>
+        <div class="av-text" data-fr="Toutes vos recettes Pi vous appartiennent. Aucun frais caché, aucun partage de revenus." data-en="All your Pi earnings are yours. No hidden fees, no revenue share, no conditions.">All your Pi earnings are yours. No hidden fees, no revenue share, no conditions.</div>
+      </div>
+    </div>
+  </div>
+  <div class="av-card rv" style="margin-bottom:14px;border-color:rgba(0,243,255,.35);background:rgba(0,243,255,.04);">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-size:2.2rem;flex-shrink:0;">⚡</div>
+      <div>
+        <div class="av-title" style="font-size:.72rem;" data-fr="PI SDK INCLUS — SANS FRAIS" data-en="PI SDK INCLUDED — AT NO COST">PI SDK INCLUDED — AT NO COST</div>
+        <div class="av-text" data-fr="Accompagnement complet : paiements Pi, authentification, déploiement. Aucune expertise requise." data-en="Full support: Pi payments, authentication, deployment. No prior expertise required.">Full support: Pi payments, authentication, deployment. No prior expertise required.</div>
+      </div>
+    </div>
+  </div>
   <div class="avantages-grid">
-    <div class="av-card rv d1">
-      <div class="av-icon">📄</div>
-      <div class="av-title" data-fr="Page dédiée" data-en="Dedicated page">Page dédiée</div>
-      <div class="av-text" data-fr="Description, images et vidéos pour présenter votre jeu." data-en="Description, images and videos to showcase your game.">Description, images et vidéos pour présenter votre jeu.</div>
-    </div>
-    <div class="av-card rv d2">
-      <div class="av-icon">🌐</div>
-      <div class="av-title" data-fr="Communauté active" data-en="Active community">Communauté active</div>
-      <div class="av-text" data-fr="Vos jeux visibles par des milliers de joueurs Pi." data-en="Your games visible to thousands of Pi players.">Vos jeux visibles par des milliers de joueurs Pi.</div>
-    </div>
-    <div class="av-card rv d3">
-      <div class="av-icon">🎤</div>
-      <div class="av-title" data-fr="Mise en avant" data-en="In the spotlight">Mise en avant</div>
-      <div class="av-text" data-fr="Interview et présentation du développeur sur le portail." data-en="Developer interview and profile published on the portal.">Interview et présentation du développeur sur le portail.</div>
-    </div>
-    <div class="av-card rv d1">
-      <div class="av-icon">🔎</div>
-      <div class="av-title" data-fr="Portail centralisé" data-en="Centralised portal">Portail centralisé</div>
-      <div class="av-text" data-fr="Tous les jeux rassemblés pour être facilement trouvés." data-en="All games gathered in one place for easy discovery.">Tous les jeux rassemblés pour être facilement trouvés.</div>
-    </div>
-    <div class="av-card rv d2" style="grid-column: 1 / -1;">
-      <div class="av-icon">💬</div>
-      <div class="av-title" data-fr="Feedback communauté" data-en="Community feedback">Feedback communauté</div>
-      <div class="av-text" data-fr="Recevez des commentaires et réactions directement de la communauté Pi Network." data-en="Receive comments and reactions directly from the Pi Network community.">Recevez des commentaires et réactions directement de la communauté Pi Network.</div>
-    </div>
+    <div class="av-card rv d1"><div class="av-icon">📄</div><div class="av-title" data-fr="Page dédiée" data-en="Game page">Game page</div><div class="av-text" data-fr="Description, images et vidéos pour présenter votre jeu." data-en="Description, images and videos to showcase your game.">Description, images et vidéos pour présenter votre jeu.</div></div>
+    <div class="av-card rv d2"><div class="av-icon">🌐</div><div class="av-title" data-fr="Communauté active" data-en="Pi Community">Pi Community</div><div class="av-text" data-fr="Vos jeux visibles par des milliers de joueurs Pi." data-en="Your games visible to thousands of Pi players.">Vos jeux visibles par des milliers de joueurs Pi.</div></div>
+    <div class="av-card rv d3"><div class="av-icon">🎤</div><div class="av-title" data-fr="Mise en avant" data-en="Spotlight">Spotlight</div><div class="av-text" data-fr="Interview et présentation du développeur sur le portail." data-en="Developer interview and profile on the portal.">Interview et présentation du développeur sur le portail.</div></div>
+    <div class="av-card rv d1"><div class="av-icon">🔎</div><div class="av-title" data-fr="Portail centralisé" data-en="Centralised portal">Portail centralisé</div><div class="av-text" data-fr="Tous les jeux rassemblés pour être facilement trouvés." data-en="All games gathered in one place for easy discovery.">Tous les jeux rassemblés pour être facilement trouvés.</div></div>
+    <div class="av-card rv d2" style="grid-column:1/-1"><div class="av-icon">💬</div><div class="av-title" data-fr="Feedback communauté" data-en="Player feedback">Player feedback</div><div class="av-text" data-fr="Recevez des commentaires directement de la communauté Pi Network." data-en="Receive feedback directly from the Pi Network community.">Recevez des commentaires directement de la communauté Pi Network.</div></div>
   </div>
-
-  <a class="cta-devs rv" onclick="goToContact()" data-fr="SOUMETTRE VOTRE JEU →" data-en="SUBMIT YOUR GAME →">SOUMETTRE VOTRE JEU →</a>
+  <a class="cta-devs rv" onclick="goToContact()" data-fr="SOUMETTRE VOTRE JEU →" data-en="SUBMIT YOUR GAME — FREE →">SUBMIT YOUR GAME — FREE →</a>
+  <div style="margin-top:24px;">
+    <div id="form-ok">
+      <div class="ok-ico">🚀</div>
+      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Candidature envoyée !</div>
+      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !</div>
+    </div>
+    <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
+      <div class="form-row">
+        <input type="text" name="name" id="fi-name" placeholder="Nom / Pseudo Pi" required>
+        <input type="email" name="email" id="fi-email" placeholder="Email de contact" required>
+      </div>
+      <input type="text" name="game" id="fi-game" placeholder="Nom du jeu" required>
+      <input type="url" name="url" id="fi-url" placeholder="https://votre-jeu.com (optionnel)">
+      <select name="category" id="fi-cat">
+        <option value="" id="fi-cat-ph">Catégorie du jeu</option>
+        <option id="o1">Stratégie</option><option id="o2">Action / Arcade</option>
+        <option id="o3">Puzzle / Réflexion</option><option id="o4">RPG / Aventure</option>
+        <option id="o5">Casual / Idle</option><option id="o6">Autre</option>
+      </select>
+      <textarea name="message" id="fi-msg" rows="3" placeholder="Description de votre jeu et vos attentes..."></textarea>
+      <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SOUMETTRE MON JEU →</button>
+    </form>
+    <p class="form-note" data-fr="✔ Réponse sous 48h · Certifié WadCox · 0% commission · Pi SDK incluse" data-en="✔ Reply within 48h · 0% commission · Pi SDK included">✔ Reply within 48h · 0% commission · Pi SDK integration included</p>
+  </div>
 </section>
+</div><!-- /view-developers -->
 
-<!-- ── §4 CONTACT ── -->
-<section id="contact" style="border:none">
-  <div class="cat-title rv">
-    <span>📬 <span data-fr="Contact & Déploiement" data-en="Contact & Deployment">Contact & Déploiement</span></span>
-  </div>
-
-  <div id="form-ok">
-    <div class="ok-ico">🚀</div>
-    <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Candidature envoyée !</div>
-    <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !</div>
-  </div>
-
-  <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
-    <div class="form-row">
-      <input type="text" name="name" id="fi-name" placeholder="Nom / Pseudo Pi" required>
-      <input type="email" name="email" id="fi-email" placeholder="Email de contact" required>
+<!-- ══ BOUTIQUE — bottom sheet ══ -->
+<div class="shop-overlay" id="shop-overlay" onclick="if(event.target===this)closeShop()">
+  <div class="shop-panel">
+    <div class="shop-handle"></div>
+    <div class="shop-title" data-fr="🛒 BOUTIQUE GOLD PIXEL" data-en="🛒 GOLD PIXEL SHOP">🛒 BOUTIQUE GOLD PIXEL</div>
+    <div class="shop-sub" data-fr="Boostez vos créations avec des Pi" data-en="Boost your creations with Pi">Boostez vos créations avec des Pi</div>
+    <div class="shop-items">
+      <div class="shop-item" id="shop-item-feature" onclick="buyBoost('feature')">
+        <div class="shop-item-icon">⭐</div>
+        <div class="shop-item-body">
+          <div class="shop-item-name" data-fr="MISE EN AVANT 24H" data-en="FEATURED 24H">MISE EN AVANT 24H</div>
+          <div class="shop-item-desc" data-fr="Votre dernière œuvre Gold Pixel apparaît en tête de galerie pendant 24 heures." data-en="Your latest Gold Pixel artwork appears at the top of the gallery for 24 hours.">Votre dernière œuvre Gold Pixel apparaît en tête de galerie pendant 24 heures.</div>
+        </div>
+        <div class="shop-item-price">0.30 <span>π</span></div>
+      </div>
+      <div class="shop-item" id="shop-item-gold" onclick="buyBoost('gold_pixels')">
+        <div class="shop-item-icon">🟡</div>
+        <div class="shop-item-body">
+          <div class="shop-item-name" data-fr="+50 PIXELS OR" data-en="+50 GOLD PIXELS">+50 PIXELS OR</div>
+          <div class="shop-item-desc" data-fr="Débloque 50 pixels Or supplémentaires pour votre prochaine œuvre (une seule fois par œuvre)." data-en="Unlock 50 extra Gold pixels for your next artwork (once per artwork).">Débloque 50 pixels Or supplémentaires pour votre prochaine œuvre (une seule fois par œuvre).</div>
+        </div>
+        <div class="shop-item-price">0.10 <span>π</span></div>
+      </div>
+      <div class="shop-item" id="shop-item-slots" onclick="buyBoost('extra_slots')">
+        <div class="shop-item-icon">🛑</div>
+        <div class="shop-item-body">
+          <div class="shop-item-name" data-fr="PACK +5 ŒUVRES" data-en="PACK +5 ARTWORKS">PACK +5 ŒUVRES</div>
+          <div class="shop-item-desc" data-fr="Passez de 3 à 8 publications gratuites aujourd'hui. Remis à zéro à minuit." data-en="Go from 3 to 8 free posts today. Resets at midnight.">Passez de 3 à 8 publications gratuites aujourd'hui. Remis à zéro à minuit.</div>
+        </div>
+        <div class="shop-item-price">0.20 <span>π</span></div>
+      </div>
     </div>
-    <input type="text" name="game" id="fi-game" placeholder="Nom du jeu" required>
-    <input type="url" name="url" id="fi-url" placeholder="https://votre-jeu.com (optionnel)">
-    <select name="category" id="fi-cat">
-      <option value="" id="fi-cat-ph">Catégorie du jeu</option>
-      <option id="o1">Stratégie</option>
-      <option id="o2">Action / Arcade</option>
-      <option id="o3">Puzzle / Réflexion</option>
-      <option id="o4">RPG / Aventure</option>
-      <option id="o5">Casual / Idle</option>
-      <option id="o6">Autre</option>
-    </select>
-    <textarea name="message" id="fi-msg" rows="3" placeholder="Description de votre jeu et vos attentes..."></textarea>
-    <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SOUMETTRE MON JEU →</button>
-  </form>
-  <p class="form-note" data-fr="✔ Réponse sous 48h · Certifié WadCox · 0% commission · Intégration Pi SDK incluse" data-en="✔ Reply within 48h · Certified WadCox · 0% commission · Pi SDK integration included">✔ Réponse sous 48h · Certifié WadCox · 0% commission · Intégration Pi SDK incluse</p>
-</section>
+    <div class="shop-status" id="shop-status"></div>
+    <button class="shop-close" onclick="closeShop()" data-fr="FERMER" data-en="CLOSE">FERMER</button>
+  </div>
+</div>
 
 <footer>
-  <span>✔ Certified WadCox</span> &nbsp;|&nbsp;
   Pi Network Ecosystem &nbsp;|&nbsp;
   <span>JEUXVIDEO.PI</span><br><br>
-  <a onclick="goToContact()" style="cursor:pointer" data-fr="Soumettre un jeu" data-en="Submit a game">Soumettre un jeu</a>
-  &nbsp;·&nbsp;
-  <a href="mailto:contact@jeuxvideo.pi">contact@jeuxvideo.pi</a>
+  <span style="font-size:.55rem;color:rgba(200,216,232,.25);">© 2026 JEUXVIDEO.PI · All rights reserved</span>
 </footer>
 
 <div id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════
-const API = '';  // même domaine
+const API = '';
 let piAccessToken = null;
 let piUsername    = null;
 
@@ -698,44 +1127,30 @@ let piUsername    = null;
 })();
 
 // ════════════════════════════════════════════
-//  AUTHENTIFICATION PI NETWORK (SSO portail)
+//  AUTH PI NETWORK (SSO portail)
 // ════════════════════════════════════════════
 async function loginWithPi() {
   const btn  = document.getElementById('auth-btn');
   const icon = document.getElementById('auth-btn-icon');
   const text = document.getElementById('auth-btn-text');
-
-  // Spinner
   icon.innerHTML = '<div class="auth-spinner"></div>';
   btn.style.pointerEvents = 'none';
-
   try {
-    const scopes = ['username', 'payments'];
-    const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
-
+    const authResult = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
     piAccessToken = authResult.accessToken;
     piUsername    = authResult.user.username;
-
-    // Envoyer le token au backend
     const r = await fetch(`${API}/api/auth/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ accessToken: piAccessToken })
     });
     const data = await r.json();
-
-    // Stocker le token pour les requêtes suivantes
     sessionStorage.setItem('pi_token',    piAccessToken);
     sessionStorage.setItem('pi_username', piUsername);
-
-    // Mettre à jour l'UI
     onAuthSuccess(piUsername, data.user);
-
-    // Demander le pays si pas encore défini
     if (!data.user?.country) {
       setTimeout(() => document.getElementById('country-modal').classList.add('show'), 600);
     }
-
   } catch (err) {
     console.error('Auth Pi erreur :', err);
     icon.textContent = 'π';
@@ -746,20 +1161,16 @@ async function loginWithPi() {
 }
 
 function onAuthSuccess(username, userDoc) {
-  // Masquer l'overlay
   const overlay = document.getElementById('auth-overlay');
   overlay.classList.add('hide');
   setTimeout(() => overlay.style.display = 'none', 500);
-
-  // Afficher le chip utilisateur
   document.getElementById('user-chip').textContent = `π ${username}`;
   document.getElementById('user-bar').classList.add('visible');
   document.getElementById('lang-row').style.display = 'none';
 }
 
 function onIncompletePaymentFound(payment) {
-  // Traitement des paiements incomplets (requis par Pi Network)
-  console.warn('Paiement incomplet trouvé :', payment.identifier);
+  console.warn('Paiement incomplet :', payment.identifier);
   fetch(`${API}/api/payment/complete`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionStorage.getItem('pi_token')}` },
@@ -767,7 +1178,6 @@ function onIncompletePaymentFound(payment) {
   }).catch(console.error);
 }
 
-// Vérifier si déjà connecté (session)
 window.addEventListener('load', () => {
   const savedToken    = sessionStorage.getItem('pi_token');
   const savedUsername = sessionStorage.getItem('pi_username');
@@ -777,6 +1187,140 @@ window.addEventListener('load', () => {
     onAuthSuccess(savedUsername, {});
   }
 });
+
+// ════════════════════════════════════════════
+//  NAVIGATION — système de vues
+// ════════════════════════════════════════════
+let currentView = 'home';
+
+function showView(name) {
+  // Cacher toutes les vues
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  // Afficher la vue cible
+  const target = document.getElementById('view-' + name);
+  if (target) target.classList.add('active');
+  // Mettre à jour la nav
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navMap = { home: 0, games: 1, news: 2, developers: 3 };
+  const idx = navMap[name];
+  if (idx !== undefined) {
+    const btns = document.querySelectorAll('.nav-btn:not(.shop)');
+    if (btns[idx]) btns[idx].classList.add('active');
+  }
+  currentView = name;
+  // Re-observer les éléments .rv dans la nouvelle vue
+  document.querySelectorAll('#view-' + name + ' .rv').forEach(el => {
+    el.classList.remove('in');
+    ro.observe(el);
+  });
+  // Scroll en haut
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ════════════════════════════════════════════
+//  FILTRE CATÉGORIES JEUX
+// ════════════════════════════════════════════
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.game-row').forEach(row => {
+    const rowCat = row.dataset.cat;
+    row.style.display = (cat === 'all' || rowCat === cat) ? 'flex' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════
+//  BOUTIQUE — open / close
+// ════════════════════════════════════════════
+function openShop() {
+  if (!piUsername) {
+    toast(lang === 'fr' ? 'Connectez-vous avec Pi pour accéder à la boutique' : 'Sign in with Pi to access the shop', '');
+    return;
+  }
+  document.getElementById('shop-status').textContent = '';
+  document.getElementById('shop-status').className   = 'shop-status';
+  // Réactiver les items
+  document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('paying'));
+  document.getElementById('shop-overlay').classList.add('open');
+}
+
+function closeShop() {
+  document.getElementById('shop-overlay').classList.remove('open');
+}
+
+// ════════════════════════════════════════════
+//  BOUTIQUE — paiements Pi
+// ════════════════════════════════════════════
+const BOOST_CFG = {
+  feature:     { amount: 0.30, memo: 'JEUXVIDEO.PI - Mise en avant 24h',    btnId: 'shop-item-feature' },
+  gold_pixels: { amount: 0.10, memo: 'JEUXVIDEO.PI - Pack +50 pixels Or',   btnId: 'shop-item-gold'    },
+  extra_slots: { amount: 0.20, memo: 'JEUXVIDEO.PI - Pack +5 publications', btnId: 'shop-item-slots'   },
+};
+
+async function buyBoost(type) {
+  if (!piUsername) { toast(lang === 'fr' ? 'Connexion Pi requise' : 'Pi login required', ''); return; }
+  const cfg = BOOST_CFG[type];
+  if (!cfg) return;
+  const statusEl = document.getElementById('shop-status');
+  const itemEl   = document.getElementById(cfg.btnId);
+  itemEl.classList.add('paying');
+  statusEl.textContent = lang === 'fr' ? '⏳ Ouverture Pi Wallet...' : '⏳ Opening Pi Wallet...';
+  statusEl.className   = 'shop-status';
+  try {
+    await Pi.createPayment({
+      amount:   cfg.amount,
+      memo:     cfg.memo,
+      metadata: { type, username: piUsername }
+    }, {
+      onReadyForServerApproval: async (paymentId) => {
+        statusEl.textContent = lang === 'fr' ? '🔄 Approbation...' : '🔄 Approving...';
+        await fetch(`${API}/api/payment/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
+          body: JSON.stringify({ paymentId })
+        }).catch(console.error);
+      },
+      onReadyForServerCompletion: async (paymentId, txid) => {
+        statusEl.textContent = lang === 'fr' ? '🔄 Activation...' : '🔄 Activating...';
+        const res = await fetch(`${API}/api/payment/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
+          body: JSON.stringify({ paymentId, txid, type })
+        });
+        if (res.ok) {
+          const msgs = {
+            feature:     lang === 'fr' ? '⭐ Mise en avant 24h activée !' : '⭐ Featured 24h activated!',
+            gold_pixels: lang === 'fr' ? '🟡 +50 pixels Or débloqués !' : '🟡 +50 Gold pixels unlocked!',
+            extra_slots: lang === 'fr' ? '🛑 +5 publications débloquées !' : '🛑 +5 posts unlocked!',
+          };
+          statusEl.textContent = msgs[type];
+          statusEl.className   = 'shop-status ok';
+          toast(msgs[type], 'gold');
+          setTimeout(closeShop, 2200);
+        } else {
+          const j = await res.json().catch(() => ({}));
+          statusEl.textContent = '✗ ' + (j.error || 'Erreur');
+          statusEl.className   = 'shop-status err';
+          itemEl.classList.remove('paying');
+        }
+      },
+      onCancel: () => {
+        statusEl.textContent = lang === 'fr' ? 'Paiement annulé' : 'Payment cancelled';
+        statusEl.className   = 'shop-status';
+        itemEl.classList.remove('paying');
+      },
+      onError: (err) => {
+        statusEl.textContent = '✗ ' + (err.message || 'Erreur Pi');
+        statusEl.className   = 'shop-status err';
+        itemEl.classList.remove('paying');
+      }
+    });
+  } catch (e) {
+    statusEl.textContent = '✗ ' + (e.message || 'Erreur');
+    statusEl.className   = 'shop-status err';
+    itemEl.classList.remove('paying');
+  }
+}
 
 // ════════════════════════════════════════════
 //  PAYS
@@ -796,18 +1340,14 @@ async function saveCountry() {
 // ════════════════════════════════════════════
 //  LANG
 // ════════════════════════════════════════════
-let lang = 'fr';
+let lang = 'en';
 function setLang(l) {
   lang = l;
   document.documentElement.setAttribute('data-lang', l);
   document.querySelectorAll('.lang-btn').forEach(b =>
     b.classList.toggle('on', b.textContent.includes(l.toUpperCase()))
   );
-  document.querySelectorAll('[data-fr][data-en]').forEach(el => {
-    const val = el.getAttribute('data-' + l);
-    if (!val) return;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
-    else if (el.tagName === 'BUTTON' || el.tagName === 'A') el.textContent = val;
+  document. el.tagName === 'A') el.textContent = val;
     else el.innerHTML = val;
   });
   const t = {
@@ -838,33 +1378,21 @@ function sendDon() {
     if (!v || isNaN(v)) return;
     selAmt = v;
   }
-  if (!piUsername) {
-    toast(lang==='fr' ? 'Connectez-vous d\'abord avec Pi !' : 'Please login with Pi first!', '');
-    return;
-  }
-  // Initier un paiement Pi Network
+  if (!piUsername) { toast(lang==='fr' ? 'Connectez-vous d\'abord avec Pi !' : 'Please login with Pi first!', ''); return; }
   Pi.createPayment({
     amount: parseFloat(selAmt),
-    memo: lang==='fr' ? `Don au portail JEUXVIDEO.PI` : `Donation to JEUXVIDEO.PI portal`,
+    memo: lang==='fr' ? 'Don au portail JEUXVIDEO.PI' : 'Donation to JEUXVIDEO.PI portal',
     metadata: { type: 'donation', username: piUsername }
   }, {
     onReadyForServerApproval: paymentId => {
-      fetch(`${API}/api/payment/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
-        body: JSON.stringify({ paymentId })
-      });
+      fetch(`${API}/api/payment/approve`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${piAccessToken}`}, body:JSON.stringify({paymentId}) });
     },
     onReadyForServerCompletion: (paymentId, txid) => {
-      fetch(`${API}/api/payment/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piAccessToken}` },
-        body: JSON.stringify({ paymentId, txid, type: 'donation' })
-      });
+      fetch(`${API}/api/payment/complete`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${piAccessToken}`}, body:JSON.stringify({paymentId,txid,type:'donation'}) });
       toast(lang==='fr' ? `Don de ${selAmt} Pi — Merci beaucoup ! 🙏` : `Donation of ${selAmt} Pi — Thank you! 🙏`, 'gold');
     },
     onCancel: () => toast(lang==='fr' ? 'Don annulé' : 'Donation cancelled', ''),
-    onError: (err) => toast('Erreur paiement Pi', '')
+    onError:  () => toast('Erreur paiement Pi', '')
   });
 }
 
@@ -886,7 +1414,7 @@ function handleForm(e) {
 //  UTILS
 // ════════════════════════════════════════════
 function goToContact() {
-  document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+  showView('developers');
 }
 
 let _t;
@@ -898,7 +1426,7 @@ function toast(msg, type) {
 }
 
 // ════════════════════════════════════════════
-//  REVEAL
+//  REVEAL (IntersectionObserver)
 // ════════════════════════════════════════════
 const ro = new IntersectionObserver(
   entries => entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }),
