@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>GOLD PIXEL</title>
-  <!-- Pi Network SDK — chargé en sandbox (testnet) -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -759,10 +758,73 @@
     .btn-gold-cancel { width: 100%; padding: 10px; margin-top: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); font-family: 'Orbitron', monospace; font-size: 0.65rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .btn-gold-cancel:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
 
+    /* ─── BOUTON RETOUR PORTAIL ─── */
+    .btn-back-portal {
+      position: absolute; top: 16px; left: 12px;
+      font-family: 'Orbitron', monospace; font-size: 0.52rem;
+      color: rgba(0,243,255,0.6); letter-spacing: 1px;
+      text-decoration: none; border: 1px solid rgba(0,243,255,0.2);
+      padding: 5px 10px; border-radius: 4px; transition: all 0.2s;
+      background: rgba(5,11,20,0.7);
+    }
+    .btn-back-portal:hover { color: #00f3ff; border-color: rgba(0,243,255,0.5); background: rgba(0,243,255,0.06); }
+
+    /* ─── MODAL BOOST MONÉTISATION ─── */
+    #boost-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85); z-index: 450;
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #boost-modal-overlay.open { display: flex; }
+    #boost-modal {
+      background: var(--bg3); padding: 26px 22px;
+      border: 2px solid var(--gold); border-radius: 14px;
+      width: 90%; max-width: 380px;
+      box-shadow: 0 0 60px rgba(255,170,0,0.2);
+      animation: modalIn 0.25s ease; text-align: center;
+    }
+    .boost-title { font-family: 'Orbitron', monospace; color: var(--gold); font-size: 0.9rem; margin-bottom: 16px; letter-spacing: 0.1em; }
+    .boost-card {
+      background: rgba(255,170,0,0.05); border: 1px solid rgba(255,170,0,0.2);
+      border-radius: 10px; padding: 14px; margin-bottom: 10px;
+      cursor: pointer; transition: all 0.2s; text-align: left;
+    }
+    .boost-card:hover { background: rgba(255,170,0,0.1); border-color: var(--gold); transform: translateY(-2px); }
+    .boost-card-title { font-family: 'Orbitron', monospace; font-size: 0.7rem; color: var(--gold); margin-bottom: 4px; }
+    .boost-card-desc { font-size: 0.75rem; color: rgba(255,255,255,0.5); line-height: 1.4; }
+    .boost-card-price { font-family: 'Orbitron', monospace; font-size: 1rem; color: #fff; margin-top: 8px; }
+    .boost-card-price span { color: var(--gold); }
+    .boost-status { font-family: 'Orbitron', monospace; font-size: 0.62rem; min-height: 18px; margin: 10px 0; color: var(--gold); }
+    .boost-status.error { color: #ff6666; }
+    .boost-status.success { color: #44ff88; }
+    .btn-boost-cancel { width: 100%; padding: 10px; margin-top: 6px; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); font-family: 'Orbitron', monospace; font-size: 0.65rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .btn-boost-cancel:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
+
+    /* Quota journalier */
+    #quota-bar {
+      width: 95vw; max-width: 880px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 7px 14px; margin-bottom: 4px;
+      background: var(--bg2); border: 1px solid rgba(255,170,0,0.12);
+      border-radius: 8px; z-index: 1;
+      font-family: 'Orbitron', monospace; font-size: 0.68rem;
+    }
+    .quota-info { color: rgba(255,255,255,0.4); font-size: 0.65rem; }
+    .quota-count { color: var(--gold); }
+    .btn-buy-slots {
+      background: transparent; border: 1px solid rgba(255,170,0,0.35);
+      color: rgba(255,170,0,0.7); font-family: 'Orbitron', monospace;
+      font-size: 0.58rem; padding: 5px 10px; border-radius: 6px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-buy-slots:hover { border-color: var(--gold); color: var(--gold); }
+
     @media (max-width: 480px) {
       .palette { gap: 3px; }
       .metals-row, .metals-labels { gap: 3px; }
       .btn-tool { padding: 8px 8px; font-size: 0.56rem; }
+      .btn-back-portal { font-size: 0.46rem; padding: 4px 7px; }
     }
   </style>
 </head>
@@ -770,6 +832,7 @@
 
 <!-- ─── HEADER ─── -->
 <div class="header">
+  <a href="/" class="btn-back-portal" title="Retour au portail">← JEUXVIDEO.PI</a>
   <div class="logo-wrapper">
     <div class="logo-icon">
       <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -818,7 +881,7 @@
     </div>
     <div class="site-title">GOLD PIXEL</div>
   </div>
-  <div class="header-sub">Studio Pixel Art · Pi Network</div>
+  <div class="header-sub">Créer · Partager · Voter — Pi Network</div>
 </div>
 
 <!-- ─── BANDEAU STATUT PI ─── -->
@@ -833,6 +896,14 @@
   <button class="btn-renew-gold" id="btn-renew-gold" onclick="openGoldModal()" style="display:none;">
     🔄 Renouveler
   </button>
+</div>
+
+<!-- ─── QUOTA JOURNALIER ─── -->
+<div id="quota-bar">
+  <div class="quota-info">
+    Publications aujourd'hui : <span class="quota-count" id="quota-used">0</span> / <span id="quota-max">3</span>
+  </div>
+  <button class="btn-buy-slots" onclick="openBoostModal('slots')">+5 SLOTS — 0.20π</button>
 </div>
 
 <!-- ─── CANEVAS ─── -->
@@ -907,6 +978,20 @@
   </div>
 
   <button class="btn-publish" id="btn-publish" onclick="openModal()">▲ PARTAGER SUR LA GALERIE PARTAGÉE</button>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <button class="btn-tool" style="flex:1;padding:10px;" onclick="openBoostModal('feature')">⭐ MISE EN AVANT 24H — 0.30π</button>
+    <button class="btn-tool" style="flex:1;padding:10px;" onclick="openBoostModal('gold_pixels')">🟡 +50 OR — 0.10π</button>
+  </div>
+</div>
+
+<!-- ─── MODAL BOOST ─── -->
+<div id="boost-modal-overlay">
+  <div id="boost-modal">
+    <div class="boost-title" id="boost-modal-title">⚡ BOOSTER CETTE ŒUVRE</div>
+    <div id="boost-cards-container"></div>
+    <div class="boost-status" id="boost-status"></div>
+    <button class="btn-boost-cancel" onclick="closeBoostModal()">ANNULER</button>
+  </div>
 </div>
 
 <!-- ─── MODAL GOLD MEMBRE ─── -->
@@ -1095,65 +1180,72 @@ const COLORS = [
 // Couleurs des métaux précieux
 const METAL = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
 
-// URL du serveur Render (API)
-const API = 'https://jeuxvideo.onrender.com';
+// URL du serveur Render (API) — relatif car même domaine
+const API = '';
 
 // ════════════════════════════════════════════
-//  PI NETWORK — État joueur
+//  PI NETWORK — Récupération session portail
 // ════════════════════════════════════════════
-let piUser     = null;   // { uid, username } après authenticate
-let playerGold = false;  // true si abonnement Gold actif
-let currentGallerySort = 'new'; // 'new' | 'votes' | 'mine'
+let piUser     = null;   // { uid, username } récupéré depuis la session du portail
+let playerGold = false;
+let currentGallerySort = 'new';
+// Quota journalier (mis à jour depuis l'API)
+let quotaUsed = 0;
+let quotaMax  = 3;
 
 // ── Initialisation Pi SDK ──
 async function initPi() {
   try {
-    // sandbox:true = testnet (Pi fictifs)
-    Pi.init({ version: '2.0', sandbox: true });
-    console.log('✅ Pi SDK initialisé (sandbox/testnet)');
-    await authenticatePi();
+    Pi.init({ version: '2.0', sandbox: false });
+
+    // 1. Essayer de récupérer la session existante du portail
+    const savedToken    = sessionStorage.getItem('pi_token');
+    const savedUsername = sessionStorage.getItem('pi_username');
+
+    if (savedToken && savedUsername) {
+      // Session portail disponible — pas besoin de re-authentifier
+      piUser = { username: savedUsername, token: savedToken };
+      console.log(`✅ Session portail récupérée : @${piUser.username}`);
+      await checkGoldStatus();
+      await loadQuota();
+    } else {
+      // Pas de session portail — authentification directe depuis le jeu
+      await authenticatePi();
+    }
   } catch (e) {
-    // Pi SDK non disponible (navigateur normal, pas Pi Browser)
     console.warn('⚠️ Pi SDK non disponible:', e.message);
     setPiStatusOffline();
   }
 }
 
-// ── Authentification Pi ──
+// ── Authentification Pi (fallback si pas de session portail) ──
 async function authenticatePi() {
-  const statusBar  = document.getElementById('pi-status-bar');
   const statusText = document.getElementById('pi-status-text');
-  const statusIcon = document.getElementById('pi-status-icon');
-
+  statusText.textContent = 'Connexion Pi en cours...';
   try {
-    statusText.textContent = 'Connexion Pi en cours...';
-    const auth = await Pi.authenticate(
-      ['username', 'payments'],   // scopes demandés
-      onIncompletePaymentFound     // callback pour paiements en suspens
-    );
-
-    piUser = { uid: auth.user.uid, username: auth.user.username };
-    console.log(`✅ Pi authentifié : @${piUser.username} (uid: ${piUser.uid})`);
-
-    // Vérifie le statut Gold dans MongoDB
+    const auth = await Pi.authenticate(['username', 'payments'], onIncompletePaymentFound);
+    piUser = { uid: auth.user.uid, username: auth.user.username, token: auth.accessToken };
+    // Stocker en session pour les autres jeux du portail
+    sessionStorage.setItem('pi_token',    auth.accessToken);
+    sessionStorage.setItem('pi_username', auth.user.username);
+    console.log(`✅ Pi authentifié : @${piUser.username}`);
     await checkGoldStatus();
-
+    await loadQuota();
   } catch (e) {
     console.warn('Pi authenticate échoué:', e.message);
     setPiStatusOffline();
   }
 }
 
-// ── Callback paiements incomplets (remplace le handler Vercel) ──
+// ── Callback paiements incomplets ──
 async function onIncompletePaymentFound(payment) {
   console.log('🔄 Paiement incomplet trouvé:', payment.identifier);
   try {
-    await fetch(`${API}/api/pi/incomplete`, {
+    await fetch(`${API}/api/payment/complete`, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ payment })
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piUser?.token || ''}` },
+      body:    JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction?.txid })
     });
-    console.log('✅ Paiement incomplet traité par Render');
   } catch (e) {
     console.error('Erreur traitement paiement incomplet:', e);
   }
@@ -1163,16 +1255,37 @@ async function onIncompletePaymentFound(payment) {
 async function checkGoldStatus() {
   if (!piUser) return;
   try {
-    const res  = await fetch(`${API}/api/member/status/${encodeURIComponent(piUser.username)}`);
+    const res  = await fetch(`${API}/api/user/me`, {
+      headers: { Authorization: `Bearer ${piUser.token}` }
+    });
     const data = await res.json();
-    playerGold = data.isGold;
-    updatePiStatusBar(data);
+    // Compatibilité : goldData depuis /api/user/me
+    const goldData = { isGold: data.isGold || false, daysLeft: data.daysLeft || 0 };
+    playerGold = goldData.isGold;
+    updatePiStatusBar(goldData);
     updateGoldUI();
-    console.log(`👤 @${piUser.username} — Gold: ${playerGold}${data.daysLeft ? ` (${data.daysLeft}j restants)` : ''}`);
   } catch (e) {
     console.error('Erreur vérification Gold:', e);
-    setPiStatusOffline();
+    // Afficher quand même le nom d'utilisateur même si Gold échoue
+    updatePiStatusBar({ isGold: false, daysLeft: 0 });
   }
+}
+
+// ── Charge le quota journalier ──
+async function loadQuota() {
+  if (!piUser) return;
+  try {
+    const res  = await fetch(`${API}/api/user/me`, { headers: { Authorization: `Bearer ${piUser.token}` } });
+    const data = await res.json();
+    quotaUsed = data.dailyCount || 0;
+    quotaMax  = data.extraSlots ? 8 : 3;
+    updateQuotaBar();
+  } catch (_) {}
+}
+
+function updateQuotaBar() {
+  document.getElementById('quota-used').textContent = quotaUsed;
+  document.getElementById('quota-max').textContent  = quotaMax;
 }
 
 // ── Met à jour le bandeau statut ──
@@ -1259,91 +1372,52 @@ async function startGoldPayment() {
   statusEl.textContent = '';
 
   try {
-    const payment = await Pi.createPayment({
-      amount: 1,                                          // 1 Pi
-      memo:   'Gold Pixel - Abonnement Gold 1 mois',     // memo exact vérifié côté serveur
-      metadata: {
-        type:       'gold_subscription',
-        piUsername: piUser.username,
-        piUid:      piUser.uid
-      }
+    await Pi.createPayment({
+      amount: 1,
+      memo:   'Gold Pixel - Abonnement Gold 1 mois',
+      metadata: { type: 'gold_subscription', username: piUser.username }
     }, {
-      // Callback étape 3 : paiement prêt pour approbation serveur
       onReadyForServerApproval: async (paymentId) => {
-        console.log('💰 Prêt pour approbation:', paymentId);
         statusEl.textContent = '🔄 Approbation en cours...';
-        try {
-          const res = await fetch(`${API}/api/pi/approve`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ paymentId, piUsername: piUser.username, piUid: piUser.uid })
-          });
-          if (!res.ok) throw new Error(`Approbation refusée: ${res.status}`);
-          console.log('✅ Paiement approuvé');
-        } catch (e) {
-          console.error('Erreur approbation:', e);
-          statusEl.textContent = '✗ Erreur approbation — ' + e.message;
-          statusEl.className   = 'gold-modal-status error';
-        }
+        await fetch(`${API}/api/payment/approve`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piUser.token}` },
+          body: JSON.stringify({ paymentId })
+        });
       },
-
-      // Callback étape 4 : transaction blockchain confirmée
       onReadyForServerCompletion: async (paymentId, txid) => {
-        console.log('🔗 Transaction confirmée:', paymentId, txid);
         statusEl.textContent = '🔄 Activation Gold en cours...';
-        try {
-          const res = await fetch(`${API}/api/pi/complete`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ paymentId, txid, piUsername: piUser.username, piUid: piUser.uid })
-          });
-          const data = await res.json();
-          if (res.ok) {
-            playerGold = true;
-            statusEl.textContent = '✦ STATUT GOLD ACTIVÉ ! 🌟';
-            statusEl.className   = 'gold-modal-status success';
-            payBtn.textContent   = '✅ GOLD ACTIVÉ !';
-            updateGoldUI();
-            await checkGoldStatus(); // rafraîchit le bandeau
-            setTimeout(closeGoldModal, 2000);
-            showToast('🌟 Bienvenue dans le club Gold !');
-          } else {
-            throw new Error(data.error || 'Erreur completion');
-          }
-        } catch (e) {
-          console.error('Erreur completion:', e);
-          statusEl.textContent = '✗ Erreur activation — ' + e.message;
-          statusEl.className   = 'gold-modal-status error';
-          payBtn.disabled      = false;
-          payBtn.textContent   = '🌟 PAYER 1 Pi — DEVENIR GOLD';
+        const res = await fetch(`${API}/api/payment/complete`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piUser.token}` },
+          body: JSON.stringify({ paymentId, txid, type: 'gold_subscription' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          playerGold = true;
+          statusEl.textContent = '✦ STATUT GOLD ACTIVÉ ! 🌟';
+          statusEl.className   = 'gold-modal-status success';
+          payBtn.textContent   = '✅ GOLD ACTIVÉ !';
+          updateGoldUI();
+          await checkGoldStatus();
+          setTimeout(closeGoldModal, 2000);
+          showToast('🌟 Bienvenue dans le club Gold !');
+        } else {
+          throw new Error(data.error || 'Erreur completion');
         }
       },
-
-      // Callback en cas d'annulation
-      onCancel: (paymentId) => {
-        console.log('❌ Paiement annulé:', paymentId);
+      onCancel: () => {
         statusEl.textContent = 'Paiement annulé.';
-        statusEl.className   = 'gold-modal-status';
-        payBtn.disabled      = false;
-        payBtn.textContent   = '🌟 PAYER 1 Pi — DEVENIR GOLD';
+        payBtn.disabled = false; payBtn.textContent = '🌟 PAYER 1 Pi — DEVENIR GOLD';
       },
-
-      // Callback en cas d'erreur
-      onError: (error, payment) => {
-        console.error('❌ Erreur Pi payment:', error);
+      onError: (error) => {
         statusEl.textContent = '✗ Erreur Pi : ' + (error.message || error);
         statusEl.className   = 'gold-modal-status error';
-        payBtn.disabled      = false;
-        payBtn.textContent   = '🌟 PAYER 1 Pi — DEVENIR GOLD';
+        payBtn.disabled = false; payBtn.textContent = '🌟 PAYER 1 Pi — DEVENIR GOLD';
       }
     });
-
   } catch (e) {
-    console.error('Erreur createPayment:', e);
     statusEl.textContent = '✗ ' + (e.message || 'Erreur inattendue');
     statusEl.className   = 'gold-modal-status error';
-    payBtn.disabled      = false;
-    payBtn.textContent   = '🌟 PAYER 1 Pi — DEVENIR GOLD';
+    payBtn.disabled = false; payBtn.textContent = '🌟 PAYER 1 Pi — DEVENIR GOLD';
   }
 }
 
@@ -1729,14 +1803,6 @@ viewportEl.addEventListener('touchend', e => {
 // ════════════════════════════════════════════
 let _pendingReviewData = null;
 
-function openModal() {
-  document.getElementById('modal-status').textContent = '';
-  document.getElementById('modal-status').className   = 'modal-status';
-  document.getElementById('btn-send').disabled        = false;
-  document.getElementById('btn-request-review').style.display = 'none';
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('p-name').focus(), 100);
-}
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
 
@@ -1757,31 +1823,39 @@ async function publish() {
 
   const img = canvas.toDataURL('image/webp', 1.0);
 
+  // Utiliser le pseudo Pi connecté si disponible, sinon le champ manuel
+  const authorName = piUser?.username || name;
+  // Auto-remplir le champ pseudo avec le username Pi
+  if (piUser) document.getElementById('p-name').value = piUser.username;
+
   try {
-    const res = await fetch(`${API}/api/save`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name, title, img, deleteCode: codeRaw,
-        piUsername: piUser?.username || null  // envoie le pseudo Pi pour vérif limites
-      })
+    const headers = { 'Content-Type': 'application/json' };
+    if (piUser?.token) headers['Authorization'] = `Bearer ${piUser.token}`;
+
+    const res = await fetch(`${API}/api/gallery/save`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ title, img, authorName, password: codeRaw })
     });
+
     if (res.ok) {
-      statusEl.textContent = '✦ PUBLIÉ AVEC SUCCÈS !'; statusEl.className = 'modal-status success';
+      const j = await res.json().catch(() => ({}));
+      statusEl.textContent = '✦ PUBLIÉ — EN ATTENTE DE VALIDATION IA'; statusEl.className = 'modal-status success';
       _pendingReviewData = null;
-      setTimeout(() => { closeModal(); loadGallery(); loadTop10(); loadAllPlayers(); showToast('✦ ŒUVRE PUBLIÉE !'); }, 1200);
+      quotaUsed = Math.min(quotaUsed + 1, quotaMax);
+      updateQuotaBar();
+      setTimeout(() => { closeModal(); loadGallery(); loadTop10(); loadAllPlayers(); showToast('✦ ŒUVRE ENVOYÉE — visible dans quelques instants !'); }, 1400);
     } else {
       const j = await res.json().catch(() => ({}));
       if (res.status === 422) {
         const reason = j.message || 'Contenu inapproprié détecté';
-        _pendingReviewData = { name, title, img, deleteCode: codeRaw, reason };
+        _pendingReviewData = { title, img, authorName, password: codeRaw, reason };
         statusEl.innerHTML = `🚫 <strong>IMAGE BLOQUÉE PAR L'IA</strong><br><span style="font-size:0.58rem;color:rgba(255,150,150,0.8)">${esc(reason)}</span><br><span style="font-size:0.58rem;color:rgba(255,255,255,0.3)">Tu penses que c'est une erreur ? Demande une vérification humaine.</span>`;
         statusEl.className = 'modal-status error';
         document.getElementById('btn-request-review').style.display = 'block';
         sendBtn.disabled = false;
       } else if (res.status === 429) {
-        // Limite de publication atteinte
-        const isGoldLimit = j.error === 'DÉLAI_GOLD';
-        statusEl.innerHTML = `⏱ ${esc(j.message || 'Limite de publication atteinte')}${!isGoldLimit && !playerGold ? '<br><span style="font-size:0.58rem;color:rgba(255,200,0,0.7)">👆 Deviens Membre Gold pour publier plus souvent !</span>' : ''}`;
+        statusEl.innerHTML = `⏱ QUOTA JOURNALIER ATTEINT (${quotaMax}/jour)<br><span style="font-size:0.58rem;color:rgba(255,200,0,0.7)">👆 Achète +5 slots pour 0.20π !</span>`;
         statusEl.className = 'modal-status error';
         sendBtn.disabled   = false;
       } else {
@@ -1840,7 +1914,7 @@ async function confirmDelete() {
   if (!/^\d{4}$/.test(code)) { statusEl.textContent = '⚠ Code à 4 chiffres requis'; return; }
   confirmBtn.disabled = true; statusEl.textContent = '⏳ Suppression...';
   try {
-    const res = await fetch(`${API}/api/artwork/${_deleteTargetId}`, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({deleteCode:code}) });
+    const res = await fetch(`${API}/api/gallery/${_deleteTargetId}`, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:code}) });
     if (res.ok) { closeDeleteModal(); showToast('🗑 ŒUVRE SUPPRIMÉE'); loadGallery(); loadTop10(); loadAllPlayers(); }
     else { const j = await res.json().catch(()=>({})); statusEl.textContent = j.error||'Code incorrect'; confirmBtn.disabled = false; }
   } catch (e) { statusEl.textContent = 'Erreur réseau'; confirmBtn.disabled = false; }
@@ -1855,15 +1929,15 @@ async function loadGallery() {
   try {
     let url;
     if (currentGallerySort === 'mine' && piUser) {
-      // Filtre sur les œuvres du joueur connecté
-      url = `${API}/api/gallery/player/${encodeURIComponent(piUser.username)}`;
+      url = `${API}/api/game/goldpixel/player/${encodeURIComponent(piUser.username)}`;
     } else {
-      // Tri par date (new) ou votes
-      const sortParam = currentGallerySort === 'votes' ? 'votes' : 'new';
+      const sortParam = currentGallerySort === 'votes' ? 'votes' : 'date';
       url = `${API}/api/gallery?sort=${sortParam}`;
     }
     const res = await fetch(url);
-    const data = await res.json();
+    const raw = await res.json();
+    // Compat : si c'est un objet { arts: [...] } (profil joueur)
+    const data = Array.isArray(raw) ? raw : (raw.arts || []);
     if (!data.length) {
       gal.innerHTML = currentGallerySort === 'mine'
         ? '<div class="gallery-loading">TU N\'AS PAS ENCORE PUBLIÉ D\'ŒUVRE</div>'
@@ -1871,18 +1945,20 @@ async function loadGallery() {
       return;
     }
     gal.innerHTML = data.map(art => `
-      <div class="art-card">
+      <div class="art-card" ${art.featured ? 'style="border-color:rgba(255,215,0,0.6);box-shadow:0 0 20px rgba(255,170,0,0.2);"' : ''}>
         <div class="art-card-header">
           <div class="art-card-title">
             ${esc(art.title)}
-            ${art.isGoldAuthor ? '<span class="art-gold-badge">🌟GOLD</span>' : ''}
+            ${art.featured ? '<span class="art-gold-badge">⭐EN AVANT</span>' : ''}
+            ${art.goldPixels ? '<span class="art-gold-badge">🟡OR+</span>' : ''}
           </div>
-          <div class="art-card-author clickable-author" onclick="openPlayerProfile('${esc(art.name)}')">par @${esc(art.name)}</div>
+          <div class="art-card-author clickable-author" onclick="openPlayerProfile('${esc(art.author?.name || art.name || '')}')">par @${esc(art.author?.name || art.name || '?')}</div>
         </div>
         <img src="${art.img}" alt="${esc(art.title)}" loading="lazy">
         <div class="art-card-footer">
           <span class="art-date">${fmtDate(art.createdAt)}</span>
-          <button class="btn-vote"   onclick="vote('${art.id}',this)">⭐ ${art.votes}</button>
+          <button class="btn-vote"   onclick="vote('${art.id}',this)">⭐ ${art.votes || 0}</button>
+          <button class="btn-tool" style="font-size:0.55rem;padding:5px 7px;" onclick="openBoostModal('feature','${art.id}')" title="Booster cette œuvre">⚡</button>
           <button class="btn-delete" onclick="deleteArt('${art.id}','${esc(art.title)}')" title="Supprimer (code créateur requis)">🗑</button>
         </div>
       </div>`).join('');
@@ -1923,7 +1999,7 @@ async function loadTop10() {
 
 async function loadTop10Artworks(list) {
   let data = [];
-  try { const r = await fetch(`${API}/api/top10`); data = await r.json(); } catch(_) {}
+  try { const r = await fetch(`${API}/api/game/goldpixel/top10`); data = await r.json(); } catch(_) {}
   const items = data.length >= 10 ? data.slice(0,10) : data;
   if (!items.length) { list.innerHTML = FAKE_TOP10.map(f=>renderFakeTop(f)).join(''); return; }
   const real = items.map((art,i) => {
@@ -1931,7 +2007,7 @@ async function loadTop10Artworks(list) {
     return `<div class="top-card ${rc}"><div class="rank-badge">${badge}</div>
       <img class="top-thumb" src="${art.img}" onerror="this.style.display='none'" alt="">
       <div class="top-info"><div class="top-title">${esc(art.title)}</div>
-      <div class="top-author clickable-author" onclick="openPlayerProfile('${esc(art.name)}')">@${esc(art.name)}</div></div>
+      <div class="top-author clickable-author" onclick="openPlayerProfile('${esc(art.author?.name || art.name || '')}')">@${esc(art.author?.name || art.name || '?')}</div></div>
       <div class="top-votes">⭐ ${art.votes}</div></div>`;
   }).join('');
   const fake = items.length < 10 ? FAKE_TOP10.slice(items.length,10).map((f,i)=>renderFakeTop({...f,rank:items.length+i+1})).join('') : '';
@@ -1940,7 +2016,7 @@ async function loadTop10Artworks(list) {
 
 async function loadTop10Players(list) {
   let data = [];
-  try { const r = await fetch(`${API}/api/top10-players`); data = await r.json(); } catch(_) {}
+  try { const r = await fetch(`${API}/api/game/goldpixel/top10-players`); data = await r.json(); } catch(_) {}
   if (!data.length) {
     list.innerHTML = FAKE_TOP10.map((f,i)=>`
       <div class="top-card ${i<3?`rank-${i+1}`:'rank-other'}"><div class="rank-badge">${i<3?MEDALS[i]:`#${i+1}`}</div>
@@ -1978,7 +2054,7 @@ async function loadAllPlayers() {
   const grid = document.getElementById('players-grid');
   grid.innerHTML = '<div class="gallery-loading">CHARGEMENT...</div>';
   try {
-    const res = await fetch(`${API}/api/all-players`);
+    const res = await fetch(`${API}/api/game/goldpixel/all-players`);
     _allPlayers = await res.json();
     renderPlayersGrid(_allPlayers);
     document.getElementById('players-count').textContent = `${_allPlayers.length} joueur${_allPlayers.length>1?'s':''}`;
@@ -2017,7 +2093,7 @@ async function openPlayerProfile(name) {
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   try {
-    const res = await fetch(`${API}/api/player/${encodeURIComponent(name)}`);
+    const res = await fetch(`${API}/api/game/goldpixel/player/${encodeURIComponent(name)}`);
     const data = await res.json();
     document.getElementById('player-stats-line').textContent = `${data.arts?.length||0} œuvre${(data.arts?.length||0)>1?'s':''} · ${data.totalVotes||0} votes`;
     if (!data.arts?.length) { pg.innerHTML = '<div class="gallery-loading">AUCUNE ŒUVRE PUBLIÉE</div>'; return; }
@@ -2039,8 +2115,12 @@ document.getElementById('player-modal-overlay').addEventListener('click', e => {
 async function vote(id, btn) {
   btn.classList.add('voted'); btn.disabled = true;
   try {
-    const res = await fetch(`${API}/api/vote`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
+    const headers = { 'Content-Type': 'application/json' };
+    if (piUser?.token) headers['Authorization'] = `Bearer ${piUser.token}`;
+    const res = await fetch(`${API}/api/gallery/${id}/vote`, { method:'POST', headers });
     const data = await res.json();
+    if (res.status === 403) { showToast('⛔ Impossible de voter pour ta propre œuvre'); btn.classList.remove('voted'); btn.disabled = false; return; }
+    if (res.status === 409) { showToast('Déjà voté !'); return; }
     btn.textContent = `⭐ ${data.votes}`;
     loadTop10();
   } catch(e) { btn.classList.remove('voted'); btn.disabled = false; }
@@ -2058,6 +2138,150 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ════════════════════════════════════════════
+//  MODAL BOOST — Monétisation micro-paiements
+// ════════════════════════════════════════════
+let _boostType = null;   // 'feature' | 'gold_pixels' | 'slots'
+let _boostArtId = null;
+
+const BOOST_CONFIG = {
+  feature: {
+    title:   '⭐ MISE EN AVANT 24H',
+    desc:    'Ton œuvre apparaît en tête de galerie pendant 24 heures.',
+    price:   0.30,
+    memo:    'Gold Pixel - Mise en avant 24h',
+    btnText: '⭐ PAYER 0.30π — ACTIVER'
+  },
+  gold_pixels: {
+    title:   '🟡 +50 PIXELS OR',
+    desc:    'Débloque 50 pixels Or supplémentaires pour cette œuvre (une seule fois).',
+    price:   0.10,
+    memo:    'Gold Pixel - Pack +50 pixels Or',
+    btnText: '🟡 PAYER 0.10π — DÉBLOQUER'
+  },
+  slots: {
+    title:   '🛑 PACK +5 PUBLICATIONS',
+    desc:    'Passe de 3 à 8 publications gratuites aujourd\'hui. Resetté à minuit.',
+    price:   0.20,
+    memo:    'Gold Pixel - Pack +5 publications',
+    btnText: '🛑 PAYER 0.20π — ACHETER'
+  }
+};
+
+function openBoostModal(type, artId) {
+  if (!piUser) { showToast('Connecte-toi via Pi Browser pour utiliser les boosts'); return; }
+  _boostType  = type;
+  _boostArtId = artId || null;
+
+  const cfg = BOOST_CONFIG[type];
+  document.getElementById('boost-modal-title').textContent = cfg.title;
+  document.getElementById('boost-status').textContent = '';
+  document.getElementById('boost-status').className   = 'boost-status';
+
+  document.getElementById('boost-cards-container').innerHTML = `
+    <div class="boost-card" onclick="startBoostPayment()">
+      <div class="boost-card-title">${cfg.title}</div>
+      <div class="boost-card-desc">${cfg.desc}</div>
+      <div class="boost-card-price"><span>${cfg.price}</span> Pi</div>
+      <button class="btn-pay-pi" style="margin-top:12px;font-size:0.75rem;padding:12px;" id="btn-boost-pay">${cfg.btnText}</button>
+    </div>`;
+
+  document.getElementById('boost-modal-overlay').classList.add('open');
+}
+
+function closeBoostModal() {
+  document.getElementById('boost-modal-overlay').classList.remove('open');
+  _boostType = null; _boostArtId = null;
+}
+document.getElementById('boost-modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('boost-modal-overlay')) closeBoostModal();
+});
+
+async function startBoostPayment() {
+  if (!piUser || !_boostType) return;
+  const cfg       = BOOST_CONFIG[_boostType];
+  const statusEl  = document.getElementById('boost-status');
+  const payBtn    = document.getElementById('btn-boost-pay');
+  payBtn.disabled = true;
+  statusEl.textContent = '⏳ Ouverture Pi Wallet...';
+
+  try {
+    await Pi.createPayment({
+      amount:   cfg.price,
+      memo:     cfg.memo,
+      metadata: { type: _boostType, artId: _boostArtId, username: piUser.username }
+    }, {
+      onReadyForServerApproval: async (paymentId) => {
+        statusEl.textContent = '🔄 Approbation...';
+        await fetch(`${API}/api/payment/approve`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piUser.token}` },
+          body: JSON.stringify({ paymentId })
+        });
+      },
+      onReadyForServerCompletion: async (paymentId, txid) => {
+        statusEl.textContent = '🔄 Application du boost...';
+        const res = await fetch(`${API}/api/payment/complete`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${piUser.token}` },
+          body: JSON.stringify({ paymentId, txid, type: _boostType, artId: _boostArtId })
+        });
+        if (res.ok) {
+          statusEl.textContent = '✦ BOOST ACTIVÉ !';
+          statusEl.className   = 'boost-status success';
+
+          // Effets côté client
+          if (_boostType === 'gold_pixels') {
+            // +50 pixels or supplémentaires
+            const newMax = MAX_GOLD + 50;
+            // On modifie dynamiquement la limite pour cette session
+            window._goldMaxOverride = newMax;
+            showToast('🟡 +50 pixels Or débloqués !');
+            updateGoldCounter();
+          }
+          if (_boostType === 'slots') {
+            quotaMax = Math.min(quotaMax + 5, 8);
+            updateQuotaBar();
+            showToast('🛑 +5 publications débloquées aujourd\'hui !');
+          }
+          if (_boostType === 'feature') {
+            showToast('⭐ Œuvre mise en avant 24h !');
+          }
+
+          setTimeout(closeBoostModal, 1800);
+          loadGallery();
+        } else {
+          const j = await res.json().catch(() => ({}));
+          statusEl.textContent = '✗ ' + (j.error || 'Erreur'); statusEl.className = 'boost-status error';
+          payBtn.disabled = false;
+        }
+      },
+      onCancel: () => { statusEl.textContent = 'Annulé.'; payBtn.disabled = false; },
+      onError: (err) => { statusEl.textContent = '✗ ' + (err.message || 'Erreur Pi'); statusEl.className = 'boost-status error'; payBtn.disabled = false; }
+    });
+  } catch (e) {
+    statusEl.textContent = '✗ ' + (e.message || 'Erreur'); statusEl.className = 'boost-status error';
+    payBtn.disabled = false;
+  }
+}
+
+// ════════════════════════════════════════════
+//  AUTO-REMPLIR pseudo Pi dans la modal publication
+// ════════════════════════════════════════════
+function openModal() {
+  document.getElementById('modal-status').textContent = '';
+  document.getElementById('modal-status').className   = 'modal-status';
+  document.getElementById('btn-send').disabled        = false;
+  document.getElementById('btn-request-review').style.display = 'none';
+  // Auto-remplir le pseudo Pi
+  if (piUser) {
+    const nameField = document.getElementById('p-name');
+    nameField.value    = piUser.username;
+    nameField.readOnly = true;
+    nameField.style.opacity = '0.5';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('p-title').focus(), 100);
 }
 
 // ════════════════════════════════════════════
