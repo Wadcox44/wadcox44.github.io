@@ -161,11 +161,13 @@ app.get('/api/gallery', async (req, res) => {
 
 // POST /api/gallery/save — Sauvegarder une œuvre
 // Body : { title, img, authorName, password }
-app.post('/api/gallery/save', withPiUser(true), async (req, res) => {
-  const { title, img, password } = req.body;
+// Auth Pi optionnelle : si non connecté, on utilise authorName envoyé par le client
+app.post('/api/gallery/save', withPiUser(false), async (req, res) => {
+  const { title, img, password, authorName } = req.body;
   if (!title || !img || !password) return res.status(400).json({ error: 'Données incomplètes' });
 
-  const username = req.piUser.username;
+  // Username Pi en priorité, sinon authorName du client (fallback legacy)
+  const username = req.piUser?.username || authorName || 'anonymous';
 
   // ── Vérif quota quotidien ──
   const user = await users.findOne({ piUsername: username });
@@ -174,7 +176,11 @@ app.post('/api/gallery/save', withPiUser(true), async (req, res) => {
   lastReset.setHours(0,0,0,0);
 
   let dailyCount = (lastReset.getTime() === today.getTime()) ? (user?.dailyCount || 0) : 0;
-  const maxDaily = user?.extraSlots ? 8 : 3;
+  // extraSlots expire à minuit : valide seulement si acheté aujourd'hui
+  const extraSlotsDate = user?.extraSlotsDate ? new Date(user.extraSlotsDate) : new Date(0);
+  extraSlotsDate.setHours(0,0,0,0);
+  const extraSlotsValid = user?.extraSlots && (extraSlotsDate.getTime() === today.getTime());
+  const maxDaily = extraSlotsValid ? 8 : 3;
   if (dailyCount >= maxDaily) return res.status(429).json({ error: 'Quota journalier atteint', quota: maxDaily });
 
   // ── Insertion avec statut "pending" (modération IA) ──
@@ -400,8 +406,17 @@ app.post('/api/payment/complete', async (req, res) => {
       await artworks.updateOne({ id: artId }, { $set: { goldPixels: true } });
     }
     if (type === 'extra_slots') {
-      // récupérer l'utilisateur depuis le paymentId en prod
-      // simplifié ici
+      // Le frontend envoie username dans metadata / body
+      const slotUsername = req.body.username || req.body.piUsername;
+      if (slotUsername) {
+        // Marquer extraSlots pour la journée en cours
+        const today = new Date(); today.setHours(0,0,0,0);
+        await users.updateOne(
+          { piUsername: slotUsername },
+          { $set: { extraSlots: true, extraSlotsDate: today } },
+          { upsert: false }
+        );
+      }
     }
 
     res.json({ ok: true });
@@ -481,6 +496,12 @@ app.get('/validation-key.txt', (req, res) => res.send(PI_API_KEY));
 app.get('/health', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.status(200).send('OK');
+});
+
+// Route Keep Alive — pinguée toutes les 10 min par GitHub Actions
+app.get('/ping', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.status(200).json({ status: 'alive', ts: new Date().toISOString() });
 });
 
 // Gold Pixel — dossier Games/Goldpixel
