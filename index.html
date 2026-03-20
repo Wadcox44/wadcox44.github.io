@@ -598,6 +598,71 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
   .landing-btn { padding: 14px 28px; }
 }
 
+
+/* ════════════════════════════════════════════════════════
+   BARRE DE NAVIGATION — sous le header, au-dessus du contenu
+════════════════════════════════════════════════════════ */
+#portal-nav-bar {
+  width: 100%;
+  /* Colle sous le site-header sticky */
+  background: rgba(8,18,32,.92);
+  border-bottom: 1px solid rgba(0,243,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 48px; /* hauteur approximative du site-header */
+  z-index: 500;
+  display: flex;
+  justify-content: center;
+}
+#portal-nav-bar-inner {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#portal-nav-bar-inner::-webkit-scrollbar { display: none; }
+
+/* Boutons de nav dans la barre */
+.nav-bar-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(200,216,232,.5);
+  font-family: 'Orbitron', monospace;
+  font-size: .46rem;
+  letter-spacing: 1.2px;
+  padding: 10px 14px 8px;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.nav-bar-btn:hover {
+  color: var(--cy);
+  border-bottom-color: rgba(0,243,255,.35);
+}
+.nav-bar-btn.active {
+  color: var(--cy);
+  border-bottom-color: var(--cy);
+  /* Petit glow sous le trait actif */
+  text-shadow: 0 0 8px rgba(0,243,255,.3);
+}
+/* Séparateur entre boutons */
+.nav-bar-sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(0,243,255,.1);
+  flex-shrink: 0;
+  align-self: center;
+}
+
 /* ── LANDING IMAGE LOGO ── */
 .landing-img-logo {
   width: clamp(80px, 22vw, 130px); /* Logo discret, légèrement plus grand pour être lisible */
@@ -675,15 +740,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 .hdr-brand-text .pi { color: var(--or); }
 
 /* ── NAV CENTRALE ── */
-#hdr-nav {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
+/* #hdr-nav supprimé — nav déplacée dans #portal-nav-bar */
 .hdr-nav-btn {
   background: transparent;
   border: none;
@@ -897,49 +954,20 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
       <span class="hdr-brand-text">JEUXVIDEO<span class="pi">.PI</span></span>
     </a>
 
-    <!-- CENTRE : navigation principale -->
-    <nav id="hdr-nav" aria-label="Navigation principale">
-      <!-- Home -->
-      <button class="hdr-nav-btn active"
-              onclick="showTab('home')"
-              data-tab="home"
-              data-fr="Accueil" data-en="Home">Home</button>
-      <!-- Games -->
-      <button class="hdr-nav-btn"
-              onclick="showTab('games')"
-              data-tab="games"
-              data-fr="Jeux" data-en="Games">Games</button>
-      <!-- News -->
-      <button class="hdr-nav-btn"
-              onclick="showTab('news')"
-              data-tab="news"
-              data-fr="News" data-en="News">News</button>
-      <!-- Contact → onglet Devs section contact -->
-      <button class="hdr-nav-btn"
-              onclick="showSection('contact')"
-              data-tab="contact"
-              data-fr="Contact" data-en="Contact">Contact</button>
-      <!-- Recrutement → onglet Devs section recrutement -->
-      <button class="hdr-nav-btn"
-              onclick="showRecruitModal()"
-              data-tab="recruit"
-              data-fr="Recrutement" data-en="Recruit">Recruit</button>
-    </nav>
-
-    <!-- DROITE : langue + bouton Don -->
+    <!-- DROITE : Don + langues (Don en premier pour être plus centré) -->
     <div id="hdr-right">
-      <!-- Langue EN (priorité) -->
-      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
-      <!-- Langue FR (secondaire) -->
-      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
-
-      <!-- Bouton Don animé — ouvre/ferme le bandeau -->
+      <!-- Bouton Don animé — mis en premier pour être plus proche du centre -->
       <button id="btn-don-toggle"
               onclick="toggleDonDrawer()"
               aria-expanded="false"
               aria-controls="don-drawer">
         ♥ DON
       </button>
+
+      <!-- Langue EN (priorité) -->
+      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
+      <!-- Langue FR (secondaire) -->
+      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
     </div>
 
   </div><!-- /header-top -->
@@ -966,6 +994,57 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
   </div><!-- /don-drawer -->
 
 </div><!-- /site-header -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     BARRE DE NAVIGATION — entre header et contenu
+     Sticky sous le site-header, au-dessus de Featured Game
+════════════════════════════════════════════════════════ -->
+<div id="portal-nav-bar">
+  <div id="portal-nav-bar-inner">
+
+    <button class="nav-bar-btn active"
+            onclick="switchTab('home')"
+            data-tab="home"
+            data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('games')"
+            data-tab="games"
+            data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('news')"
+            data-tab="news"
+            data-fr="📰 News" data-en="📰 News">📰 News</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('devs')"
+            data-tab="devs"
+            data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="showSection('contact')"
+            data-tab="contact"
+            data-fr="📬 Contact" data-en="📬 Contact">📬 Contact</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="openRecruitModal()"
+            data-tab="recruit"
+            data-fr="🤝 Recrutement" data-en="🤝 Recruit">🤝 Recruit</button>
+
+  </div>
+</div>
 
 <!-- ══ HOME ══ -->
 <div class="view active" id="view-home">
@@ -1556,6 +1635,28 @@ function setLang(l) {
 /* Appel initial pour synchro au chargement */
 (function initHdrNav(){
   syncHdrNav('home');
+})();
+
+
+/* ════════════════════════════════════════════════════════
+   BARRE DE NAV — switchTab
+   Gère à la fois la nav-bar et la syncHdrNav
+════════════════════════════════════════════════════════ */
+function switchTab(name) {
+  /* Appeler showTab existant pour changer la vue */
+  showTab(name);
+
+  /* Sync barre de nav dédiée */
+  document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+  const match = document.querySelector(`.nav-bar-btn[data-tab="${name}"]`);
+  if (match) match.classList.add('active');
+}
+
+/* Init : synchro au chargement */
+(function initNavBar(){
+  document.querySelectorAll('.nav-bar-btn').forEach(b => {
+    if (b.dataset.tab === 'home') b.classList.add('active');
+  });
 })();
 
 </script>
