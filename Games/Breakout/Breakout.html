@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>NEON BREAKER — JEUXVIDEO.PI</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cy:#00f3ff; --or:#ffaa00; --bg:#050b14; --bg2:#0a1628;
+  --gr:#44ff88; --pu:#cc44ff; --rd:#ff3131;
+  --glow-cy:0 0 18px rgba(0,243,255,.5);
+  --glow-or:0 0 18px rgba(255,170,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{
+  display:flex;flex-direction:column;align-items:center;
+  font-family:'Rajdhani',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none;
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  width:100%;max-width:500px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px 4px;flex-shrink:0;gap:6px;
+}
+.back-btn{
+  font-family:'Orbitron',monospace;font-size:.45rem;color:rgba(0,243,255,.55);
+  text-decoration:none;border:1px solid rgba(0,243,255,.18);padding:4px 9px;
+  border-radius:4px;transition:all .2s;white-space:nowrap;flex-shrink:0;
+}
+.back-btn:hover{color:var(--cy);border-color:var(--cy);}
+.game-title{
+  font-family:'Orbitron',monospace;font-size:.68rem;font-weight:900;
+  color:var(--cy);letter-spacing:2px;text-shadow:0 0 12px var(--cy);
+  white-space:nowrap;
+}
+.hud{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.hud-item{text-align:center;}
+.hud-val{font-family:'Orbitron',monospace;font-size:.68rem;color:var(--or);font-weight:700;line-height:1;}
+.hud-lbl{font-size:.38rem;color:rgba(200,216,232,.35);letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+
+/* ── CANVAS WRAPPER ── */
+#canvas-frame{
+  width:100%;max-width:500px;flex-shrink:0;
+  position:relative;
+  border:1px solid rgba(0,243,255,.22);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,243,255,.08),
+    inset 0 0 30px rgba(0,0,0,.5),
+    0 0 20px rgba(0,243,255,.08);
+}
+/* Corner accents */
+#canvas-frame::before,#canvas-frame::after{
+  content:'';position:absolute;z-index:3;pointer-events:none;
+  width:14px;height:14px;
+  border-color:var(--cy);border-style:solid;
+}
+#canvas-frame::before{top:0;left:0;border-width:2px 0 0 2px;border-radius:4px 0 0 0;}
+#canvas-frame::after{ bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 4px 0;}
+#gc{display:block;width:100%;flex-shrink:0;}
+
+/* ── POWERUP HUD BAR (desktop only) ── */
+#pu-bar{
+  width:100%;max-width:500px;
+  display:flex;gap:6px;padding:3px 12px 2px;
+  flex-shrink:0;min-height:22px;flex-wrap:wrap;
+}
+@media(pointer:coarse){#pu-bar{display:none;}}
+.pu-badge{
+  font-family:'Orbitron',monospace;font-size:.42rem;padding:2px 8px;
+  border-radius:100px;letter-spacing:.8px;white-space:nowrap;
+  animation:pulseBadge 1.8s ease-in-out infinite;
+}
+.pu-badge.speed{background:rgba(255,136,0,.12);border:1px solid rgba(255,136,0,.5);color:#ff8800;}
+.pu-badge.multi{background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.4);color:var(--cy);}
+.pu-badge.laser{background:rgba(204,68,255,.1);border:1px solid rgba(204,68,255,.4);color:#cc44ff;}
+.pu-badge.wide{background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.4);color:var(--gr);}
+@keyframes pulseBadge{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+/* ── TOUCH ZONE ── */
+#touch-zone{
+  width:100%;max-width:500px;
+  display:none;
+  flex-direction:column;align-items:center;
+  flex-shrink:0;
+  padding:6px 12px 12px;
+  gap:8px;
+}
+@media(pointer:coarse){#touch-zone{display:flex;}}
+
+/* Drag rail */
+#drag-rail{
+  width:100%;height:56px;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(0,243,255,.25);
+  border-radius:28px;
+  position:relative;
+  touch-action:none;
+  overflow:hidden;
+}
+/* Subtle gradient line */
+#drag-rail::before{
+  content:'';position:absolute;
+  top:50%;left:12px;right:12px;height:1px;
+  transform:translateY(-50%);
+  background:linear-gradient(90deg,transparent,rgba(0,243,255,.2),transparent);
+  pointer-events:none;
+}
+/* Left / right labels */
+#drag-rail::after{
+  content:'◀  SLIDE  ▶';
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:.42rem;
+  color:rgba(0,243,255,.18);letter-spacing:3px;
+  pointer-events:none;
+}
+/* The draggable thumb */
+#drag-thumb{
+  position:absolute;
+  top:50%;
+  width:60px;height:44px;
+  transform:translate(-50%,-50%);
+  background:linear-gradient(135deg,rgba(0,30,50,.95),rgba(0,60,90,.9));
+  border:2px solid var(--cy);
+  border-radius:22px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px rgba(0,243,255,.45),inset 0 1px 0 rgba(255,255,255,.1);
+  touch-action:none;
+  pointer-events:none;
+}
+#drag-thumb-icon{
+  font-size:.9rem;
+  display:flex;align-items:center;gap:5px;
+}
+#drag-thumb-icon svg{
+  width:18px;height:18px;fill:var(--cy);opacity:.9;
+}
+
+/* Active powerup display */
+#pu-display{
+  width:100%;
+  display:flex;gap:7px;flex-wrap:wrap;
+  min-height:0;
+}
+.pu-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px 5px 8px;
+  border-radius:20px;
+  font-family:'Orbitron',monospace;font-size:.45rem;letter-spacing:.8px;
+  font-weight:700;
+  position:relative;overflow:hidden;
+  flex-shrink:0;
+  animation:pillEntry .3s cubic-bezier(.22,1,.36,1);
+}
+@keyframes pillEntry{from{opacity:0;transform:translateY(6px) scale(.9);}to{opacity:1;transform:none;}}
+.pu-pill .pu-pill-icon{font-size:.9rem;flex-shrink:0;}
+.pu-pill .pu-pill-name{white-space:nowrap;}
+.pu-pill .pu-pill-timer{
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  opacity:.75;margin-left:2px;
+}
+/* Timer bar inside pill */
+.pu-pill .pu-bar-inner{
+  position:absolute;bottom:0;left:0;height:2.5px;
+  border-radius:0 0 20px 20px;
+  transition:width .5s linear;
+}
+.pu-pill.speed{background:rgba(255,136,0,.14);border:1px solid rgba(255,136,0,.55);color:#ff8800;}
+.pu-pill.speed .pu-bar-inner{background:#ff8800;}
+.pu-pill.multi{background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.45);color:var(--cy);}
+.pu-pill.multi .pu-bar-inner{background:var(--cy);}
+.pu-pill.laser{background:rgba(204,68,255,.1);border:1px solid rgba(204,68,255,.45);color:#cc44ff;}
+.pu-pill.laser .pu-bar-inner{background:#cc44ff;}
+.pu-pill.wide{background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.45);color:#44ff88;}
+.pu-pill.wide .pu-bar-inner{background:#44ff88;}
+
+/* Launch button */
+#btn-launch-touch{
+  width:100%;padding:12px;
+  background:rgba(255,170,0,.07);border:1px solid rgba(255,170,0,.35);
+  color:var(--or);font-family:'Orbitron',monospace;font-size:.55rem;
+  font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;
+  transition:all .2s;
+}
+#btn-launch-touch:active{background:rgba(255,170,0,.18);box-shadow:0 0 16px rgba(255,170,0,.3);}
+
+/* ── OVERLAY ── */
+#ov{
+  position:fixed;inset:0;z-index:80;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;background:rgba(5,11,20,.94);backdrop-filter:blur(8px);
+  overflow-y:auto;padding:20px 16px;
+}
+#ov.hide{display:none;}
+
+/* ── TUTORIAL SCREEN ── */
+.tut-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;}
+.tut-logo{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:var(--cy);text-align:center;letter-spacing:3px;text-shadow:0 0 24px var(--cy);margin-bottom:4px;}
+.tut-sub{font-size:.7rem;color:rgba(200,216,232,.5);text-align:center;letter-spacing:2px;margin-bottom:8px;}
+.tut-section{background:rgba(10,22,40,.8);border:1px solid rgba(0,243,255,.15);border-radius:12px;padding:14px 14px;}
+.tut-section-title{font-family:'Orbitron',monospace;font-size:.58rem;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;border-left:2px solid var(--or);padding-left:8px;}
+.tut-controls{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;}
+.tut-key{font-family:'Share Tech Mono',monospace;font-size:.6rem;background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.3);color:var(--cy);padding:3px 8px;border-radius:4px;text-align:center;white-space:nowrap;}
+.tut-desc{font-size:.75rem;color:rgba(200,216,232,.65);line-height:1.4;}
+.tut-powerups{display:flex;flex-direction:column;gap:7px;}
+.tut-pu{display:flex;align-items:center;gap:10px;}
+.tut-pu-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.tut-pu-icon.speed{background:rgba(255,136,0,.15);border:1px solid rgba(255,136,0,.4);}
+.tut-pu-icon.multi{background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.35);}
+.tut-pu-icon.laser{background:rgba(204,68,255,.1);border:1px solid rgba(204,68,255,.35);}
+.tut-pu-icon.wide{background:rgba(68,255,136,.1);border:1px solid rgba(68,255,136,.35);}
+.tut-pu-body{flex:1;}
+.tut-pu-name{font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:.8px;margin-bottom:2px;}
+.tut-pu-name.speed{color:#ff8800;}.tut-pu-name.multi{color:var(--cy);}.tut-pu-name.laser{color:#cc44ff;}.tut-pu-name.wide{color:var(--gr);}
+.tut-pu-desc{font-size:.72rem;color:rgba(200,216,232,.6);}
+.tut-bricks{display:flex;flex-direction:column;gap:6px;}
+.tut-brick-row{display:flex;align-items:center;gap:10px;}
+.tut-brick-swatch{width:32px;height:14px;border-radius:3px;flex-shrink:0;}
+.tut-brick-txt{font-size:.72rem;color:rgba(200,216,232,.65);}
+.tut-scoring{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.tut-score-item{background:rgba(0,243,255,.04);border:1px solid rgba(0,243,255,.1);border-radius:8px;padding:8px 10px;text-align:center;}
+.tut-score-val{font-family:'Orbitron',monospace;font-size:.78rem;color:var(--or);font-weight:700;}
+.tut-score-lbl{font-size:.62rem;color:rgba(200,216,232,.5);margin-top:2px;}
+.btn-start-game{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size:200% auto;color:#000;
+  font-family:'Orbitron',monospace;font-weight:900;font-size:.75rem;
+  letter-spacing:2px;border:none;border-radius:8px;cursor:pointer;
+  box-shadow:0 4px 24px rgba(255,170,0,.35);transition:all .3s;margin-top:4px;
+}
+.btn-start-game:hover{background-position:right center;transform:translateY(-2px);box-shadow:0 6px 32px rgba(255,170,0,.55);}
+
+/* ── GAME OVER / WIN overlay ── */
+.ov-result{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.ov-icon{font-size:3.5rem;}
+.ov-title{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;text-align:center;letter-spacing:2px;}
+.ov-title.cy{color:var(--cy);text-shadow:0 0 22px var(--cy);}
+.ov-title.or{color:var(--or);text-shadow:0 0 22px var(--or);}
+.ov-title.rd{color:var(--rd);text-shadow:0 0 22px var(--rd);}
+.ov-score-big{font-family:'Orbitron',monospace;font-size:2rem;color:var(--or);text-shadow:0 0 18px var(--or);font-weight:900;}
+.ov-score-sub{font-size:.75rem;color:rgba(200,216,232,.45);letter-spacing:1px;}
+.ov-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;}
+.ov-stat{background:rgba(10,22,40,.8);border:1px solid rgba(0,243,255,.12);border-radius:8px;padding:10px;text-align:center;}
+.ov-stat-val{font-family:'Orbitron',monospace;font-size:.82rem;color:var(--cy);font-weight:700;}
+.ov-stat-lbl{font-size:.55rem;color:rgba(200,216,232,.4);margin-top:2px;}
+
+/* Leaderboard form */
+.lb-form{width:100%;display:flex;flex-direction:column;gap:8px;}
+.lb-input{
+  background:rgba(15,26,46,.9);border:1px solid rgba(0,243,255,.25);
+  color:#fff;padding:11px 13px;border-radius:6px;
+  font-family:'Orbitron',monospace;font-size:.62rem;
+  outline:none;transition:.3s;letter-spacing:1px;
+}
+.lb-input:focus{border-color:var(--cy);box-shadow:0 0 10px rgba(0,243,255,.2);}
+.lb-input::placeholder{color:rgba(200,216,232,.3);font-size:.58rem;}
+.lb-submit{
+  padding:12px;background:rgba(0,243,255,.08);
+  border:1px solid var(--cy);color:var(--cy);
+  font-family:'Orbitron',monospace;font-size:.62rem;font-weight:700;
+  letter-spacing:1.5px;border-radius:6px;cursor:pointer;transition:all .25s;
+}
+.lb-submit:hover{background:var(--cy);color:#000;}
+.lb-skip{
+  background:transparent;border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.3);font-family:'Orbitron',monospace;font-size:.55rem;
+  letter-spacing:1px;padding:9px;border-radius:6px;cursor:pointer;transition:all .2s;
+}
+.lb-skip:hover{border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.5);}
+
+/* Leaderboard table */
+.lb-panel{width:100%;max-width:500px;padding:0 12px;}
+.lb-title{font-family:'Orbitron',monospace;font-size:.72rem;color:var(--cy);letter-spacing:2px;text-align:center;margin-bottom:12px;text-shadow:0 0 12px var(--cy);}
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-family:'Orbitron',monospace;font-size:.48rem;color:rgba(0,243,255,.45);letter-spacing:1px;padding:6px 8px;border-bottom:1px solid rgba(0,243,255,.1);text-align:left;}
+.lb-table th:last-child,.lb-table td:last-child{text-align:right;}
+.lb-table td{font-size:.72rem;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
+.lb-table tr:hover td{background:rgba(0,243,255,.04);}
+.lb-rank{font-family:'Orbitron',monospace;font-size:.6rem;color:rgba(200,216,232,.35);}
+.lb-rank.gold{color:#ffaa00;font-weight:900;}
+.lb-rank.silver{color:#c0c0c0;font-weight:700;}
+.lb-rank.bronze{color:#cd7f32;font-weight:700;}
+.lb-name{color:#fff;font-family:'Rajdhani',sans-serif;font-size:.8rem;}
+.lb-name.me{color:var(--cy);}
+.lb-pts{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--or);font-weight:700;}
+.lb-level{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:rgba(200,216,232,.4);}
+.lb-empty{text-align:center;padding:20px;color:rgba(200,216,232,.3);font-size:.75rem;}
+.lb-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-lb{flex:1;padding:11px;font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-lb.primary{background:rgba(255,170,0,.1);border:1px solid var(--or);color:var(--or);}
+.btn-lb.primary:hover{background:var(--or);color:#000;}
+.btn-lb.secondary{background:transparent;border:1px solid rgba(0,243,255,.25);color:rgba(0,243,255,.6);}
+.btn-lb.secondary:hover{border-color:var(--cy);color:var(--cy);}
+
+/* Level brief */
+.brief-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;color:var(--cy);letter-spacing:4px;text-shadow:0 0 28px var(--cy);}
+.brief-sub{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(200,216,232,.4);letter-spacing:2px;}
+
+/* TOAST */
+#toast-game{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:rgba(8,20,36,.98);border:1px solid var(--cy);
+  color:var(--cy);font-family:'Orbitron',monospace;font-size:.55rem;
+  letter-spacing:1px;padding:8px 18px;border-radius:4px;
+  z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;
+}
+#toast-game.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast-game.gold{border-color:var(--or);color:var(--or);}
+#toast-game.green{border-color:var(--gr);color:var(--gr);}
+#toast-game.pu{border-color:#cc44ff;color:#cc44ff;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a class="back-btn" href="/">← PORTAL</a>
+  <div class="game-title">NEON BREAKER</div>
+  <div class="hud">
+    <div class="hud-item"><div class="hud-val" id="h-score">0</div><div class="hud-lbl">Score</div></div>
+    <div class="hud-item"><div class="hud-val" id="h-lives">❤❤❤</div><div class="hud-lbl">Lives</div></div>
+    <div class="hud-item"><div class="hud-val" id="h-level">1</div><div class="hud-lbl">Level</div></div>
+    <div class="hud-item"><div class="hud-val" id="h-combo" style="color:var(--gr);display:none;">x1</div><div class="hud-lbl" id="h-combo-lbl" style="display:none;">Combo</div></div>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas-frame">
+  <canvas id="gc"></canvas>
+</div>
+
+<!-- POWERUP STATUS BAR -->
+<div id="pu-bar"></div>
+
+<!-- TOUCH ZONE — drag rail + powerup display -->
+<div id="touch-zone">
+  <div id="drag-rail">
+    <div id="drag-thumb">
+      <div id="drag-thumb-icon">
+        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        <span style="color:var(--cy);font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:1px;">MOVE</span>
+        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </div>
+    </div>
+  </div>
+  <div id="pu-display"></div>
+  <button id="btn-launch-touch" onclick="launchBall()">▶ TAP TO LAUNCH</button>
+</div>
+
+<!-- OVERLAY -->
+<div id="ov"></div>
+
+<div id="toast-game"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const API   = 'https://jeuxvideo.onrender.com';
+const GNAME = 'neonbreaker';
+
+// Brick colours per row
+const BC = ['#ff3131','#ff6600','#ffaa00','#22dd44','#00aaff','#cc44ff','#ff66cc','#00f3ff'];
+
+// Powerup types
+const PU_TYPES = {
+  speed: { icon:'⚡', col:'#ff8800', label:'SPEED ×1.5', dur:8000 },
+  multi: { icon:'🔵', col:'#00f3ff', label:'MULTI-BALL',  dur:0    }, // permanent until balls die
+  laser: { icon:'⚡', col:'#cc44ff', label:'LASER PAD',   dur:6000 },
+  wide:  { icon:'↔',  col:'#44ff88', label:'WIDE PAD',    dur:7000 },
+};
+
+// Level definitions  rows cols speedMult brickHp  special (powerup brick %)
+const LEVELS = [
+  // rows, cols, spd, hp, maxPU (nombre ABSOLU max de briques bonus par niveau)
+  {rows:3,cols:7, spd:1.35,hp:1,maxPU:0},  // 1 — intro, pas de bonus
+  {rows:4,cols:7, spd:1.10,hp:1,maxPU:2},  // 2 — 2 bonus max
+  {rows:4,cols:8, spd:1.22,hp:1,maxPU:2},  // 3
+  {rows:5,cols:8, spd:1.35,hp:2,maxPU:3},  // 4 — double HP
+  {rows:5,cols:9, spd:1.48,hp:2,maxPU:3},  // 5
+  {rows:5,cols:9, spd:1.60,hp:2,maxPU:4},  // 6
+  {rows:6,cols:9, spd:1.72,hp:3,maxPU:4},  // 7 — triple HP
+  {rows:6,cols:9, spd:1.85,hp:3,maxPU:4},  // 8
+  {rows:6,cols:10,spd:2.00,hp:3,maxPU:5},  // 9
+  {rows:7,cols:10,spd:2.18,hp:3,maxPU:5},  // 10 — nightmare
+];
+// After level 10, loop increasing speed
+function getLevelCfg(lvl){
+  if(lvl<LEVELS.length) return LEVELS[lvl];
+  const base = {...LEVELS[LEVELS.length-1]};
+  base.spd   = LEVELS[LEVELS.length-1].spd + (lvl-LEVELS.length+1)*0.15;
+  base.hp    = 3 + Math.floor((lvl-LEVELS.length)/3);
+  base.maxPU = 5 + Math.floor((lvl-LEVELS.length)/2); // croît lentement en infini
+  return base;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const cv  = document.getElementById('gc');
+const ctx = cv.getContext('2d');
+let W,H,DPR;
+let state='idle'; // idle|tutorial|playing|brief|dead|win|lb
+let score=0,lives=3,lvl=0,combo=0,maxCombo=0,bricksHit=0,totalBricksHit=0;
+let raf;
+// Joystick state
+let joystickDelta=0; // -1..1 continuous direction
+const keys={};
+
+// Paddle
+let px,py,pw,ph,pspd,pBaseW;
+// Balls  [{x,y,dx,dy,r,speed,trail:[]}]
+let balls=[];
+// One ball attached to pad before launch
+let bonPad=true;
+// Bricks [{x,y,w,h,hp,mhp,col,alive,flash,puType,puActive}]
+let bricks=[];
+// Powerup drops [{x,y,w,h,dy,type,alpha}]
+let drops=[];
+// Active powerups  {type:timerEnd}
+let activePU={};
+// Particles [{x,y,dx,dy,r,life,col,type}]
+let parts=[];
+// Lasers [{x,y,dy}]  (laser powerup)
+let lasers=[];
+let laserCooldown=0;
+// Session leaderboard name
+let playerName='';
+// Score submitted flag
+let scoreSubmitted=false;
+
+// ═══════════════════════════════════════════════════════════
+//  RESIZE / INIT
+// ═══════════════════════════════════════════════════════════
+function resize(){
+  DPR = window.devicePixelRatio||1;
+  const maxW = Math.min(window.innerWidth,500);
+  const topH = document.querySelector('.topbar').getBoundingClientRect().height;
+  const puH  = document.getElementById('pu-bar').getBoundingClientRect().height||22;
+  const joyH = window.matchMedia('(pointer:coarse)').matches
+    ? document.getElementById('joystick-wrap').getBoundingClientRect().height : 0;
+  const tbH  = joyH;
+  const avH  = window.innerHeight - topH - puH - tbH - 4;
+  let cW=maxW, cH=Math.min(avH,cW*1.4);
+  if(cH<cW*0.85){ cH=avH; cW=cH/1.4; }
+  cv.style.width  = cW+'px';
+  cv.style.height = cH+'px';
+  cv.width  = Math.round(cW*DPR);
+  cv.height = Math.round(cH*DPR);
+  ctx.scale(DPR,DPR);
+  W=cW; H=cH;
+  initDims();
+}
+function initDims(){
+  const cfg = getLevelCfg(lvl);
+  pBaseW = W*0.22;
+  pw = activePU.wide ? pBaseW*1.55 : pBaseW;
+  ph = Math.max(8,H*0.02);
+  px = W/2-pw/2; py = H*0.88;
+  pspd = W*0.013;
+  if(bonPad && balls.length===0){
+    const spd = W*0.006*cfg.spd * (activePU.speed ? 1.5 : 1);
+    balls=[{x:W/2,y:py-Math.max(6,W*0.018)-1,dx:0,dy:0,r:Math.max(6,W*0.018),speed:spd,trail:[]}];
+    snapBall(balls[0]);
+  }
+}
+function snapBall(b){ b.x=px+pw/2; b.y=py-b.r-1; }
+
+// ═══════════════════════════════════════════════════════════
+//  BRICKS
+// ═══════════════════════════════════════════════════════════
+function buildBricks(){
+  bricks=[];
+  const cfg=getLevelCfg(lvl);
+  const mg=W*0.03, gap=W*0.012;
+  const bW=(W-mg*2-gap*(cfg.cols-1))/cfg.cols;
+  const bH=H*0.038;
+  const topY=H*0.055;
+  const total = cfg.rows * cfg.cols;
+  // Choisir exactement maxPU indices parmi les briques (tirage sans remise)
+  const puList = ['speed','multi','laser','wide'];
+  const maxPU  = cfg.maxPU || 0;
+  // On crée un tableau d'indices mélangés et on prend les N premiers
+  const indices = Array.from({length:total},(_,i)=>i);
+  for(let i=indices.length-1;i>0;i--){ // Fisher-Yates shuffle
+    const j=Math.floor(Math.random()*(i+1));
+    [indices[i],indices[j]]=[indices[j],indices[i]];
+  }
+  const puIndices = new Set(indices.slice(0, maxPU));
+  let idx=0;
+  for(let r=0;r<cfg.rows;r++){
+    for(let c=0;c<cfg.cols;c++){
+      const puType = puIndices.has(idx)
+        ? puList[Math.floor(Math.random()*puList.length)]
+        : null;
+      bricks.push({
+        x:mg+c*(bW+gap), y:topY+r*(bH+gap),
+        w:bW, h:bH,
+        hp:cfg.hp, mhp:cfg.hp,
+        col:BC[r % BC.length],
+        alive:true, flash:0,
+        puType,
+      });
+      idx++;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME FLOW
+// ═══════════════════════════════════════════════════════════
+function showTutorial(){
+  state='tutorial';
+  const ov=document.getElementById('ov');
+  ov.innerHTML=`
+    <div class="tut-wrap">
+      <div class="tut-logo">NEON BREAKER</div>
+      <div class="tut-sub">HOW TO PLAY</div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Controls</div>
+        <div class="tut-controls">
+          <span class="tut-key">← →</span><span class="tut-desc">Move paddle (keyboard)</span>
+          <span class="tut-key">MOUSE</span><span class="tut-desc">Move paddle (desktop)</span>
+          <span class="tut-key">SWIPE</span><span class="tut-desc">Move paddle (mobile)</span>
+          <span class="tut-key">SPACE / TAP</span><span class="tut-desc">Launch ball</span>
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Power-up Bricks ✨</div>
+        <div class="tut-powerups">
+          <div class="tut-pu">
+            <div class="tut-pu-icon speed">⚡</div>
+            <div class="tut-pu-body">
+              <div class="tut-pu-name speed">SPEED BOOST</div>
+              <div class="tut-pu-desc">Ball speed ×1.5 for 8 seconds. High risk, high reward!</div>
+            </div>
+          </div>
+          <div class="tut-pu">
+            <div class="tut-pu-icon multi">🔵</div>
+            <div class="tut-pu-body">
+              <div class="tut-pu-name multi">MULTI-BALL</div>
+              <div class="tut-pu-desc">Splits into 3 balls. Lasts until all balls are lost.</div>
+            </div>
+          </div>
+          <div class="tut-pu">
+            <div class="tut-pu-icon laser">⚡</div>
+            <div class="tut-pu-body">
+              <div class="tut-pu-name laser">LASER PAD</div>
+              <div class="tut-pu-desc">Paddle fires lasers that destroy bricks on impact.</div>
+            </div>
+          </div>
+          <div class="tut-pu">
+            <div class="tut-pu-icon wide">↔</div>
+            <div class="tut-pu-body">
+              <div class="tut-pu-name wide">WIDE PAD</div>
+              <div class="tut-pu-desc">Paddle grows 1.5× wider for 7 seconds.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Brick Types</div>
+        <div class="tut-bricks">
+          <div class="tut-brick-row">
+            <div class="tut-brick-swatch" style="background:#ff3131;box-shadow:0 0 6px #ff3131;"></div>
+            <div class="tut-brick-txt">Normal brick — 1 hit to destroy</div>
+          </div>
+          <div class="tut-brick-row">
+            <div class="tut-brick-swatch" style="background:#ff8800;opacity:.6;box-shadow:0 0 6px #ff8800;"></div>
+            <div class="tut-brick-txt">Reinforced brick — requires multiple hits (dots show remaining HP)</div>
+          </div>
+          <div class="tut-brick-row">
+            <div class="tut-brick-swatch" style="background:#cc44ff;box-shadow:0 0 8px #cc44ff;border:1px dashed rgba(204,68,255,.6);"></div>
+            <div class="tut-brick-txt">Power-up brick ✨ — drops an icon to catch with your paddle</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Scoring</div>
+        <div class="tut-scoring">
+          <div class="tut-score-item"><div class="tut-score-val">10 pts</div><div class="tut-score-lbl">per brick (×level)</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">×COMBO</div><div class="tut-score-lbl">hit streak bonus</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">500 pts</div><div class="tut-score-lbl">level clear bonus</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">∞</div><div class="tut-score-lbl">infinite levels!</div></div>
+        </div>
+      </div>
+
+      <button class="btn-start-game" onclick="startGame()">▶ START GAME</button>
+    </div>
+  `;
+  ov.classList.remove('hide');
+}
+
+function startGame(){
+  score=0; lives=3; lvl=0; combo=0; maxCombo=0;
+  totalBricksHit=0; bricksHit=0;
+  activePU={}; drops=[]; lasers=[]; parts=[];
+  scoreSubmitted=false;
+  hideOv();
+  updatePUBar();
+  initLevel();
+  state='playing';
+  cancelAnimationFrame(raf);
+  loop();
+}
+
+function initLevel(){
+  bonPad=true; balls=[];
+  activePU={}; drops=[]; lasers=[];
+  combo=0;
+  resize();
+  buildBricks();
+  updateHUD();
+  updatePUBar();
+}
+
+function launchBall(){
+  if(!bonPad||state!=='playing') return;
+  bonPad=false;
+  const cfg=getLevelCfg(lvl);
+  const spd = W*0.006*cfg.spd * (activePU.speed ? 1.5 : 1);
+  balls.forEach(b=>{
+    const a=-Math.PI/2+(Math.random()*.4-.2);
+    b.speed=spd; b.dx=Math.cos(a)*spd; b.dy=Math.sin(a)*spd;
+  });
+}
+
+function loseLife(){
+  lives--;
+  combo=0;
+  updateHUD();
+  // Spawn particles at last ball position (before clearing)
+  const lx = balls[0]?.x || W/2;
+  const ly = balls[0]?.y || H*0.85;
+  balls=[];
+  parts=[]; // clear all particles immediately — fix "red dots stuck at bottom"
+  drops=[]; lasers=[];
+  activePU={}; 
+  updatePUBar();
+  // Brief flash particles only if still playing
+  spawnParts(lx, ly, '#ff3131', 10);
+  if(lives<=0){
+    cancelAnimationFrame(raf);
+    state='dead';
+    setTimeout(()=>{ parts=[]; showResultScreen(); }, 300);
+  } else {
+    bonPad=true;
+    resize();
+    toastGame('LIFE LOST — '+lives+' left','');
+    // Auto-clear particles after 600ms
+    setTimeout(()=>{ parts=[]; }, 600);
+  }
+}
+
+function nextLevel(){
+  lvl++;
+  score += 500 + lvl*100;
+  updateHUD();
+  balls=[];activePU={};drops=[];lasers=[];
+  cancelAnimationFrame(raf);
+  state='brief';
+  showBrief();
+}
+
+function showBrief(){
+  const ov=document.getElementById('ov');
+  const isInfinite = lvl>=LEVELS.length;
+  ov.innerHTML=`
+    <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="brief-sub">LEVEL CLEAR!</div>
+      <div class="brief-title">LEVEL ${lvl+1}</div>
+      ${isInfinite?'<div class="brief-sub" style="color:#ff8800;">INFINITE MODE — SPEED UP!</div>':''}
+      <div style="font-size:.75rem;color:rgba(200,216,232,.5);margin-top:4px;">+${500+lvl*100} bonus points</div>
+    </div>`;
+  ov.classList.remove('hide');
+  setTimeout(()=>{
+    ov.classList.add('hide');
+    initLevel();
+    state='playing';
+    cancelAnimationFrame(raf);
+    loop();
+  },1400);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RESULT SCREEN + LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+function showResultScreen(){
+  const ov=document.getElementById('ov');
+  const isWin = state==='win';
+  ov.innerHTML=`
+    <div class="ov-result">
+      <div class="ov-icon">${isWin?'🏆':'💀'}</div>
+      <div class="ov-title ${isWin?'or':'rd'}">${isWin?'YOU WIN!':'GAME OVER'}</div>
+      <div class="ov-score-big">${score}</div>
+      <div class="ov-score-sub">POINTS</div>
+      <div class="ov-stats">
+        <div class="ov-stat"><div class="ov-stat-val">${lvl+1}</div><div class="ov-stat-lbl">Level</div></div>
+        <div class="ov-stat"><div class="ov-stat-val">${maxCombo}</div><div class="ov-stat-lbl">Best combo</div></div>
+        <div class="ov-stat"><div class="ov-stat-val">${totalBricksHit}</div><div class="ov-stat-lbl">Bricks</div></div>
+      </div>
+      <div class="lb-form" id="lb-form-wrap">
+        <div style="font-family:'Orbitron',monospace;font-size:.58rem;color:var(--cy);letter-spacing:1.5px;text-align:center;margin-bottom:2px;">SAVE YOUR SCORE</div>
+        <input class="lb-input" id="lb-name-input" placeholder="YOUR NAME / PI USERNAME" maxlength="20"
+               value="${playerName}" oninput="playerName=this.value">
+        <button class="lb-submit" onclick="submitScore()">SUBMIT SCORE →</button>
+        <button class="lb-skip" onclick="showLeaderboard(false)">SKIP — VIEW LEADERBOARD</button>
+      </div>
+    </div>`;
+  ov.classList.remove('hide');
+}
+
+async function submitScore(){
+  const name = document.getElementById('lb-name-input')?.value?.trim();
+  if(!name){ toastGame('Enter your name first',''); return; }
+  playerName=name;
+  if(scoreSubmitted){ showLeaderboard(true); return; }
+
+  // Feedback visuel immédiat
+  const btn = document.querySelector('.lb-submit');
+  if(btn){ btn.disabled=true; btn.textContent='SAVING...'; }
+
+  try{
+    const res = await fetch(`${API}/api/game/${GNAME}/score`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,score,level:lvl+1,combo:maxCombo,bricks:totalBricksHit})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    scoreSubmitted=true;
+    showLeaderboard(true);
+  } catch(e){
+    // Réseau KO — afficher message propre avec retry
+    console.warn('Score save failed:', e.message);
+    const wrap = document.getElementById('lb-form-wrap');
+    if(wrap){
+      wrap.innerHTML=`
+        <div style="text-align:center;padding:10px 0;">
+          <div style="font-family:'Orbitron',monospace;font-size:.6rem;color:#ff8800;margin-bottom:8px;">⚠ CONNECTION ERROR</div>
+          <div style="font-size:.75rem;color:rgba(200,216,232,.55);margin-bottom:14px;line-height:1.5;">
+            Could not reach the server.<br>Your score: <strong style="color:var(--or)">${score.toLocaleString()} pts</strong>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="lb-submit" onclick="submitScore()" style="flex:1;">RETRY →</button>
+            <button class="lb-skip" onclick="showLeaderboard(false)" style="flex:1;">SKIP</button>
+          </div>
+          <div style="font-size:.6rem;color:rgba(200,216,232,.3);margin-top:8px;font-family:'Share Tech Mono',monospace;">
+            Tip: check your connection then retry
+          </div>
+        </div>`;
+    }
+  }
+}
+
+async function showLeaderboard(showMine=false){
+  const ov=document.getElementById('ov');
+  ov.innerHTML=`
+    <div class="lb-panel">
+      <div class="lb-title">🏆 LEADERBOARD</div>
+      <div id="lb-body" style="min-height:120px;display:flex;align-items:center;justify-content:center;">
+        <span style="color:rgba(0,243,255,.3);font-family:'Orbitron',monospace;font-size:.6rem;">LOADING...</span>
+      </div>
+      <div class="lb-actions">
+        <button class="btn-lb primary" onclick="showTutorial()">PLAY AGAIN</button>
+        <button class="btn-lb secondary" onclick="showLeaderboard(false)">REFRESH</button>
+      </div>
+    </div>`;
+  ov.classList.remove('hide');
+
+  try{
+    const r = await fetch(`${API}/api/game/${GNAME}/scores?limit=20`);
+    const data = r.ok ? await r.json() : [];
+    renderLeaderboard(data, showMine ? playerName : '');
+  } catch(e){
+    document.getElementById('lb-body').innerHTML=
+      `<div class="lb-empty">Could not load leaderboard.<br>Check connection.</div>`;
+  }
+}
+
+function renderLeaderboard(data, highlight){
+  const body=document.getElementById('lb-body');
+  if(!data||!data.length){
+    body.innerHTML=`<div class="lb-empty">No scores yet — be the first!</div>`;
+    return;
+  }
+  const medals=['🥇','🥈','🥉'];
+  const rankCls=['gold','silver','bronze'];
+  let html=`<table class="lb-table">
+    <thead><tr>
+      <th>#</th><th>PLAYER</th><th>LVL</th><th>SCORE</th>
+    </tr></thead><tbody>`;
+  data.forEach((e,i)=>{
+    const isMe = highlight && e.name===highlight;
+    const rank = i<3
+      ? `<span class="lb-rank ${rankCls[i]}">${medals[i]}</span>`
+      : `<span class="lb-rank">${i+1}</span>`;
+    html+=`<tr>
+      <td>${rank}</td>
+      <td><span class="lb-name${isMe?' me':''}">${esc(e.name)}${isMe?' ◀':''}</span></td>
+      <td><span class="lb-level">Lv${e.level||1}</span></td>
+      <td><span class="lb-pts">${(e.score||0).toLocaleString()}</span></td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  body.innerHTML=html;
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════════════════════════════════
+//  POWERUPS
+// ═══════════════════════════════════════════════════════════
+function applyPowerup(type){
+  const def=PU_TYPES[type];
+  if(!def) return;
+  if(type==='multi'){
+    // Split each ball into 3
+    const newBalls=[];
+    balls.forEach(b=>{
+      const angles=[-0.35,0,0.35];
+      angles.forEach(a=>{
+        const spd=Math.hypot(b.dx,b.dy);
+        const base=Math.atan2(b.dy,b.dx);
+        newBalls.push({x:b.x,y:b.y,dx:Math.cos(base+a)*spd,dy:Math.sin(base+a)*spd,r:b.r,speed:spd,trail:[]});
+      });
+    });
+    balls=newBalls.slice(0,9); // max 9 balls
+    toastGame('🔵 MULTI-BALL — 3x BALLS!','green');
+    activePU.multi=true;
+  } else if(type==='speed'){
+    activePU.speed = Date.now()+def.dur;
+    balls.forEach(b=>{
+      const a=Math.atan2(b.dy,b.dx);
+      b.speed*=1.5; b.dx=Math.cos(a)*b.speed; b.dy=Math.sin(a)*b.speed;
+    });
+    toastGame('⚡ SPEED ×1.5 — 8 SECONDS','gold');
+  } else if(type==='laser'){
+    activePU.laser = Date.now()+def.dur;
+    toastGame('⚡ LASER PAD — 6 SECONDS','pu');
+  } else if(type==='wide'){
+    activePU.wide = Date.now()+def.dur;
+    pw = pBaseW*1.55;
+    toastGame('↔ WIDE PAD — 7 SECONDS','green');
+  }
+  updatePUBar();
+}
+
+function tickPowerups(){
+  const now=Date.now();
+  let changed=false;
+  ['speed','laser','wide'].forEach(k=>{
+    if(activePU[k] && typeof activePU[k]==='number' && now>activePU[k]){
+      delete activePU[k];
+      if(k==='wide') pw=pBaseW;
+      if(k==='speed'){
+        balls.forEach(b=>{ const a=Math.atan2(b.dy,b.dx); b.speed/=1.5; b.dx=Math.cos(a)*b.speed; b.dy=Math.sin(a)*b.speed; });
+      }
+      changed=true;
+    }
+  });
+  if(changed) updatePUBar();
+}
+
+function updatePUBar(){
+  const bar=document.getElementById('pu-bar');
+  const now=Date.now();
+  let html='';
+  if(activePU.speed && typeof activePU.speed==='number'){
+    const rem=Math.max(0,Math.ceil((activePU.speed-now)/1000));
+    html+=`<span class="pu-badge speed">⚡ SPEED ×1.5 ${rem}s</span>`;
+  }
+  if(activePU.multi) html+=`<span class="pu-badge multi">🔵 MULTI-BALL</span>`;
+  if(activePU.laser && typeof activePU.laser==='number'){
+    const rem=Math.max(0,Math.ceil((activePU.laser-now)/1000));
+    html+=`<span class="pu-badge laser">⚡ LASER ${rem}s</span>`;
+  }
+  if(activePU.wide && typeof activePU.wide==='number'){
+    const rem=Math.max(0,Math.ceil((activePU.wide-now)/1000));
+    html+=`<span class="pu-badge wide">↔ WIDE ${rem}s</span>`;
+  }
+  bar.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PARTICLES
+// ═══════════════════════════════════════════════════════════
+function spawnParts(x,y,col,n=8,type='normal'){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, s=1.2+Math.random()*3.5;
+    parts.push({x,y,dx:Math.cos(a)*s,dy:Math.sin(a)*s,r:2+Math.random()*3,life:1,col,type});
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMBO
+// ═══════════════════════════════════════════════════════════
+let comboTimer=null;
+function hitCombo(){
+  combo++;
+  if(combo>maxCombo) maxCombo=combo;
+  clearTimeout(comboTimer);
+  comboTimer=setTimeout(()=>{ combo=0; updateHUD(); },2200);
+  updateHUD();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UPDATE
+// ═══════════════════════════════════════════════════════════
+function update(){
+  if(state!=='playing') return;
+  tickPowerups();
+
+  // ── Paddle ──
+  // Keyboard / mouse only — touch moves px directly via drag rail
+  const goL=keys['ArrowLeft']||keys['KeyA'];
+  const goR=keys['ArrowRight']||keys['KeyD'];
+  if(goL) px=Math.max(0,px-pspd);
+  if(goR) px=Math.min(W-pw,px+pspd);
+
+  // ── Ball on pad ──
+  if(bonPad){ if(balls[0]) snapBall(balls[0]); return; }
+
+  // ── Laser fire ──
+  if(activePU.laser && laserCooldown<=0){
+    lasers.push({x:px+pw*0.3, y:py, dy:-H*0.02});
+    lasers.push({x:px+pw*0.7, y:py, dy:-H*0.02});
+    laserCooldown=8;
+  }
+  if(laserCooldown>0) laserCooldown--;
+
+  // ── Lasers ──
+  lasers=lasers.filter(l=>{
+    l.y+=l.dy;
+    if(l.y<0) return false;
+    // Check brick hits
+    for(const b of bricks){
+      if(!b.alive) continue;
+      if(l.x>b.x&&l.x<b.x+b.w&&l.y>b.y&&l.y<b.y+b.h){
+        damageBrick(b,l.x,l.y);
+        return false; // laser consumed
+      }
+    }
+    return true;
+  });
+
+  // ── Balls ──
+  for(let bi=balls.length-1;bi>=0;bi--){
+    const b=balls[bi];
+    // Trail
+    b.trail.push({x:b.x,y:b.y});
+    if(b.trail.length>8) b.trail.shift();
+    b.x+=b.dx; b.y+=b.dy;
+    // Walls
+    if(b.x-b.r<0){b.x=b.r;b.dx=Math.abs(b.dx);}
+    if(b.x+b.r>W){b.x=W-b.r;b.dx=-Math.abs(b.dx);}
+    if(b.y-b.r<0){b.y=b.r;b.dy=Math.abs(b.dy);spawnParts(b.x,b.y,'#00f3ff',5);}
+    // Bottom
+    if(b.y-b.r>H){
+      spawnParts(b.x,H*.9,'#ff3131',8);
+      balls.splice(bi,1);
+      if(balls.length===0){ delete activePU.multi; updatePUBar(); loseLife(); return; }
+      continue;
+    }
+    // Paddle hit
+    if(b.dy>0&&b.y+b.r>=py&&b.y-b.r<=py+ph&&b.x>=px-b.r&&b.x<=px+pw+b.r){
+      const hit=(b.x-px)/pw;
+      const a=(hit-.5)*Math.PI*.62;
+      const s=Math.hypot(b.dx,b.dy);
+      b.dx=Math.sin(a)*s; b.dy=-Math.abs(Math.cos(a)*s);
+      b.y=py-b.r-1;
+      spawnParts(b.x,py,'#00f3ff',5);
+    }
+    // Bricks
+    for(const br of bricks){
+      if(!br.alive) continue;
+      if(b.x+b.r>br.x&&b.x-b.r<br.x+br.w&&b.y+b.r>br.y&&b.y-b.r<br.y+br.h){
+        const oL=(b.x+b.r)-br.x, oR=(br.x+br.w)-(b.x-b.r);
+        const oT=(b.y+b.r)-br.y, oB=(br.y+br.h)-(b.y-b.r);
+        if(Math.min(oL,oR)<Math.min(oT,oB)) b.dx*=-1; else b.dy*=-1;
+        damageBrick(br,b.x,b.y);
+        hitCombo();
+        break;
+      }
+    }
+  }
+
+  // ── Powerup drops ──
+  drops=drops.filter(d=>{
+    d.y+=d.dy; d.alpha=Math.min(1,d.alpha+0.05);
+    // Catch with paddle
+    if(d.y+d.h>=py&&d.y<=py+ph&&d.x+d.w>=px&&d.x<=px+pw){
+      applyPowerup(d.type);
+      spawnParts(d.x+d.w/2,d.y+d.h/2,PU_TYPES[d.type].col,12);
+      return false;
+    }
+    if(d.y>H) return false;
+    return true;
+  });
+
+  // ── Particles ──
+  parts=parts.filter(p=>p.life>0);
+  for(const p of parts){ p.x+=p.dx; p.y+=p.dy; p.dy+=.1; p.life-=.03; p.r*=.97; }
+
+  // ── Level clear ──
+  if(bricks.every(b=>!b.alive)){
+    nextLevel();
+  }
+}
+
+function damageBrick(b,hx,hy){
+  b.hp--; b.flash=7;
+  totalBricksHit++;
+  const pts = (10 + b.mhp*5) * (lvl+1) * Math.max(1,combo);
+  score+=pts;
+  updateHUD();
+  if(b.hp<=0){
+    b.alive=false;
+    spawnParts(b.x+b.w/2,b.y+b.h/2,b.col,10);
+    // Drop powerup?
+    if(b.puType){
+      drops.push({
+        x:b.x+b.w/2-14, y:b.y,
+        w:28, h:28, dy:H*0.005,
+        type:b.puType, alpha:0
+      });
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════════════════════════
+function rr(x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function draw(){
+  // BG
+  ctx.fillStyle='#050b14'; ctx.fillRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='rgba(0,160,210,.025)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=44){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=44){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Inner border glow
+  const borderGrad=ctx.createLinearGradient(0,0,W,0);
+  borderGrad.addColorStop(0,'rgba(0,243,255,.18)');
+  borderGrad.addColorStop(.5,'rgba(0,243,255,.06)');
+  borderGrad.addColorStop(1,'rgba(0,243,255,.18)');
+  ctx.strokeStyle=borderGrad; ctx.lineWidth=1.5;
+  ctx.strokeRect(1,1,W-2,H-2);
+  // Corner accents (drawn on canvas)
+  const cl=12,cw=2;
+  ctx.strokeStyle='rgba(0,243,255,.55)'; ctx.lineWidth=cw;
+  [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([cx,cy,sx,sy])=>{
+    ctx.beginPath(); ctx.moveTo(cx+sx*cl,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+sy*cl); ctx.stroke();
+  });
+
+  // ── BRICKS ──
+  for(const b of bricks){
+    if(!b.alive) continue;
+    const bright=b.flash>0;
+    if(b.flash>0) b.flash--;
+    const ratio = b.hp/b.mhp;
+    ctx.shadowBlur=bright?18:8; ctx.shadowColor=b.col;
+    ctx.globalAlpha=bright?1:(ratio*.55+.4);
+    ctx.fillStyle=bright?'#ffffff':b.col;
+    rr(b.x+1,b.y+1,b.w-2,b.h-2,4); ctx.fill();
+    // Highlight strip
+    ctx.globalAlpha*=.2;
+    const g=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h*.5);
+    g.addColorStop(0,'#fff'); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g; rr(b.x+1,b.y+1,b.w-2,b.h*.45,4); ctx.fill();
+    // PU icon on brick (sparkle)
+    if(b.puType && b.hp>0){
+      ctx.globalAlpha=.85; ctx.shadowBlur=0;
+      ctx.font=`${Math.round(b.h*.6)}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(PU_TYPES[b.puType].icon, b.x+b.w/2, b.y+b.h/2);
+    }
+    // HP dots
+    if(b.mhp>1){
+      ctx.globalAlpha=.9; ctx.shadowBlur=0;
+      const dotR=2.2;
+      for(let i=0;i<b.mhp;i++){
+        const dpx=b.x+b.w/2-(b.mhp-1)*(dotR*2+1)+i*(dotR*2+2);
+        const dpy=b.y+b.h-5;
+        ctx.fillStyle=i<b.hp?b.col:'rgba(0,0,0,.5)';
+        ctx.beginPath(); ctx.arc(dpx,dpy,dotR,0,Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+  }
+
+  // ── POWERUP DROPS ──
+  drops.forEach(d=>{
+    const def=PU_TYPES[d.type];
+    ctx.globalAlpha=d.alpha;
+    ctx.shadowBlur=16; ctx.shadowColor=def.col;
+    // Background pill
+    ctx.fillStyle=def.col+'22';
+    rr(d.x,d.y,d.w,d.h,6); ctx.fill();
+    ctx.strokeStyle=def.col+'aa'; ctx.lineWidth=1.5;
+    ctx.stroke();
+    // Icon
+    ctx.font=`${Math.round(d.h*.6)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#fff'; ctx.shadowBlur=0;
+    ctx.fillText(def.icon, d.x+d.w/2, d.y+d.h/2);
+    ctx.globalAlpha=1; ctx.shadowBlur=0;
+  });
+
+  // ── LASERS ──
+  lasers.forEach(l=>{
+    ctx.shadowBlur=12; ctx.shadowColor='#cc44ff';
+    ctx.strokeStyle='#cc44ff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(l.x,l.y); ctx.lineTo(l.x,l.y+H*.025); ctx.stroke();
+    ctx.shadowBlur=0;
+  });
+
+  // ── PADDLE ──
+  const padCol = activePU.laser ? '#cc44ff' : activePU.wide ? '#44ff88' : '#00f3ff';
+  ctx.shadowBlur=20; ctx.shadowColor=padCol;
+  const pg=ctx.createLinearGradient(px,0,px+pw,0);
+  pg.addColorStop(0,padCol+'55'); pg.addColorStop(.5,padCol); pg.addColorStop(1,padCol+'55');
+  ctx.fillStyle=pg; rr(px,py,pw,ph,ph/2); ctx.fill(); ctx.shadowBlur=0;
+
+  // ── BALLS ──
+  balls.forEach(b=>{
+    // Trail
+    b.trail.forEach((t,i)=>{
+      const a=((i+1)/b.trail.length)*0.35;
+      const r=b.r*((i+1)/b.trail.length)*0.65;
+      ctx.globalAlpha=a; ctx.fillStyle='#00f3ff';
+      ctx.beginPath(); ctx.arc(t.x,t.y,r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    ctx.shadowBlur=22; ctx.shadowColor='#00f3ff';
+    const bg=ctx.createRadialGradient(b.x-b.r*.3,b.y-b.r*.3,1,b.x,b.y,b.r);
+    bg.addColorStop(0,'#ffffff'); bg.addColorStop(1,'#00f3ff');
+    ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+  });
+
+  // ── PARTICLES ──
+  parts.forEach(p=>{
+    ctx.globalAlpha=Math.max(0,p.life);
+    ctx.fillStyle=p.col; ctx.shadowBlur=8; ctx.shadowColor=p.col;
+    ctx.beginPath(); ctx.arc(p.x,p.y,Math.max(.4,p.r),0,Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha=1; ctx.shadowBlur=0;
+
+  // ── LAUNCH HINT ──
+  if(state==='playing'&&bonPad){
+    const alpha=.5+.3*Math.sin(Date.now()/400);
+    ctx.fillStyle=`rgba(0,243,255,${alpha})`;
+    ctx.font=`${Math.round(W*.027)}px Orbitron,monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText('TAP / SPACE TO LAUNCH',W/2,H*.76);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOOP
+// ═══════════════════════════════════════════════════════════
+function loop(){
+  update(); draw();
+  updatePUBar();     // desktop bar
+  updatePUDisplay(); // mobile pills
+  raf=requestAnimationFrame(loop);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HUD
+// ═══════════════════════════════════════════════════════════
+function updateHUD(){
+  document.getElementById('h-score').textContent=score.toLocaleString();
+  document.getElementById('h-lives').textContent='❤'.repeat(Math.max(0,lives));
+  document.getElementById('h-level').textContent=lvl+1;
+  const cv=document.getElementById('h-combo');
+  const cl=document.getElementById('h-combo-lbl');
+  if(combo>1){
+    cv.style.display=cl.style.display='';
+    cv.textContent='×'+combo;
+    cv.style.color=combo>=5?'#ff8800':combo>=3?'#44ff88':'#00f3ff';
+  } else {
+    cv.style.display=cl.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
+let _tt;
+function toastGame(msg,type){
+  const el=document.getElementById('toast-game');
+  el.textContent=msg; el.className='show'+(type?' '+type:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.className='',2800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OVERLAY HELPERS
+// ═══════════════════════════════════════════════════════════
+function hideOv(){ document.getElementById('ov').classList.add('hide'); }
+
+// ═══════════════════════════════════════════════════════════
+//  INPUT — Keyboard
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(e.code==='Space'){ e.preventDefault(); launchBall(); }
+  if(e.code==='ArrowLeft'||e.code==='ArrowRight') e.preventDefault();
+});
+window.addEventListener('keyup',e=>{ keys[e.code]=false; });
+
+// Mouse — desktop paddle control
+cv.addEventListener('mousemove',e=>{
+  if(state!=='playing') return;
+  const rect=cv.getBoundingClientRect(), scX=W/rect.width;
+  px=Math.max(0,Math.min(W-pw,(e.clientX-rect.left)*scX-pw/2));
+});
+cv.addEventListener('click',launchBall);
+
+// ─── DRAG RAIL — position directe du doigt ─────────────────
+// Principe : on suit le doigt en temps réel sur la piste.
+// La raquette se place proportionnellement à la position X du doigt.
+// Aucune animation, aucun spring = 0 saccade.
+(function initDragRail(){
+  const rail  = document.getElementById('drag-rail');
+  const thumb = document.getElementById('drag-thumb');
+  if(!rail||!thumb) return;
+
+  // On positionne le thumb au centre au départ
+  let railRect = rail.getBoundingClientRect();
+  let fingerX  = railRect.left + railRect.width / 2;
+
+  function updateThumb(clientX){
+    railRect = rail.getBoundingClientRect();
+    // Clamp finger position dans la piste
+    fingerX = Math.max(railRect.left, Math.min(railRect.right, clientX));
+    // Position du thumb (centré sur le doigt, clampé)
+    const rel    = fingerX - railRect.left;              // px depuis bord gauche
+    const ratio  = rel / railRect.width;                 // 0..1
+    const thumbW = thumb.offsetWidth || 60;
+    const maxLeft = railRect.width - thumbW;
+    const left   = Math.max(0, Math.min(maxLeft, rel - thumbW/2));
+    thumb.style.left = left + 'px';
+    // Transmettre position normalisée (0..1) au jeu
+    // On cible le centre de la raquette
+    if(state==='playing' && W>0){
+      px = Math.max(0, Math.min(W - pw, ratio * W - pw/2));
+    }
+    joystickDelta = 0; // plus utilisé mais réinitialisé
+  }
+
+  // ── Centrer au départ ──
+  function center(){
+    railRect = rail.getBoundingClientRect();
+    const thumbW = thumb.offsetWidth || 60;
+    thumb.style.left = (railRect.width/2 - thumbW/2) + 'px';
+  }
+
+  // ── Touch events ──
+  rail.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    updateThumb(e.touches[0].clientX);
+    launchBall();
+  }, {passive:false});
+
+  rail.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    updateThumb(e.touches[0].clientX);
+  }, {passive:false});
+
+  // Mouse (test desktop)
+  let mouseDown=false;
+  rail.addEventListener('mousedown', e=>{ mouseDown=true; updateThumb(e.clientX); launchBall(); });
+  window.addEventListener('mousemove', e=>{ if(mouseDown) updateThumb(e.clientX); });
+  window.addEventListener('mouseup',   ()=>{ mouseDown=false; });
+
+  // Init
+  setTimeout(center, 120);
+  window.addEventListener('resize', ()=>setTimeout(center, 60));
+})();
+
+// ─── PU DISPLAY (mobile) — pills avec timer bar ───────────
+function updatePUDisplay(){
+  const el = document.getElementById('pu-display');
+  if(!el) return;
+  const now = Date.now();
+  let html = '';
+
+  const puDefs = {
+    speed: { icon:'⚡', label:'SPEED ×1.5', dur:8000, cls:'speed' },
+    multi: { icon:'🔵', label:'MULTI-BALL',  dur:0,    cls:'multi' },
+    laser: { icon:'🔮', label:'LASER',        dur:6000, cls:'laser' },
+    wide:  { icon:'↔',  label:'WIDE PAD',     dur:7000, cls:'wide'  },
+  };
+
+  Object.entries(puDefs).forEach(([k,def])=>{
+    if(!activePU[k]) return;
+    const hasDur = def.dur>0;
+    let timerTxt='', barW='100%';
+    if(hasDur && typeof activePU[k]==='number'){
+      const rem = Math.max(0, activePU[k]-now);
+      const pct = Math.round(rem/def.dur*100);
+      timerTxt = Math.ceil(rem/1000)+'s';
+      barW = pct+'%';
+    }
+    html+=`<div class="pu-pill ${def.cls}">
+      <span class="pu-pill-icon">${def.icon}</span>
+      <span class="pu-pill-name">${def.label}</span>
+      ${timerTxt?`<span class="pu-pill-timer">${timerTxt}</span>`:''}
+      ${hasDur?`<div class="pu-bar-inner" style="width:${barW};"></div>`:''}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize',resize);
+resize();
+showTutorial();
+</script>
+</body>
+</html>
