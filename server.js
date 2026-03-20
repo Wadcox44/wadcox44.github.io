@@ -622,6 +622,14 @@ app.get('/breakout', (req, res) => {
   });
 });
 
+// 2048 Neon — dossier Games/2048
+app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
+app.get('/2048', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), err => {
+    if (err) res.status(404).send('index.html introuvable dans Games/2048');
+  });
+});
+
 // Portail — racine (en dernier pour ne pas shadower les routes API)
 app.use(express.static(path.join(__dirname)));
 
