@@ -351,11 +351,290 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 .recruit-modal-ok .ok-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--or); margin-bottom: 6px; }
 .recruit-modal-ok .ok-sub   { font-size: .78rem; color: #C8D8E8; line-height: 1.6; }
 
+
+/* ════════════════════════════════════════════
+   LANDING PAGE — intro screen
+════════════════════════════════════════════ */
+#landing {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+  /* Exit transition */
+  transition: opacity .65s ease, transform .65s ease;
+}
+
+#landing.exit {
+  opacity: 0;
+  transform: translateY(-18px);
+  pointer-events: none;
+}
+
+/* Fond animé : deux orbes colorées */
+#landing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 10%, rgba(0,243,255,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 80% 90%, rgba(255,170,0,.05) 0%, transparent 65%);
+  animation: landingOrbs 8s ease-in-out infinite alternate;
+}
+@keyframes landingOrbs {
+  0%   { opacity: .6; }
+  100% { opacity: 1; }
+}
+
+/* Scan-lines overlay */
+#landing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,.055) 2px, rgba(0,0,0,.055) 4px
+  );
+}
+
+/* INNER — above overlays */
+.landing-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+/* Ligne déco supérieure */
+.landing-top-line {
+  width: 40px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--cy), transparent);
+  margin-bottom: 28px;
+  opacity: .6;
+}
+
+/* LOGO */
+.landing-logo {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(2rem, 10vw, 3.2rem);
+  letter-spacing: 3px;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 30px rgba(0,243,255,.35),
+    0 0 80px rgba(0,243,255,.12);
+  animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
+}
+.landing-logo .pi {
+  color: var(--or);
+  text-shadow:
+    0 0 24px rgba(255,170,0,.5),
+    0 0 60px rgba(255,170,0,.15);
+}
+
+/* TAGLINE */
+.landing-tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(.55rem, 3vw, .75rem);
+  color: var(--cy);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-top: 14px;
+  opacity: .75;
+  animation: landingFadeUp .9s .15s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* PHRASE */
+.landing-phrase {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(.82rem, 3.5vw, 1rem);
+  color: rgba(200,216,232,.55);
+  line-height: 1.6;
+  margin-top: 22px;
+  max-width: 300px;
+  animation: landingFadeUp .9s .3s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* SÉPARATEUR */
+.landing-sep {
+  width: 100%;
+  max-width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,243,255,.2), transparent);
+  margin-top: 28px;
+  animation: landingFadeUp .9s .4s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* CTA BUTTON */
+.landing-btn {
+  margin-top: 28px;
+  padding: 16px 36px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(.62rem, 3vw, .78rem);
+  letter-spacing: 2.5px;
+  /* État repos : fond transparent, texte or bien lisible */
+  color: var(--or);
+  background: transparent;
+  border: 1.5px solid rgba(255,170,0,.65);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 18px rgba(255,170,0,.18),
+    inset 0 0 14px rgba(255,170,0,.04);
+  transition: color .3s ease, background .3s ease, border-color .3s ease,
+              transform .2s ease, box-shadow .3s ease;
+  animation: landingFadeUp .9s .5s cubic-bezier(.22,1,.36,1) both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover / focus : remplissage doré, texte noir */
+.landing-btn:hover,
+.landing-btn:focus {
+  color: #000;
+  background: linear-gradient(135deg, #bf953f 0%, var(--or) 40%, #fcf6ba 60%, var(--or) 80%, #bf953f 100%);
+  background-size: 200% auto;
+  background-position: right center;
+  border-color: var(--or);
+  box-shadow:
+    0 6px 36px rgba(255,170,0,.5),
+    0 0 0 1px rgba(255,170,0,.35);
+  transform: translateY(-2px);
+}
+
+.landing-btn:active {
+  transform: scale(.97) translateY(0);
+}
+
+/* Shimmer interne */
+.landing-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,.22) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: none;
+}
+.landing-btn:hover::after {
+  animation: btnShimmer .55s ease forwards;
+}
+@keyframes btnShimmer {
+  to { transform: translateX(130%); }
+}
+
+/* SOUS-BOUTON */
+.landing-sub {
+  margin-top: 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(.5rem, 2.5vw, .58rem);
+  color: rgba(200,216,232,.28);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: landingFadeUp .9s .65s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Ligne déco inférieure */
+.landing-bottom-line {
+  width: 40px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(255,170,0,.35), transparent);
+  margin-top: 28px;
+  opacity: .5;
+  animation: landingFadeUp .9s .7s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Coin décoratifs */
+.landing-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+  opacity: .4;
+}
+.landing-corner.tl { top: 20px; left: 20px; border-top: 1.5px solid var(--cy); border-left: 1.5px solid var(--cy); }
+.landing-corner.tr { top: 20px; right: 20px; border-top: 1.5px solid var(--cy); border-right: 1.5px solid var(--cy); }
+.landing-corner.bl { bottom: 20px; left: 20px; border-bottom: 1.5px solid rgba(255,170,0,.6); border-left: 1.5px solid rgba(255,170,0,.6); }
+.landing-corner.br { bottom: 20px; right: 20px; border-bottom: 1.5px solid rgba(255,170,0,.6); border-right: 1.5px solid rgba(255,170,0,.6); }
+
+/* Animations entrée */
+@keyframes landingFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Version mobile : réduire un peu */
+@media (max-width: 390px) {
+  .landing-btn { padding: 14px 28px; }
+}
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
+
+<!-- ════════════════════════════════════════════
+     LANDING PAGE — intro screen
+════════════════════════════════════════════ -->
+<div id="landing" role="main" aria-label="Intro JEUXVIDEO.PI">
+
+  <!-- Coins décoratifs -->
+  <div class="landing-corner tl"></div>
+  <div class="landing-corner tr"></div>
+  <div class="landing-corner bl"></div>
+  <div class="landing-corner br"></div>
+
+  <div class="landing-inner">
+
+    <div class="landing-top-line"></div>
+
+    <!-- Logo -->
+    <div class="landing-logo">
+      JEUXVIDEO<span class="pi">.PI</span>
+    </div>
+
+    <!-- Tagline -->
+    <div class="landing-tagline">Play &nbsp;·&nbsp; Create &nbsp;·&nbsp; Discover</div>
+
+    <!-- Phrase -->
+    <p class="landing-phrase">
+      The first gaming portal designed for the Pi Network community.
+    </p>
+
+    <div class="landing-sep"></div>
+
+    <!-- CTA -->
+    <button class="landing-btn" onclick="enterPortal()" id="landing-cta">
+      ENTER THE EXPERIENCE
+    </button>
+
+    <!-- Sous-texte -->
+    <div class="landing-sub">Gold Pixel available now</div>
+
+    <div class="landing-bottom-line"></div>
+
+  </div>
+</div>
+
 
 <!-- DON BAR -->
 <div class="don-bar">
@@ -901,6 +1180,36 @@ function handleRecruitModal(e) {
       toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
     });
 }
+
+
+/* ════════════════════════════════════════
+   LANDING — enter portal
+════════════════════════════════════════ */
+function enterPortal() {
+  const landing = document.getElementById('landing');
+  if (!landing) return;
+
+  // Disable button immediately to prevent double-tap
+  const btn = document.getElementById('landing-cta');
+  if (btn) { btn.disabled = true; btn.textContent = 'LOADING...'; }
+
+  // Trigger exit animation
+  landing.classList.add('exit');
+
+  // Remove after transition completes
+  setTimeout(() => {
+    landing.style.display = 'none';
+    // Trigger reveal on home view
+    revealVisible();
+  }, 680);
+}
+
+// Auto-skip if user has already visited (session storage)
+(function checkSkipLanding() {
+  // Uncomment to enable auto-skip on return visit:
+  // if (sessionStorage.getItem('jvpi_visited')) { enterPortal(); return; }
+  // sessionStorage.setItem('jvpi_visited', '1');
+})();
 
 </script>
 
