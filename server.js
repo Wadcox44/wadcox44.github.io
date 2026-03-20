@@ -51,6 +51,7 @@ async function connectDB() {
     await users.createIndex({ piUsername: 1 }, { unique: true });
     await db.collection('contacts').createIndex({ receivedAt: -1 });
     await db.collection('contacts').createIndex({ type: 1 });
+    await db.collection('neonbreaker_scores').createIndex({ score: -1 });
 
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté');
   } catch (e) {
@@ -371,6 +372,44 @@ app.post('/api/vote', withPiUser(false), async (req, res) => {
 app.get('/api/player/:name', async (req, res) => res.redirect(`/api/game/goldpixel/player/${req.params.name}`));
 
 
+
+// ═══════════════════════════════════════════════════════════════
+//  /api/game/neonbreaker — Classement Neon Breaker
+// ═══════════════════════════════════════════════════════════════
+
+// POST /api/game/neonbreaker/score
+// Body : { name, score, level, combo, bricks }
+app.post('/api/game/neonbreaker/score', async (req, res) => {
+  try {
+    const { name, score, level, combo, bricks } = req.body;
+    if (!name || typeof score !== 'number') return res.status(400).json({ error: 'name + score requis' });
+    const col = db.collection('neonbreaker_scores');
+    // Garder seulement le meilleur score par joueur
+    const existing = await col.findOne({ name: name.slice(0,20) });
+    if (existing && existing.score >= score) return res.json({ ok: true, best: existing.score });
+    await col.updateOne(
+      { name: name.slice(0,20) },
+      { $set: { name: name.slice(0,20), score, level: level||1, combo: combo||0, bricks: bricks||0, updatedAt: new Date() } },
+      { upsert: true }
+    );
+    res.json({ ok: true, newBest: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/game/neonbreaker/scores?limit=20
+app.get('/api/game/neonbreaker/scores', async (req, res) => {
+  try {
+    const limit = Math.min(100, parseInt(req.query.limit)||20);
+    const col   = db.collection('neonbreaker_scores');
+    const data  = await col.find({}).sort({ score: -1 }).limit(limit).toArray();
+    res.json(data);
+  } catch (e) {
+    res.status(500).json([]);
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  /api/contact — Formulaires développeurs & recrutement
 //  Les données arrivent aussi via Formspree (email automatique)
@@ -572,6 +611,14 @@ app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel'))
 app.get('/goldpixel', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), err => {
     if (err) res.status(404).send('goldpixel.html introuvable dans Games/Goldpixel');
+  });
+});
+
+// Neon Breaker — dossier Games/Breakout
+app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
+app.get('/breakout', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), err => {
+    if (err) res.status(404).send('breakout.html introuvable dans Games/Breakout');
   });
 });
 
