@@ -150,7 +150,7 @@ textarea{min-height:88px;resize:vertical;line-height:1.55;}
 #toast.gold{border-color:var(--or);color:var(--or);box-shadow:0 0 22px rgba(255,170,0,.2);}
 
 /* FOOTER */
-footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align:center;font-family:'Orbitron',monospace;letter-spacing:1px;position:relative;z-index:2;}
+footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align:center;font-family:'Orbitron',monospace;letter-spacing:1px;position:relative;z-index:2;}
 
 /* ════════════════════════════════════════
    SLOTS VITRINE — "Votre jeu ici"
@@ -697,11 +697,11 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 /* ── Ligne du haut : logo + nav + lang + don ── */
 #header-top {
   width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
+  /* Pas de max-width — logo à gauche, langues collées à droite */
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 0;
   padding: 8px 14px;
   position: relative;
 }
@@ -872,6 +872,222 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 .don-drawer-inner .btn-don {
   font-size: .52rem;
   padding: 4px 11px;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   HERO PRINCIPAL — première section de la home
+   Remplace la section "Featured Game" basique
+════════════════════════════════════════════════════════ */
+
+/* Wrapper hero complet */
+.hero-section {
+  width: 100%;
+  padding: 18px 0 0;
+  border-bottom: 1px solid rgba(0,243,255,.07);
+  position: relative;
+  z-index: 2;
+}
+
+/* Titre fort au-dessus du hero */
+.hero-headline {
+  text-align: center;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+.hero-headline-label {
+  display: inline-block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .52rem;
+  color: var(--cy);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: .75;
+}
+.hero-headline-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(1.35rem, 6vw, 1.85rem);
+  line-height: 1.15;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 24px rgba(0,243,255,.18);
+  margin-bottom: 8px;
+}
+.hero-headline-title span { color: var(--or); }
+.hero-headline-sub {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(.82rem, 3.5vw, .95rem);
+  color: rgba(200,216,232,.55);
+  line-height: 1.5;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Carte hero Gold Pixel — redesignée */
+.hero-card-new {
+  width: 100%;
+  height: 210px;
+  background: #000;
+  border: 1.5px solid rgba(255,170,0,.4);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: all .45s;
+  /* Glow or subtil au repos */
+  box-shadow: 0 0 20px rgba(255,170,0,.08), inset 0 0 40px rgba(0,0,0,.6);
+}
+.hero-card-new img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(.55);
+  transition: .7s ease;
+  display: block;
+}
+.hero-card-new:hover {
+  border-color: var(--or);
+  box-shadow: 0 0 40px rgba(255,170,0,.4), 0 0 80px rgba(255,170,0,.1);
+}
+.hero-card-new:hover img {
+  transform: scale(1.06);
+  filter: brightness(.75);
+}
+
+/* Overlay contenu sur la carte */
+.hero-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+  /* Dégradé sombre en bas pour lisibilité */
+  background: linear-gradient(
+    to top,
+    rgba(5,11,20,.85) 0%,
+    rgba(5,11,20,.2) 45%,
+    transparent 70%
+  );
+}
+.hero-card-game-name {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 8vw, 2.4rem);
+  color: var(--or);
+  letter-spacing: 6px;
+  text-shadow: 0 0 22px var(--or), 0 0 50px rgba(255,170,0,.3);
+  transition: letter-spacing .4s, text-shadow .4s;
+}
+.hero-card-new:hover .hero-card-game-name {
+  letter-spacing: 10px;
+  text-shadow: 0 0 35px var(--or), 0 0 70px rgba(255,170,0,.4);
+}
+.hero-card-game-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .55rem;
+  color: rgba(200,216,232,.7);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Badge PIXEL ART (haut gauche) */
+.hero-badge-type {
+  position: absolute;
+  top: 11px; left: 11px;
+  background: rgba(5,11,20,.85);
+  border: 1px solid rgba(255,170,0,.55);
+  border-radius: 100px;
+  font-family: 'Orbitron', monospace;
+  font-size: .46rem;
+  letter-spacing: 1.5px;
+  color: var(--or);
+  padding: 3px 10px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* Badge SEASON 1 (haut droit) */
+.hero-badge-season {
+  position: absolute;
+  top: 11px; right: 11px;
+  background: rgba(5,11,20,.85);
+  border: 1px solid rgba(0,243,255,.35);
+  border-radius: 100px;
+  font-family: 'Orbitron', monospace;
+  font-size: .44rem;
+  letter-spacing: 1px;
+  color: var(--cy);
+  padding: 3px 10px;
+}
+
+/* CTA PLAY NOW sur la carte (bas) */
+.hero-cta-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: auto;
+}
+.hero-cta-btn {
+  flex: 1;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, #bf953f, var(--or), #fcf6ba, var(--or), #bf953f);
+  background-size: 200% auto;
+  color: #000;
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: .6rem;
+  letter-spacing: 2px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-position .4s, transform .2s, box-shadow .3s;
+  box-shadow: 0 3px 16px rgba(255,170,0,.35);
+  position: relative;
+  overflow: hidden;
+}
+.hero-cta-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.2) 50%, transparent 70%);
+  transform: translateX(-130%);
+  animation: heroShimmer 3s ease-in-out infinite;
+  animation-delay: .8s;
+}
+@keyframes heroShimmer {
+  0%  { transform: translateX(-130%); }
+  35% { transform: translateX(130%);  }
+  100%{ transform: translateX(130%);  }
+}
+.hero-cta-btn:hover {
+  background-position: right center;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 24px rgba(255,170,0,.55);
+}
+.hero-cta-explore {
+  flex-shrink: 0;
+  padding: 11px 14px;
+  background: transparent;
+  border: 1px solid rgba(0,243,255,.4);
+  border-radius: 7px;
+  color: var(--cy);
+  font-family: 'Orbitron', monospace;
+  font-size: .55rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all .25s;
+  white-space: nowrap;
+}
+.hero-cta-explore:hover {
+  background: rgba(0,243,255,.08);
+  border-color: var(--cy);
+  box-shadow: 0 0 14px rgba(0,243,255,.2);
 }
 
 </style>
@@ -1045,20 +1261,65 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 <!-- ══ HOME ══ -->
 <div class="view active" id="view-home">
 
-  <section>
-    <div class="cat-title">
-      <span>⭐ <span data-fr="Jeu Phare" data-en="Featured Game">Featured Game</span></span>
-      <span class="sub" data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</span>
-    </div>
-    <div class="hero-card" onclick="window.location.href='/goldpixel'">
-      <img src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.opacity='0'">
-      <div class="hero-overlay">
-        <div class="hero-name">GOLD PIXEL</div>
-        <div class="hero-tag" data-fr="Créer · Partager · Voter" data-en="Create · Share · Vote">Create · Share · Vote</div>
+  <!-- ════════════════════════════════════════
+       HERO PRINCIPAL — Gold Pixel mis en avant
+  ════════════════════════════════════════ -->
+  <div class="hero-section">
+
+    <!-- Titre fort + accroche -->
+    <div class="hero-headline">
+      <div class="hero-headline-label"
+           data-fr="🎮 Le portail gaming Pi Network" data-en="🎮 The Pi Network gaming portal">
+        🎮 The Pi Network gaming portal
       </div>
-      <div class="badge-live"><div class="live-dot"></div><span>PIXEL ART</span></div>
+      <div class="hero-headline-title"
+           data-fr="Dessine. Partage.<br><span>Gagne ta place.</span>"
+           data-en="Draw. Share.<br><span>Claim your place.</span>">
+        Draw. Share.<br><span>Claim your place.</span>
+      </div>
+      <div class="hero-headline-sub"
+           data-fr="Le premier jeu pixel art collaboratif sur Pi Network. Crée, publie et vote pour les meilleures œuvres."
+           data-en="The first collaborative pixel art game on Pi Network. Create, publish and vote for the best artworks.">
+        The first collaborative pixel art game on Pi Network. Create, publish and vote for the best artworks.
+      </div>
     </div>
-  </section>
+
+    <!-- Carte Gold Pixel redesignée -->
+    <div class="hero-card-new" onclick="window.location.href='/goldpixel'">
+      <img src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.opacity='0'">
+
+      <!-- Badge type -->
+      <div class="hero-badge-type">
+        <div class="live-dot"></div>
+        PIXEL ART
+      </div>
+
+      <!-- Badge saison -->
+      <div class="hero-badge-season"
+           data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</div>
+
+      <!-- Overlay nom du jeu -->
+      <div class="hero-card-overlay">
+        <div class="hero-card-game-name">GOLD PIXEL</div>
+        <div class="hero-card-game-tag"
+             data-fr="Créer · Partager · Voter"
+             data-en="Create · Share · Vote">Create · Share · Vote</div>
+      </div>
+
+      <!-- Barre CTA en bas de la carte -->
+      <div class="hero-cta-bar">
+        <button class="hero-cta-btn"
+                onclick="event.stopPropagation();window.location.href='/goldpixel'">
+          ▶ PLAY NOW
+        </button>
+        <button class="hero-cta-explore"
+                onclick="event.stopPropagation();switchTab('games')">
+          EXPLORE →
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /hero-section -->
 
   <section>
     <div class="cat-title rv">
