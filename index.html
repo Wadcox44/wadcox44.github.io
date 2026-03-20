@@ -528,18 +528,27 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
   inset: 0;
   background: linear-gradient(
     105deg,
-    transparent 30%,
-    rgba(255,255,255,.22) 50%,
-    transparent 70%
+    transparent 25%,
+    rgba(255,255,255,.28) 45%,
+    rgba(255,220,100,.18) 50%,
+    rgba(255,255,255,.28) 55%,
+    transparent 75%
   );
-  transform: translateX(-130%);
-  transition: none;
+  transform: translateX(-150%);
+  /* Voile brillant en boucle toutes les 2.8s */
+  animation: btnShimmerLoop 2.8s ease-in-out infinite;
+  animation-delay: 1.2s;
 }
 .landing-btn:hover::after {
-  animation: btnShimmer .55s ease forwards;
+  animation: btnShimmerFast .45s ease forwards;
 }
-@keyframes btnShimmer {
-  to { transform: translateX(130%); }
+@keyframes btnShimmerLoop {
+  0%   { transform: translateX(-150%); }
+  40%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
+@keyframes btnShimmerFast {
+  to { transform: translateX(150%); }
 }
 
 /* SOUS-BOUTON */
@@ -586,6 +595,228 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 @media (max-width: 390px) {
   .landing-btn { padding: 14px 28px; }
 }
+
+/* ── LANDING IMAGE LOGO ── */
+.landing-img-logo {
+  width: clamp(200px, 72vw, 320px);
+  height: auto;
+  display: block;
+  margin-bottom: 8px;
+  /* Légère animation entrée, décalée avant le titre texte */
+  animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
+  /* Drop shadow cyan+or pour fondre avec l'ambiance néon */
+  filter:
+    drop-shadow(0 0 18px rgba(0,243,255,.35))
+    drop-shadow(0 0 36px rgba(255,170,0,.18));
+}
+
+/* ════════════════════════════════════════════════════════
+   NOUVEAU HEADER UNIFIÉ
+   Remplace don-bar + lang-row + header + nav-tabs séparés
+════════════════════════════════════════════════════════ */
+
+/* ── Barre principale ── */
+#site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 600; /* au-dessus de tout */
+  background: rgba(5,11,20,.97);
+  border-bottom: 1px solid rgba(0,243,255,.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Ligne du haut : logo + nav + lang + don ── */
+#header-top {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  position: relative;
+}
+
+/* ── LOGO (gauche) ── */
+.hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.hdr-brand-img {
+  /* Logo image JV manettes */
+  height: 32px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(0,243,255,.4));
+  border-radius: 4px;
+}
+.hdr-brand-text {
+  font-family: 'Orbitron', monospace;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0,243,255,.3);
+  white-space: nowrap;
+  line-height: 1;
+}
+.hdr-brand-text .pi { color: var(--or); }
+
+/* ── NAV CENTRALE ── */
+#hdr-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.hdr-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(200,216,232,.55);
+  font-family: 'Orbitron', monospace;
+  font-size: .44rem;
+  letter-spacing: .8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.hdr-nav-btn:hover  { color: var(--cy); background: rgba(0,243,255,.06); }
+.hdr-nav-btn.active { color: var(--cy); background: rgba(0,243,255,.1); }
+.hdr-nav-btn.active::after {
+  content: '';
+  display: block;
+  height: 1.5px;
+  background: var(--cy);
+  border-radius: 1px;
+  margin-top: 3px;
+  box-shadow: 0 0 6px var(--cy);
+}
+
+/* ── DROITE : lang + don ── */
+#hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Boutons langue */
+.hdr-lang {
+  background: transparent;
+  border: 1px solid rgba(0,243,255,.18);
+  color: rgba(200,216,232,.5);
+  font-family: 'Orbitron', monospace;
+  font-size: .42rem;
+  letter-spacing: .8px;
+  padding: 3px 7px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.hdr-lang.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
+.hdr-lang:hover { border-color: var(--cy); color: var(--cy); }
+
+/* ── BOUTON DON ── */
+#btn-don-toggle {
+  position: relative;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1.5px solid rgba(255,170,0,.5);
+  border-radius: 5px;
+  color: var(--or);
+  font-family: 'Orbitron', monospace;
+  font-size: .48rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: border-color .25s, box-shadow .25s, color .25s;
+  /* Shimmer cyclique pour attirer l'œil */
+  animation: donGlow 2.5s ease-in-out infinite;
+}
+@keyframes donGlow {
+  0%,100% { box-shadow: 0 0 6px rgba(255,170,0,.2); }
+  50%      { box-shadow: 0 0 16px rgba(255,170,0,.55), 0 0 30px rgba(255,170,0,.18); }
+}
+/* Voile brillant qui traverse le bouton Don */
+#btn-don-toggle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 25%, rgba(255,220,80,.35) 50%, transparent 75%);
+  transform: translateX(-150%);
+  animation: donShimmer 2.5s ease-in-out infinite;
+}
+@keyframes donShimmer {
+  0%   { transform: translateX(-150%); }
+  35%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
+#btn-don-toggle:hover {
+  border-color: var(--or);
+  box-shadow: 0 0 20px rgba(255,170,0,.45);
+}
+#btn-don-toggle.open {
+  background: rgba(255,170,0,.1);
+  border-color: var(--or);
+  color: var(--or);
+}
+
+/* ── BANDEAU DON RÉTRACTABLE ── */
+#don-drawer {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  /* Fermé par défaut : hauteur 0, débordement caché */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .38s cubic-bezier(.4,0,.2,1), padding .38s;
+  padding: 0 14px;
+}
+#don-drawer.open {
+  /* Ouvert : assez grand pour son contenu */
+  max-height: 80px;
+  padding: 8px 14px 10px;
+}
+.don-drawer-inner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  /* Séparateur subtil en haut */
+  border-top: 1px solid rgba(0,243,255,.1);
+  padding-top: 8px;
+}
+.don-drawer-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .52rem;
+  color: rgba(200,216,232,.45);
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* Les boutons montant réutilisent .btn-don existant — pas de redéfinition */
+.don-drawer-inner .btn-don {
+  font-size: .52rem;
+  padding: 4px 11px;
+}
+
 </style>
 </head>
 <body>
@@ -605,10 +836,20 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
   <div class="landing-inner">
 
-    <div class="landing-top-line"></div>
+    <!-- Logo image JV manettes -->
+    <img
+      src="Images/Logo_jeuxvideo_final.jpg"
+      alt="JEUXVIDEO.PI Logo"
+      class="landing-img-logo"
+      onerror="this.style.display='none';document.getElementById('landing-logo-fallback').style.display='block';"
+    >
+    <!-- Fallback texte si image absente -->
+    <div class="landing-logo" id="landing-logo-fallback" style="display:none;">
+      JEUXVIDEO<span class="pi">.PI</span>
+    </div>
 
-    <!-- Logo -->
-    <div class="landing-logo">
+    <!-- Titre texte sous le logo -->
+    <div class="landing-logo" style="animation-delay:.1s;">
       JEUXVIDEO<span class="pi">.PI</span>
     </div>
 
@@ -617,7 +858,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
     <!-- Phrase -->
     <p class="landing-phrase">
-      The first gaming portal designed for the Pi Network community.
+      Join the 1st independent portal and build the future of gaming on Pi.
     </p>
 
     <div class="landing-sep"></div>
@@ -627,8 +868,6 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
       ENTER THE EXPERIENCE
     </button>
 
-    <!-- Sous-texte -->
-    <div class="landing-sub">Gold Pixel available now</div>
 
     <div class="landing-bottom-line"></div>
 
@@ -636,35 +875,97 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 </div>
 
 
-<!-- DON BAR -->
-<div class="don-bar">
-  <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Support the portal:</span>
-  <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
-  <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
-  <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
-  <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Custom</button>
-  <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Send →</button>
-</div>
+<!-- ════════════════════════════════════════════════════════
+     HEADER UNIFIÉ — logo + nav + langue + don rétractable
+     Remplace : don-bar, lang-row, header, nav-tabs
+════════════════════════════════════════════════════════ -->
+<div id="site-header">
 
-<!-- LANG -->
-<div class="lang-row">
-  <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
-  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
-</div>
+  <!-- ── Ligne principale ── -->
+  <div id="header-top">
 
-<!-- HEADER -->
-<header>
-  <div class="logo">JEUXVIDEO<span class="pi">.PI</span></div>
-  <div class="logo-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Gaming Portal · Pi Network</div>
-</header>
+    <!-- GAUCHE : logo image + texte -->
+    <a class="hdr-brand" onclick="showTab('home')" href="#">
+      <!-- Logo image JV manettes (même chemin que la landing) -->
+      <img
+        src="Images/Logo_jeuxvideo_final.jpg"
+        alt="JV"
+        class="hdr-brand-img"
+        onerror="this.style.display='none'"
+      >
+      <!-- Texte JEUXVIDEO.PI à côté du logo -->
+      <span class="hdr-brand-text">JEUXVIDEO<span class="pi">.PI</span></span>
+    </a>
 
-<!-- NAV -->
-<nav class="nav-tabs">
-  <button class="nav-tab active" onclick="showTab('home')" data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
-  <button class="nav-tab" onclick="showTab('games')" data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
-  <button class="nav-tab" onclick="showTab('news')" data-fr="📰 News" data-en="📰 News">📰 News</button>
-  <button class="nav-tab" onclick="showTab('devs')" data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
-</nav>
+    <!-- CENTRE : navigation principale -->
+    <nav id="hdr-nav" aria-label="Navigation principale">
+      <!-- Home -->
+      <button class="hdr-nav-btn active"
+              onclick="showTab('home')"
+              data-tab="home"
+              data-fr="Accueil" data-en="Home">Home</button>
+      <!-- Games -->
+      <button class="hdr-nav-btn"
+              onclick="showTab('games')"
+              data-tab="games"
+              data-fr="Jeux" data-en="Games">Games</button>
+      <!-- News -->
+      <button class="hdr-nav-btn"
+              onclick="showTab('news')"
+              data-tab="news"
+              data-fr="News" data-en="News">News</button>
+      <!-- Contact → onglet Devs section contact -->
+      <button class="hdr-nav-btn"
+              onclick="showSection('contact')"
+              data-tab="contact"
+              data-fr="Contact" data-en="Contact">Contact</button>
+      <!-- Recrutement → onglet Devs section recrutement -->
+      <button class="hdr-nav-btn"
+              onclick="showRecruitModal()"
+              data-tab="recruit"
+              data-fr="Recrutement" data-en="Recruit">Recruit</button>
+    </nav>
+
+    <!-- DROITE : langue + bouton Don -->
+    <div id="hdr-right">
+      <!-- Langue EN (priorité) -->
+      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
+      <!-- Langue FR (secondaire) -->
+      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+
+      <!-- Bouton Don animé — ouvre/ferme le bandeau -->
+      <button id="btn-don-toggle"
+              onclick="toggleDonDrawer()"
+              aria-expanded="false"
+              aria-controls="don-drawer">
+        ♥ DON
+      </button>
+    </div>
+
+  </div><!-- /header-top -->
+
+  <!-- ── Bandeau don rétractable (fermé par défaut) ── -->
+  <div id="don-drawer" role="region" aria-label="Faire un don">
+    <div class="don-drawer-inner">
+      <!-- Label -->
+      <span class="don-drawer-label"
+            data-fr="Soutenir le portail :"
+            data-en="Support the portal:">Support the portal:</span>
+      <!-- Montants (réutilise .btn-don et la fonction pick() existante) -->
+      <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
+      <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
+      <button class="btn-don" onclick="pick(this,'5')">5 Pi</button>
+      <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
+      <button class="btn-don" onclick="pick(this,'?')"
+              data-fr="Autre" data-en="Custom">Custom</button>
+      <!-- Bouton envoyer -->
+      <button class="btn-don envoyer"
+              onclick="sendDon()"
+              data-fr="Envoyer →" data-en="Send →">Send →</button>
+    </div>
+  </div><!-- /don-drawer -->
+
+</div><!-- /site-header -->
 
 <!-- ══ HOME ══ -->
 <div class="view active" id="view-home">
@@ -1048,6 +1349,8 @@ function showTab(name){
     const txt=b.getAttribute('data-en')||b.textContent;
     if(txt.toLowerCase().includes(name==='devs'?'dev':name))b.classList.add('active');
   });
+  /* Sync nouveau header nav */
+  if(typeof syncHdrNav==='function') syncHdrNav(name);
   window.scrollTo({top:0,behavior:'smooth'});
   setTimeout(revealVisible,80);
 }
@@ -1209,6 +1512,50 @@ function enterPortal() {
   // Uncomment to enable auto-skip on return visit:
   // if (sessionStorage.getItem('jvpi_visited')) { enterPortal(); return; }
   // sessionStorage.setItem('jvpi_visited', '1');
+})();
+
+
+/* ════════════════════════════════════════
+   HEADER — toggle bandeau don
+════════════════════════════════════════ */
+function toggleDonDrawer() {
+  const drawer = document.getElementById('don-drawer');
+  const btn    = document.getElementById('btn-don-toggle');
+  const isOpen = drawer.classList.toggle('open');
+  /* Mettre à jour aria-expanded pour l'accessibilité */
+  btn.setAttribute('aria-expanded', isOpen);
+  /* Basculer la classe visuelle sur le bouton */
+  btn.classList.toggle('open', isOpen);
+}
+
+/* ════════════════════════════════════════
+   HEADER — sync nav active sur hdr-nav
+   (appelé par showTab existant)
+════════════════════════════════════════ */
+function syncHdrNav(tabName) {
+  /* Retirer .active de tous les boutons hdr-nav */
+  document.querySelectorAll('.hdr-nav-btn').forEach(b => b.classList.remove('active'));
+  /* Ajouter .active sur le bouton correspondant */
+  const match = document.querySelector(`.hdr-nav-btn[data-tab="${tabName}"]`);
+  if (match) match.classList.add('active');
+}
+
+/* ════════════════════════════════════════
+   HEADER — mise à jour setLang pour
+   synchroniser aussi les hdr-lang
+════════════════════════════════════════ */
+const _origSetLang = setLang;
+function setLang(l) {
+  _origSetLang(l);
+  /* Sync boutons langue du header */
+  document.querySelectorAll('.hdr-lang').forEach(b =>
+    b.classList.toggle('on', b.textContent.includes(l.toUpperCase()))
+  );
+}
+
+/* Appel initial pour synchro au chargement */
+(function initHdrNav(){
+  syncHdrNav('home');
 })();
 
 </script>
