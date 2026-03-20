@@ -598,16 +598,16 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
 /* ── LANDING IMAGE LOGO ── */
 .landing-img-logo {
-  width: clamp(200px, 72vw, 320px);
+  width: clamp(100px, 30vw, 160px); /* Discret — visible mais pas imposant */
   height: auto;
   display: block;
-  margin-bottom: 8px;
-  /* Légère animation entrée, décalée avant le titre texte */
+  margin-bottom: 6px;
+  opacity: .88; /* Légèrement transparent pour s'intégrer */
   animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
-  /* Drop shadow cyan+or pour fondre avec l'ambiance néon */
+  /* Glow subtil pour fondre avec l'ambiance néon */
   filter:
-    drop-shadow(0 0 18px rgba(0,243,255,.35))
-    drop-shadow(0 0 36px rgba(255,170,0,.18));
+    drop-shadow(0 0 10px rgba(0,243,255,.25))
+    drop-shadow(0 0 20px rgba(255,170,0,.12));
 }
 
 /* ════════════════════════════════════════════════════════
@@ -838,7 +838,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
     <!-- Logo image JV manettes (chemin insensible à la casse) -->
     <img
-      src="Images/Logo_jeuxvideo_final.jpg"
+      src="Images/Logo%20jeuxvideo%20final.jpg"
       alt="JEUXVIDEO.PI Logo"
       class="landing-img-logo"
       onerror="this.style.display='none';document.getElementById('landing-logo-fallback').style.display='block';"
@@ -883,7 +883,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
     <a class="hdr-brand" onclick="showTab('home')" href="#">
       <!-- Logo image JV manettes (même chemin que la landing) -->
       <img
-        src="Images/Logo_jeuxvideo_final.jpg"
+        src="Images/Logo%20jeuxvideo%20final.jpg"
         alt="JV"
         class="hdr-brand-img"
         onerror="this.style.display='none'"
