@@ -604,13 +604,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 ════════════════════════════════════════════════════════ */
 #portal-nav-bar {
   width: 100%;
-  /* Colle sous le site-header sticky */
   background: rgba(8,18,32,.92);
   border-bottom: 1px solid rgba(0,243,255,.12);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   position: sticky;
-  top: 48px; /* hauteur approximative du site-header */
+  top: 48px;
   z-index: 500;
   display: flex;
   justify-content: center;
@@ -619,48 +618,45 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
   width: 100%;
   max-width: 680px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 0 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  align-items: stretch;
+  /* space-evenly distribue les 6 boutons uniformément sur toute la largeur */
+  justify-content: space-evenly;
+  padding: 0;
+  /* Pas de scroll — tous visibles */
+  overflow: visible;
 }
-#portal-nav-bar-inner::-webkit-scrollbar { display: none; }
 
-/* Boutons de nav dans la barre */
+/* Boutons de nav — tous visibles sur une ligne */
 .nav-bar-btn {
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: rgba(200,216,232,.5);
+  color: rgba(200,216,232,.45);
   font-family: 'Orbitron', monospace;
-  font-size: .46rem;
-  letter-spacing: 1.2px;
-  padding: 10px 14px 8px;
+  /* Taille adaptative : petit sur mobile, un peu plus grand sur desktop */
+  font-size: clamp(.32rem, 1.8vw, .46rem);
+  letter-spacing: 0;
+  /* Padding minimal pour que tout rentre */
+  padding: 9px 2px 7px;
   cursor: pointer;
   transition: color .2s, border-color .2s;
   white-space: nowrap;
   text-transform: uppercase;
-  flex-shrink: 0;
+  flex: 1; /* chaque bouton prend une part égale */
+  text-align: center;
 }
 .nav-bar-btn:hover {
   color: var(--cy);
-  border-bottom-color: rgba(0,243,255,.35);
+  border-bottom-color: rgba(0,243,255,.3);
 }
 .nav-bar-btn.active {
   color: var(--cy);
   border-bottom-color: var(--cy);
-  /* Petit glow sous le trait actif */
-  text-shadow: 0 0 8px rgba(0,243,255,.3);
+  text-shadow: 0 0 8px rgba(0,243,255,.25);
 }
-/* Séparateur entre boutons */
+/* Séparateur masqué — on libère l'espace */
 .nav-bar-sep {
-  width: 1px;
-  height: 14px;
-  background: rgba(0,243,255,.1);
-  flex-shrink: 0;
-  align-self: center;
+  display: none;
 }
 
 /* ── LANDING IMAGE LOGO ── */
@@ -1006,42 +1002,42 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
     <button class="nav-bar-btn active"
             onclick="switchTab('home')"
             data-tab="home"
-            data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
+            data-fr="Accueil" data-en="Home">Home</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
             onclick="switchTab('games')"
             data-tab="games"
-            data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
+            data-fr="Jeux" data-en="Games">Games</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
             onclick="switchTab('news')"
             data-tab="news"
-            data-fr="📰 News" data-en="📰 News">📰 News</button>
+            data-fr="News" data-en="News">News</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
             onclick="switchTab('devs')"
             data-tab="devs"
-            data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
+            data-fr="Devs" data-en="Devs">Devs</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
             onclick="showSection('contact')"
             data-tab="contact"
-            data-fr="📬 Contact" data-en="📬 Contact">📬 Contact</button>
+            data-fr="Contact" data-en="Contact">Contact</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
             onclick="openRecruitModal()"
             data-tab="recruit"
-            data-fr="🤝 Recrutement" data-en="🤝 Recruit">🤝 Recruit</button>
+            data-fr="Recrutement" data-en="Recruit">Recruit</button>
 
   </div>
 </div>
