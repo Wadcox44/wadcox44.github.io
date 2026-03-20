@@ -1,366 +1,355 @@
 <!DOCTYPE html>
-<html lang="fr" data-lang="fr">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JEUXVIDEO.PI — Pi Network Gaming</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <style>
-
 :root {
-  --cy: #00f3ff;
-  --or: #ffaa00;
-  --bg: #050b14;
-  --bg1: #081422;
-  --bg2: #0d1e36;
-  --bg3: #122440;
-  --max: 500px;
+  --cy: #00f3ff; --or: #ffaa00; --bg: #050b14;
+  --bg1: #081422; --bg2: #0d1e36; --bg3: #122440;
+  --max: 520px;
   --border: rgba(0,243,255,.15);
-  --border-gold: rgba(255,170,0,.3);
   --glow-cy: 0 0 20px rgba(0,243,255,.35);
   --glow-or: 0 0 20px rgba(255,170,0,.35);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:#fff;font-family:'Rajdhani',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+::selection{background:var(--or);color:#000;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--cy);border-radius:2px;}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45;}
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: #fff;
-  font-family: 'Rajdhani', sans-serif;
-  min-height: 100vh;
-  display: flex; flex-direction: column; align-items: center;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-::selection { background: var(--or); color: #000; }
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--cy); border-radius: 2px; }
+/* DON BAR */
+.don-bar{position:sticky;top:0;width:100%;z-index:500;background:rgba(5,11,20,.96);border-bottom:1px solid var(--cy);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;padding:9px 12px;gap:10px;flex-wrap:wrap;}
+.don-label{font-family:'Orbitron',monospace;font-size:.58rem;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+.don-label::before{content:'♥ ';color:rgba(255,170,0,.7);}
+.btn-don{background:transparent;border:1px solid var(--cy);color:rgba(255,255,255,.75);font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:1px;padding:5px 13px;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.btn-don:hover,.btn-don.sel{background:var(--cy);color:#000;box-shadow:var(--glow-cy);}
+.btn-don.envoyer{border-color:var(--or);color:var(--or);}
+.btn-don.envoyer:hover{background:var(--or);color:#000;box-shadow:var(--glow-or);}
 
-#bg-canvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: .45;
-}
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);
-}
+/* LANG */
+.lang-row{display:flex;justify-content:flex-end;width:90%;max-width:var(--max);padding:8px 0 0;gap:5px;position:relative;z-index:2;}
+.lang-btn{background:transparent;border:1px solid rgba(0,243,255,.2);color:#C8D8E8;font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all .2s;}
+.lang-btn.on{background:rgba(0,243,255,.1);border-color:var(--cy);color:var(--cy);}
 
-/* ── DON BAR ── */
-.don-bar {
-  position: sticky; top: 0; width: 100%; z-index: 500;
-  background: rgba(5,11,20,.96);
-  border-bottom: 1px solid var(--cy);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  display: flex; justify-content: center; align-items: center;
-  padding: 9px 12px; gap: 10px; flex-wrap: wrap;
-}
-.don-label {
-  font-family: 'Orbitron', monospace;
-  font-size: .58rem; color: var(--cy);
-  letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
-}
-.don-label::before { content: '♥ '; color: rgba(255,170,0,.7); }
-.btn-don {
-  background: transparent; border: 1px solid var(--cy);
-  color: rgba(255,255,255,.75);
-  font-family: 'Orbitron', monospace; font-size: .58rem; letter-spacing: 1px;
-  padding: 5px 13px; cursor: pointer; transition: all .25s; white-space: nowrap;
-}
-.btn-don:hover, .btn-don.sel { background: var(--cy); color: #000; box-shadow: var(--glow-cy); }
-.btn-don.envoyer { border-color: var(--or); color: var(--or); }
-.btn-don.envoyer:hover { background: var(--or); color: #000; box-shadow: var(--glow-or); }
+/* HEADER */
+header{padding:14px 0 4px;text-align:center;position:relative;z-index:2;width:90%;max-width:var(--max);}
+.logo{font-family:'Orbitron',monospace;font-size:2.1rem;font-weight:900;letter-spacing:1.5px;text-shadow:0 0 18px var(--cy),0 0 45px rgba(0,243,255,.25);line-height:1;}
+.logo .pi{color:var(--or);text-shadow:0 0 14px var(--or),0 0 40px rgba(255,170,0,.25);}
+.logo-sub{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#C8D8E8;letter-spacing:3px;text-transform:uppercase;margin-top:5px;}
 
-/* ── LANG + HEADER ── */
-.lang-row {
-  display: flex; justify-content: flex-end;
-  width: 90%; max-width: var(--max);
-  padding: 8px 0 0; gap: 5px; position: relative; z-index: 2;
-}
-.lang-btn {
-  background: transparent; border: 1px solid rgba(0,243,255,.2);
-  color: #C8D8E8; font-family: 'Orbitron', monospace;
-  font-size: .52rem; letter-spacing: 1px; padding: 3px 9px; cursor: pointer; transition: all .2s;
-}
-.lang-btn.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
+/* NAV */
+.nav-tabs{width:90%;max-width:var(--max);display:flex;gap:6px;align-items:center;padding:12px 0 0;position:relative;z-index:2;flex-wrap:wrap;}
+.nav-tab{background:transparent;border:1px solid rgba(0,243,255,.18);color:rgba(200,216,232,.6);font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:1px;padding:6px 13px;cursor:pointer;transition:all .2s;border-radius:4px;white-space:nowrap;}
+.nav-tab:hover{border-color:var(--cy);color:var(--cy);background:rgba(0,243,255,.05);}
+.nav-tab.active{background:rgba(0,243,255,.1);border-color:var(--cy);color:var(--cy);}
 
-header {
-  padding: 14px 0 4px; text-align: center;
-  position: relative; z-index: 2;
-  width: 90%; max-width: var(--max);
-}
-.logo {
-  font-family: 'Orbitron', monospace; font-size: 2.1rem; font-weight: 900;
-  letter-spacing: 1.5px;
-  text-shadow: 0 0 18px var(--cy), 0 0 45px rgba(0,243,255,.25);
-  line-height: 1;
-}
-.logo .pi { color: var(--or); text-shadow: 0 0 14px var(--or), 0 0 40px rgba(255,170,0,.25); }
-.logo-sub {
-  font-family: 'Share Tech Mono', monospace; font-size: .6rem;
-  color: #C8D8E8; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px;
-}
+/* VIEWS */
+.view{display:none;width:90%;max-width:var(--max);}
+.view.active{display:block;}
 
-/* ── SECTIONS ── */
-section {
-  width: 90%; max-width: var(--max);
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(0,243,255,.07);
-  position: relative; z-index: 2;
-}
-section:last-of-type { border-bottom: none; }
-.cat-title {
-  font-family: 'Orbitron', monospace; font-size: .72rem; color: var(--cy);
-  letter-spacing: 1.5px; text-transform: uppercase;
-  border-left: 3px solid var(--or); padding-left: 10px; margin-bottom: 14px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.cat-title .sub { color: #C8D8E8; font-size: .5rem; letter-spacing: 1px; }
+/* SECTIONS */
+section{width:100%;padding:16px 0;border-bottom:1px solid rgba(0,243,255,.07);position:relative;z-index:2;}
+section:last-of-type{border-bottom:none;}
+.cat-title{font-family:'Orbitron',monospace;font-size:.72rem;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;border-left:3px solid var(--or);padding-left:10px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.cat-title .sub{color:#C8D8E8;font-size:.5rem;letter-spacing:1px;}
 
-/* ── HERO GOLD PIXEL ── */
-.hero-card {
-  width: 100%; height: 220px; background: #000;
-  border: 2px solid rgba(255,170,0,.45);
-  border-radius: 12px; overflow: hidden; cursor: pointer;
-  position: relative; transition: all .5s;
-}
-.hero-card img {
-  width: 101%; height: 101%; object-fit: cover;
-  filter: brightness(.6); transition: .8s ease;
-  display: block; border: none; outline: none;
-}
-.hero-overlay {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; pointer-events: none;
-}
-.hero-name {
-  font-family: 'Orbitron', monospace; font-size: 2.2rem; font-weight: 900;
-  color: var(--or); letter-spacing: 5px; transition: .5s ease;
-  text-shadow: 0 0 20px var(--or);
-}
-.hero-tag {
-  font-family: 'Share Tech Mono', monospace; font-size: .55rem;
-  color: #C8D8E8; letter-spacing: 3px; text-transform: uppercase;
-  margin-top: 7px; transition: .4s ease;
-}
-.badge-live {
-  position: absolute; top: 11px; left: 11px;
-  background: rgba(5,11,20,.82); border: 1px solid rgba(255,170,0,.55);
-  border-radius: 100px; font-family: 'Orbitron', monospace; font-size: .48rem;
-  letter-spacing: 1.5px; color: var(--or); padding: 3px 10px;
-  display: flex; align-items: center; gap: 5px;
-}
-.live-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: var(--or);
-  animation: pulse 1.6s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(255,170,0,.5); }
-  50%      { box-shadow: 0 0 0 5px rgba(255,170,0,0); }
-}
-.badge-pi {
-  position: absolute; top: 11px; right: 11px;
-  background: rgba(5,11,20,.82); border: 1px solid rgba(0,243,255,.4);
-  border-radius: 100px; font-family: 'Orbitron', monospace; font-size: .45rem;
-  letter-spacing: 1px; color: var(--cy); padding: 3px 10px;
-}
-.hero-card:hover { border-color: var(--or); box-shadow: 0 0 40px rgba(255,170,0,.5), 0 0 80px rgba(255,170,0,.12); }
-.hero-card:hover img { transform: scale(1.08); filter: brightness(.8); }
-.hero-card:hover .hero-name { letter-spacing: 12px; text-shadow: 0 0 35px var(--or); }
-.hero-card:hover .hero-tag { color: rgba(255,255,255,.7); }
+/* HERO */
+.hero-card{width:100%;height:220px;background:#000;border:2px solid rgba(255,170,0,.45);border-radius:12px;overflow:hidden;cursor:pointer;position:relative;transition:all .5s;}
+.hero-card img{width:101%;height:101%;object-fit:cover;filter:brightness(.6);transition:.8s ease;display:block;}
+.hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.hero-name{font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:900;color:var(--or);letter-spacing:5px;transition:.5s;text-shadow:0 0 20px var(--or);}
+.hero-tag{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:#C8D8E8;letter-spacing:3px;text-transform:uppercase;margin-top:7px;transition:.4s;}
+.badge-live{position:absolute;top:11px;left:11px;background:rgba(5,11,20,.82);border:1px solid rgba(255,170,0,.55);border-radius:100px;font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:1.5px;color:var(--or);padding:3px 10px;display:flex;align-items:center;gap:5px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--or);animation:pulse 1.6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,170,0,.5);}50%{box-shadow:0 0 0 5px rgba(255,170,0,0);}}
+.hero-card:hover{border-color:var(--or);box-shadow:0 0 40px rgba(255,170,0,.5);}
+.hero-card:hover img{transform:scale(1.08);filter:brightness(.8);}
+.hero-card:hover .hero-name{letter-spacing:12px;text-shadow:0 0 35px var(--or);}
+.hero-card:hover .hero-tag{color:rgba(255,255,255,.7);}
 
-/* Stats */
-.stats-row {
-  display: grid; grid-template-columns: repeat(4,1fr);
-  border: 1px solid var(--border); border-radius: 8px;
-  overflow: hidden; margin-top: 12px;
-}
-.stat { padding: 11px 4px; text-align: center; border-right: 1px solid var(--border); }
-.stat:last-child { border-right: none; }
-.stat-n {
-  font-family: 'Orbitron', monospace; font-size: .9rem; font-weight: 700;
-  color: var(--or); text-shadow: 0 0 10px rgba(255,170,0,.4);
-}
-.stat-l {
-  font-size: .45rem; color: #C8D8E8;
-  letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;
-  font-family: 'Share Tech Mono', monospace;
-}
+/* GAME GRID */
+.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:16px;}
+.card{background:rgba(16,33,62,.4);border:1px solid rgba(0,243,255,.18);border-radius:10px;height:120px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .35s;cursor:pointer;}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.65);transition:.7s;}
+.card-label{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-family:'Orbitron',monospace;font-size:.48rem;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;z-index:1;text-shadow:0 0 8px var(--cy);}
+.card:hover{border-color:var(--cy);transform:translateY(-4px);box-shadow:var(--glow-cy);}
+.card:hover img{transform:scale(1.08);filter:brightness(.82);}
+.slot{border:1px dashed rgba(255,170,0,.45);background:rgba(255,170,0,.02);}
+.slot-icon{font-size:1.7rem;color:var(--or);margin-bottom:4px;transition:.5s;position:relative;z-index:1;}
+.slot-sub{font-size:.46rem;color:#C8D8E8;letter-spacing:1.5px;text-transform:uppercase;font-family:'Orbitron',monospace;position:relative;z-index:1;}
+.slot:hover .slot-icon{transform:scale(1.2) rotate(90deg);color:var(--cy);}
+.slot:hover{border-color:var(--cy);box-shadow:var(--glow-cy);}
 
-/* ── GAME GRID ── */
-.game-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 11px; margin-bottom: 16px; }
-.card {
-  background: rgba(16,33,62,.4); border: 1px solid rgba(0,243,255,.18);
-  border-radius: 10px; height: 120px; position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: all .35s; cursor: pointer;
-}
-.card img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; filter: brightness(.65); transition: .7s;
-}
-.card-label {
-  position: absolute; bottom: 7px; left: 0; right: 0; text-align: center;
-  font-family: 'Orbitron', monospace; font-size: .48rem;
-  color: var(--cy); letter-spacing: 1.5px; text-transform: uppercase;
-  z-index: 1; text-shadow: 0 0 8px var(--cy);
-}
-.card:hover { border-color: var(--cy); transform: translateY(-4px); box-shadow: var(--glow-cy); }
-.card:hover img { transform: scale(1.08); filter: brightness(.82); }
-.slot { border: 1px dashed rgba(255,170,0,.45); background: rgba(255,170,0,.02); }
-.slot-icon { font-size: 1.7rem; color: var(--or); margin-bottom: 4px; transition: .5s; position: relative; z-index: 1; }
-.slot-sub {
-  font-size: .46rem; color: #C8D8E8;
-  letter-spacing: 1.5px; text-transform: uppercase; font-family: 'Orbitron', monospace;
-  position: relative; z-index: 1;
-}
-.slot:hover .slot-icon { transform: scale(1.2) rotate(90deg); color: var(--cy); }
-.slot:hover { border-color: var(--cy); box-shadow: var(--glow-cy); }
+/* NEWS */
+.news-list{display:flex;flex-direction:column;gap:12px;}
+.news-card{background:rgba(10,22,40,.7);border:1px solid rgba(0,243,255,.1);border-radius:12px;padding:16px 16px 14px;border-left:3px solid var(--cy);transition:all .25s;}
+.news-card:hover{border-color:rgba(0,243,255,.4);transform:translateX(4px);}
+.news-date{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(200,216,232,.35);letter-spacing:1px;margin-bottom:6px;}
+.news-tag{display:inline-block;font-family:'Orbitron',monospace;font-size:.46rem;letter-spacing:1px;padding:2px 8px;border-radius:100px;margin-bottom:7px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.7);border:1px solid rgba(0,243,255,.2);}
+.news-title{font-family:'Orbitron',monospace;font-size:.7rem;color:#fff;margin-bottom:8px;letter-spacing:.5px;}
+.news-body{font-size:.8rem;color:rgba(200,216,232,.65);line-height:1.6;}
 
-/* ── SECTION DÉVELOPPEURS ── */
-.devs-headline {
-  font-family: 'Orbitron', monospace; font-size: .88rem; font-weight: 700;
-  color: #fff; text-align: center; line-height: 1.45;
-  margin-bottom: 10px; letter-spacing: .5px;
-  text-shadow: 0 0 14px rgba(0,243,255,.2);
-}
-.devs-sub {
-  font-size: .82rem; color: #C8D8E8; text-align: center;
-  line-height: 1.65; margin-bottom: 20px;
-}
+/* DEVS */
+.devs-headline{font-family:'Orbitron',monospace;font-size:.88rem;font-weight:700;color:#fff;text-align:center;line-height:1.45;margin-bottom:10px;letter-spacing:.5px;text-shadow:0 0 14px rgba(0,243,255,.2);}
+.devs-sub{font-size:.82rem;color:#C8D8E8;text-align:center;line-height:1.65;margin-bottom:20px;}
+.highlight-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;margin-bottom:10px;}
+.highlight-card.gold-hl{border:1px solid rgba(255,170,0,.45);background:rgba(255,170,0,.05);}
+.highlight-card.cy-hl{border:1px solid rgba(0,243,255,.35);background:rgba(0,243,255,.04);}
+.hl-icon{font-size:2rem;flex-shrink:0;}
+.hl-title{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;letter-spacing:.8px;margin-bottom:4px;}
+.hl-title.gold{color:var(--or);}
+.hl-title.cy{color:var(--cy);}
+.hl-text{font-size:.78rem;color:rgba(200,216,232,.7);line-height:1.5;}
+.avantages-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:20px;margin-top:14px;}
+.av-card{background:rgba(10,22,40,.7);border:1px solid rgba(0,243,255,.14);border-radius:10px;padding:14px 13px;display:flex;flex-direction:column;align-items:flex-start;transition:all .3s;cursor:default;position:relative;overflow:hidden;}
+.av-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--cy),transparent);opacity:0;transition:opacity .3s;}
+.av-card:hover{transform:translateY(-4px);border-color:rgba(0,243,255,.38);box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.av-card:hover::before{opacity:1;}
+.av-icon{font-size:1.5rem;margin-bottom:8px;}
+.av-title{font-family:'Orbitron',monospace;font-size:.6rem;color:var(--cy);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.av-text{font-size:.78rem;color:#C8D8E8;line-height:1.55;}
 
-/* Grille avantages — adaptée au dark */
-.avantages-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 9px; margin-bottom: 20px;
-}
-.av-card {
-  background: rgba(10,22,40,.7);
-  border: 1px solid rgba(0,243,255,.14);
-  border-radius: 10px; padding: 14px 13px;
-  display: flex; flex-direction: column; align-items: flex-start;
-  transition: all .3s; cursor: default; position: relative; overflow: hidden;
-}
-.av-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
-  background: linear-gradient(90deg, var(--cy), transparent);
-  opacity: 0; transition: opacity .3s;
-}
-.av-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0,243,255,.38);
-  box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 0 14px rgba(0,243,255,.1);
-}
-.av-card:hover::before { opacity: 1; }
-.av-icon { font-size: 1.5rem; margin-bottom: 8px; }
-.av-title {
-  font-family: 'Orbitron', monospace; font-size: .6rem;
-  color: var(--cy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;
-}
-.av-text { font-size: .78rem; color: #C8D8E8; line-height: 1.55; }
+/* CTA */
+.cta-devs{display:block;width:100%;padding:13px;background:transparent;border:1px solid var(--or);color:var(--or);font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-align:center;text-decoration:none;cursor:pointer;border-radius:4px;transition:all .25s;position:relative;overflow:hidden;}
+.cta-devs::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.15) 50%,transparent 65%);transform:translateX(-120%);}
+.cta-devs:hover{background:var(--or);color:#000;box-shadow:var(--glow-or);}
+.cta-devs:hover::after{animation:shine .6s ease forwards;}
+@keyframes shine{to{transform:translateX(130%);}}
 
-/* CTA développeur */
-.cta-devs {
+/* FORM */
+form{width:100%;display:flex;flex-direction:column;gap:9px;}
+input,textarea,select{background:rgba(15,26,46,.9);border:1px solid #1e2e42;color:#fff;padding:12px 13px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-size:.9rem;width:100%;outline:none;transition:.3s;-webkit-appearance:none;appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,243,255,.15);}
+input::placeholder,textarea::placeholder{color:rgba(200,216,232,.5);}
+select option{background:#0d1828;color:#fff;}
+textarea{min-height:88px;resize:vertical;line-height:1.55;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.btn-send{background:var(--cy);border:none;padding:14px;border-radius:4px;font-family:'Orbitron',monospace;font-weight:700;font-size:.72rem;letter-spacing:1px;cursor:pointer;color:#000;margin-top:4px;transition:.3s;position:relative;overflow:hidden;}
+.btn-send::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#C8D8E8 50%,transparent 65%);transform:translateX(-120%);}
+.btn-send:hover{box-shadow:0 0 24px var(--cy);}
+.btn-send:hover::after{animation:shine .6s ease forwards;}
+.form-note{font-size:.58rem;color:#C8D8E8;text-align:center;margin-top:8px;letter-spacing:.5px;line-height:1.6;font-family:'Share Tech Mono',monospace;}
+#form-ok{display:none;text-align:center;padding:28px 16px;background:rgba(0,243,255,.04);border:1px solid rgba(0,243,255,.2);border-radius:8px;}
+.ok-ico{font-size:2.4rem;margin-bottom:10px;}
+.ok-title{font-family:'Orbitron',monospace;font-size:.85rem;color:var(--cy);margin-bottom:8px;letter-spacing:1px;}
+.ok-sub{font-size:.8rem;color:#C8D8E8;line-height:1.6;}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .55s,transform .55s;}
+.rv.in{opacity:1;transform:none;}
+.d1{transition-delay:.07s;}.d2{transition-delay:.14s;}.d3{transition-delay:.21s;}.d4{transition-delay:.28s;}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:rgba(8,20,36,.98);border:1px solid var(--cy);color:var(--cy);font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:1px;padding:10px 20px;border-radius:4px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 0 22px rgba(0,243,255,.2);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.gold{border-color:var(--or);color:var(--or);box-shadow:0 0 22px rgba(255,170,0,.2);}
+
+/* FOOTER */
+footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align:center;font-family:'Orbitron',monospace;letter-spacing:1px;position:relative;z-index:2;}
+
+/* ════════════════════════════════════════
+   SLOTS VITRINE — "Votre jeu ici"
+════════════════════════════════════════ */
+.slots-section { margin-bottom: 0; }
+.slots-title {
+  font-family: 'Orbitron', monospace; font-size: .65rem; color: var(--cy);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.slots-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0,243,255,.25), transparent); }
+.slots-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 6px;
+}
+.slot-card {
+  height: 100px; border-radius: 10px; overflow: hidden;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .3s;
+}
+.slot-card.filled { border: 1px solid rgba(255,170,0,.5); background: rgba(10,22,40,.9); }
+.slot-card.empty  { border: 1px dashed rgba(0,243,255,.3); background: rgba(5,11,20,.6); }
+.slot-card.empty:hover { border-color: rgba(0,243,255,.7); box-shadow: var(--glow-cy); transform: translateY(-3px); }
+.slot-card.filled:hover { border-color: var(--or); box-shadow: var(--glow-or); transform: translateY(-3px); }
+.slot-card-inner { text-align: center; padding: 8px; }
+.slot-game-emoji { font-size: 2rem; display: block; margin-bottom: 4px; }
+.slot-game-name { font-family: 'Orbitron', monospace; font-size: .42rem; color: var(--or); letter-spacing: 1px; text-transform: uppercase; }
+.slot-empty-icon { font-size: 1.4rem; opacity: .4; display: block; margin-bottom: 4px; }
+.slot-empty-text { font-family: 'Orbitron', monospace; font-size: .4rem; color: rgba(0,243,255,.5); letter-spacing: 1px; text-transform: uppercase; }
+.slots-note { font-family: 'Share Tech Mono', monospace; font-size: .55rem; color: rgba(200,216,232,.3); text-align: center; letter-spacing: 1px; margin-top: 8px; }
+
+/* ════════════════════════════════════════
+   BLOC DÉVELOPPEURS — section premium
+════════════════════════════════════════ */
+.dev-premium {
+  background: linear-gradient(135deg, rgba(10,22,40,.95) 0%, rgba(5,11,20,.98) 100%);
+  border: 1px solid rgba(0,243,255,.2); border-radius: 14px;
+  padding: 22px 18px; margin-bottom: 12px; position: relative; overflow: hidden;
+}
+.dev-premium::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cy), var(--or), var(--cy));
+  animation: shimmer 3s linear infinite;
+  background-size: 200% 100%;
+}
+@keyframes shimmer { 0%{ background-position:200% 0 } 100%{ background-position:-200% 0 } }
+
+.dev-premium-header { text-align: center; margin-bottom: 20px; }
+.dev-premium-eyebrow {
+  font-family: 'Share Tech Mono', monospace; font-size: .52rem;
+  color: var(--cy); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px;
+}
+.dev-premium-title {
+  font-family: 'Orbitron', monospace; font-size: .95rem; font-weight: 900;
+  color: #fff; line-height: 1.4; letter-spacing: .5px;
+  text-shadow: 0 0 20px rgba(0,243,255,.2);
+}
+.dev-premium-title span { color: var(--cy); }
+.dev-premium-sub {
+  font-size: .8rem; color: rgba(200,216,232,.65); margin-top: 8px; line-height: 1.6;
+}
+.dev-perks { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.dev-perk {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  background: rgba(0,243,255,.03); border: 1px solid rgba(0,243,255,.1);
+  transition: all .25s;
+}
+.dev-perk:hover { background: rgba(0,243,255,.07); border-color: rgba(0,243,255,.25); transform: translateX(4px); }
+.dev-perk-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.dev-perk-body { flex: 1; }
+.dev-perk-title { font-family: 'Orbitron', monospace; font-size: .58rem; color: var(--cy); letter-spacing: .8px; margin-bottom: 2px; }
+.dev-perk-text { font-size: .75rem; color: rgba(200,216,232,.6); line-height: 1.4; }
+.dev-badges {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
+}
+.dev-badge {
+  font-family: 'Orbitron', monospace; font-size: .48rem; letter-spacing: 1.2px;
+  padding: 5px 12px; border-radius: 100px; font-weight: 700;
+}
+.dev-badge.or   { background: rgba(255,170,0,.12); border: 1px solid rgba(255,170,0,.5); color: var(--or); }
+.dev-badge.cy   { background: rgba(0,243,255,.08);  border: 1px solid rgba(0,243,255,.4);  color: var(--cy); }
+.dev-badge.gr   { background: rgba(68,255,136,.06); border: 1px solid rgba(68,255,136,.35); color: #44ff88; }
+.dev-cta-main {
+  display: block; width: 100%; padding: 15px;
+  background: linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size: 200% auto;
+  color: #000; font-family: 'Orbitron', monospace; font-weight: 900;
+  font-size: .72rem; letter-spacing: 2px; border: none; border-radius: 8px;
+  cursor: pointer; text-align: center; text-decoration: none;
+  transition: all .4s; box-shadow: 0 4px 24px rgba(255,170,0,.3);
+  position: relative; overflow: hidden;
+}
+.dev-cta-main:hover { background-position: right center; box-shadow: 0 6px 36px rgba(255,170,0,.5); transform: translateY(-2px); }
+.dev-cta-note { font-family: 'Share Tech Mono', monospace; font-size: .52rem; color: rgba(200,216,232,.35); text-align: center; margin-top: 8px; letter-spacing: 1px; }
+
+/* Modal formulaire développeur */
+.dev-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 900;
+  background: rgba(0,0,0,.88); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+}
+.dev-modal-overlay.open { display: flex; }
+.dev-modal {
+  width: 100%; max-width: var(--max);
+  background: var(--bg2); border: 1px solid rgba(0,243,255,.3);
+  border-radius: 18px 18px 0 0; padding: 20px 18px 32px;
+  animation: slideUp .35s cubic-bezier(.22,1,.36,1);
+  max-height: 92vh; overflow-y: auto;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.dev-modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,.15); border-radius: 2px; margin: 0 auto 18px; }
+.dev-modal-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--cy); text-align: center; margin-bottom: 6px; letter-spacing: 1px; }
+.dev-modal-sub   { font-size: .75rem; color: rgba(200,216,232,.5); text-align: center; margin-bottom: 18px; line-height: 1.5; }
+.dev-modal-ok    { display: none; text-align: center; padding: 20px 0; }
+.dev-modal-ok .ok-ico   { font-size: 2.4rem; margin-bottom: 10px; }
+.dev-modal-ok .ok-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--cy); margin-bottom: 6px; }
+.dev-modal-ok .ok-sub   { font-size: .78rem; color: #C8D8E8; line-height: 1.6; }
+.dev-modal-close {
+  display: block; width: 100%; padding: 11px; margin-top: 10px;
+  background: transparent; border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.4); font-family: 'Orbitron', monospace;
+  font-size: .62rem; letter-spacing: 1px; cursor: pointer; border-radius: 8px; transition: all .2s;
+}
+.dev-modal-close:hover { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.7); }
+
+/* ════════════════════════════════════════
+   BLOC RECRUTEMENT
+════════════════════════════════════════ */
+.recruit-section {
+  background: rgba(5,11,20,.8); border: 1px solid rgba(255,170,0,.2);
+  border-radius: 14px; padding: 20px 18px; position: relative; overflow: hidden;
+}
+.recruit-section::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--or), transparent 60%);
+}
+.recruit-eyebrow {
+  font-family: 'Share Tech Mono', monospace; font-size: .52rem;
+  color: var(--or); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px;
+}
+.recruit-title {
+  font-family: 'Orbitron', monospace; font-size: .88rem; font-weight: 900;
+  color: #fff; line-height: 1.4; margin-bottom: 10px;
+}
+.recruit-title span { color: var(--or); }
+.recruit-intro { font-size: .8rem; color: rgba(200,216,232,.65); line-height: 1.65; margin-bottom: 18px; }
+.recruit-roles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.recruit-role {
+  background: rgba(255,170,0,.04); border: 1px solid rgba(255,170,0,.18);
+  border-radius: 10px; padding: 14px 14px;
+  transition: all .25s; cursor: default;
+}
+.recruit-role:hover { background: rgba(255,170,0,.08); border-color: rgba(255,170,0,.35); transform: translateX(4px); }
+.recruit-role-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.recruit-role-icon { font-size: 1.3rem; flex-shrink: 0; }
+.recruit-role-title { font-family: 'Orbitron', monospace; font-size: .6rem; color: var(--or); letter-spacing: .8px; }
+.recruit-role-desc { font-size: .76rem; color: rgba(200,216,232,.6); line-height: 1.5; font-style: italic; }
+.recruit-avantages { margin-bottom: 18px; }
+.recruit-avantages-title { font-family: 'Orbitron', monospace; font-size: .58rem; color: var(--cy); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
+.recruit-av-list { display: flex; flex-direction: column; gap: 7px; }
+.recruit-av {
+  display: flex; align-items: center; gap: 9px;
+  font-size: .78rem; color: rgba(200,216,232,.7); line-height: 1.4;
+}
+.recruit-av::before { content: '▸'; color: var(--cy); font-size: .6rem; flex-shrink: 0; }
+.recruit-cta {
   display: block; width: 100%; padding: 13px;
   background: transparent; border: 1px solid var(--or);
   color: var(--or); font-family: 'Orbitron', monospace;
   font-size: .7rem; font-weight: 700; letter-spacing: 1.5px;
   text-align: center; text-decoration: none; cursor: pointer;
-  border-radius: 4px; transition: all .25s;
-  position: relative; overflow: hidden;
+  border-radius: 8px; transition: all .25s; position: relative; overflow: hidden;
 }
-.cta-devs::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.15) 50%,transparent 65%);
-  transform: translateX(-120%);
-}
-.cta-devs:hover {
-  background: var(--or); color: #000;
-  box-shadow: var(--glow-or);
-}
-.cta-devs:hover::after { animation: shine .6s ease forwards; }
-@keyframes shine { to { transform: translateX(130%); } }
+.recruit-cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.15) 50%,transparent 65%); transform: translateX(-120%); }
+.recruit-cta:hover { background: var(--or); color: #000; box-shadow: var(--glow-or); }
+.recruit-cta:hover::after { animation: shine .6s ease forwards; }
 
-/* ── FORMULAIRE ── */
-.contact-title {
-  font-family: 'Orbitron', monospace; color: var(--cy); font-size: .82rem;
-  margin: 18px 0 16px; text-align: center; letter-spacing: 1px;
+/* Modal recrutement */
+.recruit-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 900;
+  background: rgba(0,0,0,.88); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
 }
-form { width: 100%; display: flex; flex-direction: column; gap: 9px; }
-input, textarea, select {
-  background: rgba(15,26,46,.9); border: 1px solid #1e2e42;
-  color: #fff; padding: 12px 13px; border-radius: 4px;
-  font-family: 'Rajdhani', sans-serif; font-size: .9rem;
-  width: 100%; outline: none; transition: .3s;
-  -webkit-appearance: none; appearance: none;
+.recruit-modal-overlay.open { display: flex; }
+.recruit-modal {
+  width: 100%; max-width: var(--max);
+  background: var(--bg2); border: 1px solid rgba(255,170,0,.3);
+  border-radius: 18px 18px 0 0; padding: 20px 18px 32px;
+  animation: slideUp .35s cubic-bezier(.22,1,.36,1);
+  max-height: 92vh; overflow-y: auto;
 }
-input:focus, textarea:focus, select:focus {
-  border-color: var(--cy); box-shadow: 0 0 8px rgba(0,243,255,.15);
-}
-input::placeholder, textarea::placeholder { color: #C8D8E8; }
-select option { background: #0d1828; color: #fff; }
-textarea { min-height: 88px; resize: vertical; line-height: 1.55; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-.btn-send {
-  background: var(--cy); border: none; padding: 14px; border-radius: 4px;
-  font-family: 'Orbitron', monospace; font-weight: 700; font-size: .72rem;
-  letter-spacing: 1px; cursor: pointer; color: #000;
-  margin-top: 4px; transition: .3s; position: relative; overflow: hidden;
-}
-.btn-send::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(105deg,transparent 35%,#C8D8E8 50%,transparent 65%);
-  transform: translateX(-120%);
-}
-.btn-send:hover { box-shadow: 0 0 24px var(--cy); }
-.btn-send:hover::after { animation: shine .6s ease forwards; }
-.form-note {
-  font-size: .58rem; color: #C8D8E8; text-align: center;
-  margin-top: 8px; letter-spacing: .5px; line-height: 1.6;
-  font-family: 'Share Tech Mono', monospace;
-}
-
-#form-ok {
-  display: none; text-align: center; padding: 28px 16px;
-  background: rgba(0,243,255,.04); border: 1px solid rgba(0,243,255,.2); border-radius: 8px;
-}
-.ok-ico { font-size: 2.4rem; margin-bottom: 10px; }
-.ok-title { font-family: 'Orbitron', monospace; font-size: .85rem; color: var(--cy); margin-bottom: 8px; letter-spacing: 1px; }
-.ok-sub { font-size: .8rem; color: #C8D8E8; line-height: 1.6; }
-
-/* ── REVEAL ── */
-.rv { opacity: 0; transform: translateY(18px); transition: opacity .55s, transform .55s; }
-.rv.in { opacity: 1; transform: none; }
-.d1 { transition-delay: .07s; } .d2 { transition-delay: .14s; }
-.d3 { transition-delay: .21s; } .d4 { transition-delay: .28s; }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed; bottom: 20px; left: 50%;
-  transform: translateX(-50%) translateY(60px);
-  background: rgba(8,20,36,.98); border: 1px solid var(--cy);
-  color: var(--cy); font-family: 'Orbitron', monospace; font-size: .6rem;
-  letter-spacing: 1px; padding: 10px 20px; border-radius: 4px;
-  z-index: 9999; opacity: 0; transition: all .3s; pointer-events: none;
-  white-space: nowrap; box-shadow: 0 0 22px rgba(0,243,255,.2);
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast.gold { border-color: var(--or); color: var(--or); box-shadow: 0 0 22px rgba(255,170,0,.2); }
-
-/* ── FOOTER ── */
-footer {
-  font-size: .6rem; color: #C8D8E8;
-  padding: 32px 0 24px; text-align: center;
-  font-family: 'Orbitron', monospace; letter-spacing: 1px;
-  position: relative; z-index: 2;
-}
-footer span { color: rgba(0,243,255,.4); }
-footer a { color: #C8D8E8; text-decoration: none; transition: color .2s; }
-footer a:hover { color: var(--cy); }
+.recruit-modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,.15); border-radius: 2px; margin: 0 auto 18px; }
+.recruit-modal-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--or); text-align: center; margin-bottom: 6px; letter-spacing: 1px; }
+.recruit-modal-sub   { font-size: .75rem; color: rgba(200,216,232,.5); text-align: center; margin-bottom: 18px; line-height: 1.5; }
+.recruit-modal-ok    { display: none; text-align: center; padding: 20px 0; }
+.recruit-modal-ok .ok-ico   { font-size: 2.4rem; margin-bottom: 10px; }
+.recruit-modal-ok .ok-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--or); margin-bottom: 6px; }
+.recruit-modal-ok .ok-sub   { font-size: .78rem; color: #C8D8E8; line-height: 1.6; }
 
 </style>
 </head>
@@ -368,288 +357,620 @@ footer a:hover { color: var(--cy); }
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- ── DON BAR ── -->
+<!-- DON BAR -->
 <div class="don-bar">
-  <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Soutenir le portail :</span>
+  <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Support the portal:</span>
   <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
   <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
   <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
-  <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Autre</button>
-  <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Envoyer →</button>
+  <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Custom</button>
+  <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Send →</button>
 </div>
 
-<!-- ── LANG ── -->
+<!-- LANG -->
 <div class="lang-row">
-  <button class="lang-btn on" onclick="setLang('fr')">🇫🇷 FR</button>
-  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
+  <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
 </div>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <header>
   <div class="logo">JEUXVIDEO<span class="pi">.PI</span></div>
-  <div class="logo-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Portail Gaming · Pi Network</div>
+  <div class="logo-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Gaming Portal · Pi Network</div>
 </header>
 
-<!-- ── §1 GOLD PIXEL ── -->
-<section>
-  <div class="cat-title">
-    <span>⭐ <span data-fr="Projet Phare" data-en="Main Project">Projet Phare</span></span>
-    <span class="sub" data-fr="SAISON 1 ACTIVE" data-en="SEASON 1 ACTIVE">SAISON 1 ACTIVE</span>
-  </div>
+<!-- NAV -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showTab('home')" data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
+  <button class="nav-tab" onclick="showTab('games')" data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
+  <button class="nav-tab" onclick="showTab('news')" data-fr="📰 News" data-en="📰 News">📰 News</button>
+  <button class="nav-tab" onclick="showTab('devs')" data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
+</nav>
 
-  <div class="hero-card" onclick="window.location.href='/goldpixel'">
-    <img id="gp-img" src="Images/Gold%20Pixel.png" alt="Gold Pixel">
-    
-    <div class="hero-overlay">
+<!-- ══ HOME ══ -->
+<div class="view active" id="view-home">
+
+  <section>
+    <div class="cat-title">
+      <span>⭐ <span data-fr="Jeu Phare" data-en="Featured Game">Featured Game</span></span>
+      <span class="sub" data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</span>
+    </div>
+    <div class="hero-card" onclick="window.location.href='/goldpixel'">
+      <img src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.opacity='0'">
+      <div class="hero-overlay">
         <div class="hero-name">GOLD PIXEL</div>
-        <div class="hero-tag" data-fr="Conquérir · Défendre · Gagner des Pi" data-en="Conquer · Defend · Earn Pi">
-            Conquérir · Défendre · Gagner des Pi
+        <div class="hero-tag" data-fr="Créer · Partager · Voter" data-en="Create · Share · Vote">Create · Share · Vote</div>
+      </div>
+      <div class="badge-live"><div class="live-dot"></div><span>PIXEL ART</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cat-title rv">
+      <span>🎮 <span data-fr="Vitrine" data-en="Showcase">Showcase</span></span>
+    </div>
+
+    <!-- Slots "Votre jeu ici" -->
+    <div class="slots-section rv">
+      <div class="slots-grid">
+        <!-- Slot 1 — Gold Pixel (exemple) -->
+        <div class="slot-card filled rv d1" onclick="window.location.href='/goldpixel'">
+          <div class="slot-card-inner">
+            <span class="slot-game-emoji">🟡</span>
+            <span class="slot-game-name">GOLD PIXEL</span>
+          </div>
         </div>
+        <!-- Slot 2 — 2048 Neon (coming soon) -->
+        <div class="slot-card empty rv d2" onclick="toast('2048 Neon — coming soon!','')">
+          <div class="slot-card-inner">
+            <span class="slot-game-emoji" style="opacity:.4;">🧩</span>
+            <span class="slot-empty-text">COMING SOON</span>
+          </div>
+        </div>
+        <!-- Slots 3-5 — libres -->
+        <div class="slot-card empty rv d3" onclick="openDevModal()">
+          <div class="slot-card-inner">
+            <span class="slot-empty-icon">✚</span>
+            <span class="slot-empty-text" data-fr="Votre jeu" data-en="Your game">Your game</span>
+          </div>
+        </div>
+        <div class="slot-card empty rv d1" onclick="openDevModal()">
+          <div class="slot-card-inner">
+            <span class="slot-empty-icon">✚</span>
+            <span class="slot-empty-text" data-fr="Votre jeu" data-en="Your game">Your game</span>
+          </div>
+        </div>
+        <div class="slot-card empty rv d2" onclick="openDevModal()">
+          <div class="slot-card-inner">
+            <span class="slot-empty-icon">✚</span>
+            <span class="slot-empty-text" data-fr="Votre jeu" data-en="Your game">Your game</span>
+          </div>
+        </div>
+        <div class="slot-card empty rv d3" onclick="openDevModal()">
+          <div class="slot-card-inner">
+            <span class="slot-empty-icon">✚</span>
+            <span class="slot-empty-text" data-fr="Votre jeu" data-en="Your game">Your game</span>
+          </div>
+        </div>
+      </div>
+      <p class="slots-note" data-fr="5 slots disponibles · Intégration gratuite · 0% commission" data-en="5 slots available · Free integration · 0% commission">5 slots available · Free integration · 0% commission</p>
+    </div>
+  </section>
+
+  <section style="border:none;">
+    <div class="cat-title rv"><span>💼 <span data-fr="Développeurs" data-en="Developers">Developers</span></span></div>
+    <div class="devs-headline rv" data-fr="0% de commission. Pi SDK gratuit. Votre jeu visible partout." data-en="0% commission. Free Pi SDK. Your game seen everywhere.">0% commission. Free Pi SDK. Your game seen everywhere.</div>
+    <div class="devs-sub rv" data-fr="Rejoignez le seul portail Pi Network sans frais ni commission sur vos revenus." data-en="Join the only Pi Network portal with zero fees and zero commission on your earnings.">Join the only Pi Network portal with zero fees and zero commission on your earnings.</div>
+    <a class="cta-devs rv" onclick="openDevModal()" data-fr="INTÉGRER MON JEU — GRATUIT →" data-en="LIST MY GAME — FREE →">LIST MY GAME — FREE →</a>
+  </section>
+
+</div><!-- /home -->
+
+<!-- ══ GAMES ══ -->
+<div class="view" id="view-games">
+  <section style="border:none;padding-top:14px;">
+    <div class="cat-title rv"><span>🎮 <span data-fr="Tous les Jeux" data-en="All Games">All Games</span></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="nav-tab active" onclick="filterGames('all',this)" data-fr="Tous" data-en="All">All</button>
+      <button class="nav-tab" onclick="filterGames('pixel',this)">Pixel Art</button>
+      <button class="nav-tab" onclick="filterGames('puzzle',this)">Puzzle</button>
+      <button class="nav-tab" onclick="filterGames('arcade',this)">Arcade</button>
+    </div>
+    <div id="games-list" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="av-card rv" data-cat="pixel" onclick="window.location.href='/goldpixel'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;">
+          <img src="Images/Gold%20Pixel.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="av-title" style="margin-bottom:3px;">GOLD PIXEL</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(255,170,0,.08);color:rgba(255,170,0,.7);border:1px solid rgba(255,170,0,.2);">Pixel Art</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Gallery</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Votes</span>
+          </div>
+          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="Draw, share and vote on 80×45 pixel art.">Draw, share and vote on 80×45 pixel art.</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
+      </div>
+      <div class="av-card rv" data-cat="puzzle" style="flex-direction:row;align-items:center;gap:14px;opacity:.5;cursor:default;">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🧩</div>
+        <div style="flex:1;">
+          <div class="av-title" style="margin-bottom:3px;">2048 NEON</div>
+          <div style="display:flex;gap:5px;margin-bottom:4px;"><span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Puzzle</span></div>
+          <div class="av-text" data-fr="Bientôt disponible." data-en="Coming soon.">Coming soon.</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:rgba(200,216,232,.3);" data-fr="BIENTÔT" data-en="SOON">SOON</div>
+      </div>
+      <div class="av-card rv" data-cat="arcade" style="flex-direction:row;align-items:center;gap:14px;opacity:.5;cursor:default;">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a1010,#0a2a1a);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🚀</div>
+        <div style="flex:1;">
+          <div class="av-title" style="margin-bottom:3px;">SLOT PI</div>
+          <div style="display:flex;gap:5px;margin-bottom:4px;"><span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Arcade</span></div>
+          <div class="av-text" data-fr="En développement." data-en="In development.">In development.</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:rgba(200,216,232,.3);" data-fr="BIENTÔT" data-en="SOON">SOON</div>
+      </div>
+    </div>
+  </section>
+</div><!-- /games -->
+
+<!-- ══ NEWS ══ -->
+<div class="view" id="view-news">
+  <section style="border:none;padding-top:14px;">
+    <div class="cat-title rv"><span>📰 <span data-fr="News & Actualités" data-en="News & Updates">News & Updates</span></span></div>
+    <div class="news-list">
+      <div class="news-card rv d1">
+        <div class="news-date">March 2026</div>
+        <div class="news-tag" data-fr="Lancement" data-en="Launch">Launch</div>
+        <div class="news-title" data-fr="JEUXVIDEO.PI est en ligne !" data-en="JEUXVIDEO.PI is live!">JEUXVIDEO.PI is live!</div>
+        <div class="news-body" data-fr="Le premier portail de jeux Pi Network est officiellement lancé. Gold Pixel est disponible dès maintenant — dessinez, partagez, votez." data-en="The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.">The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.</div>
+      </div>
+      <div class="news-card rv d2">
+        <div class="news-date">Coming soon</div>
+        <div class="news-tag" data-fr="Fonctionnalité" data-en="Feature">Feature</div>
+        <div class="news-title" data-fr="Challenge quotidien dans Gold Pixel" data-en="Daily Challenge in Gold Pixel">Daily Challenge in Gold Pixel</div>
+        <div class="news-body" data-fr="Un nouveau challenge pixel art chaque jour. Reproduis le modèle du jour et gagne des pixels Or bonus !" data-en="A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!">A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!</div>
+      </div>
+      <div class="news-card rv d3">
+        <div class="news-date">Coming soon</div>
+        <div class="news-tag" data-fr="Jeux" data-en="Games">Games</div>
+        <div class="news-title" data-fr="2048 Neon en développement" data-en="2048 Neon in development">2048 Neon in development</div>
+        <div class="news-body" data-fr="Un 2048 version néon bientôt disponible sur le portail." data-en="A neon-styled 2048 is coming to the portal soon.">A neon-styled 2048 is coming to the portal soon.</div>
+      </div>
+      <div class="news-card rv d1">
+        <div class="news-date">Open</div>
+        <div class="news-tag" data-fr="Développeurs" data-en="Developers">Developers</div>
+        <div class="news-title" data-fr="Intégrez votre jeu — gratuitement" data-en="List your game — for free">List your game — for free</div>
+        <div class="news-body" data-fr="0% de commission, intégration Pi SDK sans frais. Soumettez votre jeu dès maintenant." data-en="0% commission, Pi SDK integration at no cost. Submit your game now.">0% commission, Pi SDK integration at no cost. Submit your game now.</div>
+      </div>
+    </div>
+  </section>
+</div><!-- /news -->
+
+<!-- ══ DEVS ══ -->
+<div class="view" id="view-devs">
+
+  <section>
+    <div class="cat-title rv"><span>💼 <span data-fr="Pourquoi rejoindre JEUXVIDEO.PI ?" data-en="Why join JEUXVIDEO.PI?">Why join JEUXVIDEO.PI?</span></span></div>
+
+    <div class="devs-headline rv" data-fr="Publiez votre jeu. Gratuitement. Sans commission." data-en="Publish your game. For free. Zero commission.">Publish your game. For free. Zero commission.</div>
+    <div class="devs-sub rv" data-fr="JEUXVIDEO.PI est la seule plateforme Pi Network à proposer 0% de commission et une intégration Pi SDK sans frais pour tous les développeurs." data-en="JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.">JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.</div>
+
+    <div class="highlight-card gold-hl rv d1">
+      <div class="hl-icon">🏆</div>
+      <div>
+        <div class="hl-title gold" data-fr="0% DE COMMISSION — GARANTI À VIE" data-en="0% COMMISSION — GUARANTEED FOREVER">0% COMMISSION — GUARANTEED FOREVER</div>
+        <div class="hl-text" data-fr="Toutes vos recettes Pi vous appartiennent intégralement. Aucun frais caché, aucun partage de revenus, aucune condition." data-en="Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.">Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.</div>
+      </div>
     </div>
 
-    <div class="badge-live">
-        <div class="live-dot"></div>
-        <span data-fr="EN DIRECT (MULTI)" data-en="LIVE (MULTI)">EN DIRECT (MULTI)</span>
+    <div class="highlight-card cy-hl rv d2">
+      <div class="hl-icon">⚡</div>
+      <div>
+        <div class="hl-title cy" data-fr="INTÉGRATION PI SDK — SANS FRAIS" data-en="PI SDK INTEGRATION — AT NO COST">PI SDK INTEGRATION — AT NO COST</div>
+        <div class="hl-text" data-fr="Nous vous accompagnons dans l'intégration complète : paiements Pi, authentification, déploiement. Aucune expertise requise." data-en="We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.">We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.</div>
+      </div>
     </div>
-    
-    <div class="badge-pi">π Pi Rewards</div>
-</div>
 
-  <div class="stats-row rv">
-    <div class="stat"><div class="stat-n">8K+</div><div class="stat-l" data-fr="Joueurs" data-en="Players">Joueurs</div></div>
-    <div class="stat"><div class="stat-n">45Kπ</div><div class="stat-l" data-fr="Distribués" data-en="Distributed">Distribués</div></div>
-    <div class="stat"><div class="stat-n">G10</div><div class="stat-l" data-fr="Grades" data-en="Grades">Grades</div></div>
-    <div class="stat"><div class="stat-n">★4.8</div><div class="stat-l" data-fr="Note" data-en="Rating">Note</div></div>
-  </div>
-</section>
+    <div class="avantages-grid">
+      <div class="av-card rv d1"><div class="av-icon">📄</div><div class="av-title" data-fr="Page dédiée" data-en="Dedicated page">Dedicated page</div><div class="av-text" data-fr="Une page Steam-like avec screenshots, pitch et profil développeur." data-en="A Steam-like page with screenshots, pitch and developer profile.">A Steam-like page with screenshots, pitch and developer profile.</div></div>
+      <div class="av-card rv d2"><div class="av-icon">🌍</div><div class="av-title" data-fr="Communauté Pi mondiale" data-en="Global Pi community">Global Pi community</div><div class="av-text" data-fr="Des milliers de joueurs Pi Network actifs dans le monde entier." data-en="Thousands of active Pi Network players worldwide.">Thousands of active Pi Network players worldwide.</div></div>
+      <div class="av-card rv d3"><div class="av-icon">🎤</div><div class="av-title" data-fr="Mise en avant" data-en="Spotlight">Spotlight</div><div class="av-text" data-fr="Votre profil développeur mis en avant sur le portail et les réseaux." data-en="Your developer profile featured on the portal and social channels.">Your developer profile featured on the portal and social channels.</div></div>
+      <div class="av-card rv d1"><div class="av-icon">🚀</div><div class="av-title" data-fr="Déploiement 48h" data-en="Live in 48h">Live in 48h</div><div class="av-text" data-fr="Votre jeu en ligne en 48h. Nous gérons l'hébergement et la visibilité." data-en="Your game live in 48h. We handle hosting and visibility.">Your game live in 48h. We handle hosting and visibility.</div></div>
+      <div class="av-card rv d2"><div class="av-icon">💬</div><div class="av-title" data-fr="Feedback joueurs" data-en="Player feedback">Player feedback</div><div class="av-text" data-fr="Les joueurs votent et commentent directement depuis le portail." data-en="Players vote and give you direct feedback from the portal.">Players vote and give you direct feedback from the portal.</div></div>
+      <div class="av-card rv d3"><div class="av-icon">🔎</div><div class="av-title" data-fr="Portail centralisé" data-en="Central hub">Central hub</div><div class="av-text" data-fr="Tous les jeux Pi au même endroit, facilement trouvables." data-en="All Pi games in one place, easy to discover.">All Pi games in one place, easy to discover.</div></div>
+    </div>
 
-<!-- ── §2 VITRINE DEVS ── -->
-<section>
-  <div class="cat-title rv">
-    <span>🚀 <span data-fr="Vitrine Développeurs" data-en="Developer Showcase">Vitrine Développeurs</span></span>
-  </div>
-  <div class="game-grid">
-    <div class="card rv d1" onclick="toast('2048 Neon — bientôt en ligne !','cy')">
-      <div style="position:absolute;inset:0;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:2.2rem">🧩</div>
-      <div class="card-label">2048 NEON</div>
-    </div>
-    <div class="card slot rv d2" onclick="goToContact()">
-      <div class="slot-icon">✚</div>
-      <div class="slot-sub" data-fr="Disponible" data-en="Available">Disponible</div>
-      <div class="card-label" data-fr="Déployer ici" data-en="Deploy here">Déployer ici</div>
-    </div>
-    <div class="card slot rv d3" onclick="goToContact()">
-      <div class="slot-icon">✚</div>
-      <div class="slot-sub" data-fr="Disponible" data-en="Available">Disponible</div>
-      <div class="card-label" data-fr="Déployer ici" data-en="Deploy here">Déployer ici</div>
-    </div>
-  </div>
-</section>
+    <a class="cta-devs rv" onclick="showSection('contact')" data-fr="INTÉGRER MON JEU — GRATUIT →" data-en="LIST MY GAME — FREE →">LIST MY GAME — FREE →</a>
+  </section>
 
-<!-- ── §3 AVANTAGES DÉVELOPPEUR ── -->
-<section id="developers">
-  <div class="cat-title rv">
-    <span>💼 <span data-fr="Développeurs" data-en="Developers">Développeurs</span></span>
-  </div>
-
-  <div class="devs-headline rv" data-fr="Donnez à votre jeu la visibilité qu'il mérite sur Pi Network !" data-en="Give your game the visibility it deserves on Pi Network!">
-    Donnez à votre jeu la visibilité qu'il mérite sur Pi Network !
-  </div>
-  <div class="devs-sub rv" data-fr="Une page dédiée, des joueurs passionnés et une mise en avant de votre parcours. Rejoignez notre portail et faites découvrir votre création." data-en="A dedicated page, passionate players and a spotlight on your journey. Join our portal and get your game discovered.">
-    Une page dédiée, des joueurs passionnés et une mise en avant de votre parcours. Rejoignez notre portail et faites découvrir votre création.
-  </div>
-
-  <div class="avantages-grid">
-    <div class="av-card rv d1">
-      <div class="av-icon">📄</div>
-      <div class="av-title" data-fr="Page dédiée" data-en="Dedicated page">Page dédiée</div>
-      <div class="av-text" data-fr="Description, images et vidéos pour présenter votre jeu." data-en="Description, images and videos to showcase your game.">Description, images et vidéos pour présenter votre jeu.</div>
+  <!-- Formulaire -->
+  <section id="contact" style="border:none;padding-top:20px;">
+    <div class="cat-title rv">
+      <span>📬 <span data-fr="Soumettre votre jeu" data-en="Submit your game">Submit your game</span></span>
     </div>
-    <div class="av-card rv d2">
-      <div class="av-icon">🌐</div>
-      <div class="av-title" data-fr="Communauté active" data-en="Active community">Communauté active</div>
-      <div class="av-text" data-fr="Vos jeux visibles par des milliers de joueurs Pi." data-en="Your games visible to thousands of Pi players.">Vos jeux visibles par des milliers de joueurs Pi.</div>
-    </div>
-    <div class="av-card rv d3">
-      <div class="av-icon">🎤</div>
-      <div class="av-title" data-fr="Mise en avant" data-en="In the spotlight">Mise en avant</div>
-      <div class="av-text" data-fr="Interview et présentation du développeur sur le portail." data-en="Developer interview and profile published on the portal.">Interview et présentation du développeur sur le portail.</div>
-    </div>
-    <div class="av-card rv d1">
-      <div class="av-icon">🔎</div>
-      <div class="av-title" data-fr="Portail centralisé" data-en="Centralised portal">Portail centralisé</div>
-      <div class="av-text" data-fr="Tous les jeux rassemblés pour être facilement trouvés." data-en="All games gathered in one place for easy discovery.">Tous les jeux rassemblés pour être facilement trouvés.</div>
-    </div>
-    <div class="av-card rv d2" style="grid-column: 1 / -1;">
-      <div class="av-icon">💬</div>
-      <div class="av-title" data-fr="Feedback communauté" data-en="Community feedback">Feedback communauté</div>
-      <div class="av-text" data-fr="Recevez des commentaires et réactions directement de la communauté Pi Network." data-en="Receive comments and reactions directly from the Pi Network community.">Recevez des commentaires et réactions directement de la communauté Pi Network.</div>
-    </div>
-  </div>
 
-  <a class="cta-devs rv" onclick="goToContact()" data-fr="SOUMETTRE VOTRE JEU →" data-en="SUBMIT YOUR GAME →">SOUMETTRE VOTRE JEU →</a>
-</section>
-
-<!-- ── §4 CONTACT ── -->
-<section id="contact" style="border:none">
-  <div class="cat-title rv">
-    <span>📬 <span data-fr="Contact & Déploiement" data-en="Contact & Deployment">Contact & Déploiement</span></span>
-  </div>
-
-  <div id="form-ok">
-    <div class="ok-ico">🚀</div>
-    <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Candidature envoyée !</div>
-    <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !</div>
-  </div>
-
-  <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
-    <div class="form-row">
-      <input type="text" name="name" id="fi-name" placeholder="Nom / Pseudo Pi" required>
-      <input type="email" name="email" id="fi-email" placeholder="Email de contact" required>
+    <div id="form-ok">
+      <div class="ok-ico">🚀</div>
+      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
+      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!</div>
     </div>
-    <input type="text" name="game" id="fi-game" placeholder="Nom du jeu" required>
-    <input type="url" name="url" id="fi-url" placeholder="https://votre-jeu.com (optionnel)">
-    <select name="category" id="fi-cat">
-      <option value="" id="fi-cat-ph">Catégorie du jeu</option>
-      <option id="o1">Stratégie</option>
-      <option id="o2">Action / Arcade</option>
-      <option id="o3">Puzzle / Réflexion</option>
-      <option id="o4">RPG / Aventure</option>
-      <option id="o5">Casual / Idle</option>
-      <option id="o6">Autre</option>
-    </select>
-    <textarea name="message" id="fi-msg" rows="3" placeholder="Description de votre jeu et vos attentes..."></textarea>
-    <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SOUMETTRE MON JEU →</button>
-  </form>
-  <p class="form-note" data-fr="✔ Réponse sous 48h · Certifié WadCox · 0% commission · Intégration Pi SDK incluse" data-en="✔ Reply within 48h · Certified WadCox · 0% commission · Pi SDK integration included">✔ Réponse sous 48h · Certifié WadCox · 0% commission · Intégration Pi SDK incluse</p>
-</section>
+
+    <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
+      <div class="form-row">
+        <input type="text" name="name" id="fi-name" placeholder="Name / Pi Username" required>
+        <input type="email" name="email" id="fi-email" placeholder="Contact email" required>
+      </div>
+      <input type="text" name="game" id="fi-game" placeholder="Game name" required>
+      <input type="url" name="url" id="fi-url" placeholder="https://your-game.com (optional)">
+      <select name="category" id="fi-cat">
+        <option value="" id="fi-cat-ph">Game category</option>
+        <option id="o1">Strategy</option>
+        <option id="o2">Action / Arcade</option>
+        <option id="o3">Puzzle / Thinking</option>
+        <option id="o4">RPG / Adventure</option>
+        <option id="o5">Casual / Idle</option>
+        <option id="o6">Other</option>
+      </select>
+      <textarea name="message" id="fi-msg" rows="3" placeholder="Describe your game and what you expect from us..."></textarea>
+      <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SUBMIT MY GAME →</button>
+    </form>
+    <p class="form-note" data-fr="✔ Réponse sous 48h · 0% de commission · Pi SDK incluse" data-en="✔ Reply within 48h · 0% commission · Pi SDK integration included">✔ Reply within 48h · 0% commission · Pi SDK integration included</p>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════
+       BLOC DÉVELOPPEURS PREMIUM
+  ═══════════════════════════════════════ -->
+  <section style="border:none;padding-top:20px;">
+    <div class="dev-premium rv">
+      <div class="dev-premium-header">
+        <div class="dev-premium-eyebrow" data-fr="REJOIGNEZ LE MOUVEMENT" data-en="JOIN THE MOVEMENT">JOIN THE MOVEMENT</div>
+        <div class="dev-premium-title" data-fr="Publiez votre jeu. Trouvez vos joueurs.<br><span>Gagnez en visibilité.</span>" data-en="Publish your game. Find your players.<br><span>Gain visibility.</span>">Publish your game. Find your players.<br><span>Gain visibility.</span></div>
+        <div class="dev-premium-sub" data-fr="Rejoignez le 1er portail indépendant et bâtissez l'avenir du jeu sur Pi." data-en="Join the 1st independent portal and build the future of gaming on Pi.">Join the 1st independent portal and build the future of gaming on Pi.</div>
+      </div>
+
+      <!-- Badges -->
+      <div class="dev-badges rv d1">
+        <span class="dev-badge or" data-fr="0% FRAIS" data-en="0% FEES">0% FEES</span>
+        <span class="dev-badge cy" data-fr="PI SDK INCLUS" data-en="PI SDK INCLUDED">PI SDK INCLUDED</span>
+        <span class="dev-badge gr" data-fr="VITRINE GRATUITE" data-en="FREE SHOWCASE">FREE SHOWCASE</span>
+      </div>
+
+      <!-- Avantages -->
+      <ul class="dev-perks">
+        <li class="dev-perk rv d1">
+          <span class="dev-perk-icon">👁️</span>
+          <div class="dev-perk-body">
+            <div class="dev-perk-title" data-fr="Visibilité immédiate" data-en="Immediate visibility">Immediate visibility</div>
+            <div class="dev-perk-text" data-fr="Votre jeu présenté à une audience Pi Network déjà connectée et engagée." data-en="Your game presented to an already connected and engaged Pi Network audience.">Your game presented to an already connected and engaged Pi Network audience.</div>
+          </div>
+        </li>
+        <li class="dev-perk rv d2">
+          <span class="dev-perk-icon">🌟</span>
+          <div class="dev-perk-body">
+            <div class="dev-perk-title" data-fr="Mise en avant prioritaire" data-en="Priority spotlight">Priority spotlight</div>
+            <div class="dev-perk-text" data-fr="Les premiers développeurs bénéficient d'une mise en avant exclusive sur le portail." data-en="Early developers get exclusive featured placement on the portal.">Early developers get exclusive featured placement on the portal.</div>
+          </div>
+        </li>
+        <li class="dev-perk rv d3">
+          <span class="dev-perk-icon">🎮</span>
+          <div class="dev-perk-body">
+            <div class="dev-perk-title" data-fr="Vitrine immersive" data-en="Immersive showcase">Immersive showcase</div>
+            <div class="dev-perk-text" data-fr="Une page dédiée avec screenshots, pitch et profil développeur. Votre identité mise en valeur." data-en="A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.">A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.</div>
+          </div>
+        </li>
+        <li class="dev-perk rv d1">
+          <span class="dev-perk-icon">🏆</span>
+          <div class="dev-perk-body">
+            <div class="dev-perk-title" data-fr="0% frais · 0% commission" data-en="0% fees · 0% commission">0% fees · 0% commission</div>
+            <div class="dev-perk-text" data-fr="Toutes vos recettes Pi vous appartiennent. Sans exception. Sans surprise." data-en="Every Pi you earn is yours. No exceptions. No surprises.">Every Pi you earn is yours. No exceptions. No surprises.</div>
+          </div>
+        </li>
+        <li class="dev-perk rv d2">
+          <span class="dev-perk-icon">🎯</span>
+          <div class="dev-perk-body">
+            <div class="dev-perk-title" data-fr="Concentrez-vous sur votre jeu" data-en="Focus on your game">Focus on your game</div>
+            <div class="dev-perk-text" data-fr="On s'occupe des joueurs, de la visibilité et de l'intégration Pi SDK." data-en="We handle the players, visibility and Pi SDK integration.">We handle the players, visibility and Pi SDK integration.</div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- CTA principal -->
+      <button class="dev-cta-main rv" onclick="openDevModal()">
+        👉 <span data-fr="INTÉGRER MON JEU — GRATUIT" data-en="LIST MY GAME — FREE">LIST MY GAME — FREE</span>
+      </button>
+      <p class="dev-cta-note rv" data-fr="Réponse sous 48h · Intégration accompagnée · Aucun engagement" data-en="Reply within 48h · Guided integration · No commitment">Reply within 48h · Guided integration · No commitment</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       BLOC RECRUTEMENT
+  ═══════════════════════════════════════ -->
+  <section style="border:none;padding-top:4px;">
+    <div class="recruit-section rv">
+      <div class="recruit-eyebrow" data-fr="NOUS RECRUTONS" data-en="WE'RE HIRING">WE'RE HIRING</div>
+      <div class="recruit-title" data-fr="Rejoignez l'aventure<br><span>JeuxVideo.Pi</span>" data-en="Join the<br><span>JeuxVideo.Pi</span> adventure">Join the<br><span>JeuxVideo.Pi</span> adventure</div>
+      <div class="recruit-intro" data-fr="Nous recherchons deux passionnés de jeux vidéo et de l'écosystème Pi Network pour structurer et faire vibrer le premier portail indépendant." data-en="We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.">We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.</div>
+
+      <div class="recruit-roles">
+        <!-- Rôle 1 -->
+        <div class="recruit-role rv d1">
+          <div class="recruit-role-header">
+            <span class="recruit-role-icon">✍️</span>
+            <div class="recruit-role-title" data-fr="Responsable Éditorial & Veille Stratégique" data-en="Editorial & Strategic Watch Manager">Editorial & Strategic Watch Manager</div>
+          </div>
+          <div class="recruit-role-desc" data-fr="Voix officielle du portail, vous pilotez la ligne éditoriale, décryptez l'actualité du réseau Pi et animez les sections Blog/News pour la communauté." data-en="Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.">Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.</div>
+        </div>
+        <!-- Rôle 2 -->
+        <div class="recruit-role rv d2">
+          <div class="recruit-role-header">
+            <span class="recruit-role-icon">⚙️</span>
+            <div class="recruit-role-title" data-fr="Responsable Opérationnel & Intégration" data-en="Operational & Integration Manager">Operational & Integration Manager</div>
+          </div>
+          <div class="recruit-role-desc" data-fr="Garant de la fluidité du portail, vous orchestrez les mises à jour techniques et assurez l'intégration qualitative des nouvelles expériences de jeu." data-en="Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.">Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.</div>
+        </div>
+      </div>
+
+      <div class="recruit-avantages rv d3">
+        <div class="recruit-avantages-title" data-fr="Vos avantages" data-en="Your benefits">Your benefits</div>
+        <div class="recruit-av-list">
+          <div class="recruit-av" data-fr="Impact — Participez activement à un projet en pleine croissance dans l'écosystème Pi." data-en="Impact — Actively contribute to a fast-growing project in the Pi ecosystem.">Impact — Actively contribute to a fast-growing project in the Pi ecosystem.</div>
+          <div class="recruit-av" data-fr="Notoriété — Une visibilité unique au sein de l'écosystème Pi Network." data-en="Recognition — Unique visibility within the Pi Network ecosystem.">Recognition — Unique visibility within the Pi Network ecosystem.</div>
+          <div class="recruit-av" data-fr="Vision — Une collaboration de long terme basée sur la passion et l'innovation." data-en="Vision — A long-term collaboration built on passion and innovation.">Vision — A long-term collaboration built on passion and innovation.</div>
+        </div>
+      </div>
+
+      <button class="recruit-cta rv" onclick="openRecruitModal()">
+        👉 <span data-fr="POSTULER MAINTENANT" data-en="APPLY NOW">APPLY NOW</span>
+      </button>
+    </div>
+  </section>
+
+</div><!-- /devs -->
 
 <footer>
-  <span>✔ Certified WadCox</span> &nbsp;|&nbsp;
-  Pi Network Ecosystem &nbsp;|&nbsp;
-  <span>JEUXVIDEO.PI</span><br><br>
-  <a onclick="goToContact()" style="cursor:pointer" data-fr="Soumettre un jeu" data-en="Submit a game">Soumettre un jeu</a>
-  &nbsp;·&nbsp;
-  <a href="mailto:contact@jeuxvideo.pi">contact@jeuxvideo.pi</a>
+  Pi Network Ecosystem &nbsp;|&nbsp; JEUXVIDEO.PI<br>
+  <span style="font-size:.52rem;">© 2026 JEUXVIDEO.PI · All rights reserved</span>
 </footer>
 
 <div id="toast"></div>
 
 <script>
-
-/* ── BG CANVAS ── */
-(function() {
-  const c = document.getElementById('bg-canvas');
-  const ctx = c.getContext('2d');
-  let W, H, pts = [];
-  function resize() {
-    W = c.width = window.innerWidth;
-    H = c.height = window.innerHeight;
-    pts = [];
-    const n = Math.min(Math.floor(W * H / 22000), 55);
-    for (let i = 0; i < n; i++) pts.push({
-      x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25,
-      r: Math.random()*1.2+.3, a: Math.random()*Math.PI*2
-    });
-  }
-  function draw() {
-    ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='rgba(0,160,210,.04)'; ctx.lineWidth=1;
-    for(let x=0;x<W;x+=55){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(let y=0;y<H;y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    pts.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>W) p.vx*=-1;
-      if(p.y<0||p.y>H) p.vy*=-1;
-      p.a+=.007;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(0,200,255,${.25+.2*Math.sin(p.a)})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', resize);
-  resize(); draw();
+/* BG CANVAS */
+(function(){
+  const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;pts=[];const n=Math.min(Math.floor(W*H/22000),55);for(let i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.3,a:Math.random()*Math.PI*2});}
+  function draw(){ctx.clearRect(0,0,W,H);ctx.strokeStyle='rgba(0,160,210,.04)';ctx.lineWidth=1;for(let x=0;x<W;x+=55){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;p.a+=.007;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(0,200,255,${.25+.2*Math.sin(p.a)})`;ctx.fill();});requestAnimationFrame(draw);}
+  window.addEventListener('resize',resize);resize();draw();
 })();
 
-/* ── LANG ── */
-let lang = 'fr';
-function setLang(l) {
-  lang = l;
-  document.documentElement.setAttribute('data-lang', l);
-  document.querySelectorAll('.lang-btn').forEach(b =>
-    b.classList.toggle('on', b.textContent.includes(l.toUpperCase()))
-  );
-  document.querySelectorAll('[data-fr][data-en]').forEach(el => {
-    const val = el.getAttribute('data-' + l);
-    if (!val) return;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
-    else if (el.tagName === 'BUTTON' || el.tagName === 'A') el.textContent = val;
-    else el.innerHTML = val;
+/* NAVIGATION */
+function showTab(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  const v=document.getElementById('view-'+name);if(v)v.classList.add('active');
+  document.querySelectorAll('.nav-tabs .nav-tab').forEach(b=>{
+    const txt=b.getAttribute('data-en')||b.textContent;
+    if(txt.toLowerCase().includes(name==='devs'?'dev':name))b.classList.add('active');
   });
-  const t = {
-    fr: { name:'Nom / Pseudo Pi', email:'Email de contact', game:'Nom du jeu', url:'https://votre-jeu.com (optionnel)', msg:'Description de votre jeu et vos attentes...', cat:'Catégorie du jeu', o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre'] },
-    en: { name:'Name / Pi Username', email:'Contact Email', game:'Game Name', url:'https://your-game.com (optional)', msg:'Describe your game and expectations...', cat:'Game category', o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other'] }
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(revealVisible,80);
+}
+function showSection(id){
+  showTab('devs');
+  setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});},150);
+}
+
+/* FILTER GAMES */
+function filterGames(cat,btn){
+  document.querySelectorAll('#view-games .nav-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#games-list [data-cat]').forEach(row=>{
+    row.style.display=(cat==='all'||row.dataset.cat===cat)?'flex':'none';
+  });
+}
+
+/* LANG */
+let lang='en';
+function setLang(l){
+  lang=l;
+  document.documentElement.setAttribute('data-lang',l);
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('on',b.textContent.includes(l.toUpperCase())));
+  document.querySelectorAll('[data-fr][data-en]').forEach(el=>{
+    const val=el.getAttribute('data-'+l);if(!val)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=val;
+    else if(el.tagName==='BUTTON'||el.tagName==='A')el.textContent=val;
+    else el.innerHTML=val;
+  });
+  const t={
+    fr:{name:'Nom / Pseudo Pi',email:'Email de contact',game:'Nom du jeu',url:'https://votre-jeu.com (optionnel)',msg:'Décrivez votre jeu et vos attentes...',cat:'Catégorie du jeu',o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']},
+    en:{name:'Name / Pi Username',email:'Contact email',game:'Game name',url:'https://your-game.com (optional)',msg:'Describe your game and what you expect from us...',cat:'Game category',o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']}
   }[l];
-  const g = id => document.getElementById(id);
-  if(g('fi-name'))   g('fi-name').placeholder  = t.name;
-  if(g('fi-email'))  g('fi-email').placeholder = t.email;
-  if(g('fi-game'))   g('fi-game').placeholder  = t.game;
-  if(g('fi-url'))    g('fi-url').placeholder   = t.url;
-  if(g('fi-msg'))    g('fi-msg').placeholder   = t.msg;
-  if(g('fi-cat-ph')) g('fi-cat-ph').textContent = t.cat;
-  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{ const el=g(id); if(el) el.textContent=t.o[i]; });
+  const g=id=>document.getElementById(id);
+  if(g('fi-name'))g('fi-name').placeholder=t.name;if(g('fi-email'))g('fi-email').placeholder=t.email;
+  if(g('fi-game'))g('fi-game').placeholder=t.game;if(g('fi-url'))g('fi-url').placeholder=t.url;
+  if(g('fi-msg'))g('fi-msg').placeholder=t.msg;if(g('fi-cat-ph'))g('fi-cat-ph').textContent=t.cat;
+  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{const el=g(id);if(el)el.textContent=t.o[i];});
 }
 
-/* ── DON ── */
-let selAmt = '3';
-function pick(el, v) {
-  document.querySelectorAll('.btn-don:not(.envoyer)').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel'); selAmt = v;
-}
-function sendDon() {
-  if (selAmt === '?') {
-    const v = prompt(lang==='fr' ? 'Montant en Pi :' : 'Amount in Pi:');
-    if (!v || isNaN(v)) return;
-    selAmt = v;
-  }
-  toast(lang==='fr' ? `Don de ${selAmt} Pi — Merci beaucoup ! 🙏` : `Donation of ${selAmt} Pi — Thank you! 🙏`, 'gold');
+/* DON */
+let selAmt='3';
+function pick(el,v){document.querySelectorAll('.btn-don:not(.envoyer)').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');selAmt=v;}
+function sendDon(){
+  if(selAmt==='?'){const v=prompt(lang==='fr'?'Montant en Pi :':'Amount in Pi:');if(!v||isNaN(v))return;selAmt=v;}
+  toast(lang==='fr'?`Don de ${selAmt} Pi — Merci beaucoup ! 🙏`:`Donation of ${selAmt} Pi — Thank you! 🙏`,'gold');
 }
 
-/* ── FORM ── */
-function handleForm(e) {
+/* FORM */
+function handleForm(e){
   e.preventDefault();
-  const fd = new FormData(e.target);
-  fetch(e.target.action, { method:'POST', body:fd, headers:{'Accept':'application/json'} })
-    .then(() => {
-      document.getElementById('dev-form').style.display = 'none';
-      document.getElementById('form-ok').style.display = 'block';
+  const btn=document.getElementById('fi-send');
+  btn.disabled=true;btn.textContent=lang==='fr'?'ENVOI...':'SENDING...';
+  fetch(e.target.action,{method:'POST',body:new FormData(e.target),headers:{'Accept':'application/json'}})
+    .then(r=>{
+      if(r.ok){document.getElementById('dev-form').style.display='none';document.getElementById('form-ok').style.display='block';}
+      else throw new Error();
     })
-    .catch(() => toast(lang==='fr' ? 'Erreur — veuillez réessayer' : 'Error — please retry', ''));
+    .catch(()=>{btn.disabled=false;btn.textContent=lang==='fr'?'SOUMETTRE MON JEU →':'SUBMIT MY GAME →';toast(lang==='fr'?'Erreur — veuillez réessayer':'Error — please retry','');});
 }
 
-/* ── SCROLL ── */
-function goToContact() {
-  document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── TOAST ── */
+/* TOAST */
 let _t;
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show' + (type==='gold' ? ' gold' : '');
-  clearTimeout(_t); _t = setTimeout(() => el.className='', 3400);
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='show'+(type==='gold'?' gold':'');clearTimeout(_t);_t=setTimeout(()=>el.className='',3400);}
+
+/* REVEAL */
+const ro=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}}),{threshold:0.05});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+function revealVisible(){document.querySelectorAll('.view.active .rv:not(.in)').forEach(el=>{const r=el.getBoundingClientRect();if(r.top<window.innerHeight+100){el.classList.add('in');ro.unobserve(el);}});}
+window.addEventListener('load',()=>setTimeout(revealVisible,80));
+window.addEventListener('scroll',revealVisible,{passive:true});
+
+
+/* ════════════════════════
+   MODAL DÉVELOPPEUR
+════════════════════════ */
+function openDevModal() {
+  document.getElementById('dev-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDevModal() {
+  document.getElementById('dev-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleDevModal(e) {
+  e.preventDefault();
+  const btn = document.getElementById('dev-modal-send');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = lang === 'fr' ? 'ENVOI...' : 'SENDING...';
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        document.getElementById('dev-modal-form').style.display = 'none';
+        document.getElementById('dev-modal-ok').style.display   = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = lang === 'fr' ? 'ENVOYER MA CANDIDATURE →' : 'SUBMIT MY APPLICATION →';
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
+    });
 }
 
-/* ── REVEAL ── */
-const ro = new IntersectionObserver(
-  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); }),
-  { threshold: .1 }
-);
-document.querySelectorAll('.rv').forEach(el => ro.observe(el));
-setTimeout(() => document.querySelectorAll('.rv').forEach(el => el.classList.add('in')), 650);
+/* ════════════════════════
+   MODAL RECRUTEMENT
+════════════════════════ */
+function openRecruitModal() {
+  document.getElementById('recruit-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeRecruitModal() {
+  document.getElementById('recruit-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleRecruitModal(e) {
+  e.preventDefault();
+  const btn = document.getElementById('recruit-modal-send');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = lang === 'fr' ? 'ENVOI...' : 'SENDING...';
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        document.getElementById('recruit-modal-form').style.display = 'none';
+        document.getElementById('recruit-modal-ok').style.display   = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = lang === 'fr' ? 'ENVOYER MA CANDIDATURE →' : 'SEND MY APPLICATION →';
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
+    });
+}
+
 </script>
+
+<!-- ═══════════════════════════════════════
+     MODAL DÉVELOPPEUR — formulaire
+═══════════════════════════════════════ -->
+<div class="dev-modal-overlay" id="dev-modal-overlay" onclick="if(event.target===this)closeDevModal()">
+  <div class="dev-modal">
+    <div class="dev-modal-handle"></div>
+    <div class="dev-modal-title" data-fr="🎮 INTÉGRER VOTRE JEU" data-en="🎮 LIST YOUR GAME">🎮 LIST YOUR GAME</div>
+    <div class="dev-modal-sub" data-fr="Gratuit · 0% commission · Réponse sous 48h" data-en="Free · 0% commission · Reply within 48h">Free · 0% commission · Reply within 48h</div>
+
+    <div class="dev-modal-ok" id="dev-modal-ok">
+      <div class="ok-ico">🚀</div>
+      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
+      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue sur JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to JEUXVIDEO.PI!">We'll reply within 48h. Welcome to JEUXVIDEO.PI!</div>
+      <button class="dev-modal-close" onclick="closeDevModal()" data-fr="FERMER" data-en="CLOSE">CLOSE</button>
+    </div>
+
+    <form id="dev-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleDevModal(event)" style="display:flex;flex-direction:column;gap:9px;">
+      <input type="hidden" name="type" value="developer-integration">
+      <div class="form-row">
+        <input type="text" name="dev_name" placeholder="Developer name *" required>
+        <input type="email" name="dev_email" placeholder="Email *" required>
+      </div>
+      <input type="text" name="game_name" placeholder="Game name *" required>
+      <input type="url" name="game_url" placeholder="Game URL (https://...)">
+      <textarea name="game_description" rows="3" placeholder="Describe your game — genre, gameplay, current status..." required></textarea>
+      <select name="game_category">
+        <option value="">Game category</option>
+        <option>Pixel Art</option>
+        <option>Puzzle / Thinking</option>
+        <option>Action / Arcade</option>
+        <option>RPG / Adventure</option>
+        <option>Strategy</option>
+        <option>Casual / Idle</option>
+        <option>Other</option>
+      </select>
+      <textarea name="expectations" rows="2" placeholder="What do you expect from JEUXVIDEO.PI?"></textarea>
+      <button type="submit" class="btn-send" id="dev-modal-send" style="margin-top:4px;">
+        <span data-fr="ENVOYER MA CANDIDATURE →" data-en="SUBMIT MY APPLICATION →">SUBMIT MY APPLICATION →</span>
+      </button>
+      <button type="button" class="dev-modal-close" onclick="closeDevModal()" data-fr="ANNULER" data-en="CANCEL">CANCEL</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL RECRUTEMENT — formulaire
+═══════════════════════════════════════ -->
+<div class="recruit-modal-overlay" id="recruit-modal-overlay" onclick="if(event.target===this)closeRecruitModal()">
+  <div class="recruit-modal">
+    <div class="recruit-modal-handle"></div>
+    <div class="recruit-modal-title" data-fr="💼 POSTULER — JEUXVIDEO.PI" data-en="💼 APPLY — JEUXVIDEO.PI">💼 APPLY — JEUXVIDEO.PI</div>
+    <div class="recruit-modal-sub" data-fr="Bénévolat · Passion · Impact · Long terme" data-en="Volunteer · Passion · Impact · Long term">Volunteer · Passion · Impact · Long term</div>
+
+    <div class="recruit-modal-ok" id="recruit-modal-ok">
+      <div class="ok-ico">⭐</div>
+      <div class="ok-title" data-fr="Candidature reçue !" data-en="Application received!">Application received!</div>
+      <div class="ok-sub" data-fr="Merci pour votre intérêt ! Nous vous contacterons très prochainement." data-en="Thank you for your interest! We'll reach out to you very soon.">Thank you for your interest! We'll reach out to you very soon.</div>
+      <button class="dev-modal-close" onclick="closeRecruitModal()" data-fr="FERMER" data-en="CLOSE">CLOSE</button>
+    </div>
+
+    <form id="recruit-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleRecruitModal(event)" style="display:flex;flex-direction:column;gap:9px;">
+      <input type="hidden" name="type" value="recruitment">
+      <div class="form-row">
+        <input type="text" name="applicant_name" placeholder="Your name *" required>
+        <input type="email" name="applicant_email" placeholder="Email *" required>
+      </div>
+      <select name="role" required>
+        <option value="">I'm applying for... *</option>
+        <option value="editorial">Editorial & Strategic Watch Manager</option>
+        <option value="operational">Operational & Integration Manager</option>
+        <option value="both">Both positions</option>
+      </select>
+      <textarea name="motivation" rows="3" placeholder="Tell us about you — your background, your passion for gaming and Pi Network..." required></textarea>
+      <input type="url" name="portfolio" placeholder="Portfolio / LinkedIn / GitHub (optional)">
+      <button type="submit" class="btn-send" id="recruit-modal-send" style="background:var(--or);color:#000;margin-top:4px;">
+        <span data-fr="ENVOYER MA CANDIDATURE →" data-en="SEND MY APPLICATION →">SEND MY APPLICATION →</span>
+      </button>
+      <button type="button" class="dev-modal-close" onclick="closeRecruitModal()" data-fr="ANNULER" data-en="CANCEL">CANCEL</button>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
