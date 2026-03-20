@@ -351,41 +351,696 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 .recruit-modal-ok .ok-title { font-family: 'Orbitron', monospace; font-size: .82rem; color: var(--or); margin-bottom: 6px; }
 .recruit-modal-ok .ok-sub   { font-size: .78rem; color: #C8D8E8; line-height: 1.6; }
 
+
+/* ════════════════════════════════════════════
+   LANDING PAGE — intro screen
+════════════════════════════════════════════ */
+#landing {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+  /* Exit transition */
+  transition: opacity .65s ease, transform .65s ease;
+}
+
+#landing.exit {
+  opacity: 0;
+  transform: translateY(-18px);
+  pointer-events: none;
+}
+
+/* Fond animé : deux orbes colorées */
+#landing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 10%, rgba(0,243,255,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 80% 90%, rgba(255,170,0,.05) 0%, transparent 65%);
+  animation: landingOrbs 8s ease-in-out infinite alternate;
+}
+@keyframes landingOrbs {
+  0%   { opacity: .6; }
+  100% { opacity: 1; }
+}
+
+/* Scan-lines overlay */
+#landing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,.055) 2px, rgba(0,0,0,.055) 4px
+  );
+}
+
+/* INNER — above overlays */
+.landing-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+/* Ligne déco supérieure */
+.landing-top-line {
+  width: 40px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--cy), transparent);
+  margin-bottom: 28px;
+  opacity: .6;
+}
+
+/* LOGO */
+.landing-logo {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(2rem, 10vw, 3.2rem);
+  letter-spacing: 3px;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 30px rgba(0,243,255,.35),
+    0 0 80px rgba(0,243,255,.12);
+  /* opacity:1 par défaut — l'animation gère l'entrée mais ne bloque pas */
+  opacity: 1;
+  animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
+}
+.landing-logo .pi {
+  color: var(--or);
+  text-shadow:
+    0 0 24px rgba(255,170,0,.5),
+    0 0 60px rgba(255,170,0,.15);
+}
+
+/* TAGLINE */
+.landing-tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(.55rem, 3vw, .75rem);
+  color: var(--cy);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-top: 14px;
+  opacity: .75;
+  animation: landingFadeUp .9s .15s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* PHRASE */
+.landing-phrase {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(.82rem, 3.5vw, 1rem);
+  color: rgba(200,216,232,.55);
+  line-height: 1.6;
+  margin-top: 22px;
+  max-width: 300px;
+  animation: landingFadeUp .9s .3s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* SÉPARATEUR */
+.landing-sep {
+  width: 100%;
+  max-width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,243,255,.2), transparent);
+  margin-top: 28px;
+  animation: landingFadeUp .9s .4s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* CTA BUTTON */
+.landing-btn {
+  margin-top: 28px;
+  padding: 16px 36px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(.62rem, 3vw, .78rem);
+  letter-spacing: 2.5px;
+  /* État repos : fond transparent, texte or bien lisible */
+  color: var(--or);
+  background: transparent;
+  border: 1.5px solid rgba(255,170,0,.65);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 18px rgba(255,170,0,.18),
+    inset 0 0 14px rgba(255,170,0,.04);
+  transition: color .3s ease, background .3s ease, border-color .3s ease,
+              transform .2s ease, box-shadow .3s ease;
+  animation: landingFadeUp .9s .5s cubic-bezier(.22,1,.36,1) both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover / focus : remplissage doré, texte noir */
+.landing-btn:hover,
+.landing-btn:focus {
+  color: #000;
+  background: linear-gradient(135deg, #bf953f 0%, var(--or) 40%, #fcf6ba 60%, var(--or) 80%, #bf953f 100%);
+  background-size: 200% auto;
+  background-position: right center;
+  border-color: var(--or);
+  box-shadow:
+    0 6px 36px rgba(255,170,0,.5),
+    0 0 0 1px rgba(255,170,0,.35);
+  transform: translateY(-2px);
+}
+
+.landing-btn:active {
+  transform: scale(.97) translateY(0);
+}
+
+/* Shimmer interne */
+.landing-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 25%,
+    rgba(255,255,255,.28) 45%,
+    rgba(255,220,100,.18) 50%,
+    rgba(255,255,255,.28) 55%,
+    transparent 75%
+  );
+  transform: translateX(-150%);
+  /* Voile brillant en boucle toutes les 2.8s */
+  animation: btnShimmerLoop 2.8s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+.landing-btn:hover::after {
+  animation: btnShimmerFast .45s ease forwards;
+}
+@keyframes btnShimmerLoop {
+  0%   { transform: translateX(-150%); }
+  40%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
+@keyframes btnShimmerFast {
+  to { transform: translateX(150%); }
+}
+
+/* SOUS-BOUTON */
+.landing-sub {
+  margin-top: 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(.5rem, 2.5vw, .58rem);
+  color: rgba(200,216,232,.28);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  animation: landingFadeUp .9s .65s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Ligne déco inférieure */
+.landing-bottom-line {
+  width: 40px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(255,170,0,.35), transparent);
+  margin-top: 28px;
+  opacity: .5;
+  animation: landingFadeUp .9s .7s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Coin décoratifs */
+.landing-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+  opacity: .4;
+}
+.landing-corner.tl { top: 20px; left: 20px; border-top: 1.5px solid var(--cy); border-left: 1.5px solid var(--cy); }
+.landing-corner.tr { top: 20px; right: 20px; border-top: 1.5px solid var(--cy); border-right: 1.5px solid var(--cy); }
+.landing-corner.bl { bottom: 20px; left: 20px; border-bottom: 1.5px solid rgba(255,170,0,.6); border-left: 1.5px solid rgba(255,170,0,.6); }
+.landing-corner.br { bottom: 20px; right: 20px; border-bottom: 1.5px solid rgba(255,170,0,.6); border-right: 1.5px solid rgba(255,170,0,.6); }
+
+/* Animations entrée */
+@keyframes landingFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Version mobile : réduire un peu */
+@media (max-width: 390px) {
+  .landing-btn { padding: 14px 28px; }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   BARRE DE NAVIGATION — sous le header, au-dessus du contenu
+════════════════════════════════════════════════════════ */
+#portal-nav-bar {
+  width: 100%;
+  background: rgba(8,18,32,.92);
+  border-bottom: 1px solid rgba(0,243,255,.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 48px;
+  z-index: 500;
+  display: flex;
+  justify-content: center;
+}
+#portal-nav-bar-inner {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  align-items: stretch;
+  /* space-evenly distribue les 6 boutons uniformément sur toute la largeur */
+  justify-content: space-evenly;
+  padding: 0;
+  /* Pas de scroll — tous visibles */
+  overflow: visible;
+}
+
+/* Boutons de nav — tous visibles sur une ligne */
+.nav-bar-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(200,216,232,.45);
+  font-family: 'Orbitron', monospace;
+  /* Taille adaptative : petit sur mobile, un peu plus grand sur desktop */
+  font-size: clamp(.32rem, 1.8vw, .46rem);
+  letter-spacing: 0;
+  /* Padding minimal pour que tout rentre */
+  padding: 9px 2px 7px;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  flex: 1; /* chaque bouton prend une part égale */
+  text-align: center;
+}
+.nav-bar-btn:hover {
+  color: var(--cy);
+  border-bottom-color: rgba(0,243,255,.3);
+}
+.nav-bar-btn.active {
+  color: var(--cy);
+  border-bottom-color: var(--cy);
+  text-shadow: 0 0 8px rgba(0,243,255,.25);
+}
+/* Séparateur masqué — on libère l'espace */
+.nav-bar-sep {
+  display: none;
+}
+
+/* ── LANDING IMAGE LOGO ── */
+.landing-img-logo {
+  width: clamp(80px, 22vw, 130px); /* Logo discret, légèrement plus grand pour être lisible */
+  height: auto;
+  display: block;
+  margin-bottom: 12px;
+  /* Fondre le fond sombre du JPG avec le background de la landing */
+  mix-blend-mode: lighten;
+  opacity: .95;
+  animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
+  /* Glow néon cyan + or */
+  filter:
+    drop-shadow(0 0 12px rgba(0,243,255,.4))
+    drop-shadow(0 0 24px rgba(255,170,0,.2));
+}
+
+/* ════════════════════════════════════════════════════════
+   NOUVEAU HEADER UNIFIÉ
+   Remplace don-bar + lang-row + header + nav-tabs séparés
+════════════════════════════════════════════════════════ */
+
+/* ── Barre principale ── */
+#site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 600; /* au-dessus de tout */
+  background: rgba(5,11,20,.97);
+  border-bottom: 1px solid rgba(0,243,255,.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Ligne du haut : logo + nav + lang + don ── */
+#header-top {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  position: relative;
+}
+
+/* ── LOGO (gauche) ── */
+.hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.hdr-brand-img {
+  /* Logo image JV manettes — discret dans le header */
+  height: 24px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(0,243,255,.4));
+  border-radius: 4px;
+}
+.hdr-brand-text {
+  font-family: 'Orbitron', monospace;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0,243,255,.3);
+  white-space: nowrap;
+  line-height: 1;
+}
+.hdr-brand-text .pi { color: var(--or); }
+
+/* ── NAV CENTRALE ── */
+/* #hdr-nav supprimé — nav déplacée dans #portal-nav-bar */
+.hdr-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(200,216,232,.55);
+  font-family: 'Orbitron', monospace;
+  font-size: .44rem;
+  letter-spacing: .8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.hdr-nav-btn:hover  { color: var(--cy); background: rgba(0,243,255,.06); }
+.hdr-nav-btn.active { color: var(--cy); background: rgba(0,243,255,.1); }
+.hdr-nav-btn.active::after {
+  content: '';
+  display: block;
+  height: 1.5px;
+  background: var(--cy);
+  border-radius: 1px;
+  margin-top: 3px;
+  box-shadow: 0 0 6px var(--cy);
+}
+
+/* ── DROITE : lang + don ── */
+#hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Boutons langue */
+.hdr-lang {
+  background: transparent;
+  border: 1px solid rgba(0,243,255,.18);
+  color: rgba(200,216,232,.5);
+  font-family: 'Orbitron', monospace;
+  font-size: .42rem;
+  letter-spacing: .8px;
+  padding: 3px 7px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.hdr-lang.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
+.hdr-lang:hover { border-color: var(--cy); color: var(--cy); }
+
+/* ── BOUTON DON ── */
+#btn-don-toggle {
+  position: relative;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1.5px solid rgba(255,170,0,.5);
+  border-radius: 5px;
+  color: var(--or);
+  font-family: 'Orbitron', monospace;
+  font-size: .48rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: border-color .25s, box-shadow .25s, color .25s;
+  /* Shimmer cyclique pour attirer l'œil */
+  animation: donGlow 2.5s ease-in-out infinite;
+}
+@keyframes donGlow {
+  0%,100% { box-shadow: 0 0 6px rgba(255,170,0,.2); }
+  50%      { box-shadow: 0 0 16px rgba(255,170,0,.55), 0 0 30px rgba(255,170,0,.18); }
+}
+/* Voile brillant qui traverse le bouton Don */
+#btn-don-toggle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 25%, rgba(255,220,80,.35) 50%, transparent 75%);
+  transform: translateX(-150%);
+  animation: donShimmer 2.5s ease-in-out infinite;
+}
+@keyframes donShimmer {
+  0%   { transform: translateX(-150%); }
+  35%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
+#btn-don-toggle:hover {
+  border-color: var(--or);
+  box-shadow: 0 0 20px rgba(255,170,0,.45);
+}
+#btn-don-toggle.open {
+  background: rgba(255,170,0,.1);
+  border-color: var(--or);
+  color: var(--or);
+}
+
+/* ── BANDEAU DON RÉTRACTABLE ── */
+#don-drawer {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  /* Fermé par défaut : hauteur 0, débordement caché */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .38s cubic-bezier(.4,0,.2,1), padding .38s;
+  padding: 0 14px;
+}
+#don-drawer.open {
+  /* Ouvert : assez grand pour son contenu */
+  max-height: 80px;
+  padding: 8px 14px 10px;
+}
+.don-drawer-inner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  /* Séparateur subtil en haut */
+  border-top: 1px solid rgba(0,243,255,.1);
+  padding-top: 8px;
+}
+.don-drawer-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .52rem;
+  color: rgba(200,216,232,.45);
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* Les boutons montant réutilisent .btn-don existant — pas de redéfinition */
+.don-drawer-inner .btn-don {
+  font-size: .52rem;
+  padding: 4px 11px;
+}
+
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- DON BAR -->
-<div class="don-bar">
-  <span class="don-label" data-fr="Soutenir le portail :" data-en="Support the portal:">Support the portal:</span>
-  <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
-  <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
-  <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
-  <button class="btn-don" onclick="pick(this,'?')" data-fr="Autre" data-en="Custom">Custom</button>
-  <button class="btn-don envoyer" onclick="sendDon()" data-fr="Envoyer →" data-en="Send →">Send →</button>
+<!-- ════════════════════════════════════════════
+     LANDING PAGE — intro screen
+════════════════════════════════════════════ -->
+<div id="landing" role="main" aria-label="Intro JEUXVIDEO.PI">
+
+  <!-- Coins décoratifs -->
+  <div class="landing-corner tl"></div>
+  <div class="landing-corner tr"></div>
+  <div class="landing-corner bl"></div>
+  <div class="landing-corner br"></div>
+
+  <div class="landing-inner">
+
+    <!-- Logo image JV manettes -->
+    <img
+      src="Images/Logo%20jeuxvideo%20final.jpg"
+      alt="JEUXVIDEO.PI Logo"
+      class="landing-img-logo"
+      onerror="this.style.display='none';"
+    >
+
+    <!-- Titre JEUXVIDEO.PI — toujours visible sous le logo -->
+    <div class="landing-logo" style="animation-delay:.1s;animation-fill-mode:both;">
+      JEUXVIDEO<span class="pi">.PI</span>
+    </div>
+
+    <!-- Tagline -->
+    <div class="landing-tagline">Play &nbsp;·&nbsp; Create &nbsp;·&nbsp; Discover</div>
+
+    <!-- Phrase -->
+    <p class="landing-phrase">
+      Join the 1st independent portal and build the future of gaming on Pi.
+    </p>
+
+    <div class="landing-sep"></div>
+
+    <!-- CTA -->
+    <button class="landing-btn" onclick="enterPortal()" id="landing-cta">
+      ENTER THE EXPERIENCE
+    </button>
+
+
+    <div class="landing-bottom-line"></div>
+
+  </div>
 </div>
 
-<!-- LANG -->
-<div class="lang-row">
-  <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
-  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
+
+<!-- ════════════════════════════════════════════════════════
+     HEADER UNIFIÉ — logo + nav + langue + don rétractable
+     Remplace : don-bar, lang-row, header, nav-tabs
+════════════════════════════════════════════════════════ -->
+<div id="site-header">
+
+  <!-- ── Ligne principale ── -->
+  <div id="header-top">
+
+    <!-- GAUCHE : logo image + texte -->
+    <a class="hdr-brand" onclick="showTab('home')" href="#">
+      <!-- Logo image JV manettes (même chemin que la landing) -->
+      <img
+        src="Images/Logo%20jeuxvideo%20final.jpg"
+        alt="JV"
+        class="hdr-brand-img"
+        onerror="this.style.display='none'"
+      >
+      <!-- Texte JEUXVIDEO.PI à côté du logo -->
+      <span class="hdr-brand-text">JEUXVIDEO<span class="pi">.PI</span></span>
+    </a>
+
+    <!-- CENTRE : bouton DON en position absolue = centrage parfait -->
+    <button id="btn-don-toggle"
+            onclick="toggleDonDrawer()"
+            aria-expanded="false"
+            aria-controls="don-drawer">
+      ♥ DON
+    </button>
+
+    <!-- DROITE : langues collées au bord droit -->
+    <div id="hdr-right">
+      <!-- Langue EN (priorité) -->
+      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
+      <!-- Langue FR (secondaire) -->
+      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+    </div>
+
+  </div><!-- /header-top -->
+
+  <!-- ── Bandeau don rétractable (fermé par défaut) ── -->
+  <div id="don-drawer" role="region" aria-label="Faire un don">
+    <div class="don-drawer-inner">
+      <!-- Label -->
+      <span class="don-drawer-label"
+            data-fr="Soutenir le portail :"
+            data-en="Support the portal:">Support the portal:</span>
+      <!-- Montants (réutilise .btn-don et la fonction pick() existante) -->
+      <button class="btn-don" onclick="pick(this,'1')">1 Pi</button>
+      <button class="btn-don sel" onclick="pick(this,'3')">3 Pi</button>
+      <button class="btn-don" onclick="pick(this,'5')">5 Pi</button>
+      <button class="btn-don" onclick="pick(this,'10')">10 Pi</button>
+      <button class="btn-don" onclick="pick(this,'?')"
+              data-fr="Autre" data-en="Custom">Custom</button>
+      <!-- Bouton envoyer -->
+      <button class="btn-don envoyer"
+              onclick="sendDon()"
+              data-fr="Envoyer →" data-en="Send →">Send →</button>
+    </div>
+  </div><!-- /don-drawer -->
+
+</div><!-- /site-header -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     BARRE DE NAVIGATION — entre header et contenu
+     Sticky sous le site-header, au-dessus de Featured Game
+════════════════════════════════════════════════════════ -->
+<div id="portal-nav-bar">
+  <div id="portal-nav-bar-inner">
+
+    <button class="nav-bar-btn active"
+            onclick="switchTab('home')"
+            data-tab="home"
+            data-fr="Accueil" data-en="Home">Home</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('games')"
+            data-tab="games"
+            data-fr="Jeux" data-en="Games">Games</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('news')"
+            data-tab="news"
+            data-fr="News" data-en="News">News</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="switchTab('devs')"
+            data-tab="devs"
+            data-fr="Devs" data-en="Devs">Devs</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="showSection('contact')"
+            data-tab="contact"
+            data-fr="Contact" data-en="Contact">Contact</button>
+
+    <div class="nav-bar-sep"></div>
+
+    <button class="nav-bar-btn"
+            onclick="openRecruitModal()"
+            data-tab="recruit"
+            data-fr="Recrutement" data-en="Recruit">Recruit</button>
+
+  </div>
 </div>
-
-<!-- HEADER -->
-<header>
-  <div class="logo">JEUXVIDEO<span class="pi">.PI</span></div>
-  <div class="logo-sub" data-fr="Portail Gaming · Pi Network" data-en="Gaming Portal · Pi Network">Gaming Portal · Pi Network</div>
-</header>
-
-<!-- NAV -->
-<nav class="nav-tabs">
-  <button class="nav-tab active" onclick="showTab('home')" data-fr="🏠 Accueil" data-en="🏠 Home">🏠 Home</button>
-  <button class="nav-tab" onclick="showTab('games')" data-fr="🎮 Jeux" data-en="🎮 Games">🎮 Games</button>
-  <button class="nav-tab" onclick="showTab('news')" data-fr="📰 News" data-en="📰 News">📰 News</button>
-  <button class="nav-tab" onclick="showTab('devs')" data-fr="💼 Devs" data-en="💼 Devs">💼 Devs</button>
-</nav>
 
 <!-- ══ HOME ══ -->
 <div class="view active" id="view-home">
@@ -744,8 +1399,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 </div><!-- /devs -->
 
 <footer>
-  Pi Network Ecosystem &nbsp;|&nbsp; JEUXVIDEO.PI<br>
-  <span style="font-size:.52rem;">© 2026 JEUXVIDEO.PI · All rights reserved</span>
+  © JeuxVideo.Pi &nbsp;|&nbsp;
+  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Règlement &amp; CGU</a>
+  &nbsp;|&nbsp;
+  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Support &amp; Contact</a>
+  &nbsp;|&nbsp;
+  <a href="https://brainstorm.pi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Voter sur Brainstorm</a>
 </footer>
 
 <div id="toast"></div>
@@ -769,6 +1428,8 @@ function showTab(name){
     const txt=b.getAttribute('data-en')||b.textContent;
     if(txt.toLowerCase().includes(name==='devs'?'dev':name))b.classList.add('active');
   });
+  /* Sync nouveau header nav */
+  if(typeof syncHdrNav==='function') syncHdrNav(name);
   window.scrollTo({top:0,behavior:'smooth'});
   setTimeout(revealVisible,80);
 }
@@ -901,6 +1562,102 @@ function handleRecruitModal(e) {
       toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
     });
 }
+
+
+/* ════════════════════════════════════════
+   LANDING — enter portal
+════════════════════════════════════════ */
+function enterPortal() {
+  const landing = document.getElementById('landing');
+  if (!landing) return;
+
+  // Disable button immediately to prevent double-tap
+  const btn = document.getElementById('landing-cta');
+  if (btn) { btn.disabled = true; btn.textContent = 'LOADING...'; }
+
+  // Trigger exit animation
+  landing.classList.add('exit');
+
+  // Remove after transition completes
+  setTimeout(() => {
+    landing.style.display = 'none';
+    // Trigger reveal on home view
+    revealVisible();
+  }, 680);
+}
+
+// Auto-skip if user has already visited (session storage)
+(function checkSkipLanding() {
+  // Uncomment to enable auto-skip on return visit:
+  // if (sessionStorage.getItem('jvpi_visited')) { enterPortal(); return; }
+  // sessionStorage.setItem('jvpi_visited', '1');
+})();
+
+
+/* ════════════════════════════════════════
+   HEADER — toggle bandeau don
+════════════════════════════════════════ */
+function toggleDonDrawer() {
+  const drawer = document.getElementById('don-drawer');
+  const btn    = document.getElementById('btn-don-toggle');
+  const isOpen = drawer.classList.toggle('open');
+  /* Mettre à jour aria-expanded pour l'accessibilité */
+  btn.setAttribute('aria-expanded', isOpen);
+  /* Basculer la classe visuelle sur le bouton */
+  btn.classList.toggle('open', isOpen);
+}
+
+/* ════════════════════════════════════════
+   HEADER — sync nav active sur hdr-nav
+   (appelé par showTab existant)
+════════════════════════════════════════ */
+function syncHdrNav(tabName) {
+  /* Retirer .active de tous les boutons hdr-nav */
+  document.querySelectorAll('.hdr-nav-btn').forEach(b => b.classList.remove('active'));
+  /* Ajouter .active sur le bouton correspondant */
+  const match = document.querySelector(`.hdr-nav-btn[data-tab="${tabName}"]`);
+  if (match) match.classList.add('active');
+}
+
+/* ════════════════════════════════════════
+   HEADER — mise à jour setLang pour
+   synchroniser aussi les hdr-lang
+════════════════════════════════════════ */
+const _origSetLang = setLang;
+function setLang(l) {
+  _origSetLang(l);
+  /* Sync boutons langue du header */
+  document.querySelectorAll('.hdr-lang').forEach(b =>
+    b.classList.toggle('on', b.textContent.includes(l.toUpperCase()))
+  );
+}
+
+/* Appel initial pour synchro au chargement */
+(function initHdrNav(){
+  syncHdrNav('home');
+})();
+
+
+/* ════════════════════════════════════════════════════════
+   BARRE DE NAV — switchTab
+   Gère à la fois la nav-bar et la syncHdrNav
+════════════════════════════════════════════════════════ */
+function switchTab(name) {
+  /* Appeler showTab existant pour changer la vue */
+  showTab(name);
+
+  /* Sync barre de nav dédiée */
+  document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+  const match = document.querySelector(`.nav-bar-btn[data-tab="${name}"]`);
+  if (match) match.classList.add('active');
+}
+
+/* Init : synchro au chargement */
+(function initNavBar(){
+  document.querySelectorAll('.nav-bar-btn').forEach(b => {
+    if (b.dataset.tab === 'home') b.classList.add('active');
+  });
+})();
 
 </script>
 
