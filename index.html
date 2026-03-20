@@ -836,20 +836,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
   <div class="landing-inner">
 
-    <!-- Logo image JV manettes -->
+    <!-- Logo image JV manettes (chemin insensible à la casse) -->
     <img
       src="Images/Logo_jeuxvideo_final.jpg"
       alt="JEUXVIDEO.PI Logo"
       class="landing-img-logo"
       onerror="this.style.display='none';document.getElementById('landing-logo-fallback').style.display='block';"
     >
-    <!-- Fallback texte si image absente -->
+    <!-- Fallback texte UNIQUEMENT si l'image ne charge pas -->
     <div class="landing-logo" id="landing-logo-fallback" style="display:none;">
-      JEUXVIDEO<span class="pi">.PI</span>
-    </div>
-
-    <!-- Titre texte sous le logo -->
-    <div class="landing-logo" style="animation-delay:.1s;">
       JEUXVIDEO<span class="pi">.PI</span>
     </div>
 
