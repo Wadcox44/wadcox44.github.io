@@ -369,8 +369,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
 <!-- LANG -->
 <div class="lang-row">
-  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
   <button class="lang-btn on" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
 </div>
 
 <!-- HEADER -->
@@ -413,11 +413,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
     <!-- Slots "Votre jeu ici" -->
     <div class="slots-section rv">
       <div class="slots-grid">
-        <!-- Slot 1 — Gold Pixel (exemple) -->
-        <div class="slot-card filled rv d1" onclick="window.location.href='/goldpixel'">
+        <!-- Slot 1 — Neon Breaker -->
+        <div class="slot-card filled rv d1" onclick="window.location.href='/breakout'"
+             style="border-color:rgba(0,243,255,.55);background:linear-gradient(135deg,rgba(0,15,35,.95),rgba(0,35,55,.9));">
           <div class="slot-card-inner">
-            <span class="slot-game-emoji">🟡</span>
-            <span class="slot-game-name">GOLD PIXEL</span>
+            <span class="slot-game-emoji" style="filter:drop-shadow(0 0 8px #00f3ff);">🧱</span>
+            <span class="slot-game-name" style="color:var(--cy);text-shadow:0 0 8px var(--cy);">NEON BREAKER</span>
           </div>
         </div>
         <!-- Slot 2 — 2048 Neon (coming soon) -->
@@ -492,6 +493,19 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
+      <div class="av-card rv" data-cat="arcade" onclick="window.location.href='/breakout'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#001020,#002035);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(0,243,255,.3);">🧱</div>
+        <div style="flex:1;min-width:0;">
+          <div class="av-title" style="color:var(--cy);margin-bottom:3px;">NEON BREAKER</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Arcade</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">5 Levels</span>
+          </div>
+          <div class="av-text" data-fr="Casse-briques néon. 5 niveaux, balle physique, effets glow." data-en="Neon breakout game. 5 levels, physics ball, glow FX.">Neon breakout game. 5 levels, physics ball, glow FX.</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
+      </div>
+
       <div class="av-card rv" data-cat="puzzle" style="flex-direction:row;align-items:center;gap:14px;opacity:.5;cursor:default;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🧩</div>
         <div style="flex:1;">
