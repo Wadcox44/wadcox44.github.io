@@ -942,9 +942,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 .hero-card-new img {
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: brightness(.85) saturate(1.4) contrast(1.05);
-  /* Supprime le fond blanc du JPG */
-  mix-blend-mode: multiply;
+  filter: brightness(.55);
   transition: .7s ease;
   display: block;
 }
@@ -954,7 +952,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 .hero-card-new:hover img {
   transform: scale(1.06);
-  filter: brightness(1) saturate(1.6) contrast(1.08);
+  filter: brightness(.75);
 }
 
 /* Overlay contenu sur la carte */
@@ -1164,12 +1162,10 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  /* Supprime le fond blanc du JPG */
-  mix-blend-mode: multiply;
   transition: transform .5s, filter .5s;
 }
-.sc-card.featured .sc-card-bg { filter: brightness(.82) saturate(1.45) contrast(1.05); }
-.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(1) saturate(1.6) contrast(1.08); }
+.sc-card.featured .sc-card-bg { filter: brightness(.45); }
+.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(.6); }
 
 /* Overlay dégradé bas */
 .sc-card-overlay {
