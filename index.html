@@ -950,16 +950,16 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
       <span class="hdr-brand-text">JEUXVIDEO<span class="pi">.PI</span></span>
     </a>
 
-    <!-- DROITE : Don + langues (Don en premier pour être plus centré) -->
-    <div id="hdr-right">
-      <!-- Bouton Don animé — mis en premier pour être plus proche du centre -->
-      <button id="btn-don-toggle"
-              onclick="toggleDonDrawer()"
-              aria-expanded="false"
-              aria-controls="don-drawer">
-        ♥ DON
-      </button>
+    <!-- CENTRE : bouton DON en position absolue = centrage parfait -->
+    <button id="btn-don-toggle"
+            onclick="toggleDonDrawer()"
+            aria-expanded="false"
+            aria-controls="don-drawer">
+      ♥ DON
+    </button>
 
+    <!-- DROITE : langues collées au bord droit -->
+    <div id="hdr-right">
       <!-- Langue EN (priorité) -->
       <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
       <!-- Langue FR (secondaire) -->
@@ -1399,8 +1399,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 </div><!-- /devs -->
 
 <footer>
-  Pi Network Ecosystem &nbsp;|&nbsp; JEUXVIDEO.PI<br>
-  <span style="font-size:.52rem;">© 2026 JEUXVIDEO.PI · All rights reserved</span>
+  © JeuxVideo.Pi &nbsp;|&nbsp;
+  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Règlement &amp; CGU</a>
+  &nbsp;|&nbsp;
+  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Support &amp; Contact</a>
+  &nbsp;|&nbsp;
+  <a href="https://brainstorm.pi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Voter sur Brainstorm</a>
 </footer>
 
 <div id="toast"></div>
