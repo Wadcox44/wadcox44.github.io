@@ -436,6 +436,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
   text-shadow:
     0 0 30px rgba(0,243,255,.35),
     0 0 80px rgba(0,243,255,.12);
+  /* opacity:1 par défaut — l'animation gère l'entrée mais ne bloque pas */
+  opacity: 1;
   animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
 }
 .landing-logo .pi {
@@ -598,16 +600,18 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
 
 /* ── LANDING IMAGE LOGO ── */
 .landing-img-logo {
-  width: clamp(70px, 18vw, 110px); /* Logo discret au-dessus du titre */
+  width: clamp(80px, 22vw, 130px); /* Logo discret, légèrement plus grand pour être lisible */
   height: auto;
   display: block;
-  margin-bottom: 10px;
-  opacity: .88; /* Légèrement transparent pour s'intégrer */
+  margin-bottom: 12px;
+  /* Fondre le fond sombre du JPG avec le background de la landing */
+  mix-blend-mode: lighten;
+  opacity: .95;
   animation: landingFadeUp .9s cubic-bezier(.22,1,.36,1) both;
-  /* Glow subtil pour fondre avec l'ambiance néon */
+  /* Glow néon cyan + or */
   filter:
-    drop-shadow(0 0 10px rgba(0,243,255,.25))
-    drop-shadow(0 0 20px rgba(255,170,0,.12));
+    drop-shadow(0 0 12px rgba(0,243,255,.4))
+    drop-shadow(0 0 24px rgba(255,170,0,.2));
 }
 
 /* ════════════════════════════════════════════════════════
@@ -845,7 +849,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.3);padding:32px 0 24px;text-align
     >
 
     <!-- Titre JEUXVIDEO.PI — toujours visible sous le logo -->
-    <div class="landing-logo" style="animation-delay:.08s;">
+    <div class="landing-logo" style="animation-delay:.1s;animation-fill-mode:both;">
       JEUXVIDEO<span class="pi">.PI</span>
     </div>
 
