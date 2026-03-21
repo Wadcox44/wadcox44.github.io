@@ -119,14 +119,13 @@
     /* ─── VIEWPORT CANEVAS ─── */
     #viewport-container {
       position: relative;
-      width: 95vw;
-      max-width: 880px;
+      width: 100%;
+      max-width: 100%;
       aspect-ratio: 16 / 9;
-      border: 2px solid var(--gold);
-      border-radius: 10px;
+      border: none;
+      border-radius: 0;
       overflow: hidden;
       background: #030810;
-      box-shadow: 0 0 30px rgba(255,170,0,0.15), inset 0 0 20px rgba(0,0,0,0.5);
       touch-action: none;
       z-index: 1;
     }
@@ -1304,11 +1303,10 @@ body {
 ══════════════════════════════════════════════════════════════ */
 .hud-main-layout {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
   display: grid;
-  /* Canvas occupe 70%, panel droit 30% */
-  grid-template-columns: 1fr 280px;
-  grid-template-rows: auto 1fr;
+  /* Canvas occupe max, panel droit 260px fixe */
+  grid-template-columns: 1fr 260px;
   gap: var(--hud-gap);
   padding: 8px 16px 16px;
   align-items: start;
@@ -1329,6 +1327,21 @@ body {
   gap: 8px;
   position: sticky;
   top: 8px;
+  /* Assure que le panel a une hauteur minimum visible */
+  min-height: 200px;
+}
+
+/* Glass-panel dans le side-panel — toujours visible */
+.hud-side-panel .glass-panel {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Palette : s'assurer qu'elle s'affiche en grille */
+.hud-side-panel .palette {
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+  gap: 4px !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2447,15 +2460,14 @@ body {
    Tous les styles interactifs préservés
 ════════════════════════════════════════ */
 #viewport-container {
-  /* Override HUD précédent — tout dans .canvas-frame */
   position: relative !important;
   width: 100% !important;
   max-width: none !important;
+  aspect-ratio: 16 / 9;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  background: #010508 !important;
-  /* Curseurs préservés */
+  background: #030810 !important;
   touch-action: none;
   z-index: 1;
 }
@@ -3657,6 +3669,58 @@ body {
   #shop-modal { max-height: 95vh; }
 }
 
+  
+/* ═══════════════════════════════════════════════════
+   FIXES PALETTE + LAYOUT
+═══════════════════════════════════════════════════ */
+
+/* Palette toujours visible dans le panel droit */
+#palette {
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+  gap: 4px;
+  min-height: 80px;
+}
+
+/* Canvas-frame hérite bien du ratio */
+.canvas-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+}
+
+/* Viewport dans le frame */
+.canvas-frame #viewport-container {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: unset;
+}
+
+/* Canvas-stage : pas de hauteur fixe, laisser le ratio faire */
+.canvas-stage {
+  width: 100%;
+  position: relative;
+}
+
+/* palette-hint cachée par défaut mais ne bloque pas la hauteur */
+.palette-hint.hidden { display: none !important; }
+
+/* bonus-gold-reserve caché par défaut */
+#bonus-gold-reserve { display: none; }
+#bonus-gold-reserve.visible { display: block; }
+
+/* Shop trigger bouton — taille correcte */
+#shop-trigger-btn {
+  width: 100%;
+}
+
+/* hud-tool-strip — sous le canvas */
+.hud-tool-strip {
+  width: 100%;
+}
+
   </style>
 </head>
 <body>
@@ -3963,43 +4027,18 @@ body {
   ══════════════════════════════════════════ -->
   <div class="hud-canvas-column">
 
-    <!-- ─── Challenge du jour (au-dessus du canvas) ─── -->
-    <div id="challenge-bar" class="pulse-anim">
-      <div class="challenge-inner">
-        <canvas id="template-preview-canvas" width="80" height="45"
-                style="width:80px;height:45px;"></canvas>
-        <div class="challenge-left">
-          <div class="challenge-header">
-            <span class="challenge-badge">CHALLENGE DU JOUR</span>
-            <span class="challenge-title" id="challenge-name">—</span>
-          </div>
-          <div class="challenge-meta">
-            <div class="challenge-diff">
-              Difficulté :&nbsp;
-              <div class="diff-dots" id="diff-dots">
-                <div class="diff-dot"></div>
-                <div class="diff-dot"></div>
-                <div class="diff-dot"></div>
-              </div>
-            </div>
-            <span class="challenge-bonus-tag">+10 OR BONUS si réussi</span>
-          </div>
-        </div>
-        <button class="btn-challenge" id="btn-challenge" onclick="startChallenge()">
-          🎯 ESSAYER
-        </button>
-      </div>
+    <!-- IDs challenge conservés pour le JS (masqués) -->
+    <div id="challenge-bar" style="display:none;">
+      <canvas id="template-preview-canvas" width="80" height="45"></canvas>
+      <span id="challenge-name"></span>
+      <div id="diff-dots"></div>
+      <button id="btn-challenge" onclick="startChallenge()"></button>
     </div>
-
-    <!-- ─── Barre challenge en cours ─── -->
-    <div id="challenge-active-bar">
-      <span class="ca-label">🎯 MODE CHALLENGE — Reproduire le modèle</span>
-      <span class="ca-progress">Pixels corrects : <span id="ca-correct">0</span>/<span id="ca-total">0</span></span>
-      <button class="btn-toggle-overlay active" id="btn-overlay-toggle" onclick="toggleTemplateOverlay()">
-        👁 MODÈLE
-      </button>
-      <button class="btn-validate" onclick="validateChallenge()">✓ VALIDER</button>
-      <button class="btn-abandon"  onclick="abandonChallenge()">✕ QUITTER</button>
+    <div id="challenge-active-bar" style="display:none;">
+      <span id="ca-correct">0</span><span id="ca-total">0</span>
+      <button id="btn-overlay-toggle" onclick="toggleTemplateOverlay()"></button>
+      <button onclick="validateChallenge()"></button>
+      <button onclick="abandonChallenge()"></button>
     </div>
 
     <!-- ══════════════════════════════════════════════════════
@@ -6030,7 +6069,7 @@ requestAnimationFrame(() => {
     loadGallery();
     loadTop10();
     loadAllPlayers();
-    initDailyChallenge(); // ← Template du jour
+    // initDailyChallenge(); // désactivé — challenge supprimé de cette version
   });
 });
 
