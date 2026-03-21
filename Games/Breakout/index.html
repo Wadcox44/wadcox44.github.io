@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>NEON BREAKER — JEUXVIDEO.PI</title>
+<title>BREAKER — JEUXVIDEO.PI</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -322,7 +322,7 @@ body{
 <!-- TOP BAR -->
 <div class="topbar">
   <a class="back-btn" href="/">← PORTAL</a>
-  <div class="game-title">NEON BREAKER</div>
+  <div class="game-title">BREAKER</div>
   <div class="hud">
     <div class="hud-item"><div class="hud-val" id="h-score">0</div><div class="hud-lbl">Score</div></div>
     <div class="hud-item"><div class="hud-val" id="h-lives">❤❤❤</div><div class="hud-lbl">Lives</div></div>
@@ -446,7 +446,7 @@ function resize(){
   const topH = document.querySelector('.topbar').getBoundingClientRect().height;
   const puH  = document.getElementById('pu-bar').getBoundingClientRect().height||22;
   const joyH = window.matchMedia('(pointer:coarse)').matches
-    ? document.getElementById('joystick-wrap').getBoundingClientRect().height : 0;
+    ? document.getElementById('touch-zone').getBoundingClientRect().height : 0;
   const tbH  = joyH;
   const avH  = window.innerHeight - topH - puH - tbH - 4;
   let cW=maxW, cH=Math.min(avH,cW*1.4);
@@ -522,7 +522,7 @@ function showTutorial(){
   const ov=document.getElementById('ov');
   ov.innerHTML=`
     <div class="tut-wrap">
-      <div class="tut-logo">NEON BREAKER</div>
+      <div class="tut-logo">BREAKER</div>
       <div class="tut-sub">HOW TO PLAY</div>
 
       <div class="tut-section">
