@@ -1998,8 +1998,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         🎮 <span data-fr="Jeux" data-en="Games">Games</span>
       </div>
       <div class="showcase-count"
-           data-fr="3 jeux · 3 slots libres"
-           data-en="3 games · 3 open slots">3 games · 3 open slots</div>
+           data-fr="4 jeux · 2 slots libres"
+           data-en="4 games · 2 open slots">4 games · 2 open slots</div>
     </div>
 
     <!-- Grille vitrine -->
@@ -2124,12 +2124,21 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
       </div>
 
-      <!-- ── YOUR GAME HERE × 4 ── -->
-      <div class="sc-card your-game rv d1" onclick="openDevModal()">
-        <div class="sc-your-inner">
-          <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+      <!-- ── YOUR GAME HERE × 3 + PI STACKER ── -->
+      <div class="sc-card live rv d1" onclick="window.location.href='/stacker'"
+           style="background:linear-gradient(135deg,rgba(10,0,30,.95),rgba(20,0,50,.9));border-color:rgba(204,68,255,.4);">
+        <div class="sc-badge" style="background:rgba(204,68,255,.12);border:1px solid rgba(204,68,255,.5);color:#cc44ff;top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
+          <div class="sc-badge-dot"></div>NEW
+        </div>
+        <div class="sc-card-emoji" style="filter:drop-shadow(0 0 10px rgba(204,68,255,.6));font-size:2.2rem;position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);">🔷</div>
+        <div class="sc-card-overlay"></div>
+        <div class="sc-card-body">
+          <div class="sc-card-info">
+            <div class="sc-card-name" style="color:#cc44ff;text-shadow:0 0 10px rgba(204,68,255,.4);">PI STACKER</div>
+            <div class="sc-card-tags">
+              <span class="sc-tag" style="background:rgba(204,68,255,.08);border:1px solid rgba(204,68,255,.3);color:rgba(204,68,255,.8);">Puzzle</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2417,6 +2426,19 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
+      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/stacker'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a0020,#180040);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(204,68,255,.3);">🔷</div>
+        <div style="flex:1;min-width:0;">
+          <div class="av-title" style="color:#cc44ff;margin-bottom:3px;">PI STACKER</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(204,68,255,.08);color:rgba(204,68,255,.7);border:1px solid rgba(204,68,255,.2);">Puzzle</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(68,255,136,.06);color:rgba(68,255,136,.7);border:1px solid rgba(68,255,136,.25);">New</span>
+          </div>
+          <div class="av-text" data-fr="Blocs tombants cyberpunk. Empile, élimine, bats ton record !" data-en="Cyberpunk falling blocks. Stack, clear lines, beat your record!">Cyberpunk falling blocks. Stack, clear lines, beat your record!</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:#cc44ff;white-space:nowrap;">PLAY →</div>
+      </div>
+
       <div class="av-card rv" data-cat="arcade" style="flex-direction:row;align-items:center;gap:14px;opacity:.5;cursor:default;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a1010,#0a2a1a);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🚀</div>
         <div style="flex:1;">
