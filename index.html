@@ -942,7 +942,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 .hero-card-new img {
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: brightness(.55);
+  filter: brightness(.85) saturate(1.4) contrast(1.05);
+  /* Supprime le fond blanc du JPG */
+  mix-blend-mode: multiply;
   transition: .7s ease;
   display: block;
 }
@@ -952,7 +954,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 .hero-card-new:hover img {
   transform: scale(1.06);
-  filter: brightness(.75);
+  filter: brightness(1) saturate(1.6) contrast(1.08);
 }
 
 /* Overlay contenu sur la carte */
@@ -1162,10 +1164,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
+  /* Supprime le fond blanc du JPG */
+  mix-blend-mode: multiply;
   transition: transform .5s, filter .5s;
 }
-.sc-card.featured .sc-card-bg { filter: brightness(.45); }
-.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(.6); }
+.sc-card.featured .sc-card-bg { filter: brightness(.82) saturate(1.45) contrast(1.05); }
+.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(1) saturate(1.6) contrast(1.08); }
 
 /* Overlay dégradé bas */
 .sc-card-overlay {
@@ -1498,6 +1502,258 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   font-size: .5rem;
   color: rgba(200,216,232,.25);
   letter-spacing: 1px;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   SECTION NEWS HOME — mini bloc activité
+════════════════════════════════════════════════════════ */
+.news-home-block {
+  width: 100%;
+  padding: 20px 0 8px;
+  border-bottom: 1px solid rgba(0,243,255,.07);
+  position: relative; z-index: 2;
+}
+.news-home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.news-home-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .72rem;
+  color: var(--cy);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-left: 3px solid var(--or);
+  padding-left: 10px;
+}
+.news-home-more {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .5rem;
+  color: rgba(0,243,255,.45);
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color .2s;
+  background: none;
+  border: none;
+  text-transform: uppercase;
+  padding: 0;
+}
+.news-home-more:hover { color: var(--cy); }
+
+/* Fil d'actualité */
+.news-feed { display: flex; flex-direction: column; gap: 8px; }
+
+/* Carte news */
+.nf-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  background: rgba(8,18,32,.7);
+  border: 1px solid rgba(0,243,255,.1);
+  border-left: 3px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .25s;
+  position: relative;
+  overflow: hidden;
+}
+.nf-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(0,243,255,.03), transparent);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.nf-card:hover { transform: translateX(4px); border-color: rgba(0,243,255,.25); }
+.nf-card:hover::before { opacity: 1; }
+
+/* Variantes couleur par type */
+.nf-card.live   { border-left-color: #44ff88; }
+.nf-card.new    { border-left-color: var(--cy); }
+.nf-card.update { border-left-color: var(--or); }
+.nf-card.soon   { border-left-color: rgba(200,216,232,.2); }
+.nf-card.dev    { border-left-color: var(--pu, #cc44ff); }
+
+/* Icône / emoji */
+.nf-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.nf-icon.live   { background: rgba(68,255,136,.1);  border: 1px solid rgba(68,255,136,.3); }
+.nf-icon.new    { background: rgba(0,243,255,.08);   border: 1px solid rgba(0,243,255,.25); }
+.nf-icon.update { background: rgba(255,170,0,.1);   border: 1px solid rgba(255,170,0,.3); }
+.nf-icon.soon   { background: rgba(200,216,232,.05); border: 1px solid rgba(200,216,232,.12); }
+.nf-icon.dev    { background: rgba(204,68,255,.08);  border: 1px solid rgba(204,68,255,.25); }
+
+/* Contenu texte */
+.nf-body { flex: 1; min-width: 0; }
+.nf-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.nf-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: .38rem;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nf-badge.live   { background: rgba(68,255,136,.12);  border: 1px solid rgba(68,255,136,.4);  color: #44ff88; }
+.nf-badge.new    { background: rgba(0,243,255,.1);    border: 1px solid rgba(0,243,255,.4);   color: var(--cy); }
+.nf-badge.update { background: rgba(255,170,0,.12);   border: 1px solid rgba(255,170,0,.45);  color: var(--or); }
+.nf-badge.soon   { background: rgba(200,216,232,.06); border: 1px solid rgba(200,216,232,.2); color: rgba(200,216,232,.5); }
+.nf-badge.dev    { background: rgba(204,68,255,.1);   border: 1px solid rgba(204,68,255,.4);  color: #cc44ff; }
+.nf-name {
+  font-family: 'Orbitron', monospace;
+  font-size: .6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nf-desc {
+  font-size: .72rem;
+  color: rgba(200,216,232,.5);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Flèche droite */
+.nf-arrow {
+  font-family: 'Orbitron', monospace;
+  font-size: .48rem;
+  color: rgba(0,243,255,.35);
+  flex-shrink: 0;
+  transition: color .2s, transform .2s;
+}
+.nf-card:hover .nf-arrow { color: var(--cy); transform: translateX(3px); }
+
+/* ════════════════════════════════════════════════════════
+   VUE NEWS — onglet refondé
+════════════════════════════════════════════════════════ */
+.news-view-header {
+  padding: 16px 0 14px;
+  border-bottom: 1px solid rgba(0,243,255,.07);
+  margin-bottom: 0;
+}
+.news-view-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .72rem;
+  color: var(--cy);
+  letter-spacing: 1.5px;
+  border-left: 3px solid var(--or);
+  padding-left: 10px;
+  text-transform: uppercase;
+}
+
+/* Grande carte news (featured) */
+.nv-featured {
+  width: 100%;
+  padding: 16px 14px 14px;
+  margin: 14px 0 10px;
+  background: linear-gradient(135deg, rgba(10,22,40,.95), rgba(5,11,20,.98));
+  border: 1px solid rgba(0,243,255,.2);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .25s, box-shadow .25s;
+}
+.nv-featured::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cy), var(--or), var(--cy));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+.nv-featured:hover { border-color: rgba(0,243,255,.4); box-shadow: 0 4px 24px rgba(0,243,255,.08); }
+.nv-featured-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Orbitron', monospace; font-size: .42rem;
+  letter-spacing: 1px; padding: 3px 10px; border-radius: 100px;
+  font-weight: 700; margin-bottom: 10px;
+}
+.nv-featured-badge.live   { background: rgba(68,255,136,.12); border: 1px solid rgba(68,255,136,.45); color: #44ff88; }
+.nv-featured-badge.new    { background: rgba(0,243,255,.1);   border: 1px solid rgba(0,243,255,.4);   color: var(--cy); }
+.nv-featured-badge.update { background: rgba(255,170,0,.12);  border: 1px solid rgba(255,170,0,.45);  color: var(--or); }
+.nv-featured-badge.soon   { background: rgba(200,216,232,.06);border: 1px solid rgba(200,216,232,.2); color: rgba(200,216,232,.5); }
+.nv-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse 1.6s ease-in-out infinite; }
+.nv-featured-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .88rem; font-weight: 900;
+  color: #fff; line-height: 1.3; letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.nv-featured-title span { color: var(--cy); }
+.nv-featured-desc {
+  font-size: .78rem;
+  color: rgba(200,216,232,.55);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.nv-featured-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .5rem; color: rgba(200,216,232,.3); letter-spacing: 1px;
+}
+.nv-featured-meta span { color: rgba(0,243,255,.4); }
+
+/* Liste news secondaires */
+.nv-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.nv-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 13px;
+  background: rgba(8,18,32,.6);
+  border: 1px solid rgba(0,243,255,.08);
+  border-left: 2px solid transparent;
+  border-radius: 10px;
+  transition: all .22s;
+  cursor: default;
+}
+.nv-item.clickable { cursor: pointer; }
+.nv-item.clickable:hover { border-color: rgba(0,243,255,.2); transform: translateX(3px); }
+.nv-item.live-item   { border-left-color: #44ff88; }
+.nv-item.new-item    { border-left-color: var(--cy); }
+.nv-item.update-item { border-left-color: var(--or); }
+.nv-item.soon-item   { border-left-color: rgba(200,216,232,.15); }
+.nv-item-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+.nv-item-body { flex: 1; min-width: 0; }
+.nv-item-head {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 3px; flex-wrap: wrap;
+}
+.nv-item-badge {
+  font-family: 'Orbitron', monospace; font-size: .38rem;
+  letter-spacing: .8px; padding: 2px 7px; border-radius: 100px; font-weight: 700;
+}
+.nv-item-badge.live   { background: rgba(68,255,136,.1);  border: 1px solid rgba(68,255,136,.35); color: #44ff88; }
+.nv-item-badge.new    { background: rgba(0,243,255,.08);  border: 1px solid rgba(0,243,255,.3);   color: var(--cy); }
+.nv-item-badge.update { background: rgba(255,170,0,.1);   border: 1px solid rgba(255,170,0,.4);   color: var(--or); }
+.nv-item-badge.soon   { background: rgba(200,216,232,.05);border: 1px solid rgba(200,216,232,.15);color: rgba(200,216,232,.4); }
+.nv-item-title {
+  font-family: 'Orbitron', monospace; font-size: .62rem;
+  color: #fff; letter-spacing: .5px;
+}
+.nv-item-desc {
+  font-size: .75rem; color: rgba(200,216,232,.52); line-height: 1.55;
+}
+.nv-item-date {
+  font-family: 'Share Tech Mono', monospace; font-size: .48rem;
+  color: rgba(200,216,232,.25); letter-spacing: 1px; margin-top: 5px;
 }
 
 </style>
@@ -1989,6 +2245,125 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
   </div><!-- /dev-home-block -->
 
+  <!-- ════════════════════════════════════════
+       MINI BLOC ACTIVITÉ — home
+  ════════════════════════════════════════ -->
+  <div class="news-home-block rv">
+
+    <div class="news-home-header">
+      <div class="news-home-title">
+        📡 <span data-fr="Activité" data-en="Activity">Activity</span>
+      </div>
+      <button class="news-home-more" onclick="switchTab('news')"
+              data-fr="TOUT VOIR →" data-en="SEE ALL →">SEE ALL →</button>
+    </div>
+
+    <div class="news-feed">
+
+      <!-- Gold Pixel — LIVE -->
+      <div class="nf-card live rv d1" onclick="window.location.href='/goldpixel'">
+        <div class="nf-icon live">🟡</div>
+        <div class="nf-body">
+          <div class="nf-top">
+            <span class="nf-badge live">
+              <span style="width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block;margin-right:3px;animation:pulse 1.6s ease-in-out infinite;"></span>
+              LIVE
+            </span>
+            <span class="nf-name"
+                  data-fr="Gold Pixel — Dessine ta légende"
+                  data-en="Gold Pixel — Draw your legend">Gold Pixel — Draw your legend</span>
+          </div>
+          <div class="nf-desc"
+               data-fr="Crée du pixel art 80×45, publie et vote. Chaque chef-d'œuvre compte."
+               data-en="Create 80×45 pixel art, publish &amp; vote. Every masterpiece counts.">
+            Create 80×45 pixel art, publish &amp; vote. Every masterpiece counts.
+          </div>
+        </div>
+        <div class="nf-arrow">→</div>
+      </div>
+
+      <!-- Neon Breaker — LIVE -->
+      <div class="nf-card live rv d2" onclick="window.location.href='/breakout'">
+        <div class="nf-icon live">🧱</div>
+        <div class="nf-body">
+          <div class="nf-top">
+            <span class="nf-badge live">
+              <span style="width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block;margin-right:3px;animation:pulse 1.6s ease-in-out infinite;"></span>
+              LIVE
+            </span>
+            <span class="nf-name"
+                  data-fr="Neon Breaker — Casse les briques"
+                  data-en="Neon Breaker — Smash the bricks">Neon Breaker — Smash the bricks</span>
+          </div>
+          <div class="nf-desc"
+               data-fr="10 niveaux, powerups, multiballe. Ton score dans le classement mondial ?"
+               data-en="10 levels, powerups, multiball. Your score on the global leaderboard?">
+            10 levels, powerups, multiball. Your score on the global leaderboard?
+          </div>
+        </div>
+        <div class="nf-arrow">→</div>
+      </div>
+
+      <!-- 2048 Neon — NEW -->
+      <div class="nf-card new rv d3" onclick="window.location.href='/2048'">
+        <div class="nf-icon new">🧩</div>
+        <div class="nf-body">
+          <div class="nf-top">
+            <span class="nf-badge new">NEW</span>
+            <span class="nf-name"
+                  data-fr="2048 Neon — Fusionne jusqu'au max"
+                  data-en="2048 Neon — Merge to the max">2048 Neon — Merge to the max</span>
+          </div>
+          <div class="nf-desc"
+               data-fr="Puzzle néon cyberpunk. Fusionne les tuiles et atteins le 2048 !"
+               data-en="Cyberpunk neon puzzle. Merge tiles and reach 2048!">
+            Cyberpunk neon puzzle. Merge tiles and reach 2048!
+          </div>
+        </div>
+        <div class="nf-arrow">→</div>
+      </div>
+
+      <!-- Pi Stacker — NEW -->
+      <div class="nf-card new rv d1" onclick="window.location.href='/stacker'">
+        <div class="nf-icon new">🔷</div>
+        <div class="nf-body">
+          <div class="nf-top">
+            <span class="nf-badge new">NEW</span>
+            <span class="nf-name"
+                  data-fr="Pi Stacker — Empile les blocs"
+                  data-en="Pi Stacker — Stack the blocks">Pi Stacker — Stack the blocks</span>
+          </div>
+          <div class="nf-desc"
+               data-fr="Puzzle de blocs cyberpunk. Empile, élimine les lignes, bat ton record !"
+               data-en="Cyberpunk falling blocks puzzle. Stack, clear lines, beat your record!">
+            Cyberpunk falling blocks puzzle. Stack, clear lines, beat your record!
+          </div>
+        </div>
+        <div class="nf-arrow">→</div>
+      </div>
+
+      <!-- Coming Soon -->
+      <div class="nf-card soon rv d2">
+        <div class="nf-icon soon">🚀</div>
+        <div class="nf-body">
+          <div class="nf-top">
+            <span class="nf-badge soon">COMING SOON</span>
+            <span class="nf-name"
+                  data-fr="Nouveaux jeux en approche"
+                  data-en="New games incoming">New games incoming</span>
+          </div>
+          <div class="nf-desc"
+               data-fr="D'autres expériences Pi Network arrivent bientôt sur le portail."
+               data-en="More Pi Network gaming experiences coming to the portal soon.">
+            More Pi Network gaming experiences coming to the portal soon.
+          </div>
+        </div>
+        <div class="nf-arrow" style="opacity:.3;">→</div>
+      </div>
+
+    </div><!-- /news-feed -->
+  </div><!-- /news-home-block -->
+
 </div><!-- /home -->
 
 <!-- ══ GAMES ══ -->
@@ -2058,33 +2433,150 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 <!-- ══ NEWS ══ -->
 <div class="view" id="view-news">
   <section style="border:none;padding-top:14px;">
-    <div class="cat-title rv"><span>📰 <span data-fr="News & Actualités" data-en="News & Updates">News & Updates</span></span></div>
-    <div class="news-list">
-      <div class="news-card rv d1">
-        <div class="news-date">March 2026</div>
-        <div class="news-tag" data-fr="Lancement" data-en="Launch">Launch</div>
-        <div class="news-title" data-fr="JEUXVIDEO.PI est en ligne !" data-en="JEUXVIDEO.PI is live!">JEUXVIDEO.PI is live!</div>
-        <div class="news-body" data-fr="Le premier portail de jeux Pi Network est officiellement lancé. Gold Pixel est disponible dès maintenant — dessinez, partagez, votez." data-en="The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.">The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.</div>
+
+    <div class="news-view-header rv">
+      <div class="news-view-title">📡 <span data-fr="Actualités & Activité" data-en="News & Activity">News & Activity</span></div>
+    </div>
+
+    <!-- Carte featured — Lancement du portail -->
+    <div class="nv-featured rv d1" onclick="window.location.href='/goldpixel'">
+      <div class="nv-featured-badge live">
+        <span class="nv-badge-dot"></span>
+        LIVE
       </div>
-      <div class="news-card rv d2">
-        <div class="news-date">Coming soon</div>
-        <div class="news-tag" data-fr="Fonctionnalité" data-en="Feature">Feature</div>
-        <div class="news-title" data-fr="Challenge quotidien dans Gold Pixel" data-en="Daily Challenge in Gold Pixel">Daily Challenge in Gold Pixel</div>
-        <div class="news-body" data-fr="Un nouveau challenge pixel art chaque jour. Reproduis le modèle du jour et gagne des pixels Or bonus !" data-en="A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!">A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!</div>
+      <div class="nv-featured-title"
+           data-fr="JEUXVIDEO.PI — Le portail est <span>en ligne</span>."
+           data-en="JEUXVIDEO.PI — The portal is <span>live</span>.">
+        JEUXVIDEO.PI — The portal is <span>live</span>.
       </div>
-      <div class="news-card rv d3">
-        <div class="news-date">Coming soon</div>
-        <div class="news-tag" data-fr="Jeux" data-en="Games">Games</div>
-        <div class="news-title" data-fr="2048 Neon est disponible !" data-en="2048 Neon is live!">2048 Neon is live!</div>
-        <div class="news-body" data-fr="Le puzzle néon 2048 est maintenant jouable sur le portail. Fusionne les tuiles jusqu'au 2048 !" data-en="The neon 2048 puzzle is now playable on the portal. Merge tiles all the way to 2048!">The neon 2048 puzzle is now playable on the portal. Merge tiles all the way to 2048!</div>
+      <div class="nv-featured-desc"
+           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Gold Pixel, Neon Breaker, 2048 Neon et Pi Stacker sont disponibles dès maintenant. Construis, partage, joue — l'aventure commence."
+           data-en="The 1st independent Pi Network gaming portal is officially live. Gold Pixel, Neon Breaker, 2048 Neon &amp; Pi Stacker are available now. Build, share, play — the adventure starts here.">
+        The 1st independent Pi Network gaming portal is officially live. Gold Pixel, Neon Breaker, 2048 Neon &amp; Pi Stacker are available now. Build, share, play — the adventure starts here.
       </div>
-      <div class="news-card rv d1">
-        <div class="news-date">Open</div>
-        <div class="news-tag" data-fr="Développeurs" data-en="Developers">Developers</div>
-        <div class="news-title" data-fr="Intégrez votre jeu — gratuitement" data-en="List your game — for free">List your game — for free</div>
-        <div class="news-body" data-fr="0% de commission, intégration Pi SDK sans frais. Soumettez votre jeu dès maintenant." data-en="0% commission, Pi SDK integration at no cost. Submit your game now.">0% commission, Pi SDK integration at no cost. Submit your game now.</div>
+      <div class="nv-featured-meta">
+        March 2026 &nbsp;<span>·</span>&nbsp; JEUXVIDEO.PI
       </div>
     </div>
+
+    <!-- Liste des news secondaires -->
+    <div class="nv-list">
+
+      <!-- Gold Pixel -->
+      <div class="nv-item live-item clickable rv d1" onclick="window.location.href='/goldpixel'">
+        <div class="nv-item-icon">🟡</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge live">LIVE</span>
+            <span class="nv-item-title"
+                  data-fr="Gold Pixel — Dessine ta légende"
+                  data-en="Gold Pixel — Draw your legend">Gold Pixel — Draw your legend</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Crée des œuvres pixel art 80×45, publie dans la galerie, vote pour tes favoris. Chaque dessin raconte une histoire. Le challenge du jour t'attend."
+               data-en="Create 80×45 pixel art, publish to the gallery, vote for your favourites. Every drawing tells a story. The daily challenge awaits.">
+            Create 80×45 pixel art, publish to the gallery, vote for your favourites. Every drawing tells a story. The daily challenge awaits.
+          </div>
+          <div class="nv-item-date">March 2026 · Pixel Art · Pi Network</div>
+        </div>
+      </div>
+
+      <!-- Neon Breaker -->
+      <div class="nv-item live-item clickable rv d2" onclick="window.location.href='/breakout'">
+        <div class="nv-item-icon">🧱</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge live">LIVE</span>
+            <span class="nv-item-title"
+                  data-fr="Neon Breaker — Casse-briques cyberpunk"
+                  data-en="Neon Breaker — Cyberpunk breakout">Neon Breaker — Cyberpunk breakout</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="10 niveaux de briques néon à détruire. Attrape les powerups — multiballe, laser, vitesse — et domine le classement mondial."
+               data-en="10 levels of neon bricks to destroy. Grab powerups — multiball, laser, speed — and dominate the global leaderboard.">
+            10 levels of neon bricks to destroy. Grab powerups — multiball, laser, speed — and dominate the global leaderboard.
+          </div>
+          <div class="nv-item-date">March 2026 · Arcade · Leaderboard</div>
+        </div>
+      </div>
+
+      <!-- 2048 Neon -->
+      <div class="nv-item new-item clickable rv d3" onclick="window.location.href='/2048'">
+        <div class="nv-item-icon">🧩</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge new">NEW</span>
+            <span class="nv-item-title"
+                  data-fr="2048 Neon — Puzzle de fusion néon"
+                  data-en="2048 Neon — Neon merge puzzle">2048 Neon — Neon merge puzzle</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Fusionne les tuiles cyberpunk et atteins le 2048. Simple à apprendre, impossible à maîtriser. Parfait pour quelques minutes de jeu intense."
+               data-en="Merge cyberpunk tiles and reach 2048. Easy to learn, impossible to master. Perfect for a few minutes of intense play.">
+            Merge cyberpunk tiles and reach 2048. Easy to learn, impossible to master. Perfect for a few minutes of intense play.
+          </div>
+          <div class="nv-item-date">March 2026 · Puzzle · Pi Network</div>
+        </div>
+      </div>
+
+      <!-- Pi Stacker -->
+      <div class="nv-item new-item clickable rv d1" onclick="window.location.href='/stacker'">
+        <div class="nv-item-icon">🔷</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge new">NEW</span>
+            <span class="nv-item-title"
+                  data-fr="Pi Stacker — Blocs tombants cyberpunk"
+                  data-en="Pi Stacker — Cyberpunk falling blocks">Pi Stacker — Cyberpunk falling blocks</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Empile les blocs néon, élimine les lignes, monte en niveau. Les blocs s'envolent en particules de données quand tu fais un combo — pur style cyberpunk."
+               data-en="Stack neon blocks, clear lines, level up. Blocks explode into data particles on combos — pure cyberpunk style.">
+            Stack neon blocks, clear lines, level up. Blocks explode into data particles on combos — pure cyberpunk style.
+          </div>
+          <div class="nv-item-date">March 2026 · Puzzle · Cyberpunk</div>
+        </div>
+      </div>
+
+      <!-- Challenge quotidien -->
+      <div class="nv-item update-item rv d2">
+        <div class="nv-item-icon">🎯</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge update">UPDATE</span>
+            <span class="nv-item-title"
+                  data-fr="Challenge quotidien Gold Pixel"
+                  data-en="Gold Pixel Daily Challenge">Gold Pixel Daily Challenge</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Un modèle pixel art différent chaque jour. Reproduis-le fidèlement et gagne +10 pixels Or bonus. Reviens demain pour un nouveau défi."
+               data-en="A new pixel art template every day. Reproduce it precisely and earn +10 bonus Gold pixels. Come back tomorrow for a new challenge.">
+            A new pixel art template every day. Reproduce it precisely and earn +10 bonus Gold pixels. Come back tomorrow for a new challenge.
+          </div>
+          <div class="nv-item-date">Coming soon · Gold Pixel · Feature</div>
+        </div>
+      </div>
+
+      <!-- Open dev slot -->
+      <div class="nv-item soon-item clickable rv d3" onclick="openDevModal()">
+        <div class="nv-item-icon">🚀</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge soon">OPEN</span>
+            <span class="nv-item-title"
+                  data-fr="Ton jeu ici — rejoins le portail"
+                  data-en="Your game here — join the portal">Your game here — join the portal</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="3 slots libres pour de nouveaux jeux Pi Network. 0% commission, intégration guidée, audience déjà là."
+               data-en="3 open slots for new Pi Network games. 0% commission, guided integration, audience ready.">
+            3 open slots for new Pi Network games. 0% commission, guided integration, audience ready.
+          </div>
+          <div class="nv-item-date">Open · Developers · Free</div>
+        </div>
+      </div>
+
+    </div><!-- /nv-list -->
   </section>
 </div><!-- /news -->
 
