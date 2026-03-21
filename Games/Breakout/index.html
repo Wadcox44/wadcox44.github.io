@@ -380,17 +380,17 @@ const PU_TYPES = {
 
 // Level definitions  rows cols speedMult brickHp  special (powerup brick %)
 const LEVELS = [
-  // rows, cols, spd, hp, maxPU (nombre ABSOLU max de briques bonus par niveau)
-  {rows:3,cols:7, spd:1.35,hp:1,maxPU:0},  // 1 — intro, pas de bonus
-  {rows:4,cols:7, spd:1.10,hp:1,maxPU:2},  // 2 — 2 bonus max
-  {rows:4,cols:8, spd:1.22,hp:1,maxPU:2},  // 3
-  {rows:5,cols:8, spd:1.35,hp:2,maxPU:3},  // 4 — double HP
-  {rows:5,cols:9, spd:1.48,hp:2,maxPU:3},  // 5
-  {rows:5,cols:9, spd:1.60,hp:2,maxPU:4},  // 6
-  {rows:6,cols:9, spd:1.72,hp:3,maxPU:4},  // 7 — triple HP
-  {rows:6,cols:9, spd:1.85,hp:3,maxPU:4},  // 8
-  {rows:6,cols:10,spd:2.00,hp:3,maxPU:5},  // 9
-  {rows:7,cols:10,spd:2.18,hp:3,maxPU:5},  // 10 — nightmare
+  // rows, cols, spd, hp, maxPU — vitesse globale augmentée (+40%)
+  {rows:3,cols:7, spd:1.90,hp:1,maxPU:0},  // 1
+  {rows:4,cols:7, spd:1.55,hp:1,maxPU:2},  // 2
+  {rows:4,cols:8, spd:1.70,hp:1,maxPU:2},  // 3
+  {rows:5,cols:8, spd:1.88,hp:2,maxPU:3},  // 4
+  {rows:5,cols:9, spd:2.05,hp:2,maxPU:3},  // 5
+  {rows:5,cols:9, spd:2.22,hp:2,maxPU:4},  // 6
+  {rows:6,cols:9, spd:2.40,hp:3,maxPU:4},  // 7
+  {rows:6,cols:9, spd:2.58,hp:3,maxPU:4},  // 8
+  {rows:6,cols:10,spd:2.78,hp:3,maxPU:5},  // 9
+  {rows:7,cols:10,spd:3.00,hp:3,maxPU:5},  // 10 — nightmare
 ];
 // After level 10, loop increasing speed
 function getLevelCfg(lvl){
