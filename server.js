@@ -622,6 +622,14 @@ app.get('/breakout', (req, res) => {
   });
 });
 
+// Pi Stacker — dossier Games/Stacker
+app.use('/stacker', express.static(path.join(__dirname, 'Games', 'Stacker')));
+app.get('/stacker', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', 'Stacker', 'index.html'), err => {
+    if (err) res.status(404).send('index.html introuvable dans Games/Stacker');
+  });
+});
+
 // 2048 Neon — dossier Games/2048
 app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
 app.get('/2048', (req, res) => {
