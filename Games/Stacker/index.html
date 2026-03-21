@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PI STACKER — JEUXVIDEO.PI</title>
+<title>STRACKER — JEUXVIDEO.PI</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════
@@ -344,6 +344,35 @@ body::after {
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 #toast.gold { border-color: var(--or); color: var(--or); }
+
+/* ── TUTORIEL — même style que Breaker ── */
+.tut-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;}
+.tut-logo{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:var(--cy);text-align:center;letter-spacing:3px;text-shadow:0 0 24px var(--cy);margin-bottom:4px;}
+.tut-sub{font-size:.7rem;color:rgba(200,216,232,.5);text-align:center;letter-spacing:2px;margin-bottom:8px;}
+.tut-section{background:rgba(10,22,40,.8);border:1px solid rgba(0,243,255,.15);border-radius:12px;padding:14px 14px;}
+.tut-section-title{font-family:'Orbitron',monospace;font-size:.58rem;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;border-left:2px solid var(--or);padding-left:8px;}
+.tut-controls{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;}
+.tut-key{font-family:'Share Tech Mono',monospace;font-size:.6rem;background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.3);color:var(--cy);padding:3px 8px;border-radius:4px;text-align:center;white-space:nowrap;}
+.tut-desc{font-size:.75rem;color:rgba(200,216,232,.65);line-height:1.4;}
+.tut-scoring{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.tut-score-item{background:rgba(0,243,255,.04);border:1px solid rgba(0,243,255,.1);border-radius:8px;padding:8px 10px;text-align:center;}
+.tut-score-val{font-family:'Orbitron',monospace;font-size:.78rem;color:var(--or);font-weight:700;}
+.tut-score-lbl{font-size:.62rem;color:rgba(200,216,232,.5);margin-top:2px;}
+/* Blocs de couleur pour illustrer les pièces */
+.tut-pieces{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.tut-piece{background:rgba(0,243,255,.04);border:1px solid rgba(0,243,255,.1);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.tut-piece-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+.tut-piece-txt{font-size:.68rem;color:rgba(200,216,232,.6);}
+.btn-start-game{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size:200% auto;color:#000;
+  font-family:'Orbitron',monospace;font-weight:900;font-size:.75rem;
+  letter-spacing:2px;border:none;border-radius:8px;cursor:pointer;
+  box-shadow:0 4px 24px rgba(255,170,0,.35);transition:all .3s;margin-top:4px;
+}
+.btn-start-game:hover{background-position:right center;transform:translateY(-2px);box-shadow:0 6px 32px rgba(255,170,0,.55);}
+
 </style>
 </head>
 <body>
@@ -408,7 +437,7 @@ body::after {
 
 <!-- OVERLAY (menu / pause / game over) -->
 <div id="overlay">
-  <div class="ov-title cy" id="ov-title">PI STACKER</div>
+  <div class="ov-title cy" id="ov-title">STRACKER</div>
   <div class="ov-sub" id="ov-sub">
     PUZZLE DE BLOCS CYBERPUNK<br>
     PI NETWORK GAMING PORTAL
@@ -431,7 +460,7 @@ body::after {
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════
-   PI STACKER — Jeu de blocs tombants style Cyberpunk
+   STRACKER — Jeu de blocs tombants style Cyberpunk
    Pour JEUXVIDEO.PI — Pi Network Gaming Portal
 ═══════════════════════════════════════════════════════════ */
 
@@ -538,6 +567,87 @@ function createPiece() {
   };
 }
 
+
+/* ── TUTORIEL — affiché au lancement ── */
+function showTutorial() {
+  gameState = 'menu';
+  const ov = document.getElementById('overlay');
+  ov.innerHTML = `
+    <div class="tut-wrap">
+      <div class="tut-logo">STRACKER</div>
+      <div class="tut-sub">HOW TO PLAY</div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Contrôles</div>
+        <div class="tut-controls">
+          <span class="tut-key">← →</span><span class="tut-desc">Déplacer le bloc (clavier)</span>
+          <span class="tut-key">↑</span><span class="tut-desc">Rotation horaire</span>
+          <span class="tut-key">↓</span><span class="tut-desc">Descente rapide</span>
+          <span class="tut-key">ESPACE</span><span class="tut-desc">Drop instantané</span>
+          <span class="tut-key">P</span><span class="tut-desc">Pause</span>
+          <span class="tut-key">SWIPE</span><span class="tut-desc">Déplacer (mobile)</span>
+          <span class="tut-key">TAP</span><span class="tut-desc">Rotation (mobile)</span>
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Blocs néon</div>
+        <div class="tut-pieces">
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#00f3ff;box-shadow:0 0 6px #00f3ff;"></div>
+            <span class="tut-piece-txt">Bâton — 4 cases</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#ffaa00;box-shadow:0 0 6px #ffaa00;"></div>
+            <span class="tut-piece-txt">Carré — 2×2</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#ff3d9a;box-shadow:0 0 6px #ff3d9a;"></div>
+            <span class="tut-piece-txt">L droite</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#44ff88;box-shadow:0 0 6px #44ff88;"></div>
+            <span class="tut-piece-txt">L inversée</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#cc44ff;box-shadow:0 0 6px #cc44ff;"></div>
+            <span class="tut-piece-txt">S — zigzag</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#ff6600;box-shadow:0 0 6px #ff6600;"></div>
+            <span class="tut-piece-txt">Z — zigzag</span>
+          </div>
+          <div class="tut-piece">
+            <div class="tut-piece-swatch" style="background:#00ccff;box-shadow:0 0 6px #00ccff;"></div>
+            <span class="tut-piece-txt">T — en croix</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Mécanique unique ✨</div>
+        <div class="tut-desc" style="font-size:.75rem;color:rgba(200,216,232,.65);line-height:1.6;">
+          Quand tu complètes une ligne, les blocs <strong style="color:var(--cy);">explosent en particules de données</strong>
+          qui s'envolent. Plus tu enchaînes de lignes d'un coup, plus la récompense est grande !
+        </div>
+      </div>
+
+      <div class="tut-section">
+        <div class="tut-section-title">Score</div>
+        <div class="tut-scoring">
+          <div class="tut-score-item"><div class="tut-score-val">100 pts</div><div class="tut-score-lbl">1 ligne</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">300 pts</div><div class="tut-score-lbl">2 lignes</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">600 pts</div><div class="tut-score-lbl">3 lignes</div></div>
+          <div class="tut-score-item"><div class="tut-score-val">1000 pts</div><div class="tut-score-lbl">⚡ PI COMBO ×4</div></div>
+        </div>
+      </div>
+
+      <button class="btn-start-game" onclick="startGame()">▶ JOUER</button>
+    </div>
+  `;
+  ov.classList.remove('hidden');
+}
+
 /* Démarrer la partie */
 function startGame() {
   initBoard();
@@ -558,7 +668,7 @@ function showMenu() {
   gameState = 'menu';
   clearInterval(dropInterval);
   cancelAnimationFrame(animFrame);
-  showOverlay('menu');
+  showTutorial();
 }
 
 // ── BOUCLE PRINCIPALE ─────────────────────────────────────
@@ -919,7 +1029,7 @@ function showOverlay(type) {
 
   if (type === 'menu') {
     title.className = 'ov-title cy';
-    title.textContent = 'PI STACKER';
+    title.textContent = 'STRACKER';
     sub.innerHTML = 'PUZZLE DE BLOCS CYBERPUNK<br>PI NETWORK GAMING PORTAL';
     btnMain.textContent = '▶ JOUER';
     btnMain.onclick = startGame;
@@ -933,6 +1043,7 @@ function showOverlay(type) {
     btnMain.textContent = '↺ REJOUER';
     btnMain.onclick = startGame;
     btnMenu.style.display = '';
+    btnMenu.onclick = showTutorial;
     controls.style.display = 'none';
   } else if (type === 'pause') {
     title.className = 'ov-title cy';
@@ -1074,7 +1185,7 @@ window.addEventListener('resize', () => {
 
 // ── DÉMARRAGE ─────────────────────────────────────────────
 resizeCanvas();
-showOverlay('menu');
+showTutorial();
 loop();
 </script>
 </body>
