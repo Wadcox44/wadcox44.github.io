@@ -3461,200 +3461,266 @@ body {
 
   
 /* ╔══════════════════════════════════════════════════════════════════
-   ║  MOBILE / TABLETTE — Layout plein écran
-   ║  Approche : chaîne flexbox pure, AUCUN position:absolute
-   ║  sur le viewport → getBoundingClientRect() reste fiable
+   ║  MOBILE / TABLETTE — Layout plein écran + 4 menus flottants
    ╚══════════════════════════════════════════════════════════════════ */
 
-:root {
-  --fab-size: 48px;
-  --drawer-w: 240px;
-}
+:root { --drawer-w: 240px; }
 
-/* ══ RACINE : viewport exact, zéro scroll ══ */
+/* ══ RACINE — viewport exact, zéro scroll ══ */
 @media (max-width: 860px) {
-  html {
-    height: 100%; height: 100dvh; overflow: hidden;
-  }
-  body {
-    height: 100%; height: 100dvh; overflow: hidden;
-    display: flex; flex-direction: column; align-items: stretch;
-  }
+  html { height:100%; height:100dvh; overflow:hidden; }
+  body { height:100%; height:100dvh; overflow:hidden;
+         display:flex; flex-direction:column; align-items:stretch; }
 
-  /* ── Banner compact ── */
-  #top-banner {
-    height: 48px !important; min-height: 48px !important;
-    padding: 0 10px !important; flex-shrink: 0;
-  }
+  /* Banner compact */
+  #top-banner { height:48px !important; min-height:48px !important;
+                padding:0 10px !important; flex-shrink:0; }
   .banner-subtitle, .banner-nav-actions,
-  .id-pack-name, .id-flag-label { display: none !important; }
-  .id-sep { margin: 0 4px !important; }
-  .banner-title { font-size: 0.9rem !important; }
-  .banner-cube-icon { width: 20px !important; height: 20px !important; }
-  .tw-label, .tw-countdown-bar, .tw-reservoir-bar { display: none !important; }
+  .id-pack-name, .id-flag-label { display:none !important; }
+  .id-sep { margin:0 4px !important; }
+  .banner-title { font-size:0.9rem !important; }
+  .banner-cube-icon { width:20px !important; height:20px !important; }
+  .tw-label, .tw-countdown-bar, .tw-reservoir-bar { display:none !important; }
 
-  /* ── Layout principal : flex column, tout l'espace restant ── */
-  .hud-main-layout {
-    display: flex !important; flex-direction: column !important;
-    flex: 1 1 0 !important; min-height: 0 !important;
-    overflow: hidden !important;
-    gap: 0 !important; padding: 0 !important;
-    grid-template-columns: none !important;
-    max-width: 100% !important;
-  }
-
-  /* ── Colonne canvas : flex:1 ── */
-  .hud-canvas-column {
-    display: flex !important; flex-direction: column !important;
-    flex: 1 1 0 !important; min-height: 0 !important; gap: 0 !important;
-  }
-
-  /* ── Canvas stage : flex:1 ── */
-  .canvas-stage {
-    display: flex !important; flex-direction: column !important;
-    flex: 1 1 0 !important; min-height: 0 !important;
-  }
-
-  /* ── Canvas frame : flex:1 ── */
-  .canvas-frame {
-    display: flex !important; flex-direction: column !important;
-    flex: 1 1 0 !important; min-height: 0 !important;
-    aspect-ratio: unset !important;
-    border-radius: 0 !important; border-left: none !important; border-right: none !important;
-  }
-
-  /* ── Viewport : flex:1, POSITION RELATIVE (pas absolute !)
-     CRITIQUE : si position:absolute → getBoundingClientRect()
-     retourne des coords décalées → les clicks ne dessinent pas ── */
-  #viewport-container {
-    flex: 1 1 0 !important; min-height: 0 !important;
-    width: 100% !important; height: auto !important;
-    aspect-ratio: unset !important;
-    position: relative !important; inset: auto !important;
-  }
-
-  /* canvas-wrapper remplit le viewport */
-  #canvas-wrapper {
-    width: 100% !important; height: 100% !important;
-  }
-
-  /* Panel droit masqué, barre outil masquée */
-  .hud-side-panel { display: none !important; }
-  .hud-tool-strip { display: none !important; }
+  /* Layout principal */
+  .hud-main-layout { display:flex !important; flex-direction:column !important;
+    flex:1 1 0 !important; min-height:0 !important; overflow:hidden !important;
+    gap:0 !important; padding:0 !important;
+    grid-template-columns:none !important; max-width:100% !important; }
+  .hud-canvas-column { display:flex !important; flex-direction:column !important;
+    flex:1 1 0 !important; min-height:0 !important; gap:0 !important; }
+  .canvas-stage { display:flex !important; flex-direction:column !important;
+    flex:1 1 0 !important; min-height:0 !important; }
+  .canvas-frame { display:flex !important; flex-direction:column !important;
+    flex:1 1 0 !important; min-height:0 !important;
+    aspect-ratio:unset !important; border-radius:0 !important;
+    border-left:none !important; border-right:none !important; }
+  #viewport-container { flex:1 1 0 !important; min-height:0 !important;
+    width:100% !important; height:auto !important;
+    aspect-ratio:unset !important; position:relative !important; inset:auto !important; }
+  #canvas-wrapper { width:100% !important; height:100% !important; }
+  .hud-side-panel { display:none !important; }
+  .hud-tool-strip { display:none !important; }
 }
 
-/* ══ FAB TOOLBAR ══ */
-#fab-toolbar { display: none; }
+/* ══════════════════════════════════════════════════════════════
+   BOUTONS RONDS FIXES — les 4 coins de l'écran
+   Chaque bouton ouvre/ferme son panneau rétractable
+══════════════════════════════════════════════════════════════ */
+.mob-fab { display:none; }
 
-@media (max-width: 860px) {
-  #fab-toolbar {
-    display: flex; align-items: center; gap: 6px;
-    position: fixed; bottom: 14px; left: 50%;
-    transform: translateX(-50%);
-    z-index: 500;
-    padding: 7px 12px;
-    background: rgba(6,12,24,0.95);
-    border: 1px solid rgba(255,170,0,0.35);
-    border-radius: 28px;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.7);
-  }
-
-  .fab-btn {
-    display: flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,170,0,0.1);
-    border: 1px solid rgba(255,170,0,0.25);
-    color: rgba(255,200,80,0.85);
-    font-size: 1rem; cursor: pointer; transition: all .18s; flex-shrink: 0;
-    /* touch-action none sur les boutons FAB pour éviter le délai 300ms */
+@media (max-width:860px) {
+  /* Bouton rond générique */
+  .mob-fab {
+    display: flex; align-items:center; justify-content:center;
+    position: fixed; z-index: 600;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(6,12,24,0.93);
+    border: 1.5px solid rgba(255,170,0,0.4);
+    color: rgba(255,210,80,0.9);
+    font-size: 1.2rem; cursor: pointer;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.55);
+    transition: background .18s, transform .15s, border-color .18s;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
-  .fab-btn:active { background: rgba(255,170,0,0.3); transform: scale(0.9); }
-  .fab-btn.active {
-    background: rgba(255,170,0,0.28);
-    border-color: rgba(255,200,60,0.75);
-    box-shadow: 0 0 10px rgba(255,170,0,0.3);
-  }
+  .mob-fab:active { transform: scale(0.88); background:rgba(30,22,4,0.97); }
+  .mob-fab.open   { border-color:rgba(255,200,60,0.85);
+                    box-shadow:0 0 14px rgba(255,170,0,0.25); }
 
-  #fab-zoom-label {
-    font-family: 'Orbitron', monospace; font-size: 0.48rem;
-    color: rgba(255,200,80,0.65); min-width: 32px;
-    text-align: center; letter-spacing: 0.05em;
-  }
-  .fab-sep { width: 1px; height: 22px; background: rgba(255,170,0,0.15); flex-shrink: 0; }
+  /* Positions fixes dans les 4 coins */
+  #fab-draw-btn   { bottom:18px; right:18px; }   /* Bas droite  — DESSIN   */
+  #fab-nav-btn    { bottom:18px; left:18px;  }   /* Bas gauche  — NAV      */
+  #fab-shop-btn   { top:58px;   right:18px; }   /* Haut droite — BOUTIQUE */
+  #fab-menu-btn   { top:58px;   left:18px;  }   /* Haut gauche — MENU     */
 }
 
-/* ══ POINT COULEUR ACTIVE ══ */
-#fab-color-dot { display: none; }
-@media (max-width: 860px) {
-  #fab-color-dot {
-    display: block; width: 14px; height: 14px;
-    border-radius: 50%; border: 2px solid rgba(255,255,255,0.55);
-    flex-shrink: 0; background: #FFFFFF; transition: background .12s;
-  }
-}
+/* ══════════════════════════════════════════════════════════════
+   PANNEAUX RÉTRACTABLES — s'ouvrent depuis chaque coin
+══════════════════════════════════════════════════════════════ */
+.mob-panel { display:none; }
 
-/* ══ PALETTE DRAWER ══ */
-#palette-drawer { display: none; }
-#palette-drawer-overlay { display: none; }
-
-@media (max-width: 860px) {
-  #palette-drawer-overlay {
-    display: none; position: fixed; inset: 0; z-index: 490;
-    background: rgba(0,0,0,0); transition: background .25s; pointer-events: none;
+@media (max-width:860px) {
+  /* Overlay commun semi-transparent */
+  #mob-overlay {
+    display:none; position:fixed; inset:0; z-index:590;
+    background:rgba(0,0,0,0.35); transition:opacity .25s;
+    pointer-events:none;
   }
-  #palette-drawer-overlay.open {
-    display: block; background: rgba(0,0,0,0.45); pointer-events: all;
-  }
+  #mob-overlay.open { display:block; pointer-events:all; }
 
-  #palette-drawer {
-    display: flex; flex-direction: column; gap: 10px;
-    position: fixed; top: 48px; right: 0; bottom: 0;
-    width: var(--drawer-w); z-index: 495;
-    background: rgba(7,12,22,0.98);
-    border-left: 1px solid rgba(255,170,0,0.22);
-    padding: 14px 12px 80px;
+  /* Panneau générique */
+  .mob-panel {
+    display: flex; flex-direction: column; gap: 0;
+    position: fixed; z-index: 595;
+    background: rgba(6,11,22,0.97);
+    border: 1px solid rgba(255,170,0,0.2);
+    border-radius: 14px;
+    overflow: hidden;
+    transform: scale(0.88); opacity:0; pointer-events:none;
+    transition: transform .22s cubic-bezier(.22,1,.36,1), opacity .2s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    max-height: calc(100dvh - 140px);
     overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform .28s cubic-bezier(.22,1,.36,1);
-    backdrop-filter: blur(18px);
     scrollbar-width: thin;
+    scrollbar-color: rgba(255,170,0,0.2) transparent;
   }
-  #palette-drawer.open { transform: translateX(0); }
+  .mob-panel.open { transform:scale(1); opacity:1; pointer-events:all; }
 
-  .drawer-title {
-    font-family: 'Orbitron', monospace; font-size: 0.5rem;
-    color: rgba(255,200,80,0.5); letter-spacing: 0.18em; text-transform: uppercase;
-    padding-bottom: 8px; border-bottom: 1px solid rgba(255,170,0,0.1); margin-bottom: 4px;
+  /* Positions : s'ouvrent depuis leur coin respectif */
+  #panel-draw  { bottom:72px; right:8px;  width:260px; transform-origin: bottom right; }
+  #panel-nav   { bottom:72px; left:8px;   width:200px; transform-origin: bottom left;  }
+  #panel-shop  { top:112px;  right:8px;  width:220px; transform-origin: top right;    }
+  #panel-menu  { top:112px;  left:8px;   width:220px; transform-origin: top left;     }
+
+  /* En-tête panneau */
+  .mob-panel-header {
+    display: flex; align-items: center; gap: 9px;
+    padding: 11px 14px 10px;
+    border-bottom: 1px solid rgba(255,170,0,0.1);
+    flex-shrink: 0;
+  }
+  .mob-panel-icon { font-size: 1rem; }
+  .mob-panel-title {
+    font-family: 'Orbitron', monospace; font-size: 0.52rem; font-weight:700;
+    color: rgba(255,210,80,0.75); letter-spacing:0.14em; text-transform:uppercase;
   }
 
-  #palette-drawer .palette {
-    display: grid !important; grid-template-columns: repeat(6,1fr) !important; gap: 5px !important;
-  }
-  #palette-drawer .metals-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
-  #palette-drawer .metal-swatch { width: 100% !important; aspect-ratio: 1; }
-  #palette-drawer .metals-labels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
-  #palette-drawer .metals-wrapper { align-items: stretch; }
-  #palette-drawer .gold-reserve { width: 100%; }
+  /* Corps du panneau */
+  .mob-panel-body { padding: 10px 12px 14px; display:flex; flex-direction:column; gap:8px; }
 
-  #drawer-publish-btn, #drawer-shop-btn {
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    width: 100%; padding: 11px 12px; border-radius: 8px; cursor: pointer;
-    font-family: 'Orbitron', monospace; font-size: 0.56rem; font-weight: 700;
-    letter-spacing: 0.08em; transition: all .2s; flex-shrink: 0;
-    touch-action: manipulation;
+  /* ── Boutons d'action dans les panneaux ── */
+  .mob-action-btn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,170,0,0.12);
+    color: rgba(255,215,100,0.85); font-family:'Rajdhani',sans-serif;
+    font-size: 0.78rem; font-weight:600; letter-spacing:0.04em;
+    transition: all .17s; touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    text-align:left; width:100%;
   }
-  #drawer-publish-btn {
-    background: linear-gradient(135deg,#bf953f,#ffaa00,#fcf6ba,#ffaa00,#bf953f);
-    background-size: 200% auto; color: #000; border: none;
-    box-shadow: 0 2px 12px rgba(255,170,0,0.3);
+  .mob-action-btn:active { background:rgba(255,170,0,0.1); transform:scale(0.97); }
+  .mob-action-btn.active-mode {
+    background:rgba(255,170,0,0.14);
+    border-color:rgba(255,200,60,0.5);
+    color:rgba(255,230,120,0.95);
   }
-  #drawer-shop-btn {
-    background: rgba(255,170,0,0.08);
-    border: 1px solid rgba(255,170,0,0.25) !important;
-    color: rgba(255,200,80,0.85);
+  .mob-action-btn .btn-ico { font-size:1.05rem; flex-shrink:0; width:22px; text-align:center; }
+  .mob-action-btn .btn-lbl { flex:1; }
+  .mob-action-btn .btn-badge {
+    font-family:'Orbitron',monospace; font-size:0.42rem;
+    color:rgba(255,200,80,0.55); background:rgba(255,170,0,0.08);
+    padding:2px 5px; border-radius:4px; flex-shrink:0;
   }
+
+  /* ── Séparateur ── */
+  .mob-sep {
+    height:1px; background:rgba(255,170,0,0.08); margin:2px 0;
+  }
+
+  /* ── Zoom row ── */
+  .mob-zoom-row {
+    display:flex; align-items:center; gap:6px;
+    padding:8px 12px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,170,0,0.1);
+    border-radius:8px;
+  }
+  .mob-zoom-btn {
+    width:32px; height:32px; border-radius:50%;
+    background:rgba(255,170,0,0.1); border:1px solid rgba(255,170,0,0.25);
+    color:rgba(255,200,80,0.85); font-size:1.1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    touch-action:manipulation; flex-shrink:0; transition:all .15s;
+  }
+  .mob-zoom-btn:active { background:rgba(255,170,0,0.25); transform:scale(0.9); }
+  #mob-zoom-label {
+    flex:1; text-align:center;
+    font-family:'Orbitron',monospace; font-size:0.55rem;
+    color:rgba(255,200,80,0.65); letter-spacing:0.05em;
+  }
+
+  /* ── Palette compacte dans le panneau dessin ── */
+  #mob-palette-grid {
+    display: grid !important;
+    grid-template-columns: repeat(8, 1fr) !important;
+    gap: 4px !important;
+  }
+  #mob-palette-grid .c-btn {
+    aspect-ratio:1; border-radius:4px; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.08);
+    transition:transform .12s, box-shadow .12s;
+    touch-action:manipulation;
+  }
+  #mob-palette-grid .c-btn.active {
+    border:2px solid #fff; box-shadow:0 0 8px rgba(255,255,255,0.6);
+    transform:scale(1.1);
+  }
+
+  /* ── Swatches métaux — taille réduite mais bien visibles ── */
+  .mob-metals-row {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:4px;
+  }
+  .mob-metal-swatch {
+    aspect-ratio:1; border-radius:6px; cursor:pointer;
+    border:1.5px solid rgba(255,255,255,0.12);
+    transition:transform .14s, border-color .14s, box-shadow .14s;
+    touch-action:manipulation; position:relative;
+    /* Taille plus petite que la palette matte */
+    max-height: 32px;
+  }
+  .mob-metal-swatch:active { transform:scale(0.9); }
+  .mob-metal-swatch.active {
+    border:2px solid rgba(255,255,255,0.8) !important;
+    box-shadow:0 0 10px rgba(255,255,255,0.4) !important;
+    transform:scale(1.08);
+  }
+  /* Couleurs fixes pour silver et bronze (ne dépendent pas du JS) */
+  #mob-silver { background:linear-gradient(135deg,#888 0%,#f0f0f0 40%,#C0C0C0 60%,#999 100%); }
+  #mob-gold   { background:linear-gradient(135deg,#bf953f 0%,#fcf6ba 35%,#ffaa00 55%,#fcf6ba 75%,#b38728 100%);
+                animation:goldPulse 1.8s ease-in-out infinite; }
+  #mob-bronze { background:linear-gradient(135deg,#7c4f1e 0%,#e8a96a 40%,#cd7f32 60%,#a0612b 100%); }
+
+  .mob-metals-labels {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:2px;
+  }
+  .mob-metal-label {
+    font-family:'Orbitron',monospace; font-size:0.38rem;
+    color:rgba(255,170,0,0.55); text-align:center; letter-spacing:0.05em;
+  }
+  .mob-metal-label.silver { color:rgba(192,192,192,0.7); }
+  .mob-metal-label.bronze { color:rgba(205,127,50,0.8); }
+
+  /* ── Compteur or dans le panneau dessin ── */
+  .mob-gold-bar-row {
+    display:flex; align-items:center; gap:7px;
+    padding:6px 10px; border-radius:7px;
+    background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.12);
+  }
+  .mob-gold-bar-lbl {
+    font-family:'Orbitron',monospace; font-size:0.48rem;
+    color:rgba(255,200,80,0.8); flex-shrink:0;
+  }
+  .mob-gold-bar-track {
+    flex:1; height:5px; background:rgba(255,170,0,0.12);
+    border-radius:3px; overflow:hidden;
+  }
+  .mob-gold-bar-fill {
+    height:100%; background:linear-gradient(90deg,#bf953f,#ffaa00,#fcf6ba);
+    border-radius:3px; transition:width .3s; width:100%;
+  }
+
+  /* ── Point couleur active (affiché dans le bouton FAB dessin) ── */
+  #fab-draw-btn .color-dot {
+    position:absolute; bottom:4px; right:4px;
+    width:10px; height:10px; border-radius:50%;
+    border:1.5px solid rgba(255,255,255,0.6);
+    background:#FFFFFF; transition:background .12s;
+  }
+  #fab-draw-btn { position:fixed; } /* override pour contenir le dot */
+
 }
 
 /* ══ COORDS masquées sur mobile ══ */
@@ -7549,238 +7615,188 @@ if (_shopOrigCheckGold) {
 
 
 /* ════════════════════════════════════════════════════════════════
-   MOBILE UI — FAB toolbar + Palette Drawer + Plein écran
-   ────────────────────────────────────────────────────────────────
-   ⚠ Le CSS flexbox (position:relative sur viewport) gère le layout.
-   Ce JS ne touche PLUS à position/inset du viewport.
+   MOBILE UI — 4 menus flottants rétractables
+   ─────────────────────────────────────────
+   4 panneaux fixes dans les coins :
+     #panel-draw  (bas droite)  — palette, modes, métaux
+     #panel-nav   (bas gauche)  — zoom, pan, recentrer, fullscreen
+     #panel-shop  (haut droite) — boutique, partager
+     #panel-menu  (haut gauche) — annuler, règles, portail, effacer
    ════════════════════════════════════════════════════════════════ */
 
 const IS_MOBILE = () => window.innerWidth <= 860;
 
-/* ══ FULLSCREEN ══════════════════════════════════════════════════
-   Masque la barre de navigation du navigateur et les boutons
-   système Android/iOS. Déclenché par le bouton ⛶ dans la FAB.
-   Sur iOS Safari : utilise webkitRequestFullscreen.
-   Fallback si l'API n'est pas disponible : scrollTo(0,1) trick.
-══════════════════════════════════════════════════════════════ */
-let _isFullscreen = false;
+/* ── État des panneaux ── */
+let _mobOpenPanel = null; // null | 'draw' | 'nav' | 'shop' | 'menu'
 
-function toggleFullscreen() {
-  const el  = document.documentElement; // demander le fullscreen sur l'élément root
-  const btn = document.getElementById('fab-btn-fullscreen');
-
-  if (_isFullscreen) {
-    // ── Quitter le plein écran ──
-    const exit = document.exitFullscreen
-               || document.webkitExitFullscreen
-               || document.mozCancelFullScreen;
-    if (exit) exit.call(document);
-    _isFullscreen = false;
-    if (btn) { btn.textContent = '⛶'; btn.title = 'Plein écran'; }
-  } else {
-    // ── Entrer en plein écran ──
-    const req = el.requestFullscreen
-             || el.webkitRequestFullscreen
-             || el.mozRequestFullScreen
-             || el.msRequestFullscreen;
-    if (req) {
-      req.call(el, { navigationUI: 'hide' }) // 'hide' masque l'UI du navigateur
-        .catch(() => {}); // ignorer les erreurs si refusé (nécessite user gesture)
-    } else {
-      // Fallback iOS Safari qui ne supporte pas l'API fullscreen
-      // Scroll trick : masque la barre d'adresse
-      window.scrollTo(0, 1);
-    }
-    _isFullscreen = true;
-    if (btn) { btn.textContent = '✕'; btn.title = 'Quitter plein écran'; }
-  }
+/* Ouvrir/fermer un panneau */
+function mobToggle(name) {
+  if (_mobOpenPanel === name) { closeMobPanels(); return; }
+  closeMobPanels();
+  _mobOpenPanel = name;
+  document.getElementById('panel-' + name)?.classList.add('open');
+  document.getElementById('fab-' + name + '-btn')?.classList.add('open');
+  document.getElementById('mob-overlay')?.classList.add('open');
+  // Sync au moment de l'ouverture
+  if (name === 'draw')  { _mobFillPalette(); mobSyncModes(); mobSyncGold(); }
+  if (name === 'nav')   { mobSyncZoom(); mobSyncModes(); }
 }
 
-// Écouter les changements de fullscreen (ex: Echap pour sortir)
-document.addEventListener('fullscreenchange',       _onFullscreenChange);
-document.addEventListener('webkitfullscreenchange', _onFullscreenChange);
-function _onFullscreenChange() {
-  const isNow = !!(document.fullscreenElement || document.webkitFullscreenElement);
-  _isFullscreen = isNow;
-  const btn = document.getElementById('fab-btn-fullscreen');
-  if (btn) btn.textContent = isNow ? '✕' : '⛶';
+function closeMobPanels() {
+  if (!_mobOpenPanel) return;
+  document.getElementById('panel-'       + _mobOpenPanel)?.classList.remove('open');
+  document.getElementById('fab-' + _mobOpenPanel + '-btn')?.classList.remove('open');
+  document.getElementById('mob-overlay')?.classList.remove('open');
+  _mobOpenPanel = null;
 }
 
-/* ══ DRAWER PALETTE ══════════════════════════════════════════ */
-let _drawerOpen = false;
+/* ── Remplir la palette couleurs matte ── */
+function _mobFillPalette() {
+  const src  = document.getElementById('palette');
+  const dest = document.getElementById('mob-palette-grid');
+  if (!src || !dest || dest.children.length > 0) return; // déjà rempli
 
-function togglePaletteDrawer() { _drawerOpen ? closePaletteDrawer() : openPaletteDrawer(); }
-
-function openPaletteDrawer() {
-  if (!IS_MOBILE()) return;
-  _drawerOpen = true;
-  document.getElementById('palette-drawer')?.classList.add('open');
-  document.getElementById('palette-drawer-overlay')?.classList.add('open');
-  document.getElementById('fab-btn-palette')?.classList.add('active');
-  _syncDrawerPalette();
-}
-
-function closePaletteDrawer() {
-  _drawerOpen = false;
-  document.getElementById('palette-drawer')?.classList.remove('open');
-  document.getElementById('palette-drawer-overlay')?.classList.remove('open');
-  document.getElementById('fab-btn-palette')?.classList.remove('active');
-}
-
-/* Synchroniser la palette du tiroir depuis la palette desktop */
-function _syncDrawerPalette() {
-  const srcPalette = document.getElementById('palette');
-  const destPalette = document.getElementById('palette-drawer-colors');
-  if (!srcPalette || !destPalette) return;
-
-  destPalette.innerHTML = '';
-  srcPalette.querySelectorAll('.c-btn').forEach(btn => {
-    const clone = btn.cloneNode(true);
-    // Récupérer la couleur stockée dans le style backgroundColor
+  src.querySelectorAll('.c-btn').forEach(btn => {
+    const clone   = btn.cloneNode(true);
     const hexColor = btn.dataset.color || _rgbToHex(btn.style.backgroundColor);
-
-    clone.addEventListener('touchstart', (e) => {
-      e.preventDefault();            // empêcher le délai 300ms iOS
-      e.stopPropagation();
-      if (hexColor) {
-        color = hexColor;            // variable globale couleur active
-        // Mettre à jour les classes active sur les deux palettes
-        document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); // original
-        clone.classList.add('active'); // clone
-        // Mettre à jour le point couleur dans la FAB
-        _fabSetColor(color);
-      }
-      closePaletteDrawer();          // fermer le tiroir après sélection
+    clone.addEventListener('touchstart', e => {
+      e.preventDefault();
+      if (hexColor) { color = hexColor; _mobSetColorDot(color); _mobSyncPaletteActive(btn, clone); }
+      closeMobPanels();
     }, { passive: false });
-
-    // Fallback click pour les appareils sans touch
-    clone.addEventListener('click', (e) => {
-      if (hexColor) {
-        color = hexColor;
-        document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        _fabSetColor(color);
-      }
-      closePaletteDrawer();
+    clone.addEventListener('click', () => {
+      if (hexColor) { color = hexColor; _mobSetColorDot(color); _mobSyncPaletteActive(btn, clone); }
+      closeMobPanels();
     });
-
-    destPalette.appendChild(clone);
-  });
-
-  // Synchro swatches métaux
-  const metalMap = { silver: '#C0C0C0', gold: '#ffaa00', bronze: '#cd7f32' };
-  ['silver', 'gold', 'bronze'].forEach(m => {
-    const orig  = document.getElementById(m + '-swatch');
-    const clone = document.getElementById(m + '-swatch-d');
-    if (orig && clone) clone.className = orig.className;
+    dest.appendChild(clone);
   });
 }
 
-/* Mettre à jour le point couleur dans la FAB */
-function _fabSetColor(hex) {
-  const dot = document.getElementById('fab-color-dot');
+function _mobSyncPaletteActive(original, clone) {
+  document.querySelectorAll('#palette .c-btn, #mob-palette-grid .c-btn')
+    .forEach(b => b.classList.remove('active'));
+  original.classList.add('active');
+  clone.classList.add('active');
+}
+
+/* ── Point couleur dans le bouton FAB dessin ── */
+function _mobSetColorDot(hex) {
+  const dot = document.getElementById('mob-color-dot');
   if (dot) dot.style.background = hex;
 }
 
-/* Helper RGB → Hex pour récupérer la couleur d'un bouton palette */
+/* ── Sync état modes (dessin / gomme / pan) ── */
+function mobSyncModes() {
+  document.getElementById('mob-btn-draw') ?.classList.toggle('active-mode', mode === 'draw');
+  document.getElementById('mob-btn-erase')?.classList.toggle('active-mode', mode === 'erase');
+  document.getElementById('mob-btn-pan')  ?.classList.toggle('active-mode', mode === 'pan');
+  // Sync taille gomme
+  document.getElementById('mob-sz-small')?.classList.toggle('active-mode', eraserSize === 'small');
+  document.getElementById('mob-sz-big')  ?.classList.toggle('active-mode', eraserSize === 'big');
+}
+
+/* ── Sync label zoom ── */
+function mobSyncZoom() {
+  const lbl = document.getElementById('mob-zoom-label');
+  if (lbl) lbl.textContent = Math.round(currentScale * 100) + '%';
+}
+
+/* ── Sync compteur or ── */
+function mobSyncGold() {
+  const main    = document.getElementById('goldCount');
+  const mob     = document.getElementById('mob-gold-count');
+  const mainBar = document.getElementById('goldBarFill');
+  const mobBar  = document.getElementById('mob-gold-bar');
+  if (mob && main)       mob.textContent    = main.textContent;
+  if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
+}
+
+/* ── Sync état fullscreen dans le panneau nav ── */
+function mobSyncFullscreen(isFs) {
+  const ico = document.getElementById('mob-fs-ico');
+  const lbl = document.getElementById('mob-fs-lbl');
+  if (ico) ico.textContent = isFs ? '✕' : '⛶';
+  if (lbl) lbl.textContent = isFs ? 'QUITTER PLEIN ÉCRAN' : 'PLEIN ÉCRAN';
+}
+
+/* ── Sync swatches métaux ── */
+function mobSyncMetals() {
+  const map = { silver:'#mob-silver', gold:'#mob-gold', bronze:'#mob-bronze' };
+  // Mettre à jour les classes active sur les swatches mobile
+  ['silver','gold','bronze'].forEach(m => {
+    const el = document.getElementById('mob-' + m);
+    const orig = document.getElementById(m + '-swatch');
+    if (el && orig) el.classList.toggle('active', orig.classList.contains('active'));
+  });
+}
+
+/* ── Helper RGB → Hex ── */
 function _rgbToHex(rgb) {
   if (!rgb) return null;
   if (rgb.startsWith('#')) return rgb;
   const m = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
   if (!m) return null;
-  return '#' + [m[1],m[2],m[3]]
-    .map(n => parseInt(n).toString(16).padStart(2,'0'))
-    .join('')
-    .toUpperCase();
+  return '#' + [m[1],m[2],m[3]].map(n=>parseInt(n).toString(16).padStart(2,'0')).join('').toUpperCase();
 }
 
-/* ══ FAB — sync état modes et zoom ══════════════════════════ */
-function fabUpdateMode() {
-  if (!IS_MOBILE()) return;
-  document.getElementById('fab-btn-draw') ?.classList.toggle('active', mode === 'draw');
-  document.getElementById('fab-btn-erase')?.classList.toggle('active', mode === 'erase');
-  document.getElementById('fab-btn-pan')  ?.classList.toggle('active', mode === 'pan');
-  fabSyncZoom();
+/* ══ FULLSCREEN ════════════════════════════════════════════════ */
+let _isFullscreen = false;
+
+function toggleFullscreen() {
+  const el = document.documentElement;
+  if (_isFullscreen) {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  } else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen
+             || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) req.call(el, { navigationUI: 'hide' }).catch(() => {});
+    else window.scrollTo(0, 1);
+  }
 }
 
-function fabSyncZoom() {
-  if (!IS_MOBILE()) return;
-  const lbl = document.getElementById('fab-zoom-label');
-  if (lbl) lbl.textContent = Math.round(currentScale * 100) + '%';
+document.addEventListener('fullscreenchange',       _onFsChange);
+document.addEventListener('webkitfullscreenchange', _onFsChange);
+function _onFsChange() {
+  _isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  mobSyncFullscreen(_isFullscreen);
 }
 
-/* ══ SYNCHRO OR mobile ══════════════════════════════════════ */
-function _syncMobileGoldCounter() {
-  const main    = document.getElementById('goldCount');
-  const mob     = document.getElementById('goldCount-d');
-  const mainBar = document.getElementById('goldBarFill');
-  const mobBar  = document.getElementById('goldBarFill-d');
-  if (mob && main)       mob.textContent    = main.textContent;
-  if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
-}
-
-/* ══ HOOKS fonctions existantes (noms uniques pour éviter conflits const) ══ */
-
-/* zoomIn/Out → synchro label FAB
-   Utiliser window.xxx = pour ne pas redéclarer avec const */
+/* ══ HOOKS fonctions existantes ══════════════════════════════════ */
 (function() {
-  const _fabZoomIn  = window.zoomIn;
-  const _fabZoomOut = window.zoomOut;
-  window.zoomIn  = function() { if (_fabZoomIn)  _fabZoomIn();  fabSyncZoom(); };
-  window.zoomOut = function() { if (_fabZoomOut) _fabZoomOut(); fabSyncZoom(); };
+  /* zoomIn/Out → synchro label */
+  const _z1 = window.zoomIn,  _z2 = window.zoomOut, _rv = window.resetView;
+  window.zoomIn    = function() { if (_z1) _z1(); mobSyncZoom(); };
+  window.zoomOut   = function() { if (_z2) _z2(); mobSyncZoom(); };
+  window.resetView = function() { if (_rv) _rv(); mobSyncZoom(); };
 
-  const _fabResetView = window.resetView;
-  window.resetView = function() { if (_fabResetView) _fabResetView(); fabSyncZoom(); };
+  /* updateGoldCounter → synchro compteur or mobile */
+  const _ugc = window.updateGoldCounter;
+  window.updateGoldCounter = function() { if (_ugc) _ugc(); mobSyncGold(); };
 
-  /* updateGoldCounter → synchro tiroir mobile
-     Wrapper autour de la version déjà hookée (évite const en double) */
-  const _fabUGC = window.updateGoldCounter;
-  window.updateGoldCounter = function() {
-    if (_fabUGC) _fabUGC();
-    _syncMobileGoldCounter();
-  };
-
-  /* selectMetal → synchro dot couleur + fermer tiroir
-     Wrapper autour de la version déjà hookée */
-  const _fabSelectMetal = window.selectMetal;
+  /* selectMetal → synchro dot couleur + swatches + fermer panneau */
+  const _sm = window.selectMetal;
   window.selectMetal = function(type) {
-    if (_fabSelectMetal) _fabSelectMetal(type);
-    const METAL_HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
-    _fabSetColor(METAL_HEX[type] || '#ffaa00');
-    if (_drawerOpen) closePaletteDrawer();
+    if (_sm) _sm(type);
+    const METAL_HEX = { gold:'#ffaa00', silver:'#C0C0C0', bronze:'#cd7f32' };
+    _mobSetColorDot(METAL_HEX[type] || '#ffaa00');
+    setTimeout(mobSyncMetals, 50);
+    closeMobPanels();
   };
 })();
 
-/* ══ RESIZE ══════════════════════════════════════════════════
-   Sur resize, recalculer la vue canvas (scale et pan).
-   Le layout est géré par CSS flexbox — pas besoin de JS layout.
-══════════════════════════════════════════════════════════════ */
+/* ══ RESIZE ══════════════════════════════════════════════════════ */
 function _onResize() {
-  // Recalculer la vue après un délai pour laisser le browser relayer
-  setTimeout(() => {
-    resetView();       // recalcule currentScale selon la nouvelle taille du viewport
-    fabSyncZoom();     // mettre à jour le label zoom dans la FAB
-    fabUpdateMode();   // mettre à jour les boutons mode actifs
-  }, 120);
+  setTimeout(() => { resetView(); mobSyncZoom(); mobSyncModes(); }, 120);
 }
-
 window.addEventListener('resize', _onResize);
-window.addEventListener('orientationchange', _onResize); // portrait ↔ paysage
+window.addEventListener('orientationchange', _onResize);
 
-/* ══ INIT au chargement ══════════════════════════════════════ */
+/* ══ INIT ════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  /* Init couleur dot */
-  const dot = document.getElementById('fab-color-dot');
-  if (dot) dot.style.background = '#FFFFFF';
-
-  /* Sur mobile, initialiser la vue après que le layout CSS soit appliqué */
+  _mobSetColorDot('#FFFFFF');
   if (IS_MOBILE()) {
-    // Délai pour laisser le browser calculer les dimensions flexbox
-    setTimeout(() => {
-      resetView();
-      fabSyncZoom();
-    }, 200);
+    setTimeout(() => { resetView(); mobSyncZoom(); }, 200);
   }
 });
 
@@ -8231,92 +8247,217 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- ══════════════════════════════════════════════════════════════
-     MOBILE UI — FAB toolbar + Palette drawer
-     Visible uniquement sur mobile/tablette (< 860px via CSS)
+     MOBILE UI — 4 menus flottants rétractables
+     Visible uniquement sur mobile (< 860px via CSS)
+     ┌──────────────────────────────────────────────────────┐
+     │  Haut gauche : 📋 Menu jeu (règles, portail, undo)  │
+     │  Haut droite : 🏪 Boutique + Partager               │
+     │  Bas gauche  : 🧭 Navigation (zoom, recentrer, pan) │
+     │  Bas droite  : 🎨 Dessin (palette, modes, gomme)    │
+     └──────────────────────────────────────────────────────┘
 ══════════════════════════════════════════════════════════════ -->
 
-<!-- Overlay derrière le tiroir palette -->
-<div id="palette-drawer-overlay" onclick="closePaletteDrawer()"></div>
+<!-- Overlay commun (ferme n'importe quel panneau au tap dehors) -->
+<div id="mob-overlay" onclick="closeMobPanels()"></div>
 
-<!-- Tiroir palette / options -->
-<div id="palette-drawer" role="dialog" aria-label="Palette et options">
+<!-- ═══════════════════════════════════════
+     BAS DROITE — 🎨 DESSIN
+═══════════════════════════════════════ -->
+<button class="mob-fab" id="fab-draw-btn" onclick="mobToggle('draw')"
+        title="Outils de dessin" aria-label="Palette et outils">
+  🎨<span class="color-dot" id="mob-color-dot"></span>
+</button>
 
-  <div class="drawer-title">PALETTE DE COULEURS</div>
-
-  <!-- Palette couleurs matte — clone du panel droit -->
-  <div class="palette" id="palette-drawer-colors"></div>
-
-  <!-- Métaux -->
-  <div class="metals-wrapper" style="margin-top:8px;">
-    <div class="metals-row">
-      <div class="metal-swatch" id="silver-swatch-d" onclick="selectMetal('silver')" title="Argent"></div>
-      <div class="metal-swatch" id="gold-swatch-d"   onclick="selectMetal('gold')"   title="Or"
-           style="background:linear-gradient(135deg,#bf953f 0%,#fcf6ba 35%,#ffaa00 55%,#fcf6ba 75%,#b38728 100%);animation:goldPulse 1.8s ease-in-out infinite;"></div>
-      <div class="metal-swatch" id="bronze-swatch-d" onclick="selectMetal('bronze')" title="Bronze"></div>
-    </div>
-    <div class="metals-labels">
-      <div class="metal-label silver">ARGENT</div>
-      <div class="metal-label">✦ OR</div>
-      <div class="metal-label bronze">BRONZE</div>
-    </div>
-    <div class="gold-reserve" style="margin-top:6px;width:100%;">
-      <div class="gold-info">✦ OR : <span id="goldCount-d">50</span>/50 PX</div>
-      <div class="gold-bar"><div class="gold-bar-fill" id="goldBarFill-d" style="width:100%"></div></div>
-    </div>
+<div class="mob-panel" id="panel-draw" role="dialog" aria-label="Outils de dessin">
+  <div class="mob-panel-header">
+    <span class="mob-panel-icon">🎨</span>
+    <span class="mob-panel-title">DESSIN</span>
   </div>
+  <div class="mob-panel-body">
 
-  <!-- Boutons action -->
-  <button id="drawer-shop-btn" onclick="openShop(); closePaletteDrawer();">
-    🏪 BOUTIQUE
-  </button>
-  <button id="drawer-publish-btn" onclick="openModal(); closePaletteDrawer();">
-    ▲ PARTAGER
-  </button>
+    <!-- Modes -->
+    <button class="mob-action-btn active-mode" id="mob-btn-draw"
+            onclick="setMode('draw'); mobSyncModes();" >
+      <span class="btn-ico">✏️</span>
+      <span class="btn-lbl">PIXEL — Dessiner</span>
+    </button>
+    <button class="mob-action-btn" id="mob-btn-erase"
+            onclick="setMode('erase'); mobSyncModes();">
+      <span class="btn-ico">⬜</span>
+      <span class="btn-lbl">GOMME</span>
+      <span class="btn-badge" id="mob-eraser-size-lbl">1×1</span>
+    </button>
+    <!-- Taille gomme inline -->
+    <div style="display:flex;gap:6px;padding:0 2px;" id="mob-eraser-sizes">
+      <button class="mob-action-btn active-mode" id="mob-sz-small" style="flex:1;"
+              onclick="setEraserSize('small'); document.getElementById('mob-sz-small').classList.add('active-mode'); document.getElementById('mob-sz-big').classList.remove('active-mode'); document.getElementById('mob-eraser-size-lbl').textContent='1×1';">
+        <span class="btn-ico">▪</span><span class="btn-lbl">1×1</span>
+      </button>
+      <button class="mob-action-btn" id="mob-sz-big" style="flex:1;"
+              onclick="setEraserSize('big'); document.getElementById('mob-sz-big').classList.add('active-mode'); document.getElementById('mob-sz-small').classList.remove('active-mode'); document.getElementById('mob-eraser-size-lbl').textContent='3×3';">
+        <span class="btn-ico">◾</span><span class="btn-lbl">3×3</span>
+      </button>
+    </div>
 
-</div><!-- /palette-drawer -->
+    <div class="mob-sep"></div>
+
+    <!-- Palette couleurs matte -->
+    <div id="mob-palette-grid"></div>
+
+    <div class="mob-sep"></div>
+
+    <!-- Swatches métaux — taille réduite, bien visibles -->
+    <div class="mob-metals-row">
+      <div class="mob-metal-swatch" id="mob-silver"
+           onclick="selectMetal('silver')" title="Argent"></div>
+      <div class="mob-metal-swatch" id="mob-gold"
+           onclick="selectMetal('gold')" title="Or (limité)"></div>
+      <div class="mob-metal-swatch" id="mob-bronze"
+           onclick="selectMetal('bronze')" title="Bronze"></div>
+    </div>
+    <div class="mob-metals-labels">
+      <div class="mob-metal-label silver">ARGENT</div>
+      <div class="mob-metal-label">✦ OR</div>
+      <div class="mob-metal-label bronze">BRONZE</div>
+    </div>
+
+    <!-- Compteur or -->
+    <div class="mob-gold-bar-row">
+      <span class="mob-gold-bar-lbl">✦ OR : <span id="mob-gold-count">50</span>/50</span>
+      <div class="mob-gold-bar-track">
+        <div class="mob-gold-bar-fill" id="mob-gold-bar"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
-<!-- FAB Toolbar — barre flottante bas de l'écran -->
-<div id="fab-toolbar" role="toolbar" aria-label="Outils de dessin">
+<!-- ═══════════════════════════════════════
+     BAS GAUCHE — 🧭 NAVIGATION
+═══════════════════════════════════════ -->
+<button class="mob-fab" id="fab-nav-btn" onclick="mobToggle('nav')"
+        title="Navigation" aria-label="Zoom et déplacement">
+  🧭
+</button>
 
-  <!-- Plein écran -->
-  <button class="fab-btn" id="fab-btn-fullscreen"
-          onclick="toggleFullscreen()" title="Plein écran"
-          style="font-size:0.85rem;">⛶</button>
+<div class="mob-panel" id="panel-nav" role="dialog" aria-label="Navigation">
+  <div class="mob-panel-header">
+    <span class="mob-panel-icon">🧭</span>
+    <span class="mob-panel-title">NAVIGATION</span>
+  </div>
+  <div class="mob-panel-body">
 
-  <div class="fab-sep"></div>
+    <!-- Zoom -->
+    <div class="mob-zoom-row">
+      <button class="mob-zoom-btn" onclick="zoomOut()">－</button>
+      <span id="mob-zoom-label">100%</span>
+      <button class="mob-zoom-btn" onclick="zoomIn()">＋</button>
+    </div>
 
-  <!-- Zoom -->
-  <button class="fab-btn" onclick="zoomOut()" title="Zoom arrière">－</button>
-  <span id="fab-zoom-label">100%</span>
-  <button class="fab-btn" onclick="zoomIn()" title="Zoom avant">＋</button>
+    <!-- Recentrer -->
+    <button class="mob-action-btn" onclick="resetView(); mobSyncZoom();">
+      <span class="btn-ico">⊙</span>
+      <span class="btn-lbl">RECENTRER</span>
+    </button>
 
-  <div class="fab-sep"></div>
+    <!-- Mode déplacement -->
+    <button class="mob-action-btn" id="mob-btn-pan"
+            onclick="togglePan(); mobSyncModes();">
+      <span class="btn-ico">✋</span>
+      <span class="btn-lbl">DÉPLACER LE CANEVAS</span>
+    </button>
 
-  <!-- Point couleur active + modes dessin -->
-  <div id="fab-color-dot" style="background:#FFFFFF;" title="Couleur active"></div>
-  <button class="fab-btn active" id="fab-btn-draw"
-          onclick="setMode('draw'); fabUpdateMode();" title="Dessiner">✏</button>
-  <button class="fab-btn" id="fab-btn-erase"
-          onclick="setMode('erase'); fabUpdateMode();" title="Gomme">◻</button>
-  <button class="fab-btn" id="fab-btn-pan"
-          onclick="togglePan(); fabUpdateMode();" title="Déplacer">
-    <svg width="14" height="14" viewBox="0 0 22 22" fill="currentColor">
-      <polygon points="11,1 14,7 12,7 12,10 10,10 10,7 8,7"/>
-      <polygon points="11,21 14,15 12,15 12,12 10,12 10,15 8,15"/>
-      <polygon points="1,11 7,8 7,10 10,10 10,12 7,12 7,14"/>
-      <polygon points="21,11 15,8 15,10 12,10 12,12 15,12 15,14"/>
-    </svg>
-  </button>
-  <button class="fab-btn" onclick="resetView()" title="Recentrer">⊙</button>
+    <div class="mob-sep"></div>
 
-  <div class="fab-sep"></div>
+    <!-- Plein écran -->
+    <button class="mob-action-btn" id="mob-btn-fullscreen"
+            onclick="toggleFullscreen();">
+      <span class="btn-ico" id="mob-fs-ico">⛶</span>
+      <span class="btn-lbl" id="mob-fs-lbl">PLEIN ÉCRAN</span>
+    </button>
 
-  <!-- Palette & options -->
-  <button class="fab-btn" id="fab-btn-palette"
-          onclick="togglePaletteDrawer()" title="Palette & options">🎨</button>
+  </div>
+</div>
 
-</div><!-- /fab-toolbar -->
+
+<!-- ═══════════════════════════════════════
+     HAUT DROITE — 🏪 BOUTIQUE & PARTAGE
+═══════════════════════════════════════ -->
+<button class="mob-fab" id="fab-shop-btn" onclick="mobToggle('shop')"
+        title="Boutique et partage" aria-label="Boutique et partage">
+  🏪
+</button>
+
+<div class="mob-panel" id="panel-shop" role="dialog" aria-label="Boutique et partage">
+  <div class="mob-panel-header">
+    <span class="mob-panel-icon">🏪</span>
+    <span class="mob-panel-title">BOUTIQUE & PARTAGE</span>
+  </div>
+  <div class="mob-panel-body">
+
+    <button class="mob-action-btn" onclick="openShop(); closeMobPanels();">
+      <span class="btn-ico">🛒</span>
+      <span class="btn-lbl">OUVRIR LA BOUTIQUE</span>
+    </button>
+
+    <div class="mob-sep"></div>
+
+    <button class="mob-action-btn" onclick="openModal(); closeMobPanels();">
+      <span class="btn-ico">▲</span>
+      <span class="btn-lbl">PARTAGER SUR LA GALERIE</span>
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     HAUT GAUCHE — 📋 MENU DU JEU
+═══════════════════════════════════════ -->
+<button class="mob-fab" id="fab-menu-btn" onclick="mobToggle('menu')"
+        title="Menu du jeu" aria-label="Menu du jeu">
+  📋
+</button>
+
+<div class="mob-panel" id="panel-menu" role="dialog" aria-label="Menu du jeu">
+  <div class="mob-panel-header">
+    <span class="mob-panel-icon">📋</span>
+    <span class="mob-panel-title">MENU</span>
+  </div>
+  <div class="mob-panel-body">
+
+    <button class="mob-action-btn" onclick="undoLastPixel(); closeMobPanels();">
+      <span class="btn-ico">↩</span>
+      <span class="btn-lbl">ANNULER DERNIER PIXEL</span>
+      <span class="btn-badge">10s</span>
+    </button>
+
+    <div class="mob-sep"></div>
+
+    <button class="mob-action-btn" onclick="openRulesModal(false); closeMobPanels();">
+      <span class="btn-ico">📖</span>
+      <span class="btn-lbl">RÈGLES DU JEU</span>
+    </button>
+
+    <button class="mob-action-btn"
+            onclick="closeMobPanels(); window.location.href='/';">
+      <span class="btn-ico">🏠</span>
+      <span class="btn-lbl">RETOUR AU PORTAIL</span>
+    </button>
+
+    <div class="mob-sep"></div>
+
+    <button class="mob-action-btn"
+            onclick="if(confirm('Effacer tout le canevas ?')){clearAll();} closeMobPanels();"
+            style="border-color:rgba(255,80,80,0.2);color:rgba(255,120,100,0.8);">
+      <span class="btn-ico">🗑</span>
+      <span class="btn-lbl">EFFACER TOUT</span>
+    </button>
+
+  </div>
+</div>
+
 
 </body>
 </html>
