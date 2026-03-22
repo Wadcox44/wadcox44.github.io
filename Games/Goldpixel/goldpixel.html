@@ -4401,8 +4401,9 @@ body {
   </div>
 </div>
 
-<!-- ─── ANNUAIRE DES JOUEURS ─── -->
-<div class="section-block">
+<!-- ─── ANNUAIRE DES JOUEURS — déporté sur le portail JeuxVideo.Pi ─── -->
+<!-- IDs conservés pour le JS interne, bloc masqué de l'interface de jeu -->
+<div class="section-block" style="display:none;" aria-hidden="true">
   <div class="section-header">
     <span class="section-title">👥 TOUS LES JOUEURS</span>
     <div class="section-line"></div>
@@ -4415,8 +4416,9 @@ body {
   <div id="players-grid"><div class="gallery-loading">CHARGEMENT...</div></div>
 </div>
 
-<!-- ─── TOP 10 ─── -->
-<div class="section-block">
+<!-- ─── TOP 10 — déporté sur le portail JeuxVideo.Pi ─── -->
+<!-- IDs conservés pour le JS, bloc masqué de l'interface de jeu -->
+<div class="section-block" style="display:none;" aria-hidden="true">
   <div class="section-header">
     <span class="section-title">✦ CLASSEMENT TOP 10</span>
     <div class="section-line"></div>
@@ -4428,13 +4430,13 @@ body {
   <div id="top10-list"><div class="gallery-loading">CHARGEMENT...</div></div>
 </div>
 
-<!-- ─── GALERIE ─── -->
-<div class="section-block">
+<!-- ─── GALERIE — déportée sur le portail JeuxVideo.Pi ─── -->
+<!-- IDs conservés pour le JS (publication, vote...), bloc masqué de l'interface de jeu -->
+<div class="section-block" style="display:none;" aria-hidden="true">
   <div class="section-header">
     <span class="section-title">GALERIE DES CRÉATIONS</span>
     <div class="section-line"></div>
   </div>
-  <!-- Tri galerie -->
   <div class="gallery-sort-bar">
     <button class="sort-btn active" id="sort-new"   onclick="setGallerySort('new')">🕐 NOUVEAUTÉS</button>
     <button class="sort-btn"        id="sort-votes" onclick="setGallerySort('votes')">⭐ MIEUX NOTÉS</button>
@@ -6158,9 +6160,9 @@ drawBase(); // dessine le fond et la grille
 requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     resetView();
-    loadGallery();
-    loadTop10();
-    loadAllPlayers();
+    // loadGallery();    // désactivé — galerie déportée sur le portail
+    // loadTop10();       // désactivé — top10 déporté sur le portail
+    // loadAllPlayers();  // désactivé — scores déportés sur le portail
     // initDailyChallenge(); // désactivé — challenge supprimé de cette version
   });
 });
