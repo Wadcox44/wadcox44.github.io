@@ -7378,7 +7378,7 @@ async function shopPiPay(itemId, pricePi) {
               _shopSetStatus('success', `✦ ${meta.name} activé avec succès !`);
               showToast(`✦ ${meta.name} activé !`);
             } else {
-              _shopSetStatus('error', 'Paiement reçu mais erreur d'activation. Contacte le support.');
+              _shopSetStatus('error', "Paiement reçu mais erreur d'activation. Contacte le support.");
             }
           } catch (_) {
             _shopSetStatus('error', 'Erreur réseau. Ton paiement est sûr côté Pi.');
@@ -7720,29 +7720,37 @@ function _syncMobileGoldCounter() {
   if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
 }
 
-/* ══ HOOKS fonctions existantes ══════════════════════════════ */
+/* ══ HOOKS fonctions existantes (noms uniques pour éviter conflits const) ══ */
 
-/* zoomIn/Out → synchro label FAB */
-const _origZoomIn  = zoomIn;
-const _origZoomOut = zoomOut;
-window.zoomIn  = function() { _origZoomIn();  fabSyncZoom(); };
-window.zoomOut = function() { _origZoomOut(); fabSyncZoom(); };
+/* zoomIn/Out → synchro label FAB
+   Utiliser window.xxx = pour ne pas redéclarer avec const */
+(function() {
+  const _fabZoomIn  = window.zoomIn;
+  const _fabZoomOut = window.zoomOut;
+  window.zoomIn  = function() { if (_fabZoomIn)  _fabZoomIn();  fabSyncZoom(); };
+  window.zoomOut = function() { if (_fabZoomOut) _fabZoomOut(); fabSyncZoom(); };
 
-const _origResetView = resetView;
-window.resetView = function() { _origResetView(); fabSyncZoom(); };
+  const _fabResetView = window.resetView;
+  window.resetView = function() { if (_fabResetView) _fabResetView(); fabSyncZoom(); };
 
-/* updateGoldCounter → synchro tiroir */
-const _origUGC = updateGoldCounter;
-window.updateGoldCounter = function() { _origUGC(); _syncMobileGoldCounter(); };
+  /* updateGoldCounter → synchro tiroir mobile
+     Wrapper autour de la version déjà hookée (évite const en double) */
+  const _fabUGC = window.updateGoldCounter;
+  window.updateGoldCounter = function() {
+    if (_fabUGC) _fabUGC();
+    _syncMobileGoldCounter();
+  };
 
-/* selectMetal → synchro dot couleur + fermer tiroir */
-const _origSelectMetal = selectMetal;
-window.selectMetal = function(type) {
-  _origSelectMetal(type);
-  const METAL_HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
-  _fabSetColor(METAL_HEX[type] || '#ffaa00');
-  if (_drawerOpen) closePaletteDrawer();
-};
+  /* selectMetal → synchro dot couleur + fermer tiroir
+     Wrapper autour de la version déjà hookée */
+  const _fabSelectMetal = window.selectMetal;
+  window.selectMetal = function(type) {
+    if (_fabSelectMetal) _fabSelectMetal(type);
+    const METAL_HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
+    _fabSetColor(METAL_HEX[type] || '#ffaa00');
+    if (_drawerOpen) closePaletteDrawer();
+  };
+})();
 
 /* ══ RESIZE ══════════════════════════════════════════════════
    Sur resize, recalculer la vue canvas (scale et pan).
