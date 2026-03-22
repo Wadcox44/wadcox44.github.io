@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-//  JEUXVIDEO.PI — Server v3.1
+//  JEUXVIDEO.PI — Server v3.2
 //  Hébergement : Render  |  DB : MongoDB Atlas
 //  Architecture : portail Pi Network + 6 systèmes configurables + Shop Gold Credits
+//               + Pont Portail (snapshot mensuel, scores déportés, galerie des saisons)
 //
 //  NOUVEAUX SYSTÈMES (v3.0) — tous config-driven, enable/disable par flag :
 //    1. TERRAIN_FATIGUE   — fatigue locale des cellules surchargées
@@ -1147,6 +1148,701 @@ app.post('/api/admin/config/update', async (req, res) => {
 app.use('/api/shop', ShopRoutes.router);
 
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  ██████╗  ██████╗ ███╗   ██╗████████╗    ██████╗  ██████╗ ██████╗ ████████╗
+//  ██╔══██╗██╔═══██╗████╗  ██║╚══██╔══╝    ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+//  ██████╔╝██║   ██║██╔██╗ ██║   ██║       ██████╔╝██║   ██║██████╔╝   ██║
+//  ██╔═══╝ ██║   ██║██║╚██╗██║   ██║       ██╔═══╝ ██║   ██║██╔══██╗   ██║
+//  ██║     ╚██████╔╝██║ ╚████║   ██║       ██║     ╚██████╔╝██║  ██║   ██║
+//  ╚═╝      ╚═════╝ ╚═╝  ╚═══╝   ╚═╝       ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+//
+//  GOLD PIXEL → PORTAIL JEUXVIDEO.PI
+//  ══════════════════════════════════════════════════════════════════════════
+//  Ce bloc est le "pont" (bridge) entre le moteur de jeu Gold Pixel
+//  et la page publique du jeu sur le portail JeuxVideo.Pi.
+//
+//  Il implémente 3 fonctionnalités :
+//
+//  1. SNAPSHOT MENSUEL (reset + galerie des saisons)
+//     - Chaque dernier jour du mois à 23h59 : capture HD du canevas final
+//       sous forme d'image base64 + export JSON de toutes les œuvres actives
+//     - Stocké dans la collection MongoDB `season_snapshots`
+//     - Mis à disposition du portail via GET /api/portal/seasons
+//
+//  2. DÉPORT DES SCORES (top10, classements, annuaire)
+//     - Les données ne sont plus chargées dans le moteur de jeu
+//     - Nouvelles routes publiques pour la page du portail :
+//         GET /api/portal/goldpixel/top10
+//         GET /api/portal/goldpixel/top10-players
+//         GET /api/portal/goldpixel/all-players
+//         GET /api/portal/goldpixel/gallery
+//         GET /api/portal/goldpixel/seasons
+//
+//  3. PONT CRON (keep-alive et déclencheurs automatiques)
+//     - POST /api/cron/season-snapshot  → déclenché par GitHub Actions cron
+//     - POST /api/cron/monthly-reset    → déclenché le 1er du mois à 00h00
+//
+//  ARCHITECTURE :
+//
+//    GitHub Actions cron (keep-alive.yml)
+//         │
+//         ├─ toutes les 9 min  → GET  /ping              (keep-alive Render)
+//         ├─ 23h59 dernier jr  → POST /api/cron/season-snapshot  (capture)
+//         └─ 00h00 1er du mois → POST /api/cron/monthly-reset    (reset)
+//
+//    Page portail JeuxVideo.Pi
+//         │
+//         ├─ GET /api/portal/goldpixel/gallery    (galerie publique)
+//         ├─ GET /api/portal/goldpixel/top10      (top 10 œuvres)
+//         ├─ GET /api/portal/goldpixel/top10-players
+//         ├─ GET /api/portal/goldpixel/all-players
+//         └─ GET /api/portal/goldpixel/seasons    (archives mensuelles)
+//
+//  SÉCURITÉ :
+//    Les routes /api/cron/* sont protégées par le header :
+//      x-cron-secret: <CRON_SECRET>   (variable d'environnement Render)
+//    Les routes /api/portal/* sont publiques (lecture seule, pas de mutation).
+//
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  SECTION A — SNAPSHOT MENSUEL
+//  Fonctions utilitaires pour capturer l'état du canevas à la fin du mois
+// ───────────────────────────────────────────────────────────────────────────
+
+// detectLastDayOfMonth()
+// Retourne true si aujourd'hui est le dernier jour du mois calendaire.
+// Utilisé par le cron pour décider s'il doit déclencher le snapshot.
+function detectLastDayOfMonth() {
+  const now      = new Date();                      // date/heure actuelle
+  const tomorrow = new Date(now);                   // copie de la date
+  tomorrow.setDate(tomorrow.getDate() + 1);         // avancer d'un jour
+  return tomorrow.getDate() === 1;                  // si demain = 1er → c'est le dernier jour
+}
+
+// detectFirstDayOfMonth()
+// Retourne true si aujourd'hui est le 1er du mois.
+// Utilisé par le cron mensuel pour déclencher le "Grand Nettoyage".
+function detectFirstDayOfMonth() {
+  return new Date().getDate() === 1;                // vrai si le jour courant est le 1er
+}
+
+// buildSeasonLabel()
+// Construit le label de saison au format "YYYY-MM" (ex: "2026-03").
+// Ce label sert de clé unique pour chaque archive mensuelle.
+function buildSeasonLabel(date = new Date()) {
+  const y = date.getFullYear();                     // année sur 4 chiffres
+  const m = String(date.getMonth() + 1).padStart(2, '0'); // mois 01–12
+  return `${y}-${m}`;                              // ex: "2026-03"
+}
+
+// buildMonthLabel(date)
+// Construit un libellé humain pour affichage sur le portail.
+// Ex: "Mars 2026"
+function buildMonthLabel(date = new Date()) {
+  // Noms des mois en français pour l'affichage portail
+  const mois = [
+    'Janvier','Février','Mars','Avril','Mai','Juin',
+    'Juillet','Août','Septembre','Octobre','Novembre','Décembre'
+  ];
+  return `${mois[date.getMonth()]} ${date.getFullYear()}`; // ex: "Mars 2026"
+}
+
+// takeSeasonSnapshot(triggeredBy)
+// Fonction principale de capture. Appelée par le cron à 23h59
+// le dernier jour du mois. Elle :
+//   1. Récupère toutes les œuvres approuvées non archivées
+//   2. Calcule les stats du mois (top joueurs, total pixels, etc.)
+//   3. Construit un document snapshot complet
+//   4. L'insère dans la collection `season_snapshots`
+//   5. Retourne le résultat pour logging
+//
+// NOTE CANVAS HD :
+//   Le canevas est rendu côté client (navigateur) avec un <canvas> HTML.
+//   Le serveur Node.js n'a pas accès au DOM. Il existe deux approches :
+//   A. Le dernier joueur connecté envoie la capture via POST /api/snapshot/upload
+//      (déclenché côté client à 23h59 par un setInterval)
+//   B. Un service headless (Puppeteer) prend une screenshot — plus complexe.
+//   → On implémente l'approche A (recommandée pour Render sans headless).
+//   La capture base64 est stockée dans `canvasImageB64` du snapshot.
+//
+async function takeSeasonSnapshot(triggeredBy = 'cron') {
+  try {
+    // ── Récupérer les œuvres actives du mois ──────────────────────
+    const currentArtworks = await artworks               // collection MongoDB `artworks`
+      .find({ status: 'approved', archived: { $ne: true } }) // uniquement les approuvées non archivées
+      .sort({ votes: -1 })                               // triées par votes décroissants
+      .toArray();                                        // convertir en tableau JS
+
+    // ── Calculer les statistiques du mois ─────────────────────────
+    // Agréger par auteur pour calculer le top joueurs du mois
+    const playerStats = {};                              // dictionnaire piUsername → stats
+    for (const art of currentArtworks) {               // parcourir chaque œuvre
+      const name = art.author?.name || 'anonymous';    // récupérer le pseudo de l'auteur
+      if (!playerStats[name]) {                         // initialiser si premier artwork
+        playerStats[name] = { name, artCount: 0, totalVotes: 0, bestImg: art.img };
+      }
+      playerStats[name].artCount++;                    // incrémenter le nombre d'œuvres
+      playerStats[name].totalVotes += (art.votes || 0); // additionner les votes
+    }
+
+    // Convertir en tableau trié par votes puis par nombre d'œuvres
+    const topPlayers = Object.values(playerStats)      // extraire les valeurs
+      .sort((a, b) =>                                  // trier :
+        b.totalVotes - a.totalVotes ||                 //   1. par votes décroissants
+        b.artCount   - a.artCount                      //   2. par nombre d'œuvres en cas d'égalité
+      )
+      .slice(0, 10);                                   // garder seulement le top 10
+
+    // ── Construire le document snapshot ───────────────────────────
+    const now       = new Date();                      // timestamp de la capture
+    const label     = buildSeasonLabel(now);           // ex: "2026-03"
+    const monthName = buildMonthLabel(now);            // ex: "Mars 2026"
+
+    const snapshot = {
+      // Identifiants
+      seasonLabel:    label,                           // clé unique de la saison
+      monthName,                                       // libellé humain pour le portail
+      capturedAt:     now,                             // date/heure exacte de la capture
+      triggeredBy,                                     // 'cron' | 'admin' | 'manual'
+
+      // Données du mois
+      artworks: currentArtworks.map(a => ({           // liste simplifiée des œuvres
+        id:         a.id,                             //   ID unique
+        title:      a.title,                          //   titre de l'œuvre
+        img:        a.img,                            //   image base64 WebP
+        authorName: a.author?.name || 'anonymous',   //   pseudo de l'auteur
+        votes:      a.votes || 0,                    //   nombre de votes
+        views:      a.views || 0,                    //   nombre de vues
+        createdAt:  a.createdAt,                     //   date de création
+      })),
+      totalArtworks: currentArtworks.length,          // nombre total d'œuvres du mois
+
+      // Classements
+      topArtworks: currentArtworks.slice(0, 10).map(a => ({ // top 10 œuvres par votes
+        id: a.id, title: a.title, votes: a.votes,
+        authorName: a.author?.name, img: a.img,
+      })),
+      topPlayers,                                      // top 10 joueurs calculé ci-dessus
+
+      // Capture canvas HD — null jusqu'à l'upload client (voir POST /api/snapshot/upload)
+      canvasImageB64: null,                            // sera rempli par le client à 23h59
+      canvasUploadedAt: null,                          // timestamp upload client
+
+      // Métadonnées
+      status: 'pending_canvas',                        // attend la capture canvas du client
+    };
+
+    // ── Vérifier si un snapshot existe déjà pour ce mois ──────────
+    // Idempotent : évite les doublons si le cron est déclenché deux fois
+    const existing = await db.collection('season_snapshots') // collection des archives
+      .findOne({ seasonLabel: label });                // chercher par label du mois
+
+    if (existing) {
+      // Snapshot déjà présent → mettre à jour les stats sans écraser la capture canvas
+      await db.collection('season_snapshots').updateOne(
+        { seasonLabel: label },                        // filtre : même mois
+        { $set: {                                      // mise à jour partielle
+            artworks:      snapshot.artworks,          //   œuvres actualisées
+            totalArtworks: snapshot.totalArtworks,     //   compteur actualisé
+            topArtworks:   snapshot.topArtworks,       //   top 10 actualisé
+            topPlayers:    snapshot.topPlayers,        //   classement actualisé
+            updatedAt:     now,                        //   timestamp MAJ
+          }
+        }
+      );
+      console.log(`[Snapshot] Mis à jour — saison ${label} (${currentArtworks.length} œuvres)`);
+      return { ok: true, updated: true, label, total: currentArtworks.length };
+    }
+
+    // Snapshot inexistant → insertion
+    await db.collection('season_snapshots').insertOne(snapshot);
+    console.log(`[Snapshot] Créé — saison ${label} (${currentArtworks.length} œuvres)`);
+    return { ok: true, created: true, label, total: currentArtworks.length };
+
+  } catch (e) {
+    // Toujours logger les erreurs de snapshot
+    console.error('[Snapshot] Erreur :', e.message);
+    throw e;                                           // re-throw pour la gestion d'erreur HTTP
+  }
+}
+
+// runMonthlyReset(label)
+// Effectue le "Grand Nettoyage" du 1er du mois à 00h00 :
+//   1. Archive toutes les œuvres actives (marquées archived: true)
+//   2. Réinitialise les compteurs quotidiens des joueurs
+//   3. Désactive le logo de saison
+//   4. Enregistre le reset dans `season_snapshots`
+//
+async function runMonthlyReset(label) {
+  try {
+    // ── 1. Archiver les œuvres actives ───────────────────────────
+    const result = await artworks.updateMany(
+      { status: 'approved', archived: { $ne: true } }, // toutes les œuvres visibles
+      { $set: { archived: true, archivedAt: new Date() } } // marquées archivées
+    );
+    console.log(`[Reset] ${result.modifiedCount} œuvres archivées pour la saison ${label}`);
+
+    // ── 2. Réinitialiser les compteurs quotidiens des joueurs ─────
+    // Le quota de publication repart à 0 pour la nouvelle saison
+    await users.updateMany(
+      {},                                              // tous les joueurs
+      { $set: { dailyCount: 0, dailyReset: new Date() } } // reset du compteur
+    );
+    console.log(`[Reset] Compteurs joueurs réinitialisés`);
+
+    // ── 3. Mettre à jour le snapshot avec le statut "reset complet" ──
+    await db.collection('season_snapshots').updateOne(
+      { seasonLabel: label },                          // même mois
+      {
+        $set: {
+          status:  'complete',                         // snapshot finalisé
+          resetAt: new Date(),                         // heure du reset
+        }
+      },
+      { upsert: false }                               // ne pas créer si inexistant (le snapshot doit déjà être là)
+    );
+
+    return { ok: true, archived: result.modifiedCount };
+
+  } catch (e) {
+    console.error('[Reset] Erreur :', e.message);
+    throw e;
+  }
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  SECTION B — ROUTES CRON (déclenchées par GitHub Actions)
+// ───────────────────────────────────────────────────────────────────────────
+
+// POST /api/cron/season-snapshot
+// ─────────────────────────────
+// Déclenché par GitHub Actions à 23h59 le dernier jour du mois.
+// Capture l'état du mois (stats, classements, liste œuvres).
+// La capture canvas HD est fournie par le client (voir POST /api/snapshot/upload).
+//
+// Sécurité : header x-cron-secret obligatoire
+//
+// Exemple GitHub Actions step :
+//   - name: Season Snapshot
+//     run: |
+//       curl -X POST https://jeuxvideo.onrender.com/api/cron/season-snapshot \
+//            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+//
+app.post('/api/cron/season-snapshot', async (req, res) => {
+  // ── Vérifier l'authentification cron ──
+  if (req.headers['x-cron-secret'] !== process.env.CRON_SECRET) {
+    return res.status(403).json({ error: 'Forbidden' }); // refus si secret incorrect
+  }
+
+  try {
+    // Déclencher la capture mensuelle
+    const result = await takeSeasonSnapshot('cron'); // label 'cron' pour le logging
+    res.json(result);                                // retourner le résultat au cron
+  } catch (e) {
+    res.status(500).json({ error: e.message });     // erreur serveur
+  }
+});
+
+// POST /api/cron/monthly-reset
+// ────────────────────────────
+// Déclenché par GitHub Actions le 1er du mois à 00h00.
+// Lance le Grand Nettoyage : archive les œuvres, reset les compteurs.
+//
+// Ce endpoint vérifie automatiquement qu'on est bien le 1er du mois
+// pour éviter une exécution accidentelle le reste du mois.
+//
+// Exemple GitHub Actions step :
+//   - name: Monthly Reset
+//     run: |
+//       curl -X POST https://jeuxvideo.onrender.com/api/cron/monthly-reset \
+//            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+//
+app.post('/api/cron/monthly-reset', async (req, res) => {
+  // ── Vérifier l'authentification cron ──
+  if (req.headers['x-cron-secret'] !== process.env.CRON_SECRET) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  // ── Vérifier qu'on est bien le 1er du mois ──
+  // Protection contre une exécution accidentelle un autre jour
+  if (!detectFirstDayOfMonth()) {
+    return res.status(400).json({
+      error: 'NOT_FIRST_DAY',
+      message: 'Ce cron ne s'exécute que le 1er du mois',
+      today: new Date().getDate(),                   // jour actuel pour debug
+    });
+  }
+
+  try {
+    // Calculer le label du MOIS PRÉCÉDENT (le mois qui vient de se terminer)
+    const now       = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1); // 1er du mois précédent
+    const label     = buildSeasonLabel(lastMonth);   // ex: "2026-02" si on est en mars
+
+    // Lancer le reset
+    const result = await runMonthlyReset(label);
+    res.json({ ...result, label, monthName: buildMonthLabel(lastMonth) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/snapshot/upload
+// ─────────────────────────
+// Reçoit la capture canvas HD depuis le client JavaScript.
+// Le client appelle cette route à 23h59 le dernier jour du mois,
+// en envoyant l'image base64 du canvas (toDataURL).
+//
+// Le client (goldpixel.html) est responsable de détecter l'heure
+// et d'envoyer la capture. Cela évite d'avoir besoin de Puppeteer.
+//
+// Corps de la requête :
+//   { canvasImageB64: string, seasonLabel: string, piUsername?: string }
+//
+app.post('/api/snapshot/upload', async (req, res) => {
+  // ── Extraire les données de la requête ──
+  const { canvasImageB64, seasonLabel, piUsername } = req.body;
+
+  // ── Validation basique ──
+  if (!canvasImageB64 || !seasonLabel) {
+    return res.status(400).json({ error: 'canvasImageB64 et seasonLabel requis' });
+  }
+
+  // ── Vérifier que le label correspond bien au mois courant ou précédent ──
+  // (empêche d'injecter une image pour un mois futur ou très ancien)
+  const currentLabel  = buildSeasonLabel();          // label du mois en cours
+  const now           = new Date();
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastLabel     = buildSeasonLabel(lastMonthDate); // label du mois précédent
+
+  if (seasonLabel !== currentLabel && seasonLabel !== lastLabel) {
+    return res.status(400).json({
+      error: 'INVALID_SEASON',
+      message: `Label de saison invalide. Attendu: ${currentLabel} ou ${lastLabel}`,
+    });
+  }
+
+  // ── Vérifier que l'image est bien un base64 valide ──
+  if (!canvasImageB64.startsWith('data:image/')) {
+    return res.status(400).json({ error: 'Format d'image invalide (attendu base64 data:image/...)' });
+  }
+
+  // ── Limiter la taille de l'image (max 5 Mo) pour éviter les abus ──
+  const imageSizeBytes = canvasImageB64.length * 0.75; // estimation taille base64 → bytes
+  const maxSizeBytes   = 5 * 1024 * 1024;             // 5 Mo
+  if (imageSizeBytes > maxSizeBytes) {
+    return res.status(413).json({ error: 'Image trop grande (max 5 Mo)' });
+  }
+
+  try {
+    // ── Mettre à jour le snapshot existant avec la capture canvas ──
+    const updateResult = await db.collection('season_snapshots').updateOne(
+      { seasonLabel },                               // trouver le snapshot du mois
+      {
+        $set: {
+          canvasImageB64,                            // stocker l'image base64
+          canvasUploadedAt:  new Date(),             // timestamp de l'upload
+          canvasUploadedBy:  piUsername || 'client', // qui a envoyé la capture
+          status:           'canvas_received',       // statut mis à jour
+        }
+      }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      // Snapshot pas encore créé (le cron n'a pas encore tourné) → créer directement
+      await db.collection('season_snapshots').insertOne({
+        seasonLabel,                                 // label de la saison
+        capturedAt:       new Date(),               // date/heure de l'upload
+        triggeredBy:      'client_upload',          // source : client
+        canvasImageB64,                             // image canvas
+        canvasUploadedAt: new Date(),               // timestamp upload
+        canvasUploadedBy: piUsername || 'client',   // auteur de l'upload
+        artworks:         [],                       // sera complété par le cron
+        status:           'canvas_only',            // capture seule, stats manquantes
+      });
+    }
+
+    res.json({ ok: true, seasonLabel, size: Math.round(imageSizeBytes / 1024) + ' Ko' });
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  SECTION C — ROUTES PORTAIL (publiques, lecture seule)
+//  Consommées par la page Gold Pixel sur JeuxVideo.Pi
+// ───────────────────────────────────────────────────────────────────────────
+
+// GET /api/portal/goldpixel/top10
+// ────────────────────────────────
+// Top 10 des œuvres par votes. Utilisé par le portail pour afficher
+// le classement des meilleures créations de la saison en cours.
+//
+// Réponse : tableau de 10 œuvres { id, title, img, authorName, votes, createdAt }
+//
+app.get('/api/portal/goldpixel/top10', async (req, res) => {
+  if (!artworks) return res.json([]);                // DB pas encore prête → tableau vide
+
+  try {
+    // Chercher les 10 meilleures œuvres approuvées non archivées
+    const data = await artworks
+      .find({ status: 'approved', archived: { $ne: true } }) // filtre : actives
+      .sort({ votes: -1 })                           // tri : plus de votes d'abord
+      .limit(10)                                     // 10 résultats max
+      .project({                                     // sélectionner seulement les champs utiles
+        img: 1, title: 1, 'author.name': 1,          //   image, titre, auteur
+        votes: 1, views: 1, createdAt: 1, id: 1      //   stats, dates, ID
+      })
+      .toArray();                                    // convertir en tableau
+
+    res.json(data);                                  // envoyer au portail
+  } catch (e) {
+    res.status(500).json({ error: e.message });     // erreur serveur
+  }
+});
+
+// GET /api/portal/goldpixel/top10-players
+// ─────────────────────────────────────────
+// Top 10 des joueurs par votes cumulés sur la saison en cours.
+// Utilisé par le portail pour le classement des artistes.
+//
+// Réponse : tableau de joueurs { name, totalVotes, artCount, bestImg }
+//
+app.get('/api/portal/goldpixel/top10-players', async (req, res) => {
+  if (!artworks) return res.json([]);
+
+  try {
+    // Agrégation MongoDB : grouper par auteur et sommer les votes
+    const pipeline = [
+      { $match: { status: 'approved', archived: { $ne: true } } }, // filtre actives
+      { $group: {                                                    // grouper par auteur
+          _id:        '$author.name',                              //   clé = pseudo auteur
+          totalVotes: { $sum: '$votes' },                          //   somme des votes
+          artCount:   { $sum: 1 },                                 //   nombre d'œuvres
+          bestImg:    { $first: '$img' },                          //   image de la meilleure
+        }
+      },
+      { $sort: { totalVotes: -1 } },                               // trier par votes
+      { $limit: 10 },                                              // top 10
+      { $project: {                                                // renommer les champs
+          name: '$_id', totalVotes: 1, artCount: 1, bestImg: 1    //   pour l'API publique
+        }
+      },
+    ];
+
+    const data = await artworks.aggregate(pipeline).toArray();
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/portal/goldpixel/all-players
+// ──────────────────────────────────────
+// Liste complète de tous les joueurs ayant au moins une œuvre.
+// Utilisé par le portail pour l'annuaire des artistes.
+//
+// Query params : ?limit=50 (défaut 100)
+//
+app.get('/api/portal/goldpixel/all-players', async (req, res) => {
+  if (!artworks) return res.json([]);
+
+  try {
+    const limit = Math.min(500, parseInt(req.query.limit) || 100); // max 500
+
+    const pipeline = [
+      { $match: { status: 'approved', archived: { $ne: true } } }, // filtre actives
+      { $group: {
+          _id:        '$author.name',
+          totalVotes: { $sum: '$votes' },
+          artCount:   { $sum: 1 },
+          bestImg:    { $first: '$img' },
+          lastArt:    { $max: '$createdAt' },        // date dernière œuvre
+        }
+      },
+      { $sort: { totalVotes: -1 } },
+      { $limit: limit },
+      { $project: { name: '$_id', totalVotes: 1, artCount: 1, bestImg: 1, lastArt: 1 } },
+    ];
+
+    const data = await artworks.aggregate(pipeline).toArray();
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/portal/goldpixel/gallery
+// ───────────────────────────────────
+// Galerie publique des créations. Utilisé par le portail.
+// Paramètres : ?sort=votes|views|date|name&page=0&limit=30
+//
+app.get('/api/portal/goldpixel/gallery', async (req, res) => {
+  if (!artworks) return res.status(503).json([]);
+
+  // ── Parser les paramètres de la requête ──
+  const sortMap = {
+    votes: { votes: -1 },                            // tri par votes décroissants
+    views: { views: -1 },                            // tri par vues décroissantes
+    name:  { title:  1 },                            // tri alphabétique
+    date:  { createdAt: -1 },                        // tri par date (récent d'abord)
+  };
+  const sort  = sortMap[req.query.sort] || sortMap.date; // tri appliqué
+  const page  = Math.max(0, parseInt(req.query.page)  || 0); // page courante (0-indexed)
+  const limit = Math.min(60, parseInt(req.query.limit) || 30); // résultats par page
+
+  try {
+    const data = await artworks
+      .find({ status: 'approved', archived: { $ne: true } }) // actives seulement
+      .sort(sort)                                    // ordre demandé
+      .skip(page * limit)                            // pagination : sauter les pages précédentes
+      .limit(limit)                                  // limiter le nombre de résultats
+      .project({                                     // champs utiles pour le portail
+        img: 1, title: 1, 'author.name': 1,
+        votes: 1, views: 1, createdAt: 1, featured: 1, id: 1
+      })
+      .toArray();
+
+    // ── Compter le total pour la pagination ──
+    const total = await artworks.countDocuments({
+      status: 'approved', archived: { $ne: true }
+    });
+
+    res.json({ data, total, page, limit, pages: Math.ceil(total / limit) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/portal/goldpixel/seasons
+// ───────────────────────────────────
+// Liste toutes les archives de saisons disponibles (pour la Galerie des Saisons).
+// Utilisé par le portail pour afficher les captures mensuelles classées par mois.
+//
+// Réponse : tableau de snapshots triés par date décroissante
+//   [{ seasonLabel, monthName, capturedAt, totalArtworks, topArtworks, topPlayers,
+//      canvasImageB64?, status }]
+//
+// Query params : ?includeCanvas=true pour inclure les images canvas (lourdes)
+//               par défaut les images canvas sont exclues (trop volumineuses)
+//
+app.get('/api/portal/goldpixel/seasons', async (req, res) => {
+  try {
+    // ── Décider si les images canvas sont incluses ──
+    const includeCanvas = req.query.includeCanvas === 'true'; // opt-in explicite
+
+    // ── Construire la projection MongoDB ──
+    const project = {
+      seasonLabel:   1,                              // label "YYYY-MM"
+      monthName:     1,                              // libellé "Mars 2026"
+      capturedAt:    1,                              // date de capture
+      totalArtworks: 1,                              // nombre d'œuvres
+      topArtworks:   1,                              // top 10 œuvres
+      topPlayers:    1,                              // top 10 joueurs
+      status:        1,                              // état du snapshot
+      resetAt:       1,                              // date du reset
+    };
+
+    // Inclure l'image canvas seulement si demandé explicitement
+    if (includeCanvas) project.canvasImageB64 = 1;  // image lourde, opt-in uniquement
+
+    // ── Récupérer les snapshots triés par date décroissante ──
+    const seasons = await db.collection('season_snapshots')
+      .find({})                                      // tous les snapshots
+      .sort({ capturedAt: -1 })                      // plus récent en premier
+      .project(project)                              // champs sélectionnés
+      .toArray();
+
+    res.json(seasons);                               // retourner au portail
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/portal/goldpixel/seasons/:label
+// ─────────────────────────────────────────
+// Détail d'une saison spécifique. Inclut l'image canvas.
+// Utilisé quand le joueur clique sur un mois dans la Galerie des Saisons.
+//
+// Param : label = "YYYY-MM" (ex: "2026-03")
+//
+app.get('/api/portal/goldpixel/seasons/:label', async (req, res) => {
+  try {
+    const { label } = req.params;                    // ex: "2026-03"
+
+    // ── Valider le format du label ──
+    if (!/^\d{4}-\d{2}$/.test(label)) {
+      return res.status(400).json({ error: 'Format invalide. Attendu: YYYY-MM' });
+    }
+
+    // ── Récupérer le snapshot complet (avec image canvas) ──
+    const season = await db.collection('season_snapshots')
+      .findOne({ seasonLabel: label });              // chercher par label
+
+    if (!season) {
+      return res.status(404).json({ error: `Saison ${label} non trouvée` });
+    }
+
+    res.json(season);                               // retourner le snapshot complet
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/portal/goldpixel/player/:name
+// ────────────────────────────────────────
+// Profil public d'un joueur avec ses œuvres.
+// Utilisé par le portail pour la page de profil artiste.
+//
+app.get('/api/portal/goldpixel/player/:name', async (req, res) => {
+  if (!artworks) return res.json({ arts: [], totalVotes: 0 });
+
+  try {
+    // ── Récupérer les œuvres du joueur ──
+    const arts = await artworks
+      .find({
+        'author.name': req.params.name,              // filtre par pseudo
+        status: 'approved',                          // seulement les approuvées
+        archived: { $ne: true }                      // non archivées
+      })
+      .sort({ createdAt: -1 })                      // plus récente d'abord
+      .toArray();                                    // convertir en tableau
+
+    // ── Calculer les stats globales du joueur ──
+    const totalVotes = arts.reduce(                  // sommer les votes de toutes ses œuvres
+      (sum, a) => sum + (a.votes || 0), 0
+    );
+
+    res.json({ name: req.params.name, arts, totalVotes, artCount: arts.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/admin/season-snapshot/manual
+// ────────────────────────────────────────
+// Déclenchement manuel du snapshot par l'admin.
+// Utile pour tester ou forcer une capture hors cycle cron.
+//
+app.post('/api/admin/season-snapshot/manual', async (req, res) => {
+  // ── Vérifier les droits admin ──
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  try {
+    const result = await takeSeasonSnapshot('admin_manual'); // label 'admin_manual'
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  FICHIERS STATIQUES (inchangés)
 // ═══════════════════════════════════════════════════════════════
@@ -1168,4 +1864,4 @@ app.get('/2048', (req, res) => res.sendFile(path.join(__dirname, 'Games', '2048'
 
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.1 actif sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.2 actif sur le port ${PORT}`));
