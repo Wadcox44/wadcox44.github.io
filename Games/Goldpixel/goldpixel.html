@@ -3728,6 +3728,101 @@ body {
   .coords { display: none !important; }
 }
 
+
+/* ══════════════════════════════════════════════════════════════
+   MENUS MOBILES — ajouts pour pleine hauteur et boutique compacte
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 860px) {
+
+  /* Bouton fermer dans l'en-tête */
+  .mob-panel-close {
+    margin-left:auto; width:26px; height:26px; border-radius:50%;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:rgba(255,255,255,0.4); font-size:0.75rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    touch-action:manipulation; flex-shrink:0;
+  }
+
+  /* PANNEAU DESSIN — prend toute la hauteur depuis le bas */
+  #panel-draw {
+    bottom:0 !important;
+    top:56px !important;           /* juste sous le banner */
+    max-height:none !important;
+    border-radius:0 !important;    /* collé aux bords */
+    border-bottom:none !important;
+    right:0 !important;
+    width:100% !important;         /* pleine largeur */
+    transform-origin:bottom center !important;
+  }
+  /* Corps du panneau dessin : flex pour remplir sans overflow */
+  #panel-draw .mob-panel-body {
+    flex:1; overflow-y:auto; padding-bottom:8px;
+  }
+
+  /* PANNEAU BOUTIQUE — pleine hauteur depuis le haut */
+  #panel-shop {
+    top:56px !important;
+    bottom:0 !important;
+    max-height:none !important;
+    border-radius:0 !important;
+    border-top:none !important;
+    right:0 !important;
+    width:100% !important;
+    transform-origin:top center !important;
+    overflow:hidden;
+  }
+  #panel-shop .mob-panel-body {
+    flex:1; overflow:hidden; /* pas de scroll */
+    display:flex; flex-direction:column;
+    justify-content:space-between; /* répartir les sections */
+    padding:10px 12px 12px;
+    gap:6px;
+  }
+
+  /* PANNEAUX NAV et MENU — taille auto depuis leur coin */
+  #panel-nav  { bottom:72px; left:8px;  width:210px; top:auto; }
+  #panel-menu { top:106px;  left:8px;  width:210px; bottom:auto; }
+
+  /* Row horizontale de boutons */
+  .mob-row {
+    display:flex; gap:6px;
+  }
+  .mob-row .mob-action-btn { flex:1; padding:8px 6px; justify-content:center; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+  .mob-row .mob-action-btn .btn-ico { font-size:1.2rem; width:auto; }
+  .mob-row .mob-action-btn .btn-lbl { font-size:0.6rem; }
+  .mob-row .mob-action-btn .btn-badge { font-size:0.38rem; }
+
+  /* Section label boutique */
+  .mob-shop-section {
+    font-family:'Orbitron',monospace; font-size:0.42rem; font-weight:700;
+    color:rgba(255,200,80,0.4); letter-spacing:0.16em; text-transform:uppercase;
+    padding:3px 2px 2px; flex-shrink:0;
+  }
+
+  /* Item boutique compact */
+  .mob-shop-item {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 10px; border-radius:8px; cursor:pointer;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,170,0,0.14);
+    transition:all .15s; touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    flex:1;
+  }
+  .mob-shop-item:active { background:rgba(255,170,0,0.1); transform:scale(0.97); }
+  .mob-shop-item-don { border-color:rgba(100,255,150,0.15); }
+
+  .mob-shop-ico  { font-size:1.05rem; flex-shrink:0; }
+  .mob-shop-name { flex:1; font-family:'Rajdhani',sans-serif; font-size:0.72rem; font-weight:600; color:rgba(255,215,100,0.85); }
+  .mob-shop-price { font-family:'Orbitron',monospace; font-size:0.5rem; color:rgba(255,200,80,0.65); white-space:nowrap; flex-shrink:0; }
+
+  /* Panel-shop body : layout compact sans scroll */
+  .mob-shop-body { gap:5px !important; }
+  .mob-shop-body .mob-row { gap:5px; }
+  .mob-shop-body .mob-row .mob-shop-item { flex-direction:column; align-items:center; text-align:center; padding:8px 6px; gap:3px; }
+  .mob-shop-body .mob-row .mob-shop-name { font-size:0.62rem; }
+}
+
   </style>
 </head>
 <body>
@@ -4906,7 +5001,13 @@ function applyTransform() {
 }
 
 function resetView() {
-  const vw = viewportEl.clientWidth;
+  // Attendre que le viewport soit rendu et ait une taille réelle
+  const vw = viewportEl.clientWidth || viewportEl.offsetWidth;
+  if (!vw || vw < 10) {
+    // Viewport pas encore rendu — réessayer dans 80ms
+    setTimeout(resetView, 80);
+    return;
+  }
   currentScale = vw / CANVAS_W;
   panOffset = { x: 0, y: 0 };
   applyTransform();
@@ -4919,10 +5020,18 @@ function zoomOut() { currentScale = Math.max(currentScale / 1.25, 0.2); applyTra
 //  DESSIN — coordonnées
 // ════════════════════════════════════════════
 function getCanvasPos(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const x = (clientX - rect.left) * (CANVAS_W / rect.width);
-  const y = (clientY - rect.top)  * (CANVAS_H / rect.height);
-  return { col: Math.floor(x / PX), row: Math.floor(y / PX) };
+  // Utiliser getBoundingClientRect sur le viewport (toujours en flow normal)
+  // puis recalculer la position dans le canvas via currentScale et panOffset
+  const vpRect = viewportEl.getBoundingClientRect();
+  // Position relative au coin haut-gauche du viewport
+  const relX = clientX - vpRect.left;
+  const relY = clientY - vpRect.top;
+  // Le canvas-container est décalé de panOffset et mis à l'échelle par currentScale
+  // Inverse de transform: translate(panOffset.x, panOffset.y) scale(currentScale)
+  const scale = currentScale || 1;
+  const canvasX = (relX - panOffset.x) / scale;
+  const canvasY = (relY - panOffset.y) / scale;
+  return { col: Math.floor(canvasX / PX), row: Math.floor(canvasY / PX) };
 }
 
 function handleDraw(clientX, clientY) {
@@ -8248,23 +8357,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- ══════════════════════════════════════════════════════════════
      MOBILE UI — 4 menus flottants rétractables
-     Visible uniquement sur mobile (< 860px via CSS)
      ┌──────────────────────────────────────────────────────┐
-     │  Haut gauche : 📋 Menu jeu (règles, portail, undo)  │
-     │  Haut droite : 🏪 Boutique + Partager               │
-     │  Bas gauche  : 🧭 Navigation (zoom, recentrer, pan) │
-     │  Bas droite  : 🎨 Dessin (palette, modes, gomme)    │
+     │  Haut gauche : 📋 Menu jeu (règles, portail)         │
+     │  Haut droite : 🏪 Boutique                           │
+     │  Bas gauche  : 🧭 Navigation (zoom, recentrer, pan)  │
+     │  Bas droite  : 🎨 Dessin (palette, modes, métaux)    │
      └──────────────────────────────────────────────────────┘
 ══════════════════════════════════════════════════════════════ -->
 
-<!-- Overlay commun (ferme n'importe quel panneau au tap dehors) -->
+<!-- Overlay commun -->
 <div id="mob-overlay" onclick="closeMobPanels()"></div>
+
 
 <!-- ═══════════════════════════════════════
      BAS DROITE — 🎨 DESSIN
+     Panel vers le haut depuis le bas
 ═══════════════════════════════════════ -->
 <button class="mob-fab" id="fab-draw-btn" onclick="mobToggle('draw')"
-        title="Outils de dessin" aria-label="Palette et outils">
+        aria-label="Palette et outils">
   🎨<span class="color-dot" id="mob-color-dot"></span>
 </button>
 
@@ -8272,30 +8382,36 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="mob-panel-header">
     <span class="mob-panel-icon">🎨</span>
     <span class="mob-panel-title">DESSIN</span>
+    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
   </div>
   <div class="mob-panel-body">
 
-    <!-- Modes -->
-    <button class="mob-action-btn active-mode" id="mob-btn-draw"
-            onclick="setMode('draw'); mobSyncModes();" >
-      <span class="btn-ico">✏️</span>
-      <span class="btn-lbl">PIXEL — Dessiner</span>
-    </button>
-    <button class="mob-action-btn" id="mob-btn-erase"
-            onclick="setMode('erase'); mobSyncModes();">
-      <span class="btn-ico">⬜</span>
-      <span class="btn-lbl">GOMME</span>
-      <span class="btn-badge" id="mob-eraser-size-lbl">1×1</span>
-    </button>
-    <!-- Taille gomme inline -->
-    <div style="display:flex;gap:6px;padding:0 2px;" id="mob-eraser-sizes">
+    <!-- Modes dessin -->
+    <div class="mob-row">
+      <button class="mob-action-btn active-mode" id="mob-btn-draw"
+              onclick="setMode('draw'); closeMobPanels();">
+        <span class="btn-ico">✏️</span><span class="btn-lbl">PIXEL</span>
+      </button>
+      <button class="mob-action-btn" id="mob-btn-erase"
+              onclick="setMode('erase'); closeMobPanels();">
+        <span class="btn-ico">⬜</span><span class="btn-lbl">GOMME</span>
+      </button>
+      <button class="mob-action-btn" id="mob-btn-pan2"
+              onclick="togglePan(); mobSyncModes(); closeMobPanels();">
+        <span class="btn-ico">✋</span><span class="btn-lbl">PAN</span>
+      </button>
+    </div>
+
+    <!-- Taille gomme -->
+    <div class="mob-row" style="gap:4px;">
+      <span style="font-family:Orbitron,monospace;font-size:0.42rem;color:rgba(255,170,0,0.45);letter-spacing:0.1em;align-self:center;">GOMME :</span>
       <button class="mob-action-btn active-mode" id="mob-sz-small" style="flex:1;"
-              onclick="setEraserSize('small'); document.getElementById('mob-sz-small').classList.add('active-mode'); document.getElementById('mob-sz-big').classList.remove('active-mode'); document.getElementById('mob-eraser-size-lbl').textContent='1×1';">
-        <span class="btn-ico">▪</span><span class="btn-lbl">1×1</span>
+              onclick="setEraserSize('small'); document.getElementById('mob-sz-small').classList.add('active-mode'); document.getElementById('mob-sz-big').classList.remove('active-mode');">
+        ▪ 1×1
       </button>
       <button class="mob-action-btn" id="mob-sz-big" style="flex:1;"
-              onclick="setEraserSize('big'); document.getElementById('mob-sz-big').classList.add('active-mode'); document.getElementById('mob-sz-small').classList.remove('active-mode'); document.getElementById('mob-eraser-size-lbl').textContent='3×3';">
-        <span class="btn-ico">◾</span><span class="btn-lbl">3×3</span>
+              onclick="setEraserSize('big'); document.getElementById('mob-sz-big').classList.add('active-mode'); document.getElementById('mob-sz-small').classList.remove('active-mode');">
+        ◾ 3×3
       </button>
     </div>
 
@@ -8306,14 +8422,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="mob-sep"></div>
 
-    <!-- Swatches métaux — taille réduite, bien visibles -->
+    <!-- Swatches métaux -->
     <div class="mob-metals-row">
-      <div class="mob-metal-swatch" id="mob-silver"
-           onclick="selectMetal('silver')" title="Argent"></div>
-      <div class="mob-metal-swatch" id="mob-gold"
-           onclick="selectMetal('gold')" title="Or (limité)"></div>
-      <div class="mob-metal-swatch" id="mob-bronze"
-           onclick="selectMetal('bronze')" title="Bronze"></div>
+      <div class="mob-metal-swatch" id="mob-silver" onclick="selectMetal('silver')" title="Argent"></div>
+      <div class="mob-metal-swatch" id="mob-gold"   onclick="selectMetal('gold')"   title="Or (limité)"></div>
+      <div class="mob-metal-swatch" id="mob-bronze" onclick="selectMetal('bronze')" title="Bronze"></div>
     </div>
     <div class="mob-metals-labels">
       <div class="mob-metal-label silver">ARGENT</div>
@@ -8324,9 +8437,20 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Compteur or -->
     <div class="mob-gold-bar-row">
       <span class="mob-gold-bar-lbl">✦ OR : <span id="mob-gold-count">50</span>/50</span>
-      <div class="mob-gold-bar-track">
-        <div class="mob-gold-bar-fill" id="mob-gold-bar"></div>
-      </div>
+      <div class="mob-gold-bar-track"><div class="mob-gold-bar-fill" id="mob-gold-bar"></div></div>
+    </div>
+
+    <div class="mob-sep"></div>
+
+    <!-- Annuler + Effacer (déplacés ici depuis le menu) -->
+    <div class="mob-row">
+      <button class="mob-action-btn" style="flex:1;" onclick="undoLastPixel(); closeMobPanels();">
+        <span class="btn-ico">↩</span><span class="btn-lbl">ANNULER</span><span class="btn-badge">10s</span>
+      </button>
+      <button class="mob-action-btn" style="flex:1;border-color:rgba(255,80,80,0.25);color:rgba(255,120,100,0.85);"
+              onclick="if(confirm('Effacer ?')){clearAll();} closeMobPanels();">
+        <span class="btn-ico">🗑</span><span class="btn-lbl">EFFACER</span>
+      </button>
     </div>
 
   </div>
@@ -8337,75 +8461,112 @@ document.addEventListener('DOMContentLoaded', () => {
      BAS GAUCHE — 🧭 NAVIGATION
 ═══════════════════════════════════════ -->
 <button class="mob-fab" id="fab-nav-btn" onclick="mobToggle('nav')"
-        title="Navigation" aria-label="Zoom et déplacement">
-  🧭
-</button>
+        aria-label="Navigation">🧭</button>
 
 <div class="mob-panel" id="panel-nav" role="dialog" aria-label="Navigation">
   <div class="mob-panel-header">
     <span class="mob-panel-icon">🧭</span>
     <span class="mob-panel-title">NAVIGATION</span>
+    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
   </div>
   <div class="mob-panel-body">
-
-    <!-- Zoom -->
     <div class="mob-zoom-row">
       <button class="mob-zoom-btn" onclick="zoomOut()">－</button>
       <span id="mob-zoom-label">100%</span>
       <button class="mob-zoom-btn" onclick="zoomIn()">＋</button>
     </div>
-
-    <!-- Recentrer -->
     <button class="mob-action-btn" onclick="resetView(); mobSyncZoom();">
-      <span class="btn-ico">⊙</span>
-      <span class="btn-lbl">RECENTRER</span>
+      <span class="btn-ico">⊙</span><span class="btn-lbl">RECENTRER</span>
     </button>
-
-    <!-- Mode déplacement -->
     <button class="mob-action-btn" id="mob-btn-pan"
             onclick="togglePan(); mobSyncModes();">
-      <span class="btn-ico">✋</span>
-      <span class="btn-lbl">DÉPLACER LE CANEVAS</span>
+      <span class="btn-ico">✋</span><span class="btn-lbl">DÉPLACER LE CANEVAS</span>
     </button>
-
     <div class="mob-sep"></div>
-
-    <!-- Plein écran -->
     <button class="mob-action-btn" id="mob-btn-fullscreen"
             onclick="toggleFullscreen();">
       <span class="btn-ico" id="mob-fs-ico">⛶</span>
       <span class="btn-lbl" id="mob-fs-lbl">PLEIN ÉCRAN</span>
     </button>
-
   </div>
 </div>
 
 
 <!-- ═══════════════════════════════════════
-     HAUT DROITE — 🏪 BOUTIQUE & PARTAGE
+     HAUT DROITE — 🏪 BOUTIQUE
+     Panel vers le bas, 100% hauteur disponible sans scroll
 ═══════════════════════════════════════ -->
 <button class="mob-fab" id="fab-shop-btn" onclick="mobToggle('shop')"
-        title="Boutique et partage" aria-label="Boutique et partage">
-  🏪
-</button>
+        aria-label="Boutique">🏪</button>
 
-<div class="mob-panel" id="panel-shop" role="dialog" aria-label="Boutique et partage">
+<div class="mob-panel" id="panel-shop" role="dialog" aria-label="Boutique">
   <div class="mob-panel-header">
     <span class="mob-panel-icon">🏪</span>
-    <span class="mob-panel-title">BOUTIQUE & PARTAGE</span>
+    <span class="mob-panel-title">BOUTIQUE</span>
+    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
   </div>
-  <div class="mob-panel-body">
+  <div class="mob-panel-body mob-shop-body">
 
-    <button class="mob-action-btn" onclick="openShop(); closeMobPanels();">
-      <span class="btn-ico">🛒</span>
-      <span class="btn-lbl">OUVRIR LA BOUTIQUE</span>
+    <!-- BOUCLIERS -->
+    <div class="mob-shop-section">BOUCLIER</div>
+    <div class="mob-row">
+      <button class="mob-shop-item" onclick="shopPiPay('dome_4h',0.5); closeMobPanels();">
+        <span class="mob-shop-ico">🛡</span>
+        <span class="mob-shop-name">Dôme 4H</span>
+        <span class="mob-shop-price">0,5 Pi</span>
+      </button>
+      <button class="mob-shop-item" onclick="shopPiPay('dome_8h',1); closeMobPanels();">
+        <span class="mob-shop-ico">🛡</span>
+        <span class="mob-shop-name">Dôme 8H</span>
+        <span class="mob-shop-price">1 Pi</span>
+      </button>
+    </div>
+
+    <!-- PIXELS -->
+    <div class="mob-shop-section">PIXELS</div>
+    <div class="mob-row">
+      <button class="mob-shop-item" onclick="shopPiPay('pixels_100',1); closeMobPanels();">
+        <span class="mob-shop-ico">⚡</span>
+        <span class="mob-shop-name">100 px</span>
+        <span class="mob-shop-price">1 Pi</span>
+      </button>
+      <button class="mob-shop-item" onclick="shopPiPay('pixels_250',2); closeMobPanels();">
+        <span class="mob-shop-ico">⚡</span>
+        <span class="mob-shop-name">250 px</span>
+        <span class="mob-shop-price">2 Pi</span>
+      </button>
+    </div>
+
+    <!-- VENGEANCE -->
+    <div class="mob-shop-section">TACTIQUE</div>
+    <button class="mob-shop-item" id="mob-vengeance-item" style="width:100%;"
+            onclick="shopPiPay('vengeance_pack',1); closeMobPanels();">
+      <span class="mob-shop-ico">⚔️</span>
+      <span class="mob-shop-name">Pack Vengeance</span>
+      <span class="mob-shop-price" id="mob-vengeance-price">1 Pi/mois</span>
     </button>
 
-    <div class="mob-sep"></div>
-
-    <button class="mob-action-btn" onclick="openModal(); closeMobPanels();">
-      <span class="btn-ico">▲</span>
-      <span class="btn-lbl">PARTAGER SUR LA GALERIE</span>
+    <!-- DONS -->
+    <div class="mob-shop-section">DONS</div>
+    <div class="mob-row">
+      <button class="mob-shop-item mob-shop-item-don"
+              onclick="shopPiPay('distinction',0.1); closeMobPanels();">
+        <span class="mob-shop-ico">🎨</span>
+        <span class="mob-shop-name">Distinction</span>
+        <span class="mob-shop-price">0,1 Pi</span>
+      </button>
+      <button class="mob-shop-item mob-shop-item-don"
+              onclick="shopPiPay('gift_elite',10); closeMobPanels();">
+        <span class="mob-shop-ico">🌟</span>
+        <span class="mob-shop-name">Pass Elite</span>
+        <span class="mob-shop-price">10 Pi</span>
+      </button>
+    </div>
+    <button class="mob-shop-item mob-shop-item-don" style="width:100%;"
+            onclick="shopAnonDon(); closeMobPanels();">
+      <span class="mob-shop-ico">🎁</span>
+      <span class="mob-shop-name">Don Anonyme</span>
+      <span class="mob-shop-price">libre</span>
     </button>
 
   </div>
@@ -8413,48 +8574,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- ═══════════════════════════════════════
-     HAUT GAUCHE — 📋 MENU DU JEU
+     HAUT GAUCHE — 📋 MENU JEU
 ═══════════════════════════════════════ -->
 <button class="mob-fab" id="fab-menu-btn" onclick="mobToggle('menu')"
-        title="Menu du jeu" aria-label="Menu du jeu">
-  📋
-</button>
+        aria-label="Menu du jeu">📋</button>
 
 <div class="mob-panel" id="panel-menu" role="dialog" aria-label="Menu du jeu">
   <div class="mob-panel-header">
     <span class="mob-panel-icon">📋</span>
     <span class="mob-panel-title">MENU</span>
+    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
   </div>
   <div class="mob-panel-body">
-
-    <button class="mob-action-btn" onclick="undoLastPixel(); closeMobPanels();">
-      <span class="btn-ico">↩</span>
-      <span class="btn-lbl">ANNULER DERNIER PIXEL</span>
-      <span class="btn-badge">10s</span>
-    </button>
-
-    <div class="mob-sep"></div>
-
     <button class="mob-action-btn" onclick="openRulesModal(false); closeMobPanels();">
-      <span class="btn-ico">📖</span>
-      <span class="btn-lbl">RÈGLES DU JEU</span>
+      <span class="btn-ico">📖</span><span class="btn-lbl">RÈGLES DU JEU</span>
     </button>
-
-    <button class="mob-action-btn"
-            onclick="closeMobPanels(); window.location.href='/';">
-      <span class="btn-ico">🏠</span>
-      <span class="btn-lbl">RETOUR AU PORTAIL</span>
+    <button class="mob-action-btn" onclick="closeMobPanels(); window.location.href='/';">
+      <span class="btn-ico">🏠</span><span class="btn-lbl">RETOUR AU PORTAIL</span>
     </button>
-
-    <div class="mob-sep"></div>
-
-    <button class="mob-action-btn"
-            onclick="if(confirm('Effacer tout le canevas ?')){clearAll();} closeMobPanels();"
-            style="border-color:rgba(255,80,80,0.2);color:rgba(255,120,100,0.8);">
-      <span class="btn-ico">🗑</span>
-      <span class="btn-lbl">EFFACER TOUT</span>
-    </button>
-
   </div>
 </div>
 
