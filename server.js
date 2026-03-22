@@ -1527,7 +1527,7 @@ app.post('/api/snapshot/upload', async (req, res) => {
 
   // ── Vérifier que l'image est bien un base64 valide ──
   if (!canvasImageB64.startsWith('data:image/')) {
-    return res.status(400).json({ error: 'Format d'image invalide (attendu base64 data:image/...)' });
+    return res.status(400).json({ error: "Format d'image invalide (attendu base64 data:image/...)" });
   }
 
   // ── Limiter la taille de l'image (max 5 Mo) pour éviter les abus ──
