@@ -1471,7 +1471,7 @@ app.post('/api/cron/monthly-reset', async (req, res) => {
   if (!detectFirstDayOfMonth()) {
     return res.status(400).json({
       error: 'NOT_FIRST_DAY',
-      message: 'Ce cron ne s'exécute que le 1er du mois',
+      message: "Ce cron ne s'exécute que le 1er du mois",
       today: new Date().getDate(),                   // jour actuel pour debug
     });
   }
