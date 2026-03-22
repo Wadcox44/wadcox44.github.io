@@ -2329,47 +2329,59 @@ body {
 
 /* ════════════════════════════════════════
    STAGE WRAPPER — conteneur externe
-   Apporte la profondeur et l'atmosphère
+   Halo doré qui s'intensifie au dessin
 ════════════════════════════════════════ */
 .canvas-stage {
   position: relative;
   width: 100%;
-  /* Halo ambiant qui respire lentement */
-  filter: drop-shadow(0 0 28px rgba(255,170,0,0.08));
+  /* Glow ambiant subtil */
+  filter:
+    drop-shadow(0 0 24px rgba(255,170,0,0.07))
+    drop-shadow(0 0  8px rgba(0,0,0,0.6));
   transition: filter .5s;
 }
 .canvas-stage:focus-within,
 .canvas-stage.drawing {
-  filter: drop-shadow(0 0 40px rgba(255,170,0,0.14));
+  /* Glow plus prononcé en mode dessin actif */
+  filter:
+    drop-shadow(0 0 40px rgba(255,185,40,0.16))
+    drop-shadow(0 0 12px rgba(255,170,0,0.08));
 }
 
 /* ════════════════════════════════════════
-   FRAME — cadre galerie 4 couches
+   FRAME — cadre premium 4 couches
+   Bordure or fine + double anneau sombre + glow
 ════════════════════════════════════════ */
 .canvas-frame {
   position: relative;
-  border-radius: 12px;
-  /* Couche 1 : bordure or fine */
-  border: 1px solid rgba(255,185,40,0.45);
-  /* Couches 2-3-4 : ombres empilées */
+  border-radius: 10px;
+  /* Bordure or principale */
+  border: 1px solid rgba(255,185,40,0.5);
+  /* Ombres empilées pour l'effet premium */
   box-shadow:
-    0 0 0 3px rgba(8,14,26,0.95),         /* séparateur sombre interne */
-    0 0 0 4px rgba(255,155,20,0.18),       /* halo or fin */
-    0 4px 32px rgba(0,0,0,0.7),            /* ombre de profondeur */
-    0 0 60px rgba(255,170,0,0.06);         /* lueur ambiante */
+    /* Ring 1 : anneau sombre interne */
+    0 0 0 3px rgba(5,10,20,0.97),
+    /* Ring 2 : halo or très fin */
+    0 0 0 4px rgba(255,160,20,0.15),
+    /* Ring 3 : ombre de profondeur */
+    0 6px 40px rgba(0,0,0,0.8),
+    /* Ring 4 : glow extérieur doux */
+    0 0 70px rgba(255,170,0,0.07),
+    /* Ring 5 : inset bord lumineux en haut */
+    inset 0 1px 0 rgba(255,210,80,0.08);
   overflow: hidden;
-  background: #010508;
-  /* Transition état idle → actif */
-  transition: border-color .4s, box-shadow .4s;
+  background: #040c18; /* fond légèrement bleuté avant le canvas */
+  transition: border-color .35s, box-shadow .35s;
 }
-/* Activation au dessin */
+/* Activation au dessin — cadre s'illumine */
 .canvas-frame.active {
-  border-color: rgba(255,200,60,0.7);
+  border-color: rgba(255,200,60,0.72);
   box-shadow:
-    0 0 0 3px rgba(8,14,26,0.95),
-    0 0 0 4px rgba(255,180,30,0.3),
-    0 4px 40px rgba(0,0,0,0.75),
-    0 0 80px rgba(255,170,0,0.1);
+    0 0 0 3px rgba(5,10,20,0.97),
+    0 0 0 4px rgba(255,185,30,0.28),
+    0 6px 44px rgba(0,0,0,0.82),
+    0 0 90px rgba(255,170,0,0.12),
+    inset 0 1px 0 rgba(255,220,100,0.12);
 }
 
 /* ── 4 coins dorés — signature galerie ── */
@@ -2506,14 +2518,14 @@ body {
   z-index: 3;
   border-radius: 0;
   background:
-    /* Bord haut */
-    linear-gradient(180deg, rgba(1,5,10,0.35) 0%, transparent 8%),
+    /* Bord haut — plus prononcé sous le header */
+    linear-gradient(180deg, rgba(2,6,14,0.55) 0%, rgba(2,6,14,0.15) 6%, transparent 14%),
     /* Bord bas */
-    linear-gradient(0deg,   rgba(1,5,10,0.35) 0%, transparent 8%),
+    linear-gradient(0deg,   rgba(2,6,14,0.45) 0%, rgba(2,6,14,0.12) 6%, transparent 12%),
     /* Bord gauche */
-    linear-gradient(90deg,  rgba(1,5,10,0.25) 0%, transparent 5%),
+    linear-gradient(90deg,  rgba(2,6,14,0.35) 0%, transparent 7%),
     /* Bord droit */
-    linear-gradient(270deg, rgba(1,5,10,0.25) 0%, transparent 5%);
+    linear-gradient(270deg, rgba(2,6,14,0.35) 0%, transparent 7%);
 }
 
 /* ════════════════════════════════════════
@@ -2525,16 +2537,16 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 2;
+  /* Lignes horizontales très discrètes — texture pixel art */
   background: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 3px,
-    rgba(0,0,0,0.028) 3px,
-    rgba(0,0,0,0.028) 4px
+    transparent 9px,
+    rgba(0,0,0,0.06) 9px,
+    rgba(0,0,0,0.06) 10px
   );
-  /* Masqué par défaut, activé via préférence */
-  opacity: 0.6;
   mix-blend-mode: multiply;
+  opacity: 0.5;
 }
 
 /* ════════════════════════════════════════
@@ -3461,266 +3473,1207 @@ body {
 
   
 /* ╔══════════════════════════════════════════════════════════════════
-   ║  MOBILE / TABLETTE — Layout plein écran + 4 menus flottants
+   ║  GOLD PIXEL — HUD MOBILE PREMIUM
+   ║  Mode : paysage obligatoire · Plein écran
+   ║  Canevas : 100% de l'écran
+   ║  UI : boutons flottants discrets + overlays premium
    ╚══════════════════════════════════════════════════════════════════ */
 
-:root { --drawer-w: 240px; }
+/* ── Police Share Tech Mono pour les valeurs numériques ── */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-/* ══ RACINE — viewport exact, zéro scroll ══ */
-@media (max-width: 860px) {
-  html { height:100%; height:100dvh; overflow:hidden; }
-  body { height:100%; height:100dvh; overflow:hidden;
-         display:flex; flex-direction:column; align-items:stretch; }
+/* ═══════════════════════════════════════════════════════════════
+   FONDATIONS — body plein écran, zéro scroll, paysage
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
 
-  /* Banner compact */
-  #top-banner { height:48px !important; min-height:48px !important;
-                padding:0 10px !important; flex-shrink:0; }
-  .banner-subtitle, .banner-nav-actions,
-  .id-pack-name, .id-flag-label { display:none !important; }
-  .id-sep { margin:0 4px !important; }
-  .banner-title { font-size:0.9rem !important; }
-  .banner-cube-icon { width:20px !important; height:20px !important; }
-  .tw-label, .tw-countdown-bar, .tw-reservoir-bar { display:none !important; }
-
-  /* Layout principal */
-  .hud-main-layout { display:flex !important; flex-direction:column !important;
-    flex:1 1 0 !important; min-height:0 !important; overflow:hidden !important;
-    gap:0 !important; padding:0 !important;
-    grid-template-columns:none !important; max-width:100% !important; }
-  .hud-canvas-column { display:flex !important; flex-direction:column !important;
-    flex:1 1 0 !important; min-height:0 !important; gap:0 !important; }
-  .canvas-stage { display:flex !important; flex-direction:column !important;
-    flex:1 1 0 !important; min-height:0 !important; }
-  .canvas-frame { display:flex !important; flex-direction:column !important;
-    flex:1 1 0 !important; min-height:0 !important;
-    aspect-ratio:unset !important; border-radius:0 !important;
-    border-left:none !important; border-right:none !important; }
-  #viewport-container { flex:1 1 0 !important; min-height:0 !important;
-    width:100% !important; height:auto !important;
-    aspect-ratio:unset !important; position:relative !important; inset:auto !important; }
-  #canvas-wrapper { width:100% !important; height:100% !important; }
-  .hud-side-panel { display:none !important; }
-  .hud-tool-strip { display:none !important; }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   BOUTONS RONDS FIXES — les 4 coins de l'écran
-   Chaque bouton ouvre/ferme son panneau rétractable
-══════════════════════════════════════════════════════════════ */
-.mob-fab { display:none; }
-
-@media (max-width:860px) {
-  /* Bouton rond générique */
-  .mob-fab {
-    display: flex; align-items:center; justify-content:center;
-    position: fixed; z-index: 600;
-    width: 46px; height: 46px; border-radius: 50%;
-    background: rgba(6,12,24,0.93);
-    border: 1.5px solid rgba(255,170,0,0.4);
-    color: rgba(255,210,80,0.9);
-    font-size: 1.2rem; cursor: pointer;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.55);
-    transition: background .18s, transform .15s, border-color .18s;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .mob-fab:active { transform: scale(0.88); background:rgba(30,22,4,0.97); }
-  .mob-fab.open   { border-color:rgba(255,200,60,0.85);
-                    box-shadow:0 0 14px rgba(255,170,0,0.25); }
-
-  /* Positions fixes dans les 4 coins */
-  #fab-draw-btn   { bottom:18px; right:18px; }   /* Bas droite  — DESSIN   */
-  #fab-nav-btn    { bottom:18px; left:18px;  }   /* Bas gauche  — NAV      */
-  #fab-shop-btn   { top:58px;   right:18px; }   /* Haut droite — BOUTIQUE */
-  #fab-menu-btn   { top:58px;   left:18px;  }   /* Haut gauche — MENU     */
-}
-
-/* ══════════════════════════════════════════════════════════════
-   PANNEAUX RÉTRACTABLES — s'ouvrent depuis chaque coin
-══════════════════════════════════════════════════════════════ */
-.mob-panel { display:none; }
-
-@media (max-width:860px) {
-  /* Overlay commun semi-transparent */
-  #mob-overlay {
-    display:none; position:fixed; inset:0; z-index:590;
-    background:rgba(0,0,0,0.35); transition:opacity .25s;
-    pointer-events:none;
-  }
-  #mob-overlay.open { display:block; pointer-events:all; }
-
-  /* Panneau générique */
-  .mob-panel {
-    display: flex; flex-direction: column; gap: 0;
-    position: fixed; z-index: 595;
-    background: rgba(6,11,22,0.97);
-    border: 1px solid rgba(255,170,0,0.2);
-    border-radius: 14px;
+  html, body {
+    height: 100%; height: 100dvh;
     overflow: hidden;
-    transform: scale(0.88); opacity:0; pointer-events:none;
-    transition: transform .22s cubic-bezier(.22,1,.36,1), opacity .2s;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-    max-height: calc(100dvh - 140px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,170,0,0.2) transparent;
+    touch-action: none;
   }
-  .mob-panel.open { transform:scale(1); opacity:1; pointer-events:all; }
 
-  /* Positions : s'ouvrent depuis leur coin respectif */
-  #panel-draw  { bottom:72px; right:8px;  width:260px; transform-origin: bottom right; }
-  #panel-nav   { bottom:72px; left:8px;   width:200px; transform-origin: bottom left;  }
-  #panel-shop  { top:112px;  right:8px;  width:220px; transform-origin: top right;    }
-  #panel-menu  { top:112px;  left:8px;   width:220px; transform-origin: top left;     }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: #030710;
+  }
 
-  /* En-tête panneau */
-  .mob-panel-header {
-    display: flex; align-items: center; gap: 9px;
-    padding: 11px 14px 10px;
-    border-bottom: 1px solid rgba(255,170,0,0.1);
+  /* Banner : masqué sur mobile — remplacé par le HUD overlay */
+  #top-banner            { display: none !important; }
+  #pi-status-bar         { display: none !important; }
+
+  /* Layout principal : plein écran */
+  .hud-main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    grid-template-columns: none !important;
+    max-width: 100% !important;
+  }
+
+  /* Colonne canvas : 100% */
+  .hud-canvas-column {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+  }
+
+  /* Stage et frame : flex plein écran */
+  .canvas-stage {
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important;
+    /* Glow ambiant même sur mobile */
+    filter: drop-shadow(0 0 18px rgba(255,170,0,0.09)) !important;
+  }
+  .canvas-stage.drawing {
+    filter: drop-shadow(0 0 32px rgba(255,185,40,0.18)) !important;
+  }
+  .canvas-frame {
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important;
+    aspect-ratio: unset !important;
+    /* Sur mobile : pas de border-radius pour coller aux bords */
+    border-radius: 0 !important;
+    /* Mais on garde une bordure top/bottom or très fine */
+    border-top:    1px solid rgba(255,185,40,0.3) !important;
+    border-bottom: 1px solid rgba(255,185,40,0.18) !important;
+    border-left:   none !important;
+    border-right:  none !important;
+    /* Glow interne subtil */
+    box-shadow:
+      inset 0 1px 0 rgba(255,210,80,0.06),
+      0 0 50px rgba(255,170,0,0.06) !important;
+  }
+  /* Activation au dessin sur mobile */
+  .canvas-frame.active {
+    border-top-color: rgba(255,200,60,0.55) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,220,100,0.1),
+      0 0 70px rgba(255,170,0,0.1) !important;
+  }
+  /* Viewport : flow normal OBLIGATOIRE pour getBoundingClientRect() */
+  #viewport-container {
+    flex: 1 1 0 !important; min-height: 0 !important;
+    width: 100% !important; height: auto !important;
+    aspect-ratio: unset !important;
+    position: relative !important; inset: auto !important;
+    border: none !important; border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  #canvas-wrapper { width: 100% !important; height: 100% !important; }
+
+  /* Masquer les éléments desktop */
+  .hud-side-panel  { display: none !important; }
+  .hud-tool-strip  { display: none !important; }
+
+  /* Coins décoratifs : masqués sur mobile (trop petits) */
+  .canvas-corner   { display: none !important; }
+  .canvas-ambient  { display: none !important; }
+
+  /* Vignette : gardée pour la profondeur immersive */
+  .canvas-vignette {
+    pointer-events: none !important;
+    z-index: 3 !important;
+    opacity: 0.7;
+  }
+
+  /* Coordonnées : masquées */
+  .coords { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALE ORIENTATION / PLEIN ÉCRAN
+   Apparaît 400ms après le chargement
+═══════════════════════════════════════════════════════════════ */
+#gp-launch-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 3000;
+  background: radial-gradient(ellipse at 50% 45%,
+    rgba(18,25,48,0.98) 0%,
+    rgba(4,8,18,0.99) 100%);
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 0;
+}
+#gp-launch-overlay.open { display: flex; }
+
+.launch-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-weight: 900;
+  background: linear-gradient(135deg,
+    #7a4f00 0%, #bf953f 15%, #fcf6ba 30%,
+    #ffaa00 42%, #ffffff 50%,
+    #fcf6ba 58%, #ffaa00 70%,
+    #bf953f 82%, #8a6200 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 20px rgba(255,170,0,0.35));
+}
+.launch-sub {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.7rem; color: rgba(255,255,255,0.28);
+  letter-spacing: 0.22em; text-transform: uppercase;
+  margin-bottom: 36px;
+}
+.launch-card {
+  background: linear-gradient(160deg,
+    rgba(14,22,42,0.95) 0%,
+    rgba(8,14,28,0.97) 100%);
+  border: 1px solid rgba(255,185,40,0.25);
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  width: min(380px, 88vw);
+  box-shadow:
+    0 0 0 1px rgba(255,170,0,0.05),
+    0 24px 60px rgba(0,0,0,0.8),
+    0 0 40px rgba(255,170,0,0.06);
+}
+.launch-card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; font-weight: 700;
+  color: rgba(255,200,80,0.5); letter-spacing: 0.22em;
+  text-align: center; margin-bottom: 20px;
+  text-transform: uppercase;
+}
+.launch-choices {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.launch-choice-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 12px 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,170,0,0.15);
+  border-radius: 14px; cursor: pointer;
+  transition: all .22s cubic-bezier(.22,1,.36,1);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.launch-choice-btn:hover {
+  background: rgba(255,170,0,0.07);
+  border-color: rgba(255,200,60,0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 16px rgba(255,170,0,0.1);
+}
+.launch-choice-btn:active { transform: scale(0.95); }
+.launch-choice-icon {
+  font-size: 2rem; line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255,170,0,0.3));
+}
+.launch-choice-label {
+  font-family: 'Orbitron', monospace; font-size: 0.55rem; font-weight: 700;
+  color: rgba(255,210,80,0.85); letter-spacing: 0.1em; text-align: center;
+}
+.launch-choice-desc {
+  font-family: 'Rajdhani', sans-serif; font-size: 0.62rem;
+  color: rgba(255,255,255,0.28); text-align: center; line-height: 1.4;
+}
+.launch-hint {
+  font-family: 'Rajdhani', sans-serif; font-size: 0.58rem;
+  color: rgba(255,200,80,0.25); text-align: center;
+  margin-top: 16px; letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HUD OVERLAY — flotte PAR-DESSUS le canvas
+   Structure : header fin en haut + 4 FABs dans les coins
+═══════════════════════════════════════════════════════════════ */
+#gp-hud { display: none; }
+
+@media (max-width: 1024px) {
+  /* HUD wrapper : position fixed, couvre tout, pointer-events:none
+     pour que les taps passent au canvas par défaut */
+  #gp-hud {
+    display: block;
+    position: fixed; inset: 0; z-index: 500;
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HEADER PREMIUM — barre fine en haut du canevas
+     Hauteur : 40px — fond verre sombre — bordure or subtile
+     Contenu : avatar · nom · armée · drapeau · pack
+               pixels · timer · bouclier · menu
+  ════════════════════════════════════════════════════════════ */
+  #gp-hud-header {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 40px;
+    display: flex; align-items: center;
+    padding: 0 10px;
+    gap: 6px;
+    /* Verre sombre avec bordure dorée subtile */
+    background:
+      linear-gradient(180deg,
+        rgba(4,8,18,0.91) 0%,
+        rgba(4,8,18,0.82) 100%);
+    border-bottom: 1px solid rgba(255,185,40,0.18);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.03),
+      0 4px 24px rgba(0,0,0,0.55),
+      0 0 40px rgba(255,170,0,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* pointer-events none globalement — activé item par item */
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  /* ── BLOC JOUEUR (gauche) ── */
+  .hdr-player-bloc {
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0; pointer-events: all; cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  /* Avatar : carré arrondi avec initiale */
+  .hdr-avatar {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,170,0,0.1);
+    border: 1px solid rgba(255,170,0,0.28);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace; font-size: 0.52rem; font-weight: 900;
+    color: rgba(255,200,80,0.8); flex-shrink: 0;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .hdr-avatar.elite {
+    border-color: rgba(255,200,60,0.65);
+    box-shadow: 0 0 10px rgba(255,170,0,0.22), inset 0 0 6px rgba(255,200,0,0.06);
+  }
+
+  /* Textes nom + armée */
+  .hdr-names {
+    display: flex; flex-direction: column; gap: 1px;
+    min-width: 0; max-width: 90px;
+  }
+  .hdr-username {
+    font-family: 'Orbitron', monospace; font-size: 0.46rem; font-weight: 700;
+    color: rgba(255,215,100,0.85); letter-spacing: 0.04em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
+  }
+  .hdr-army {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.5rem; font-weight: 600;
+    color: rgba(255,255,255,0.28); letter-spacing: 0.03em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
+  }
+
+  /* ── DRAPEAU ── */
+  .hdr-flag {
+    font-size: 0.85rem; line-height: 1; flex-shrink: 0;
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
+  }
+
+  /* ── BADGE PACK ── */
+  .hdr-pack {
+    display: flex; align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: 10px;
+    border: 1px solid; flex-shrink: 0;
+    font-family: 'Orbitron', monospace; font-size: 0.36rem; font-weight: 700;
+    letter-spacing: 0.08em; line-height: 1;
+  }
+  .hdr-pack.essential {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.35);
+  }
+  .hdr-pack.elite {
+    background: rgba(255,170,0,0.1);
+    border-color: rgba(255,185,40,0.35);
+    color: rgba(255,210,80,0.85);
+    box-shadow: 0 0 8px rgba(255,170,0,0.12);
+  }
+  .hdr-pack-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .hdr-pack.essential .hdr-pack-dot { background: rgba(255,255,255,0.2); }
+  .hdr-pack.elite     .hdr-pack-dot {
+    background: rgba(255,200,60,0.9);
+    box-shadow: 0 0 5px rgba(255,200,0,0.7);
+  }
+
+  /* ── SÉPARATEUR flexible ── */
+  .hdr-sep { flex: 1; }
+
+  /* ── WIDGETS (pilules à droite) ── */
+  .hdr-pill {
+    display: flex; align-items: center; gap: 4px;
+    padding: 3px 7px; border-radius: 20px;
+    background: rgba(4,9,20,0.7);
+    border: 1px solid rgba(255,170,0,0.14);
     flex-shrink: 0;
   }
-  .mob-panel-icon { font-size: 1rem; }
-  .mob-panel-title {
-    font-family: 'Orbitron', monospace; font-size: 0.52rem; font-weight:700;
-    color: rgba(255,210,80,0.75); letter-spacing:0.14em; text-transform:uppercase;
+  .hdr-pill-ico {
+    font-size: 0.65rem; line-height: 1; flex-shrink: 0;
+  }
+  .hdr-pill-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; color: rgba(255,200,80,0.82);
+    letter-spacing: 0.03em; white-space: nowrap;
+  }
+  .hdr-pill-val.green  { color: rgba(80,230,140,0.9); }
+  .hdr-pill-val.red    { color: rgba(255,100,80,0.9); }
+  .hdr-pill-val.orange { color: rgba(255,160,40,0.9); }
+
+  /* ── BOUCLIER actif — affiché seulement quand actif ── */
+  .hdr-shield {
+    display: none; /* caché par défaut */
+    align-items: center; gap: 4px;
+    padding: 3px 7px; border-radius: 20px;
+    background: rgba(220,60,60,0.1);
+    border: 1px solid rgba(220,80,80,0.35);
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(220,60,60,0.15);
+  }
+  .hdr-shield.visible { display: flex; }
+  .hdr-shield-ico { font-size: 0.65rem; line-height: 1; }
+  .hdr-shield-val {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.5rem;
+    color: rgba(255,120,120,0.85); white-space: nowrap;
   }
 
-  /* Corps du panneau */
-  .mob-panel-body { padding: 10px 12px 14px; display:flex; flex-direction:column; gap:8px; }
+  /* ── DOT CONNEXION (inline dans le header) ── */
+  .hdr-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(80,200,130,0.25); transition: background .4s;
+  }
+  .hdr-dot.online  {
+    background: rgba(80,220,140,0.9);
+    box-shadow: 0 0 5px rgba(80,220,140,0.6);
+  }
+  .hdr-dot.offline { background: rgba(255,100,80,0.65); }
 
-  /* ── Boutons d'action dans les panneaux ── */
-  .mob-action-btn {
+  /* Conserver les anciens .hud-* pour compatibilité
+     (utilisés ailleurs, ne pas supprimer) */
+  .hud-avatar, .hud-player-name, .hud-header-sep,
+  .hud-widget, .hud-widget-ico, .hud-widget-val,
+  .hud-conn-dot { display: none !important; }
+
+  /* ══════════════════════════════════════════════════════════
+     TOOLBAR DROITE — colonne verticale de boutons flottants
+     Positionnée au centre-droit du canevas
+     z-index < overlays (20) mais > canvas (1)
+  ══════════════════════════════════════════════════════════ */
+
+  /* ── Bouton générique (partagé toolbar + undo) ── */
+  .gp-fab {
+    position: absolute; z-index: 10;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    background: rgba(5,10,22,0.88);
+    border: 1.5px solid rgba(255,170,0,0.28);
+    box-shadow:
+      0 3px 12px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    pointer-events: all; cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .18s, box-shadow .18s, transform .12s, background .18s;
+    color: rgba(255,210,80,0.85);
+  }
+  .gp-fab:hover {
+    background: rgba(10,18,36,0.95);
+    border-color: rgba(255,200,60,0.6);
+    box-shadow:
+      0 0 16px rgba(255,170,0,0.2),
+      0 3px 12px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .gp-fab:active { transform: scale(0.86); }
+  .gp-fab.active {
+    background: rgba(255,170,0,0.12);
+    border-color: rgba(255,200,60,0.8);
+    box-shadow:
+      0 0 20px rgba(255,170,0,0.3),
+      0 3px 12px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    color: rgba(255,230,100,0.95);
+  }
+
+  /* ── Wrapper toolbar droite ── */
+  #gp-toolbar-right {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none; /* les boutons internes ont pointer-events:all */
+  }
+
+  /* ── Séparateur visuel dans la toolbar ── */
+  .tb-sep {
+    width: 20px; height: 1px;
+    background: rgba(255,170,0,0.15);
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* Tous les boutons dans la toolbar ont pointer-events:all */
+  #gp-toolbar-right .gp-fab { position: relative; }
+
+  /* ── Tooltip label (hover/press) ── */
+  .gp-fab[data-tip]::before {
+    content: attr(data-tip);
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%; transform: translateY(-50%);
+    background: rgba(4,8,18,0.95);
+    border: 1px solid rgba(255,170,0,0.2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-family: 'Orbitron', monospace; font-size: 0.38rem;
+    font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,200,80,0.8); white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity .15s;
+    backdrop-filter: blur(8px);
+  }
+  .gp-fab[data-tip]:hover::before,
+  .gp-fab[data-tip]:focus::before { opacity: 1; }
+
+  /* Point couleur active — sur le bouton palette */
+  #gp-fab-palette .fab-cdot {
+    position: absolute; bottom: 3px; right: 3px;
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    background: #FFFFFF; transition: background .12s;
+    pointer-events: none;
+  }
+
+  /* Badge mode — sur le bouton palette */
+  #gp-fab-palette .fab-mode-badge {
+    position: absolute; top: -3px; left: -3px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: rgba(5,10,22,0.92);
+    border: 1px solid rgba(255,170,0,0.38);
+    font-size: 0.42rem;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,200,80,0.88); pointer-events: none;
+  }
+
+  /* ── Bouton UNDO — bas gauche isolé ── */
+  #gp-fab-undo {
+    position: absolute;
+    bottom: 16px; left: 10px;
+    z-index: 10;
+  }
+  /* Couleur différente pour l'undo : teinte bleue pour le distinguer */
+  #gp-fab-undo {
+    border-color: rgba(100,180,255,0.28);
+    color: rgba(150,200,255,0.82);
+  }
+  #gp-fab-undo:hover {
+    border-color: rgba(100,180,255,0.55);
+    box-shadow:
+      0 0 14px rgba(100,180,255,0.18),
+      0 3px 12px rgba(0,0,0,0.6);
+  }
+
+  /* ── Les 4 anciens FABs de coin — masqués, remplacés par la toolbar ── */
+  /* On garde les IDs pour les overlays qui les référencent (classList.add('active')) */
+  #gp-fab-draw  { display: none !important; }
+  #gp-fab-nav   { display: none !important; }
+  #gp-fab-shop  { display: none !important; }
+  #gp-fab-menu  { display: none !important; }
+
+  /* Point couleur (ancien — masqué) */
+  #gp-color-dot { display: none; }
+
+  /* ══════════════════════════════════════════
+     OVERLAYS — s'affichent par-dessus le canvas
+     Style verre sombre, coins arrondis
+  ══════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════════
+     DESIGN SYSTEM OVERLAYS — Gold Pixel
+     ──────────────────────────────────────────────────────────────
+     Deux patterns visuels unifiés :
+
+     A. SHEET DU BAS (draw, shop, gallery)
+        → pleine largeur · slide-up depuis le bas
+        → backdrop rgba(0,0,0,0.45)
+        → coin supérieurs arrondis 20px, pas de border bas/gauche/droite
+
+     B. POPUP COMPACT (nav, menu, tuto)
+        → largeur fixe · fade + translateY léger depuis le coin
+        → backdrop rgba(0,0,0,0.2)
+        → coins arrondis 14px tous côtés, bordure complète
+
+     Transitions identiques : cubic-bezier(.22,1,.36,1) 280ms
+     Backdrop : toujours présent, opacité variable selon le type
+  ══════════════════════════════════════════════════════════════ */
+
+  /* ── TOKEN CSS partagés ── */
+  :root {
+    --ov-bg:          rgba(5,10,22,0.95);
+    --ov-border:      rgba(255,185,40,0.2);
+    --ov-border-top:  rgba(255,185,40,0.28);
+    --ov-blur:        blur(20px);
+    --ov-inset:       inset 0 1px 0 rgba(255,200,80,0.06);
+    --ov-ease:        cubic-bezier(.22,1,.36,1);
+    --ov-dur:         280ms;
+  }
+
+  /* ── Base commune ── */
+  .gp-overlay {
+    position: absolute; z-index: 20;
+    background: var(--ov-bg);
+    backdrop-filter: var(--ov-blur); -webkit-backdrop-filter: var(--ov-blur);
+    border: 1px solid var(--ov-border);
+    box-shadow:
+      0 0 0 1px rgba(255,170,0,0.04),
+      var(--ov-inset);
+    pointer-events: none;
+    opacity: 0;
+    overflow: hidden;
+    /* Transition unifiée : opacity + transform simultanés */
+    transition:
+      opacity  var(--ov-dur) var(--ov-ease),
+      transform var(--ov-dur) var(--ov-ease);
+  }
+  .gp-overlay.open {
+    pointer-events: all;
+    opacity: 1;
+  }
+
+  /* ════════════════════════════════════════════
+     PATTERN A — SHEET DU BAS
+     draw · shop · gallery
+  ════════════════════════════════════════════ */
+  .gp-overlay.sheet-bottom {
+    bottom: 0; left: 0; right: 0;
+    width: 100% !important; max-width: 100% !important;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none; border-left: none; border-right: none;
+    /* Bordure top dorée plus visible */
+    border-top: 1px solid var(--ov-border-top);
+    box-shadow:
+      0 -12px 48px rgba(0,0,0,0.72),
+      0 -1px 0 rgba(255,185,40,0.22),
+      var(--ov-inset);
+    /* Entrée : depuis le bas */
+    transform: translateY(105%);
+  }
+  .gp-overlay.sheet-bottom.open {
+    transform: translateY(0);
+  }
+
+  /* ════════════════════════════════════════════
+     PATTERN B — POPUP COMPACT
+     nav · menu · tuto
+  ════════════════════════════════════════════ */
+  .gp-overlay.popup {
+    border-radius: 14px;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.65),
+      0 0 0 1px rgba(255,170,0,0.05),
+      var(--ov-inset);
+    max-width: min(240px, calc(100vw - 32px));
+  }
+
+  /* Popup bas-gauche → monte du bas */
+  .gp-overlay.popup.from-bl {
+    bottom: 68px; left: 8px;
+    transform: translateY(10px);
+    transform-origin: bottom left;
+  }
+  .gp-overlay.popup.from-bl.open { transform: translateY(0); }
+
+  /* Popup haut-gauche → descend du haut */
+  .gp-overlay.popup.from-tl {
+    top: 106px; left: 8px;
+    transform: translateY(-10px);
+    transform-origin: top left;
+  }
+  .gp-overlay.popup.from-tl.open { transform: translateY(0); }
+
+  /* Popup centré (tuto) → scale depuis le centre */
+  .gp-overlay.popup.from-center {
+    top: 50%; left: 50%;
+    transform: translate(-50%, -48%) scale(0.94);
+    transform-origin: center center;
+    max-width: min(340px, calc(100vw - 32px));
+    max-height: 70dvh; overflow-y: auto;
+  }
+  .gp-overlay.popup.from-center.open {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* ════════════════════════════════════════════
+     POSITIONNNEMENT INDIVIDUEL
+     (dimensions propres à chaque overlay)
+  ════════════════════════════════════════════ */
+  #ov-draw  { max-height: 46dvh; overflow-y: auto; }
+  #ov-shop  { max-height: 62dvh; overflow: hidden; display: flex; flex-direction: column; }
+  #ov-gallery { max-height: 70dvh; overflow: hidden; display: flex; flex-direction: column; }
+  #ov-nav   { width: 210px; }
+  #ov-menu  { width: 210px; }
+  #ov-tuto  { width: min(340px, calc(100vw - 32px)); }
+
+  /* ── En-tête overlay — identique pour tous ── */
+  .ov-header {
     display: flex; align-items: center; gap: 9px;
-    padding: 10px 12px; border-radius: 8px; cursor: pointer;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,170,0,0.12);
-    color: rgba(255,215,100,0.85); font-family:'Rajdhani',sans-serif;
-    font-size: 0.78rem; font-weight:600; letter-spacing:0.04em;
-    transition: all .17s; touch-action:manipulation;
-    -webkit-tap-highlight-color:transparent;
-    text-align:left; width:100%;
+    padding: 10px 14px 9px;
+    border-bottom: 1px solid rgba(255,185,40,0.07);
+    flex-shrink: 0;
+    position: relative; /* pour la poignée absolute */
   }
-  .mob-action-btn:active { background:rgba(255,170,0,0.1); transform:scale(0.97); }
-  .mob-action-btn.active-mode {
-    background:rgba(255,170,0,0.14);
-    border-color:rgba(255,200,60,0.5);
-    color:rgba(255,230,120,0.95);
+  /* Poignée handle en haut (pour sheets) */
+  .ov-header .pal-handle-btn {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
   }
-  .mob-action-btn .btn-ico { font-size:1.05rem; flex-shrink:0; width:22px; text-align:center; }
-  .mob-action-btn .btn-lbl { flex:1; }
-  .mob-action-btn .btn-badge {
-    font-family:'Orbitron',monospace; font-size:0.42rem;
-    color:rgba(255,200,80,0.55); background:rgba(255,170,0,0.08);
-    padding:2px 5px; border-radius:4px; flex-shrink:0;
+
+  /* Icône en-tête */
+  .ov-hdr-ico {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
   }
+
+  .ov-title {
+    font-family: 'Orbitron', monospace; font-size: 0.5rem; font-weight: 700;
+    color: rgba(255,200,80,0.65); letter-spacing: 0.16em; text-transform: uppercase;
+    flex: 1;
+  }
+  .ov-close {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.38); font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+    transition: background .15s, color .15s;
+  }
+  .ov-close:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+  .ov-close:active { transform: scale(0.88); }
+
+  /* ── Corps overlay ── */
+  .ov-body { padding: 10px 13px 14px; display: flex; flex-direction: column; gap: 7px; }
 
   /* ── Séparateur ── */
-  .mob-sep {
-    height:1px; background:rgba(255,170,0,0.08); margin:2px 0;
+  .ov-sep { height: 1px; background: rgba(255,170,0,0.07); margin: 1px 0; }
+
+  /* ── Label section ── */
+  .ov-section {
+    font-family: 'Orbitron', monospace; font-size: 0.38rem; font-weight: 700;
+    color: rgba(255,200,80,0.32); letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: -3px;
   }
 
-  /* ── Zoom row ── */
-  .mob-zoom-row {
-    display:flex; align-items:center; gap:6px;
-    padding:8px 12px;
-    background:rgba(255,255,255,0.02);
-    border:1px solid rgba(255,170,0,0.1);
-    border-radius:8px;
-  }
-  .mob-zoom-btn {
-    width:32px; height:32px; border-radius:50%;
-    background:rgba(255,170,0,0.1); border:1px solid rgba(255,170,0,0.25);
-    color:rgba(255,200,80,0.85); font-size:1.1rem; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    touch-action:manipulation; flex-shrink:0; transition:all .15s;
-  }
-  .mob-zoom-btn:active { background:rgba(255,170,0,0.25); transform:scale(0.9); }
-  #mob-zoom-label {
-    flex:1; text-align:center;
-    font-family:'Orbitron',monospace; font-size:0.55rem;
-    color:rgba(255,200,80,0.65); letter-spacing:0.05em;
+  /* ── Backdrop partagé ── */
+  #gp-backdrop {
+    transition: background var(--ov-dur) var(--ov-ease),
+                opacity  var(--ov-dur) var(--ov-ease);
   }
 
-  /* ── Palette compacte dans le panneau dessin ── */
-  #mob-palette-grid {
+  /* ── En-tête overlay ── */
+  .ov-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 14px 9px;
+    border-bottom: 1px solid rgba(255,170,0,0.08);
+    flex-shrink: 0;
+  }
+  .ov-title {
+    font-family: 'Orbitron', monospace; font-size: 0.5rem; font-weight: 700;
+    color: rgba(255,200,80,0.6); letter-spacing: 0.16em; text-transform: uppercase;
+    flex: 1;
+  }
+  .ov-close {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.35); font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+    transition: all .15s;
+  }
+  .ov-close:active { background: rgba(255,255,255,0.1); }
+
+  /* ── Corps overlay ── */
+  .ov-body { padding: 10px 12px 13px; display: flex; flex-direction: column; gap: 7px; }
+
+  /* ── Séparateur ── */
+  .ov-sep { height: 1px; background: rgba(255,170,0,0.07); margin: 1px 0; }
+
+  /* ═══ CONTENU OVERLAY DESSIN ═══════════════ */
+
+  /* ── Palette matte — grille 9 colonnes, cases larges tactile ── */
+  #gp-palette-grid {
     display: grid !important;
-    grid-template-columns: repeat(8, 1fr) !important;
-    gap: 4px !important;
+    grid-template-columns: repeat(9, 1fr) !important;
+    gap: 5px !important;
   }
-  #mob-palette-grid .c-btn {
-    aspect-ratio:1; border-radius:4px; cursor:pointer;
-    border:1px solid rgba(255,255,255,0.08);
-    transition:transform .12s, box-shadow .12s;
-    touch-action:manipulation;
+  #gp-palette-grid .c-btn {
+    aspect-ratio: 1;
+    border-radius: 7px;
+    cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,0.07);
+    /* Taille minimale tactile */
+    min-height: 36px;
+    transition: transform .1s, box-shadow .1s, border-color .1s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
-  #mob-palette-grid .c-btn.active {
-    border:2px solid #fff; box-shadow:0 0 8px rgba(255,255,255,0.6);
-    transform:scale(1.1);
+  #gp-palette-grid .c-btn:hover {
+    transform: scale(1.1);
+    border-color: rgba(255,255,255,0.35);
+    z-index: 1;
   }
-
-  /* ── Swatches métaux — taille réduite mais bien visibles ── */
-  .mob-metals-row {
-    display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:4px;
-  }
-  .mob-metal-swatch {
-    aspect-ratio:1; border-radius:6px; cursor:pointer;
-    border:1.5px solid rgba(255,255,255,0.12);
-    transition:transform .14s, border-color .14s, box-shadow .14s;
-    touch-action:manipulation; position:relative;
-    /* Taille plus petite que la palette matte */
-    max-height: 32px;
-  }
-  .mob-metal-swatch:active { transform:scale(0.9); }
-  .mob-metal-swatch.active {
-    border:2px solid rgba(255,255,255,0.8) !important;
-    box-shadow:0 0 10px rgba(255,255,255,0.4) !important;
-    transform:scale(1.08);
-  }
-  /* Couleurs fixes pour silver et bronze (ne dépendent pas du JS) */
-  #mob-silver { background:linear-gradient(135deg,#888 0%,#f0f0f0 40%,#C0C0C0 60%,#999 100%); }
-  #mob-gold   { background:linear-gradient(135deg,#bf953f 0%,#fcf6ba 35%,#ffaa00 55%,#fcf6ba 75%,#b38728 100%);
-                animation:goldPulse 1.8s ease-in-out infinite; }
-  #mob-bronze { background:linear-gradient(135deg,#7c4f1e 0%,#e8a96a 40%,#cd7f32 60%,#a0612b 100%); }
-
-  .mob-metals-labels {
-    display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:2px;
-  }
-  .mob-metal-label {
-    font-family:'Orbitron',monospace; font-size:0.38rem;
-    color:rgba(255,170,0,0.55); text-align:center; letter-spacing:0.05em;
-  }
-  .mob-metal-label.silver { color:rgba(192,192,192,0.7); }
-  .mob-metal-label.bronze { color:rgba(205,127,50,0.8); }
-
-  /* ── Compteur or dans le panneau dessin ── */
-  .mob-gold-bar-row {
-    display:flex; align-items:center; gap:7px;
-    padding:6px 10px; border-radius:7px;
-    background:rgba(255,170,0,0.05); border:1px solid rgba(255,170,0,0.12);
-  }
-  .mob-gold-bar-lbl {
-    font-family:'Orbitron',monospace; font-size:0.48rem;
-    color:rgba(255,200,80,0.8); flex-shrink:0;
-  }
-  .mob-gold-bar-track {
-    flex:1; height:5px; background:rgba(255,170,0,0.12);
-    border-radius:3px; overflow:hidden;
-  }
-  .mob-gold-bar-fill {
-    height:100%; background:linear-gradient(90deg,#bf953f,#ffaa00,#fcf6ba);
-    border-radius:3px; transition:width .3s; width:100%;
+  #gp-palette-grid .c-btn:active { transform: scale(0.9); }
+  #gp-palette-grid .c-btn.active {
+    border: 2px solid rgba(255,255,255,0.95) !important;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.2),
+      0 0 12px rgba(255,255,255,0.4);
+    transform: scale(1.16); z-index: 2;
   }
 
-  /* ── Point couleur active (affiché dans le bouton FAB dessin) ── */
-  #fab-draw-btn .color-dot {
-    position:absolute; bottom:4px; right:4px;
-    width:10px; height:10px; border-radius:50%;
-    border:1.5px solid rgba(255,255,255,0.6);
-    background:#FFFFFF; transition:background .12s;
+  /* Section label dans overlay */
+  .ov-section {
+    font-family: 'Orbitron', monospace; font-size: 0.38rem; font-weight: 700;
+    color: rgba(255,200,80,0.32); letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: -3px;
   }
-  #fab-draw-btn { position:fixed; } /* override pour contenir le dot */
 
+  /* ── Métaux Premium — légèrement plus grands que palette matte ── */
+  .gp-metals-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+  }
+  .gp-metal {
+    aspect-ratio: 1; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    transition: transform .12s, border-color .12s, box-shadow .12s;
+    touch-action: manipulation;
+    /* Légèrement plus grand que les cases matte pour les distinguer */
+    min-height: 40px;
+  }
+  .gp-metal:active { transform: scale(0.88); }
+  .gp-metal.active {
+    border-color: rgba(255,255,255,0.85) !important;
+    box-shadow: 0 0 10px rgba(255,255,255,0.4) !important;
+    transform: scale(1.1);
+  }
+  #gp-m-silver { background: linear-gradient(135deg,#888,#f0f0f0 40%,#C0C0C0 60%,#999); }
+  #gp-m-gold   { background: linear-gradient(135deg,#bf953f,#fcf6ba 35%,#ffaa00 55%,#fcf6ba 75%,#b38728);
+                 animation: goldPulse 1.8s ease-in-out infinite; }
+  #gp-m-bronze { background: linear-gradient(135deg,#7c4f1e,#e8a96a 40%,#cd7f32 60%,#a0612b); }
+
+  .gp-metals-labels {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;
+  }
+  .gp-metal-lbl {
+    font-family: 'Orbitron', monospace; font-size: 0.32rem;
+    color: rgba(255,170,0,0.45); text-align: center; letter-spacing: 0.04em;
+  }
+  .gp-metal-lbl.s { color: rgba(192,192,192,0.65); }
+  .gp-metal-lbl.b { color: rgba(205,127,50,0.75); }
+  /* ════════════════════════════════════════════════════════════
+     PALETTE BOTTOM SHEET — layout interne
+  ════════════════════════════════════════════════════════════ */
+
+  /* Bouton poignée (zone cliquable autour de la handle) */
+  .pal-handle-btn {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 24px; cursor: pointer;
+    background: transparent; border: none;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: manipulation;
+  }
+  /* Pill visuelle */
+  .pal-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: rgba(255,185,40,0.3);
+    transition: background .2s;
+  }
+  .pal-handle-btn:hover .pal-handle,
+  .pal-handle-btn:active .pal-handle {
+    background: rgba(255,185,40,0.65);
+  }
+
+  /* Indicateur couleur active dans le header */
+  .pal-active-color-row {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .pal-active-dot {
+    width: 18px; height: 18px; border-radius: 5px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 6px rgba(255,255,255,0.2);
+    transition: background .15s, box-shadow .15s;
+    flex-shrink: 0;
+  }
+  .pal-active-name {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.46rem;
+    color: rgba(255,200,80,0.65); letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  /* Corps en 2 colonnes */
+  .pal-body {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    padding: 8px 14px 14px;
+    overflow: hidden;
+  }
+
+  /* Colonne palette matte — prend le max de place */
+  .pal-col-main {
+    flex: 1;
+    min-width: 0;
+    padding-right: 12px;
+  }
+
+  /* Séparateur vertical */
+  .pal-vsep {
+    width: 1px;
+    background: rgba(255,170,0,0.1);
+    margin: 0 12px;
+    align-self: stretch;
+    flex-shrink: 0;
+  }
+
+  /* Colonne droite — largeur fixe */
+  .pal-col-right {
+    width: 110px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Wrap métal (swatch + label empilés) */
+  .pal-metal-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .pal-metal-wrap .gp-metal {
+    width: 100%; min-height: 36px;
+  }
+  /* Override grid 3 colonnes pour les métaux dans la colonne droite */
+  .pal-col-right .gp-metals-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+  }
+
+  /* Modes dans la colonne droite — 2 colonnes */
+  .pal-modes {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  }
+  /* Mode btn dans la palette (compacts) */
+  .pal-col-right .gp-mode-btn {
+    font-size: 0.34rem; padding: 5px 3px; gap: 2px;
+  }
+
+  /* Glow doré sur l'overlay palette ouvert */
+  #ov-draw.open {
+    box-shadow:
+      0 -8px 40px rgba(0,0,0,0.75),
+      0 -2px 0 rgba(255,185,40,0.3),
+      0 0 60px rgba(255,170,0,0.06),
+      inset 0 1px 0 rgba(255,200,80,0.07);
+  }
+
+  /* Sur mobile portrait (fallback) : 1 colonne */
+  @media (max-width: 500px) and (orientation: portrait) {
+    .pal-body { flex-direction: column; }
+    .pal-vsep { width: 100%; height: 1px; margin: 8px 0; }
+    .pal-col-right { width: 100%; }
+    .pal-col-main { padding-right: 0; }
+  }
+
+
+  /* Barre or */
+  .gp-gold-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 8px; border-radius: 6px;
+    background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.1);
+  }
+  .gp-gold-lbl {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.5rem;
+    color: rgba(255,200,80,0.7); white-space: nowrap; flex-shrink: 0;
+  }
+  .gp-gold-track {
+    flex: 1; height: 4px; background: rgba(255,170,0,0.1);
+    border-radius: 2px; overflow: hidden;
+  }
+  .gp-gold-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #bf953f, #ffaa00, #fcf6ba);
+    border-radius: 2px; transition: width .3s; width: 100%;
+  }
+
+  /* Modes dessin */
+  .gp-modes-row {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 4px;
+  }
+  .gp-mode-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 4px; border-radius: 8px; cursor: pointer;
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,170,0,0.1);
+    color: rgba(255,210,80,0.7);
+    font-family: 'Orbitron', monospace; font-size: 0.36rem; letter-spacing: 0.05em;
+    transition: all .14s; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gp-mode-btn .gm-ico { font-size: 0.9rem; line-height: 1; }
+  .gp-mode-btn.on {
+    background: rgba(255,170,0,0.14); border-color: rgba(255,200,60,0.5);
+    color: rgba(255,230,120,0.95);
+    box-shadow: 0 0 8px rgba(255,170,0,0.12);
+  }
+  .gp-mode-btn:active { transform: scale(0.91); }
+
+  /* ═══ CONTENU OVERLAY NAV ═══════════════════ */
+  .gp-zoom-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,170,0,0.08);
+  }
+  .gp-zoom-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,170,0,0.1); border: 1px solid rgba(255,170,0,0.22);
+    color: rgba(255,200,80,0.85); font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+    transition: all .14s;
+  }
+  .gp-zoom-btn:active { background: rgba(255,170,0,0.28); transform: scale(0.88); }
+  #gp-zoom-lbl {
+    flex: 1; text-align: center;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.52rem;
+    color: rgba(255,200,80,0.6);
+  }
+
+  .gp-nav-btn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 11px; border-radius: 8px; cursor: pointer;
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,170,0,0.09);
+    color: rgba(255,215,100,0.8); font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem; font-weight: 600;
+    transition: all .14s; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gp-nav-btn:active { background: rgba(255,170,0,0.1); transform: scale(0.97); }
+  .gp-nav-btn.on { background: rgba(255,170,0,0.14); border-color: rgba(255,200,60,0.45); }
+  .gp-nav-btn .gn-ico { font-size: 0.9rem; flex-shrink: 0; line-height: 1; }
+
+  /* ═══════════════════════════════════════════════════════
+     BOUTIQUE — système de cartes premium
+  ═══════════════════════════════════════════════════════ */
+
+  /* Corps scrollable de la boutique */
+  #ov-shop .sh-body {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 12px 14px 18px;
+    scrollbar-width: thin; scrollbar-color: rgba(255,170,0,0.15) transparent;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  #ov-shop .sh-body::-webkit-scrollbar { width: 3px; }
+  #ov-shop .sh-body::-webkit-scrollbar-thumb {
+    background: rgba(255,170,0,0.18); border-radius: 2px;
+  }
+
+  /* ── Section label ── */
+  .sh-sec-lbl {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Orbitron', monospace; font-size: 0.42rem; font-weight: 700;
+    color: rgba(255,200,80,0.38); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: -4px;
+  }
+  .sh-sec-lbl::before {
+    content: '';
+    flex: none; width: 3px; height: 11px;
+    border-radius: 2px; background: rgba(255,200,80,0.45);
+  }
+  .sh-sec-lbl::after {
+    content: '';
+    flex: 1; height: 1px; background: rgba(255,170,0,0.08);
+  }
+
+  /* ── Grille cartes ── */
+  .sh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sh-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .sh-grid.cols-1 { grid-template-columns: 1fr; }
+
+  /* ── Carte produit ── */
+  .sh-card {
+    position: relative;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 12px 10px;
+    border-radius: 12px;
+    background: rgba(8,15,30,0.7);
+    border: 1px solid rgba(255,170,0,0.13);
+    transition: border-color .18s, box-shadow .18s, transform .12s;
+    touch-action: manipulation; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+  /* Ligne or en haut de la carte */
+  .sh-card::before {
+    content: '';
+    position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,185,40,0.35), transparent);
+  }
+  .sh-card:hover {
+    border-color: rgba(255,185,40,0.35);
+    box-shadow: 0 0 18px rgba(255,170,0,0.1), 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .sh-card:active { transform: scale(0.96); }
+  /* Variante bleue (dons) */
+  .sh-card.don { border-color: rgba(100,220,180,0.15); }
+  .sh-card.don::before { background: linear-gradient(90deg, transparent, rgba(100,220,180,0.25), transparent); }
+  .sh-card.don:hover { border-color: rgba(100,220,180,0.35); box-shadow: 0 0 18px rgba(100,220,180,0.08), 0 4px 16px rgba(0,0,0,0.4); }
+  /* Carte désactivée (inclus Elite) */
+  .sh-card.included { opacity: 0.55; cursor: default; }
+  .sh-card.included:hover { border-color: rgba(255,170,0,0.13); box-shadow: none; }
+  .sh-card.included:active { transform: none; }
+
+  /* ── Ligne haut de carte : icône + badge ── */
+  .sh-card-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .sh-card-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,170,0,0.08);
+    border: 1px solid rgba(255,170,0,0.14);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .sh-card-icon.blue { background: rgba(100,180,255,0.08); border-color: rgba(100,180,255,0.14); }
+  .sh-card-icon.green { background: rgba(100,220,160,0.08); border-color: rgba(100,220,160,0.14); }
+
+  /* Badge (OVERFILL, INCLUS ELITE, etc.) */
+  .sh-badge {
+    font-family: 'Orbitron', monospace; font-size: 0.33rem; font-weight: 700;
+    letter-spacing: 0.07em; padding: 2px 6px; border-radius: 6px;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .sh-badge.gold   { color: rgba(255,200,60,0.85); background: rgba(255,170,0,0.1); border: 1px solid rgba(255,170,0,0.2); }
+  .sh-badge.green  { color: rgba(80,220,140,0.85); background: rgba(80,220,140,0.08); border: 1px solid rgba(80,220,140,0.2); }
+  .sh-badge.blue   { color: rgba(100,180,255,0.85); background: rgba(100,180,255,0.08); border: 1px solid rgba(100,180,255,0.2); }
+  .sh-badge.dim    { color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+
+  /* ── Texte principal ── */
+  .sh-card-name {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.78rem; font-weight: 700;
+    color: rgba(255,215,100,0.88); line-height: 1; letter-spacing: 0.02em;
+  }
+  .sh-card-desc {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.6rem; font-weight: 500;
+    color: rgba(255,255,255,0.3); line-height: 1.35; margin-top: -4px;
+  }
+
+  /* ── Ligne bas : prix + bouton ── */
+  .sh-card-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-top: auto;
+  }
+  .sh-price {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
+    color: rgba(255,200,80,0.78); letter-spacing: 0.04em; line-height: 1;
+  }
+  .sh-price-sub {
+    font-family: 'Orbitron', monospace; font-size: 0.3rem;
+    color: rgba(255,200,80,0.35); letter-spacing: 0.06em;
+    display: block; margin-top: 1px;
+  }
+  .sh-buy-btn {
+    font-family: 'Orbitron', monospace; font-size: 0.42rem; font-weight: 700;
+    letter-spacing: 0.07em; padding: 5px 10px; border-radius: 20px;
+    background: linear-gradient(135deg, #8a5c00, #bf953f, #ffaa00, #fcf6ba, #ffaa00, #bf953f);
+    background-size: 200% auto; color: rgba(0,0,0,0.85); border: none;
+    cursor: pointer; touch-action: manipulation; white-space: nowrap;
+    transition: background-position .3s, box-shadow .2s, transform .12s;
+    box-shadow: 0 2px 10px rgba(255,170,0,0.2);
+    flex-shrink: 0;
+  }
+  .sh-buy-btn:hover { background-position: right center; box-shadow: 0 3px 16px rgba(255,170,0,0.35); }
+  .sh-buy-btn:active { transform: scale(0.93); }
+  .sh-buy-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  /* Bouton don — teinte verte */
+  .sh-buy-btn.don {
+    background: linear-gradient(135deg, rgba(40,160,100,0.8), rgba(80,220,140,0.8));
+    color: rgba(0,0,0,0.8); box-shadow: 0 2px 10px rgba(80,220,140,0.15);
+  }
+  .sh-buy-btn.don:hover { box-shadow: 0 3px 16px rgba(80,220,140,0.28); }
+
+  /* ── Toggle don anonyme ── */
+  .sh-toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .sh-toggle-label {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.65rem; font-weight: 600;
+    color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 6px;
+  }
+  .sh-toggle-label .tl-ico { font-size: 0.85rem; }
+  /* Switch ON/OFF */
+  .sh-toggle {
+    position: relative; width: 32px; height: 17px;
+    background: rgba(255,255,255,0.08); border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+    transition: background .2s, border-color .2s;
+  }
+  .sh-toggle::after {
+    content: '';
+    position: absolute; top: 2px; left: 2px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: transform .2s, background .2s;
+  }
+  .sh-toggle.on {
+    background: rgba(80,220,140,0.25); border-color: rgba(80,220,140,0.45);
+  }
+  .sh-toggle.on::after {
+    transform: translateX(15px);
+    background: rgba(80,220,140,0.9);
+    box-shadow: 0 0 6px rgba(80,220,140,0.5);
+  }
+
+  /* ── Infos mécaniques (Overfill) ── */
+  .sh-meca-box {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.1);
+  }
+  .sh-meca-ico { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .sh-meca-txt { flex: 1; }
+  .sh-meca-title {
+    font-family: 'Orbitron', monospace; font-size: 0.46rem; font-weight: 700;
+    color: rgba(255,200,80,0.75); letter-spacing: 0.08em; margin-bottom: 3px;
+  }
+  .sh-meca-desc {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.6rem;
+    color: rgba(255,255,255,0.3); line-height: 1.4;
+  }
+
+  /* ═══ CONTENU OVERLAY MENU ══════════════════ */
+  .gp-menu-btn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 11px; border-radius: 8px; cursor: pointer;
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,170,0,0.08);
+    color: rgba(255,215,100,0.78); font-family: 'Rajdhani', sans-serif;
+    font-size: 0.74rem; font-weight: 600;
+    transition: all .14s; touch-action: manipulation; width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gp-menu-btn:active { background: rgba(255,170,0,0.1); transform: scale(0.97); }
+  .gp-menu-btn .gmn-ico { font-size: 0.9rem; flex-shrink: 0; line-height: 1; }
 }
 
 /* ══ COORDS masquées sur mobile ══ */
@@ -4466,7 +5419,7 @@ const COLS = 80, ROWS = 45, PX = 10;   // grille 80×45 = canevas 800×450px
 const CANVAS_W = COLS * PX;             // 800
 const CANVAS_H = ROWS * PX;             // 450
 const MAX_GOLD = 50;                    // pixels or max par dessin
-const BG_COLOR = '#081422';             // couleur de fond du canevas
+const BG_COLOR = '#081422';             // couleur de fond (centre du dégradé radial)
 
 // 36 couleurs de la palette
 const COLORS = [
@@ -4815,18 +5768,47 @@ if (!localStorage.getItem('gp_rules_accepted')) {
 //  DESSIN DU CANEVAS
 // ════════════════════════════════════════════
 function drawBase() {
-  // Fond sombre
-  ctx.fillStyle = BG_COLOR;
+  // ── Fond dégradé sombre immersif ──
+  const bgGrad = ctx.createRadialGradient(
+    CANVAS_W * 0.5, CANVAS_H * 0.5, 0,
+    CANVAS_W * 0.5, CANVAS_H * 0.5, CANVAS_W * 0.72
+  );
+  bgGrad.addColorStop(0,   '#0d1829'); // centre légèrement plus chaud
+  bgGrad.addColorStop(0.6, '#081422'); // milieu = BG_COLOR
+  bgGrad.addColorStop(1,   '#040c14'); // bords très sombres
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-  // Grille de guidage (lignes très subtiles)
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 0.5;
+
+  // ── Grille principale — cellules pixel ──
+  // Lignes fines, couleur légèrement bleue dorée
+  ctx.strokeStyle = 'rgba(80,140,220,0.1)';
+  ctx.lineWidth   = 0.5;
   for (let c = 0; c <= COLS; c++) {
     ctx.beginPath(); ctx.moveTo(c * PX, 0); ctx.lineTo(c * PX, CANVAS_H); ctx.stroke();
   }
   for (let r = 0; r <= ROWS; r++) {
     ctx.beginPath(); ctx.moveTo(0, r * PX); ctx.lineTo(CANVAS_W, r * PX); ctx.stroke();
   }
+
+  // ── Grille secondaire — blocs 10×10 cellules (repères majeurs) ──
+  ctx.strokeStyle = 'rgba(255,185,40,0.07)';
+  ctx.lineWidth   = 0.8;
+  for (let c = 0; c <= COLS; c += 10) {
+    ctx.beginPath(); ctx.moveTo(c * PX, 0); ctx.lineTo(c * PX, CANVAS_H); ctx.stroke();
+  }
+  for (let r = 0; r <= ROWS; r += 10) {
+    ctx.beginPath(); ctx.moveTo(0, r * PX); ctx.lineTo(CANVAS_W, r * PX); ctx.stroke();
+  }
+
+  // ── Croix centrale de repérage — très discrète ──
+  const cx = Math.floor(COLS / 2) * PX;
+  const cy = Math.floor(ROWS / 2) * PX;
+  ctx.strokeStyle = 'rgba(255,185,40,0.12)';
+  ctx.lineWidth   = 0.8;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath(); ctx.moveTo(cx, 0);       ctx.lineTo(cx, CANVAS_H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, cy);       ctx.lineTo(CANVAS_W, cy); ctx.stroke();
+  ctx.setLineDash([]); // reset dash
 }
 
 function redrawAll() {
@@ -7724,188 +8706,503 @@ if (_shopOrigCheckGold) {
 
 
 /* ════════════════════════════════════════════════════════════════
-   MOBILE UI — 4 menus flottants rétractables
-   ─────────────────────────────────────────
-   4 panneaux fixes dans les coins :
-     #panel-draw  (bas droite)  — palette, modes, métaux
-     #panel-nav   (bas gauche)  — zoom, pan, recentrer, fullscreen
-     #panel-shop  (haut droite) — boutique, partager
-     #panel-menu  (haut gauche) — annuler, règles, portail, effacer
-   ════════════════════════════════════════════════════════════════ */
+   GOLD PIXEL — HUD MOBILE PREMIUM
+   JS contrôlant les overlays, la palette, les synchros, le fullscreen
+   et la modale de lancement.
 
-const IS_MOBILE = () => window.innerWidth <= 860;
+   Fonctions exposées (appelées par les onclick HTML) :
+     gpToggle(name)        — ouvrir/fermer un overlay
+     gpCloseAll()          — fermer tous les overlays
+     gpStartGame(orient)   — modale lancement → fullscreen + orientation
+     gpToggleFullscreen()  — toggle fullscreen
+     gpSyncModes()         — mettre à jour l'état actif des modes
+     gpSyncZoom()          — mettre à jour le label zoom
+════════════════════════════════════════════════════════════════ */
 
-/* ── État des panneaux ── */
-let _mobOpenPanel = null; // null | 'draw' | 'nav' | 'shop' | 'menu'
+const IS_MOBILE = () => window.innerWidth <= 1024;
 
-/* Ouvrir/fermer un panneau */
-function mobToggle(name) {
-  if (_mobOpenPanel === name) { closeMobPanels(); return; }
-  closeMobPanels();
-  _mobOpenPanel = name;
-  document.getElementById('panel-' + name)?.classList.add('open');
-  document.getElementById('fab-' + name + '-btn')?.classList.add('open');
-  document.getElementById('mob-overlay')?.classList.add('open');
-  // Sync au moment de l'ouverture
-  if (name === 'draw')  { _mobFillPalette(); mobSyncModes(); mobSyncGold(); }
-  if (name === 'nav')   { mobSyncZoom(); mobSyncModes(); }
+/* ────────────────────────────────────────────────────────────
+   OVERLAYS — ouverture / fermeture
+──────────────────────────────────────────────────────────── */
+let _gpOpen = null; // nom de l'overlay ouvert : null | 'draw'|'nav'|'shop'|'menu'
+
+function gpToggle(name) {
+  if (_gpOpen === name) { gpCloseAll(); return; }
+  gpCloseAll();
+  _gpOpen = name;
+
+  const ov  = document.getElementById('ov-'     + name);
+  const bd  = document.getElementById('gp-backdrop');
+
+  if (ov) ov.classList.add('open');
+  if (bd) {
+    bd.style.display = 'block';
+    // Sheets (draw, shop, gallery) → fond plus sombre
+    // Popups (nav, menu, tuto)     → fond très léger
+    const isSheet = ['draw','shop','gallery'].includes(name);
+    bd.style.background = isSheet ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.22)';
+  }
+
+  // Activer le bouton toolbar correspondant
+  const tbMap = {
+    draw:    'gp-fab-palette', // palette ouvre l'overlay dessin
+    shop:    'gp-tb-shop',
+    nav:     null,
+    menu:    null,
+    gallery: null,             // placeholder — pas encore de bouton dédié
+    tuto:    null,
+  };
+  const tbId = tbMap[name];
+  if (tbId) document.getElementById(tbId)?.classList.add('active');
+
+  // Synchros à l'ouverture
+  if (name === 'draw')  {
+    _gpFillPalette(); gpSyncModes(); _gpSyncGold();
+    // Sync dot couleur active dans le header palette
+    _gpPalUpdateActive(color, color);
+    _gpSetColorDot(color);
+  }
+  if (name === 'nav')   { gpSyncZoom(); gpSyncModes(); }
+  if (name === 'shop')  { _gpSyncShop(); }
 }
 
-function closeMobPanels() {
-  if (!_mobOpenPanel) return;
-  document.getElementById('panel-'       + _mobOpenPanel)?.classList.remove('open');
-  document.getElementById('fab-' + _mobOpenPanel + '-btn')?.classList.remove('open');
-  document.getElementById('mob-overlay')?.classList.remove('open');
-  _mobOpenPanel = null;
-}
+function gpCloseAll() {
+  if (!_gpOpen) return;
+  const ov = document.getElementById('ov-' + _gpOpen);
+  const bd = document.getElementById('gp-backdrop');
 
-/* ── Remplir la palette couleurs matte ── */
-function _mobFillPalette() {
-  const src  = document.getElementById('palette');
-  const dest = document.getElementById('mob-palette-grid');
-  if (!src || !dest || dest.children.length > 0) return; // déjà rempli
+  if (ov) ov.classList.remove('open');
+  if (bd) bd.style.display = 'none';
 
-  src.querySelectorAll('.c-btn').forEach(btn => {
-    const clone   = btn.cloneNode(true);
-    const hexColor = btn.dataset.color || _rgbToHex(btn.style.backgroundColor);
-    clone.addEventListener('touchstart', e => {
-      e.preventDefault();
-      if (hexColor) { color = hexColor; _mobSetColorDot(color); _mobSyncPaletteActive(btn, clone); }
-      closeMobPanels();
-    }, { passive: false });
-    clone.addEventListener('click', () => {
-      if (hexColor) { color = hexColor; _mobSetColorDot(color); _mobSyncPaletteActive(btn, clone); }
-      closeMobPanels();
-    });
-    dest.appendChild(clone);
+  // Désactiver tous les boutons toolbar
+  ['gp-fab-palette','gp-tb-shop'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
   });
+
+  _gpOpen = null;
+  gpSyncModes(); // re-sync état modes
 }
 
-function _mobSyncPaletteActive(original, clone) {
-  document.querySelectorAll('#palette .c-btn, #mob-palette-grid .c-btn')
-    .forEach(b => b.classList.remove('active'));
-  original.classList.add('active');
-  clone.classList.add('active');
+/* ────────────────────────────────────────────────────────────
+   MODALE LANCEMENT — orientation + fullscreen obligatoire
+──────────────────────────────────────────────────────────── */
+function gpStartGame(orientation) {
+  // Fermer la modale
+  const overlay = document.getElementById('gp-launch-overlay');
+  if (overlay) overlay.classList.remove('open');
+
+  // Fullscreen obligatoire
+  const el  = document.documentElement;
+  const req = el.requestFullscreen
+           || el.webkitRequestFullscreen
+           || el.mozRequestFullScreen
+           || el.msRequestFullscreen;
+  if (req) req.call(el, { navigationUI: 'hide' }).catch(() => {});
+  else     window.scrollTo(0, 1); // fallback iOS Safari
+
+  // Verrouiller l'orientation si l'API est disponible
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock(orientation).catch(() => {});
+  }
+
+  // Recalculer la vue canvas après la transition plein écran
+  setTimeout(() => { resetView(); gpSyncZoom(); }, 400);
 }
 
-/* ── Point couleur dans le bouton FAB dessin ── */
-function _mobSetColorDot(hex) {
-  const dot = document.getElementById('mob-color-dot');
+function _gpShowLaunchModal() {
+  if (!IS_MOBILE()) return;
+  const overlay = document.getElementById('gp-launch-overlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+/* ────────────────────────────────────────────────────────────
+   FULLSCREEN
+──────────────────────────────────────────────────────────── */
+let _gpFullscreen = false;
+
+function gpToggleFullscreen() {
+  if (_gpFullscreen) {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  } else {
+    const el  = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen
+             || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) req.call(el, { navigationUI: 'hide' }).catch(() => {});
+    else     window.scrollTo(0, 1);
+  }
+}
+
+// Écouter les changements natifs (ex: Échap pour sortir)
+document.addEventListener('fullscreenchange',       _gpOnFsChange);
+document.addEventListener('webkitfullscreenchange', _gpOnFsChange);
+function _gpOnFsChange() {
+  _gpFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const ico = document.getElementById('gp-fs-ico');
+  const lbl = document.getElementById('gp-fs-lbl');
+  if (ico) ico.textContent = _gpFullscreen ? '✕' : '⛶';
+  if (lbl) lbl.textContent = _gpFullscreen ? 'QUITTER PLEIN ÉCRAN' : 'PLEIN ÉCRAN';
+}
+
+/* ────────────────────────────────────────────────────────────
+   PALETTE — remplissage unique depuis la palette desktop
+──────────────────────────────────────────────────────────── */
+let _gpPaletteBuilt = false;
+
+
+/* ── Palette : mise à jour indicateur couleur active dans le header ── */
+function _gpPalUpdateActive(name, hex) {
+  const dot  = document.getElementById('pal-active-dot');
+  const lbl  = document.getElementById('pal-active-name');
+  if (dot) {
+    dot.style.background  = hex || color;
+    dot.style.boxShadow   = `0 0 8px ${hex || color}55`;
+  }
+  if (lbl) lbl.textContent = (name || '').toUpperCase();
+}
+
+/* Appeler _gpPalUpdateActive à chaque sélection de couleur depuis la grille */
+function _gpFillPalette() {
+  if (_gpPaletteBuilt) return;
+  const srcGrid  = document.getElementById('palette');
+  const destGrid = document.getElementById('gp-palette-grid');
+  if (!srcGrid || !destGrid) return;
+
+  srcGrid.querySelectorAll('.c-btn').forEach(btn => {
+    const clone    = btn.cloneNode(true);
+    const hexColor = btn.dataset.color || _gpRgbToHex(btn.style.backgroundColor);
+
+    const handler = () => {
+      if (!hexColor) return;
+      color = hexColor; // variable globale du moteur de dessin
+      _gpSetColorDot(color);
+      // Sync actif sur les deux grilles
+      document.querySelectorAll('#palette .c-btn, #gp-palette-grid .c-btn')
+              .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      clone.classList.add('active');
+      // Mettre à jour le dot + nom dans le header palette
+      _gpPalUpdateActive(btn.title || hexColor, hexColor);
+      gpCloseAll(); // fermer l'overlay après sélection
+    };
+
+    // Touch natif sans délai 300ms
+    clone.addEventListener('touchstart', e => { e.preventDefault(); handler(); }, { passive: false });
+    clone.addEventListener('click', handler);
+    destGrid.appendChild(clone);
+  });
+
+  _gpPaletteBuilt = true;
+}
+
+/* ────────────────────────────────────────────────────────────
+   HELPERS — couleur, hex, synchros
+──────────────────────────────────────────────────────────── */
+function _gpSetColorDot(hex) {
+  // Point couleur sur le FAB dessin
+  const dot = document.getElementById('gp-color-dot');
   if (dot) dot.style.background = hex;
 }
 
-/* ── Sync état modes (dessin / gomme / pan) ── */
-function mobSyncModes() {
-  document.getElementById('mob-btn-draw') ?.classList.toggle('active-mode', mode === 'draw');
-  document.getElementById('mob-btn-erase')?.classList.toggle('active-mode', mode === 'erase');
-  document.getElementById('mob-btn-pan')  ?.classList.toggle('active-mode', mode === 'pan');
-  // Sync taille gomme
-  document.getElementById('mob-sz-small')?.classList.toggle('active-mode', eraserSize === 'small');
-  document.getElementById('mob-sz-big')  ?.classList.toggle('active-mode', eraserSize === 'big');
-}
-
-/* ── Sync label zoom ── */
-function mobSyncZoom() {
-  const lbl = document.getElementById('mob-zoom-label');
-  if (lbl) lbl.textContent = Math.round(currentScale * 100) + '%';
-}
-
-/* ── Sync compteur or ── */
-function mobSyncGold() {
-  const main    = document.getElementById('goldCount');
-  const mob     = document.getElementById('mob-gold-count');
-  const mainBar = document.getElementById('goldBarFill');
-  const mobBar  = document.getElementById('mob-gold-bar');
-  if (mob && main)       mob.textContent    = main.textContent;
-  if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
-}
-
-/* ── Sync état fullscreen dans le panneau nav ── */
-function mobSyncFullscreen(isFs) {
-  const ico = document.getElementById('mob-fs-ico');
-  const lbl = document.getElementById('mob-fs-lbl');
-  if (ico) ico.textContent = isFs ? '✕' : '⛶';
-  if (lbl) lbl.textContent = isFs ? 'QUITTER PLEIN ÉCRAN' : 'PLEIN ÉCRAN';
-}
-
-/* ── Sync swatches métaux ── */
-function mobSyncMetals() {
-  const map = { silver:'#mob-silver', gold:'#mob-gold', bronze:'#mob-bronze' };
-  // Mettre à jour les classes active sur les swatches mobile
-  ['silver','gold','bronze'].forEach(m => {
-    const el = document.getElementById('mob-' + m);
-    const orig = document.getElementById(m + '-swatch');
-    if (el && orig) el.classList.toggle('active', orig.classList.contains('active'));
-  });
-}
-
-/* ── Helper RGB → Hex ── */
-function _rgbToHex(rgb) {
+function _gpRgbToHex(rgb) {
   if (!rgb) return null;
   if (rgb.startsWith('#')) return rgb;
   const m = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
   if (!m) return null;
-  return '#' + [m[1],m[2],m[3]].map(n=>parseInt(n).toString(16).padStart(2,'0')).join('').toUpperCase();
+  return '#' + [m[1], m[2], m[3]]
+    .map(n => parseInt(n).toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase();
 }
 
-/* ══ FULLSCREEN ════════════════════════════════════════════════ */
-let _isFullscreen = false;
+function gpSyncModes() {
+  // Modes dessin dans l'overlay
+  document.getElementById('gp-mode-draw') ?.classList.toggle('on', mode === 'draw');
+  document.getElementById('gp-mode-erase')?.classList.toggle('on', mode === 'erase');
+  document.getElementById('gp-nav-pan')   ?.classList.toggle('on', mode === 'pan');
 
-function toggleFullscreen() {
-  const el = document.documentElement;
-  if (_isFullscreen) {
-    const exit = document.exitFullscreen || document.webkitExitFullscreen;
-    if (exit) exit.call(document);
-  } else {
-    const req = el.requestFullscreen || el.webkitRequestFullscreen
-             || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if (req) req.call(el, { navigationUI: 'hide' }).catch(() => {});
-    else window.scrollTo(0, 1);
+  // Badge mode sur le bouton palette de la toolbar
+  const badge = document.getElementById('gp-mode-badge');
+  if (badge) badge.textContent = mode === 'erase' ? '⬜' : mode === 'pan' ? '✋' : '✏';
+
+  // Bouton gomme dans la toolbar — allumé si mode erase
+  const tbErase = document.getElementById('gp-tb-erase');
+  if (tbErase) tbErase.classList.toggle('active', mode === 'erase');
+
+  // Bouton palette — allumé si mode draw ou overlay dessin ouvert
+  const tbPalette = document.getElementById('gp-fab-palette');
+  if (tbPalette) tbPalette.classList.toggle('active',
+    mode === 'draw' && _gpOpen === 'draw');
+}
+
+function gpSyncZoom() {
+  const lbl = document.getElementById('gp-zoom-lbl');
+  if (lbl) lbl.textContent = Math.round(currentScale * 100) + '%';
+}
+
+function _gpSyncGold() {
+  // Compteur or dans l'overlay dessin
+  const mainCount = document.getElementById('goldCount');
+  const mobCount  = document.getElementById('gp-gold-count');
+  if (mobCount && mainCount) mobCount.textContent = mainCount.textContent;
+
+  const mainBar = document.getElementById('goldBarFill');
+  const mobBar  = document.getElementById('gp-gold-bar');
+  if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
+}
+
+function _gpSyncMetals() {
+  ['silver', 'gold', 'bronze'].forEach(m => {
+    const orig = document.getElementById(m + '-swatch');
+    const mob  = document.getElementById('gp-m-' + m);
+    if (orig && mob) mob.classList.toggle('active', orig.classList.contains('active'));
+  });
+}
+
+function _gpSyncShop() {
+  // Vengeance pack : inclus pour Elite, payant sinon
+  const tile  = document.getElementById('gp-vengeance-tile');
+  const price = document.getElementById('gp-vengeance-price');
+  if (typeof playerGold !== 'undefined' && playerGold && price) {
+    price.textContent = 'INCLUS ✓';
+    if (tile) { tile.disabled = true; tile.style.opacity = '0.5'; }
   }
 }
 
-document.addEventListener('fullscreenchange',       _onFsChange);
-document.addEventListener('webkitfullscreenchange', _onFsChange);
-function _onFsChange() {
-  _isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-  mobSyncFullscreen(_isFullscreen);
+/* ────────────────────────────────────────────────────────────
+   SYNC HEADER HUD — nom joueur, dot connexion, réservoir
+   Appelé par updateBanner() existant via hook
+──────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────
+   BOUTIQUE PREMIUM — logique JS
+──────────────────────────────────────────────────────────── */
+
+/* État don anonyme */
+let _shAnonActive = false;
+
+/* Toggle bouton anonyme (switch ON/OFF) */
+function shToggleAnon(el) {
+  _shAnonActive = !_shAnonActive;
+  el.classList.toggle('on', _shAnonActive);
+  el.setAttribute('aria-checked', _shAnonActive);
+  const status = document.getElementById('sh-anon-status');
+  if (status) status.style.display = _shAnonActive ? 'block' : 'none';
 }
 
-/* ══ HOOKS fonctions existantes ══════════════════════════════════ */
-(function() {
-  /* zoomIn/Out → synchro label */
-  const _z1 = window.zoomIn,  _z2 = window.zoomOut, _rv = window.resetView;
-  window.zoomIn    = function() { if (_z1) _z1(); mobSyncZoom(); };
-  window.zoomOut   = function() { if (_z2) _z2(); mobSyncZoom(); };
-  window.resetView = function() { if (_rv) _rv(); mobSyncZoom(); };
+/* Action d'un don — vérifie si anonyme ou non */
+function shDonAction(type) {
+  if (!piUser) {
+    showToast("Connectez-vous via Pi Browser pour effectuer un don");
+    return;
+  }
+  if (type === 'elite') {
+    const recipient = _shAnonActive ? null : prompt("Pseudo Pi du destinataire :");
+    if (recipient === null && !_shAnonActive) return; // annulé
+    shopPiPay('gift_elite', 10);
+  } else if (type === 'libre') {
+    const amtStr = prompt("Montant du don en Pi (ex: 0.5, 1, 2) :");
+    if (!amtStr) return;
+    const amt = parseFloat(amtStr);
+    if (isNaN(amt) || amt <= 0) { showToast("Montant invalide"); return; }
+    if (!_shAnonActive) {
+      const recipient = prompt("Pseudo Pi du destinataire (laisser vide pour général) :");
+      if (recipient === null) return;
+    }
+    shopAnonDon();
+  }
+}
 
-  /* updateGoldCounter → synchro compteur or mobile */
-  const _ugc = window.updateGoldCounter;
-  window.updateGoldCounter = function() { if (_ugc) _ugc(); mobSyncGold(); };
+/* Adapter la carte Vengeance selon le pack du joueur */
+function _gpSyncShop() {
+  const isElite = typeof playerGold !== 'undefined' && playerGold;
+  const tile    = document.getElementById('gp-vengeance-tile');
+  const badge   = document.getElementById('gp-vengeance-badge');
+  const price   = document.getElementById('gp-vengeance-price');
+  const sub     = document.getElementById('gp-vengeance-sub');
+  const btn     = document.getElementById('gp-vengeance-btn');
 
-  /* selectMetal → synchro dot couleur + swatches + fermer panneau */
-  const _sm = window.selectMetal;
-  window.selectMetal = function(type) {
-    if (_sm) _sm(type);
-    const METAL_HEX = { gold:'#ffaa00', silver:'#C0C0C0', bronze:'#cd7f32' };
-    _mobSetColorDot(METAL_HEX[type] || '#ffaa00');
-    setTimeout(mobSyncMetals, 50);
-    closeMobPanels();
+  if (isElite) {
+    // Elite : inclus gratuitement
+    if (tile)  { tile.classList.add('included'); tile.onclick = null; }
+    if (badge) { badge.textContent = 'INCLUS ELITE'; badge.style.cssText = 'color:rgba(80,220,140,0.85);background:rgba(80,220,140,0.08);border:1px solid rgba(80,220,140,0.22);'; }
+    if (price) price.textContent = 'Gratuit';
+    if (sub)   sub.textContent   = 'Compris dans votre Pack Elite';
+    if (btn)   { btn.textContent = 'INCLUS ✓'; btn.disabled = true; }
+  } else {
+    // Essentiel : payant
+    if (tile)  { tile.classList.remove('included'); tile.onclick = () => shopPiPay('vengeance_pack',1); }
+    if (badge) { badge.textContent = 'ESSENTIEL'; badge.style.cssText = 'color:rgba(255,120,100,0.85);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.22);'; }
+    if (price) price.textContent = '1 Pi';
+    if (sub)   sub.textContent   = 'par mois · Essentiel uniquement';
+    if (btn)   { btn.textContent = 'ACHETER'; btn.disabled = false; }
+  }
+
+  // Réinitialiser le toggle anonyme à chaque ouverture
+  _shAnonActive = false;
+  const toggle = document.getElementById('sh-anon-toggle');
+  if (toggle) { toggle.classList.remove('on'); toggle.setAttribute('aria-checked','false'); }
+  const status = document.getElementById('sh-anon-status');
+  if (status) status.style.display = 'none';
+}
+function _gpUpdateHudHeader() {
+  // ── Sources : éléments du top-banner desktop (masqué sur mobile)
+  //    Ces IDs sont toujours présents dans le DOM, juste cachés visuellement.
+  const $  = id => document.getElementById(id);
+
+  // 1. Nom joueur
+  const srcName = $('banner-player-name');
+  const hdrUser = $('gp-hdr-username');
+  const hdrAvt  = $('gp-hdr-avatar');
+  if (srcName && hdrUser) {
+    const txt = srcName.textContent.trim();
+    hdrUser.textContent = txt || 'CONNEXION...';
+    // Avatar : initiale
+    if (hdrAvt) {
+      hdrAvt.textContent = (txt && txt !== 'CONNEXION...')
+        ? txt.charAt(0).toUpperCase() : '?';
+      const isElite = typeof playerGold !== 'undefined' && playerGold;
+      hdrAvt.classList.toggle('elite', isElite);
+    }
+  }
+
+  // 2. Armée ou solo
+  const srcArmy = $('banner-player-rank');
+  const hdrArmy = $('gp-hdr-army');
+  if (srcArmy && hdrArmy) {
+    hdrArmy.textContent = srcArmy.textContent.trim() || '◆ SOLO';
+  }
+
+  // 3. Drapeau pays
+  const srcFlag = $('banner-flag');
+  const hdrFlag = $('gp-hdr-flag');
+  if (srcFlag && hdrFlag) {
+    hdrFlag.textContent = srcFlag.textContent.trim() || '🌐';
+  }
+
+  // 4. Badge pack Essentiel / Elite
+  const hdrPack    = $('gp-hdr-pack');
+  const hdrPackLbl = $('gp-hdr-pack-lbl');
+  const isElite    = typeof playerGold !== 'undefined' && playerGold;
+  if (hdrPack) {
+    hdrPack.classList.toggle('elite',     isElite);
+    hdrPack.classList.toggle('essential', !isElite);
+  }
+  if (hdrPackLbl) hdrPackLbl.textContent = isElite ? 'ELITE' : 'ESSENTIAL';
+
+  // 5. Pixels or (depuis goldCount ou tw-reservoir-value)
+  const hdrPix  = $('gp-hdr-pixels');
+  const srcRes  = $('tw-reservoir-value');
+  const srcGold = $('goldCount');
+  if (hdrPix) {
+    const val = (srcRes && srcRes.textContent.trim() !== '—')
+      ? srcRes.textContent.trim()
+      : (srcGold ? srcGold.textContent.trim() + ' px' : '—');
+    hdrPix.textContent = val;
+    hdrPix.classList.toggle('red', parseInt(val) < 5);
+  }
+
+  // 6. Countdown recharge
+  const hdrTimer = $('gp-hdr-timer');
+  const srcTimer = $('tw-countdown-value');
+  if (hdrTimer && srcTimer) {
+    const t = srcTimer.textContent.trim();
+    hdrTimer.textContent = t;
+    hdrTimer.className   = 'hdr-pill-val'; // reset
+    if (t === 'PRÊT')       hdrTimer.classList.add('green');
+    else if (/^\d{1}:/.test(t)) hdrTimer.classList.add('orange'); // < 2min
+    else                    hdrTimer.classList.add('orange');
+  }
+
+  // 7. Bouclier actif
+  const hdrShield    = $('gp-hdr-shield');
+  const hdrShieldVal = $('gp-hdr-shield-val');
+  const srcShield    = $('tw-shield-value');
+  const shieldActive = typeof window.playerShieldActive !== 'undefined'
+    && window.playerShieldActive;
+  const shieldVal    = srcShield ? srcShield.textContent.trim() : '—';
+  if (hdrShield) {
+    hdrShield.classList.toggle('visible', shieldActive && shieldVal !== '—');
+  }
+  if (hdrShieldVal) hdrShieldVal.textContent = shieldVal;
+
+  // 8. Dot connexion Pi
+  const hdrDot  = $('gp-hdr-dot');
+  const srcConn = $('tw-sentinel-status');
+  if (hdrDot && srcConn) {
+    const online = srcConn.textContent.trim() !== 'OFFLINE';
+    hdrDot.classList.toggle('online',  online);
+    hdrDot.classList.toggle('offline', !online);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   HOOKS — wrapping des fonctions globales existantes
+   Approche IIFE pour éviter tout conflit de const
+──────────────────────────────────────────────────────────── */
+(function _gpHooks() {
+
+  // zoomIn / zoomOut / resetView → sync label zoom
+  const _origZI = window.zoomIn;
+  const _origZO = window.zoomOut;
+  const _origRV = window.resetView;
+  window.zoomIn    = function() { if (_origZI) _origZI(); gpSyncZoom(); };
+  window.zoomOut   = function() { if (_origZO) _origZO(); gpSyncZoom(); };
+  window.resetView = function() { if (_origRV) _origRV(); gpSyncZoom(); };
+
+  // updateGoldCounter → sync compteur or HUD
+  const _origUGC = window.updateGoldCounter;
+  window.updateGoldCounter = function() {
+    if (_origUGC) _origUGC();
+    _gpSyncGold();
   };
+
+  // selectMetal → sync dot couleur + swatches + fermer overlay
+  const _origSM = window.selectMetal;
+  window.selectMetal = function(type) {
+    if (_origSM) _origSM(type);
+    const HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
+    _gpSetColorDot(HEX[type] || '#ffaa00');
+    setTimeout(_gpSyncMetals, 40);
+    gpCloseAll();
+  };
+
+  // updateBanner → sync header HUD
+  const _origUB = window.updateBanner;
+  window.updateBanner = function() {
+    if (_origUB) _origUB();
+    _gpUpdateHudHeader();
+  };
+
+  // updateTacticalWidgets → sync header réservoir/timer
+  const _origUTW = window.updateTacticalWidgets;
+  window.updateTacticalWidgets = function() {
+    if (_origUTW) _origUTW();
+    _gpUpdateHudHeader();
+  };
+
 })();
 
-/* ══ RESIZE ══════════════════════════════════════════════════════ */
-function _onResize() {
-  setTimeout(() => { resetView(); mobSyncZoom(); mobSyncModes(); }, 120);
+/* ────────────────────────────────────────────────────────────
+   RESIZE / ORIENTATION
+──────────────────────────────────────────────────────────── */
+function _gpOnResize() {
+  setTimeout(() => { resetView(); gpSyncZoom(); gpSyncModes(); }, 130);
 }
-window.addEventListener('resize', _onResize);
-window.addEventListener('orientationchange', _onResize);
+window.addEventListener('resize',            _gpOnResize);
+window.addEventListener('orientationchange', _gpOnResize);
 
-/* ══ INIT ════════════════════════════════════════════════════════ */
+/* ────────────────────────────────────────────────────────────
+   INIT au chargement DOM
+──────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  _mobSetColorDot('#FFFFFF');
+  _gpSetColorDot('#FFFFFF');
+
   if (IS_MOBILE()) {
-    setTimeout(() => { resetView(); mobSyncZoom(); }, 200);
+    // Afficher la modale de lancement après stabilisation du DOM
+    setTimeout(_gpShowLaunchModal, 450);
+    // Initialiser la vue canvas après le layout
+    setTimeout(() => { resetView(); gpSyncZoom(); }, 650);
   }
 });
 
@@ -8356,244 +9653,704 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- ══════════════════════════════════════════════════════════════
-     MOBILE UI — 4 menus flottants rétractables
-     ┌──────────────────────────────────────────────────────┐
-     │  Haut gauche : 📋 Menu jeu (règles, portail)         │
-     │  Haut droite : 🏪 Boutique                           │
-     │  Bas gauche  : 🧭 Navigation (zoom, recentrer, pan)  │
-     │  Bas droite  : 🎨 Dessin (palette, modes, métaux)    │
-     └──────────────────────────────────────────────────────┘
+     GOLD PIXEL — HUD MOBILE PREMIUM
+     Flotte par-dessus le canvas via #gp-hud (position:fixed)
 ══════════════════════════════════════════════════════════════ -->
 
-<!-- Overlay commun -->
-<div id="mob-overlay" onclick="closeMobPanels()"></div>
-
-
-<!-- ═══════════════════════════════════════
-     BAS DROITE — 🎨 DESSIN
-     Panel vers le haut depuis le bas
-═══════════════════════════════════════ -->
-<button class="mob-fab" id="fab-draw-btn" onclick="mobToggle('draw')"
-        aria-label="Palette et outils">
-  🎨<span class="color-dot" id="mob-color-dot"></span>
-</button>
-
-<div class="mob-panel" id="panel-draw" role="dialog" aria-label="Outils de dessin">
-  <div class="mob-panel-header">
-    <span class="mob-panel-icon">🎨</span>
-    <span class="mob-panel-title">DESSIN</span>
-    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
-  </div>
-  <div class="mob-panel-body">
-
-    <!-- Modes dessin -->
-    <div class="mob-row">
-      <button class="mob-action-btn active-mode" id="mob-btn-draw"
-              onclick="setMode('draw'); closeMobPanels();">
-        <span class="btn-ico">✏️</span><span class="btn-lbl">PIXEL</span>
+<!-- ═══════════════════════════════════════════════════
+     MODALE LANCEMENT — orientation + plein écran
+══════════════════════════════════════════════════════ -->
+<div id="gp-launch-overlay">
+  <div class="launch-logo">GOLD PIXEL</div>
+  <div class="launch-sub">Studio Pixel Art · Pi Network</div>
+  <div class="launch-card">
+    <div class="launch-card-title">Choisissez votre orientation</div>
+    <div class="launch-choices">
+      <button class="launch-choice-btn" onclick="gpStartGame('landscape')">
+        <span class="launch-choice-icon">🖥</span>
+        <span class="launch-choice-label">PAYSAGE</span>
+        <span class="launch-choice-desc">Recommandé<br>Meilleure expérience</span>
       </button>
-      <button class="mob-action-btn" id="mob-btn-erase"
-              onclick="setMode('erase'); closeMobPanels();">
-        <span class="btn-ico">⬜</span><span class="btn-lbl">GOMME</span>
-      </button>
-      <button class="mob-action-btn" id="mob-btn-pan2"
-              onclick="togglePan(); mobSyncModes(); closeMobPanels();">
-        <span class="btn-ico">✋</span><span class="btn-lbl">PAN</span>
+      <button class="launch-choice-btn" onclick="gpStartGame('portrait')">
+        <span class="launch-choice-icon">📱</span>
+        <span class="launch-choice-label">PORTRAIT</span>
+        <span class="launch-choice-desc">Tenir le téléphone<br>à la verticale</span>
       </button>
     </div>
-
-    <!-- Taille gomme -->
-    <div class="mob-row" style="gap:4px;">
-      <span style="font-family:Orbitron,monospace;font-size:0.42rem;color:rgba(255,170,0,0.45);letter-spacing:0.1em;align-self:center;">GOMME :</span>
-      <button class="mob-action-btn active-mode" id="mob-sz-small" style="flex:1;"
-              onclick="setEraserSize('small'); document.getElementById('mob-sz-small').classList.add('active-mode'); document.getElementById('mob-sz-big').classList.remove('active-mode');">
-        ▪ 1×1
-      </button>
-      <button class="mob-action-btn" id="mob-sz-big" style="flex:1;"
-              onclick="setEraserSize('big'); document.getElementById('mob-sz-big').classList.add('active-mode'); document.getElementById('mob-sz-small').classList.remove('active-mode');">
-        ◾ 3×3
-      </button>
-    </div>
-
-    <div class="mob-sep"></div>
-
-    <!-- Palette couleurs matte -->
-    <div id="mob-palette-grid"></div>
-
-    <div class="mob-sep"></div>
-
-    <!-- Swatches métaux -->
-    <div class="mob-metals-row">
-      <div class="mob-metal-swatch" id="mob-silver" onclick="selectMetal('silver')" title="Argent"></div>
-      <div class="mob-metal-swatch" id="mob-gold"   onclick="selectMetal('gold')"   title="Or (limité)"></div>
-      <div class="mob-metal-swatch" id="mob-bronze" onclick="selectMetal('bronze')" title="Bronze"></div>
-    </div>
-    <div class="mob-metals-labels">
-      <div class="mob-metal-label silver">ARGENT</div>
-      <div class="mob-metal-label">✦ OR</div>
-      <div class="mob-metal-label bronze">BRONZE</div>
-    </div>
-
-    <!-- Compteur or -->
-    <div class="mob-gold-bar-row">
-      <span class="mob-gold-bar-lbl">✦ OR : <span id="mob-gold-count">50</span>/50</span>
-      <div class="mob-gold-bar-track"><div class="mob-gold-bar-fill" id="mob-gold-bar"></div></div>
-    </div>
-
-    <div class="mob-sep"></div>
-
-    <!-- Annuler + Effacer (déplacés ici depuis le menu) -->
-    <div class="mob-row">
-      <button class="mob-action-btn" style="flex:1;" onclick="undoLastPixel(); closeMobPanels();">
-        <span class="btn-ico">↩</span><span class="btn-lbl">ANNULER</span><span class="btn-badge">10s</span>
-      </button>
-      <button class="mob-action-btn" style="flex:1;border-color:rgba(255,80,80,0.25);color:rgba(255,120,100,0.85);"
-              onclick="if(confirm('Effacer ?')){clearAll();} closeMobPanels();">
-        <span class="btn-ico">🗑</span><span class="btn-lbl">EFFACER</span>
-      </button>
-    </div>
-
+    <div class="launch-hint">⛶ Le jeu passera automatiquement en plein écran</div>
   </div>
 </div>
 
 
-<!-- ═══════════════════════════════════════
-     BAS GAUCHE — 🧭 NAVIGATION
-═══════════════════════════════════════ -->
-<button class="mob-fab" id="fab-nav-btn" onclick="mobToggle('nav')"
-        aria-label="Navigation">🧭</button>
+<!-- ═══════════════════════════════════════════════════
+     HUD — wrapper fixe par-dessus le canvas
+══════════════════════════════════════════════════════ -->
+<div id="gp-hud">
 
-<div class="mob-panel" id="panel-nav" role="dialog" aria-label="Navigation">
-  <div class="mob-panel-header">
-    <span class="mob-panel-icon">🧭</span>
-    <span class="mob-panel-title">NAVIGATION</span>
-    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
-  </div>
-  <div class="mob-panel-body">
-    <div class="mob-zoom-row">
-      <button class="mob-zoom-btn" onclick="zoomOut()">－</button>
-      <span id="mob-zoom-label">100%</span>
-      <button class="mob-zoom-btn" onclick="zoomIn()">＋</button>
-    </div>
-    <button class="mob-action-btn" onclick="resetView(); mobSyncZoom();">
-      <span class="btn-ico">⊙</span><span class="btn-lbl">RECENTRER</span>
-    </button>
-    <button class="mob-action-btn" id="mob-btn-pan"
-            onclick="togglePan(); mobSyncModes();">
-      <span class="btn-ico">✋</span><span class="btn-lbl">DÉPLACER LE CANEVAS</span>
-    </button>
-    <div class="mob-sep"></div>
-    <button class="mob-action-btn" id="mob-btn-fullscreen"
-            onclick="toggleFullscreen();">
-      <span class="btn-ico" id="mob-fs-ico">⛶</span>
-      <span class="btn-lbl" id="mob-fs-lbl">PLEIN ÉCRAN</span>
-    </button>
-  </div>
-</div>
+  <!-- ════════════════════════════════════════════════════════
+       HEADER PREMIUM
+       Sources : banner-player-name · banner-player-rank · banner-flag
+                 banner-pack · goldCount · tw-reservoir-value
+                 tw-countdown-value · tw-shield-value · tw-sentinel-status
+  ════════════════════════════════════════════════════════ -->
+  <div id="gp-hud-header">
 
+    <!-- ── BLOC GAUCHE : avatar · nom · armée · drapeau · pack ── -->
+    <div class="hdr-player-bloc" title="Votre profil">
 
-<!-- ═══════════════════════════════════════
-     HAUT DROITE — 🏪 BOUTIQUE
-     Panel vers le bas, 100% hauteur disponible sans scroll
-═══════════════════════════════════════ -->
-<button class="mob-fab" id="fab-shop-btn" onclick="mobToggle('shop')"
-        aria-label="Boutique">🏪</button>
+      <!-- Avatar : initiale du pseudo -->
+      <div class="hdr-avatar" id="gp-hdr-avatar">?</div>
 
-<div class="mob-panel" id="panel-shop" role="dialog" aria-label="Boutique">
-  <div class="mob-panel-header">
-    <span class="mob-panel-icon">🏪</span>
-    <span class="mob-panel-title">BOUTIQUE</span>
-    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
-  </div>
-  <div class="mob-panel-body mob-shop-body">
+      <!-- Nom + armée (deux lignes) -->
+      <div class="hdr-names">
+        <span class="hdr-username" id="gp-hdr-username">CONNEXION...</span>
+        <span class="hdr-army"     id="gp-hdr-army">◆ SOLO</span>
+      </div>
 
-    <!-- BOUCLIERS -->
-    <div class="mob-shop-section">BOUCLIER</div>
-    <div class="mob-row">
-      <button class="mob-shop-item" onclick="shopPiPay('dome_4h',0.5); closeMobPanels();">
-        <span class="mob-shop-ico">🛡</span>
-        <span class="mob-shop-name">Dôme 4H</span>
-        <span class="mob-shop-price">0,5 Pi</span>
-      </button>
-      <button class="mob-shop-item" onclick="shopPiPay('dome_8h',1); closeMobPanels();">
-        <span class="mob-shop-ico">🛡</span>
-        <span class="mob-shop-name">Dôme 8H</span>
-        <span class="mob-shop-price">1 Pi</span>
-      </button>
+      <!-- Drapeau pays -->
+      <span class="hdr-flag" id="gp-hdr-flag">🌐</span>
+
+      <!-- Badge pack -->
+      <div class="hdr-pack essential" id="gp-hdr-pack">
+        <span class="hdr-pack-dot"></span>
+        <span id="gp-hdr-pack-lbl">ESSENTIAL</span>
+      </div>
+
+    </div><!-- /hdr-player-bloc -->
+
+    <!-- ── SÉPARATEUR ── -->
+    <div class="hdr-sep"></div>
+
+    <!-- ── BLOC DROITE : pixels · timer · bouclier · connexion ── -->
+
+    <!-- Pixels or disponibles -->
+    <div class="hdr-pill" title="Pixels or disponibles">
+      <span class="hdr-pill-ico">◆</span>
+      <span class="hdr-pill-val" id="gp-hdr-pixels">—</span>
     </div>
 
-    <!-- PIXELS -->
-    <div class="mob-shop-section">PIXELS</div>
-    <div class="mob-row">
-      <button class="mob-shop-item" onclick="shopPiPay('pixels_100',1); closeMobPanels();">
-        <span class="mob-shop-ico">⚡</span>
-        <span class="mob-shop-name">100 px</span>
-        <span class="mob-shop-price">1 Pi</span>
-      </button>
-      <button class="mob-shop-item" onclick="shopPiPay('pixels_250',2); closeMobPanels();">
-        <span class="mob-shop-ico">⚡</span>
-        <span class="mob-shop-name">250 px</span>
-        <span class="mob-shop-price">2 Pi</span>
-      </button>
+    <!-- Countdown recharge -->
+    <div class="hdr-pill" title="Prochain pixel disponible">
+      <span class="hdr-pill-ico">⏱</span>
+      <span class="hdr-pill-val green" id="gp-hdr-timer">PRÊT</span>
     </div>
 
-    <!-- VENGEANCE -->
-    <div class="mob-shop-section">TACTIQUE</div>
-    <button class="mob-shop-item" id="mob-vengeance-item" style="width:100%;"
-            onclick="shopPiPay('vengeance_pack',1); closeMobPanels();">
-      <span class="mob-shop-ico">⚔️</span>
-      <span class="mob-shop-name">Pack Vengeance</span>
-      <span class="mob-shop-price" id="mob-vengeance-price">1 Pi/mois</span>
+    <!-- Bouclier actif — masqué par défaut, .visible quand actif -->
+    <div class="hdr-shield" id="gp-hdr-shield" title="Bouclier actif">
+      <span class="hdr-shield-ico">🛡</span>
+      <span class="hdr-shield-val" id="gp-hdr-shield-val">—</span>
+    </div>
+
+    <!-- Dot connexion Pi -->
+    <div class="hdr-dot offline" id="gp-hdr-dot" title="Connexion Pi Network"></div>
+
+  </div><!-- /gp-hud-header -->
+
+  <!-- ══ ANCIENS FABs COIN — masqués, gardés pour gpToggle() ══ -->
+  <!-- gpToggle() utilise getElementById('gp-fab-draw').classList etc.
+       On garde les éléments dans le DOM mais invisibles (display:none via CSS) -->
+  <button class="gp-fab" id="gp-fab-draw"  aria-hidden="true"></button>
+  <button class="gp-fab" id="gp-fab-nav"   aria-hidden="true"></button>
+  <button class="gp-fab" id="gp-fab-shop"  aria-hidden="true"></button>
+  <button class="gp-fab" id="gp-fab-menu"  aria-hidden="true"></button>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TOOLBAR VERTICALE DROITE
+       Colonne de 7 boutons flottants centrée verticalement
+       Côté droit du canevas, par-dessus le canvas
+  ══════════════════════════════════════════════════════════ -->
+  <div id="gp-toolbar-right" role="toolbar" aria-label="Outils">
+
+    <!-- 1. Palette de couleurs — ouvre l'overlay dessin -->
+    <button class="gp-fab" id="gp-fab-palette"
+            data-tip="PALETTE"
+            onclick="gpToggle('draw')"
+            aria-label="Ouvrir la palette de couleurs">
+      <!-- SVG palette minimaliste -->
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.2" fill="none" opacity=".5"/>
+        <circle cx="7"  cy="7"  r="1.8" fill="rgba(255,100,100,0.9)"/>
+        <circle cx="13" cy="7"  r="1.8" fill="rgba(100,200,255,0.9)"/>
+        <circle cx="10" cy="13" r="1.8" fill="rgba(255,200,80,0.9)"/>
+        <circle cx="6"  cy="11.5" r="1.4" fill="rgba(100,220,100,0.9)"/>
+        <circle cx="14" cy="11.5" r="1.4" fill="rgba(200,100,255,0.9)"/>
+      </svg>
+      <!-- Point couleur active -->
+      <span class="fab-cdot" id="gp-color-dot"></span>
+      <!-- Badge mode -->
+      <span class="fab-mode-badge" id="gp-mode-badge">✏</span>
     </button>
 
-    <!-- DONS -->
-    <div class="mob-shop-section">DONS</div>
-    <div class="mob-row">
-      <button class="mob-shop-item mob-shop-item-don"
-              onclick="shopPiPay('distinction',0.1); closeMobPanels();">
-        <span class="mob-shop-ico">🎨</span>
-        <span class="mob-shop-name">Distinction</span>
-        <span class="mob-shop-price">0,1 Pi</span>
+    <!-- 2. Gomme -->
+    <button class="gp-fab" id="gp-tb-erase"
+            data-tip="GOMME"
+            onclick="setMode('erase'); gpSyncModes();"
+            aria-label="Mode gomme">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="11" width="16" height="7" rx="1.5"
+              stroke="currentColor" stroke-width="1.2" fill="rgba(255,210,80,0.06)"/>
+        <path d="M4 11 L10 4 L16 11" stroke="currentColor" stroke-width="1.2"
+              stroke-linejoin="round" fill="rgba(255,210,80,0.06)"/>
+        <line x1="7" y1="18" x2="7" y2="11" stroke="currentColor" stroke-width="0.8" opacity=".4"/>
+      </svg>
+    </button>
+
+    <!-- Séparateur -->
+    <div class="tb-sep"></div>
+
+    <!-- 3. Zoom + -->
+    <button class="gp-fab" id="gp-tb-zoomin"
+            data-tip="ZOOM +"
+            onclick="zoomIn()"
+            aria-label="Zoom avant">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="9" y1="6" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="6" y1="9" x2="12" y2="9"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14" y1="14" x2="18" y2="18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".6"/>
+      </svg>
+    </button>
+
+    <!-- 4. Zoom - -->
+    <button class="gp-fab" id="gp-tb-zoomout"
+            data-tip="ZOOM -"
+            onclick="zoomOut()"
+            aria-label="Zoom arrière">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="6" y1="9" x2="12" y2="9"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14" y1="14" x2="18" y2="18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".6"/>
+      </svg>
+    </button>
+
+    <!-- 5. Recentrer -->
+    <button class="gp-fab" id="gp-tb-recenter"
+            data-tip="CENTRER"
+            onclick="resetView()"
+            aria-label="Recentrer le canevas">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cercle externe -->
+        <circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.1" opacity=".5"/>
+        <!-- Croix de visée -->
+        <line x1="10" y1="3"  x2="10" y2="7"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="10" y1="13" x2="10" y2="17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="3"  y1="10" x2="7"  y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="13" y1="10" x2="17" y2="10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <!-- Centre -->
+        <circle cx="10" cy="10" r="2" fill="currentColor" opacity=".8"/>
+      </svg>
+    </button>
+
+    <!-- Séparateur -->
+    <div class="tb-sep"></div>
+
+    <!-- 6. Boutique -->
+    <button class="gp-fab" id="gp-tb-shop"
+            data-tip="BOUTIQUE"
+            onclick="gpToggle('shop')"
+            aria-label="Ouvrir la boutique">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sachet -->
+        <path d="M4 8 L5.5 17 L14.5 17 L16 8 Z"
+              stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"
+              fill="rgba(255,210,80,0.06)"/>
+        <!-- Haut du sachet -->
+        <path d="M3 8 L17 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Anse -->
+        <path d="M7.5 8 C7.5 5 12.5 5 12.5 8"
+              stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Étoile or centrale -->
+        <path d="M10 10.5 L10.7 12.5 L12.8 12.5 L11.1 13.7 L11.7 15.7 L10 14.5 L8.3 15.7 L8.9 13.7 L7.2 12.5 L9.3 12.5 Z"
+              fill="rgba(255,200,60,0.7)" stroke="none"/>
+      </svg>
+    </button>
+
+  </div><!-- /gp-toolbar-right -->
+
+  <!-- ══════════════════════════════════════════════════════════
+       BOUTON UNDO — bas gauche, isolé
+  ══════════════════════════════════════════════════════════ -->
+  <button class="gp-fab" id="gp-fab-undo"
+          data-tip="ANNULER"
+          onclick="executeUndo()"
+          aria-label="Annuler le dernier pixel">
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Flèche courbe retour -->
+      <path d="M4 10 C4 6 7.5 3 12 4.5 C15.5 5.5 17 8 17 11 C17 14.5 14 17 10 17"
+            stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <!-- Tête de flèche -->
+      <polyline points="4,6 4,10 8,10"
+                stroke="currentColor" stroke-width="1.4" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- ══ OVERLAYS ══ -->
+
+  <!-- Overlay transparent pour fermer en tapant dehors -->
+  <!-- Backdrop : semi-transparent pour la palette, invisible sinon -->
+  <div id="gp-backdrop"
+       style="position:absolute;inset:0;z-index:5;display:none;pointer-events:all;background:rgba(0,0,0,0);transition:background .2s;"
+       onclick="gpCloseAll()">
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       OVERLAY PALETTE — sheet du bas, pleine largeur
+       S'ouvre depuis le bas, laisse 55%+ du canevas visible
+       Layout paysage : palette matte gauche | métaux+modes droite
+  ════════════════════════════════════════════════════════════ -->
+  <div class="gp-overlay sheet-bottom" id="ov-draw" role="dialog" aria-label="Palette de couleurs">
+
+    <!-- ── En-tête palette ── -->
+    <div class="ov-header">
+      <!-- Poignée tactile -->
+      <button class="pal-handle-btn" onclick="gpCloseAll()" aria-label="Fermer">
+        <div class="pal-handle"></div>
       </button>
-      <button class="mob-shop-item mob-shop-item-don"
-              onclick="shopPiPay('gift_elite',10); closeMobPanels();">
-        <span class="mob-shop-ico">🌟</span>
-        <span class="mob-shop-name">Pass Elite</span>
-        <span class="mob-shop-price">10 Pi</span>
+      <!-- Dot couleur active -->
+      <div class="pal-active-color-row">
+        <div class="pal-active-dot" id="pal-active-dot"></div>
+        <span class="pal-active-name" id="pal-active-name">BLANC</span>
+      </div>
+      <span class="ov-title">PALETTE</span>
+      <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
+    </div>
+
+    <!-- ── Corps en deux colonnes (paysage) ── -->
+    <div class="pal-body">
+
+      <!-- COLONNE GAUCHE — Palette matte -->
+      <div class="pal-col-main">
+        <div class="ov-section" style="margin-bottom:5px;">MATTE</div>
+        <div id="gp-palette-grid"></div>
+      </div>
+
+      <!-- SÉPARATEUR VERTICAL -->
+      <div class="pal-vsep"></div>
+
+      <!-- COLONNE DROITE — Premium + Modes + Or -->
+      <div class="pal-col-right">
+
+        <!-- Métaux Premium -->
+        <div class="ov-section" style="margin-bottom:5px;">PREMIUM</div>
+        <div class="gp-metals-row" style="gap:5px;">
+          <div class="pal-metal-wrap">
+            <div class="gp-metal" id="gp-m-silver"
+                 onclick="selectMetal('silver'); _gpPalUpdateActive('ARGENT', '#C0C0C0');"
+                 title="Argent"></div>
+            <span class="gp-metal-lbl s">ARG</span>
+          </div>
+          <div class="pal-metal-wrap">
+            <div class="gp-metal" id="gp-m-gold"
+                 onclick="selectMetal('gold'); _gpPalUpdateActive('OR ✦', '#ffaa00');"
+                 title="Or — limité"></div>
+            <span class="gp-metal-lbl" style="color:rgba(255,210,80,0.8);">✦ OR</span>
+          </div>
+          <div class="pal-metal-wrap">
+            <div class="gp-metal" id="gp-m-bronze"
+                 onclick="selectMetal('bronze'); _gpPalUpdateActive('BRONZE', '#cd7f32');"
+                 title="Bronze"></div>
+            <span class="gp-metal-lbl b">BRZ</span>
+          </div>
+        </div>
+
+        <!-- Barre stock or -->
+        <div class="gp-gold-row" style="margin-top:4px;">
+          <span class="gp-gold-lbl">✦ <span id="gp-gold-count">50</span>/50</span>
+          <div class="gp-gold-track">
+            <div class="gp-gold-fill" id="gp-gold-bar"></div>
+          </div>
+        </div>
+
+        <!-- Modes dessin -->
+        <div class="ov-section" style="margin-top:6px;margin-bottom:4px;">MODE</div>
+        <div class="pal-modes">
+          <button class="gp-mode-btn on" id="gp-mode-draw"
+                  onclick="setMode('draw'); gpSyncModes(); gpCloseAll();">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M2 14 L5 11 L12 4 L14 6 L7 13 Z" stroke="currentColor" stroke-width="1.2" fill="rgba(255,210,80,0.12)"/>
+              <line x1="10" y1="2" x2="14" y2="6" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            PIXEL
+          </button>
+          <button class="gp-mode-btn" id="gp-mode-erase"
+                  onclick="setMode('erase'); gpSyncModes(); gpCloseAll();">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="9" width="12" height="5" rx="1" stroke="currentColor" stroke-width="1.1"/>
+              <path d="M3 9 L8 3 L13 9" stroke="currentColor" stroke-width="1.1" fill="none"/>
+            </svg>
+            GOMME
+          </button>
+        </div>
+
+        <!-- Taille gomme -->
+        <div class="pal-modes" style="margin-top:3px;">
+          <button class="gp-mode-btn on" id="gp-mode-s1"
+                  onclick="setEraserSize('small'); document.getElementById('gp-mode-s1').classList.add('on'); document.getElementById('gp-mode-s2').classList.remove('on');">
+            ▪ 1×1
+          </button>
+          <button class="gp-mode-btn" id="gp-mode-s2"
+                  onclick="setEraserSize('big'); document.getElementById('gp-mode-s2').classList.add('on'); document.getElementById('gp-mode-s1').classList.remove('on');">
+            ◾ 3×3
+          </button>
+        </div>
+
+      </div><!-- /pal-col-right -->
+
+    </div><!-- /pal-body -->
+
+  </div><!-- /ov-draw -->
+
+  <!-- ─── Overlay Navigation ─── -->
+  <div class="gp-overlay popup from-bl" id="ov-nav" role="dialog" aria-label="Navigation">
+    <div class="ov-header">
+      <div class="ov-hdr-ico">🧭</div>
+      <span class="ov-title">NAVIGATION</span>
+      <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="ov-body">
+      <div class="gp-zoom-row">
+        <button class="gp-zoom-btn" onclick="zoomOut()">－</button>
+        <span id="gp-zoom-lbl">100%</span>
+        <button class="gp-zoom-btn" onclick="zoomIn()">＋</button>
+      </div>
+      <button class="gp-nav-btn" onclick="resetView(); gpSyncZoom();">
+        <span class="gn-ico">⊙</span> RECENTRER
+      </button>
+      <button class="gp-nav-btn" id="gp-nav-pan" onclick="togglePan(); gpSyncModes();">
+        <span class="gn-ico">✋</span> DÉPLACER
+      </button>
+      <div class="ov-sep"></div>
+      <button class="gp-nav-btn" id="gp-nav-fs" onclick="gpToggleFullscreen();">
+        <span class="gn-ico" id="gp-fs-ico">⛶</span>
+        <span id="gp-fs-lbl">PLEIN ÉCRAN</span>
       </button>
     </div>
-    <button class="mob-shop-item mob-shop-item-don" style="width:100%;"
-            onclick="shopAnonDon(); closeMobPanels();">
-      <span class="mob-shop-ico">🎁</span>
-      <span class="mob-shop-name">Don Anonyme</span>
-      <span class="mob-shop-price">libre</span>
-    </button>
+  </div><!-- /ov-nav -->
 
-  </div>
-</div>
+  <!-- ════════════════════════════════════════════════════════════
+       BOUTIQUE PREMIUM — sheet du bas, pleine largeur
+  ════════════════════════════════════════════════════════════ -->
+  <div class="gp-overlay sheet-bottom" id="ov-shop" role="dialog" aria-label="Boutique Gold Pixel">
+
+    <!-- En-tête -->
+    <div class="ov-header">
+      <button class="pal-handle-btn" onclick="gpCloseAll()" aria-label="Fermer">
+        <div class="pal-handle"></div>
+      </button>
+      <div class="ov-hdr-ico">🏪</div>
+      <span class="ov-title">BOUTIQUE</span>
+      <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
+    </div>
+
+    <!-- Corps scrollable -->
+    <div class="sh-body">
+
+      <!-- ════════════════════════
+           1. PIXELS
+      ════════════════════════ -->
+      <div>
+        <div class="sh-sec-lbl">PIXELS</div>
+        <div class="sh-grid" style="margin-top:7px;">
+
+          <!-- Chargeur Moyen 100 px -->
+          <div class="sh-card" onclick="shopPiPay('pixels_100',1);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon">⚡</div>
+              <span class="sh-badge gold">OVERFILL</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Chargeur Moyen</div>
+              <div class="sh-card-desc">+ 100 pixels à votre réservoir</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price">1 Pi</div>
+              </div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('pixels_100',1);">ACHETER</button>
+            </div>
+          </div>
+
+          <!-- Grand Chargeur 250 px -->
+          <div class="sh-card" onclick="shopPiPay('pixels_250',2);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon">⚡</div>
+              <span class="sh-badge gold">OVERFILL</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Grand Chargeur</div>
+              <div class="sh-card-desc">+ 250 pixels à votre réservoir</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price">2 Pi</div>
+              </div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('pixels_250',2);">ACHETER</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Mécanique Overfill -->
+        <div class="sh-meca-box" style="margin-top:7px;">
+          <span class="sh-meca-ico">🔓</span>
+          <div class="sh-meca-txt">
+            <div class="sh-meca-title">SYSTÈME OVERFILL</div>
+            <div class="sh-meca-desc">Les chargeurs dépassent le stock max de votre réservoir. Idéal pour des actions massives en guerre territoriale.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════
+           2. BOUCLIER
+      ════════════════════════ -->
+      <div>
+        <div class="sh-sec-lbl">BOUCLIER</div>
+        <div class="sh-grid" style="margin-top:7px;">
+
+          <!-- Dôme 4H -->
+          <div class="sh-card" onclick="shopPiPay('dome_4h',0.5);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon blue">🛡</div>
+              <span class="sh-badge blue">4 HEURES</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Dôme 4H</div>
+              <div class="sh-card-desc">Aucun ennemi ne peut recouvrir vos pixels pendant 4h</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price">0,5 Pi</div>
+              </div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('dome_4h',0.5);">ACHETER</button>
+            </div>
+          </div>
+
+          <!-- Dôme 8H -->
+          <div class="sh-card" onclick="shopPiPay('dome_8h',1);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon blue">🛡</div>
+              <span class="sh-badge blue">8 HEURES</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Dôme 8H</div>
+              <div class="sh-card-desc">Protection maximale. Dormez sur vos deux oreilles</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price">1 Pi</div>
+              </div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('dome_8h',1);">ACHETER</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════
+           3. PACK VENGEANCE
+      ════════════════════════ -->
+      <div>
+        <div class="sh-sec-lbl">TACTIQUE</div>
+        <div class="sh-grid cols-1" style="margin-top:7px;" id="sh-vengeance-wrap">
+
+          <!-- Vengeance — affiché selon le pack (JS adapte) -->
+          <div class="sh-card" id="gp-vengeance-tile" onclick="shopPiPay('vengeance_pack',1);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon" style="background:rgba(255,80,80,0.08);border-color:rgba(255,80,80,0.18);">⚔️</div>
+              <span class="sh-badge" id="gp-vengeance-badge" style="color:rgba(255,120,100,0.85);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.22);">ESSENTIEL</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Pack Vengeance</div>
+              <div class="sh-card-desc">Révèle l'identité de votre attaquant · Ciblez ses œuvres pour contre-attaquer</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price" id="gp-vengeance-price">1 Pi</div>
+                <span class="sh-price-sub" id="gp-vengeance-sub">par mois · Essentiel uniquement</span>
+              </div>
+              <button class="sh-buy-btn" id="gp-vengeance-btn"
+                      onclick="event.stopPropagation(); shopPiPay('vengeance_pack',1);">ACHETER</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════
+           4. DISTINCTION
+      ════════════════════════ -->
+      <div>
+        <div class="sh-sec-lbl">DISTINCTION</div>
+        <div class="sh-grid cols-1" style="margin-top:7px;">
+
+          <div class="sh-card don" onclick="shopPiPay('distinction',0.1);">
+            <div class="sh-card-top">
+              <div class="sh-card-icon green">🎨</div>
+              <span class="sh-badge green">DON</span>
+            </div>
+            <div>
+              <div class="sh-card-name">Distinction</div>
+              <div class="sh-card-desc">Offrez un don de 0,1 Pi pour mettre en valeur l'œuvre d'un artiste dans la galerie</div>
+            </div>
+            <div class="sh-card-footer">
+              <div>
+                <div class="sh-price">0,1 Pi</div>
+              </div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation(); shopPiPay('distinction',0.1);">OFFRIR</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════
+           5. SYSTÈME DE DON
+      ════════════════════════ -->
+      <div>
+        <div class="sh-sec-lbl">DONS</div>
+        <div style="margin-top:7px; display:flex; flex-direction:column; gap:8px;">
+
+          <!-- Toggle don anonyme -->
+          <div class="sh-toggle-row">
+            <span class="sh-toggle-label">
+              <span class="tl-ico">🎭</span>
+              Don anonyme
+            </span>
+            <div class="sh-toggle" id="sh-anon-toggle" onclick="shToggleAnon(this)"
+                 title="Activer le don anonyme" role="switch" aria-checked="false"></div>
+          </div>
+
+          <!-- Cartes don -->
+          <div class="sh-grid" id="sh-don-grid">
+
+            <!-- Offrir Pack Elite -->
+            <div class="sh-card don" id="sh-don-elite" onclick="shDonAction('elite');">
+              <div class="sh-card-top">
+                <div class="sh-card-icon green">🌟</div>
+                <span class="sh-badge green">ELITE</span>
+              </div>
+              <div>
+                <div class="sh-card-name">Pass Elite</div>
+                <div class="sh-card-desc">Offrez le pack Elite à un joueur de votre choix</div>
+              </div>
+              <div class="sh-card-footer">
+                <div class="sh-price">10 Pi</div>
+                <button class="sh-buy-btn don" onclick="event.stopPropagation(); shDonAction('elite');">OFFRIR</button>
+              </div>
+            </div>
+
+            <!-- Don libre -->
+            <div class="sh-card don" onclick="shDonAction('libre');">
+              <div class="sh-card-top">
+                <div class="sh-card-icon green">🎁</div>
+                <span class="sh-badge dim">LIBRE</span>
+              </div>
+              <div>
+                <div class="sh-card-name">Don Libre</div>
+                <div class="sh-card-desc">Montant au choix pour soutenir un joueur</div>
+              </div>
+              <div class="sh-card-footer">
+                <div class="sh-price">libre</div>
+                <button class="sh-buy-btn don" onclick="event.stopPropagation(); shDonAction('libre');">OFFRIR</button>
+              </div>
+            </div>
+
+          </div><!-- /sh-don-grid -->
+
+          <!-- Statut don anonyme -->
+          <div id="sh-anon-status" style="display:none;
+               font-family:'Rajdhani',sans-serif; font-size:0.6rem;
+               color:rgba(80,220,140,0.7); text-align:center;
+               padding:5px; letter-spacing:0.04em;">
+            🎭 Don anonyme activé — le destinataire ne saura pas qui vous êtes
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /sh-body -->
+  </div><!-- /ov-shop -->
+
+  <!-- ─── Overlay Menu ─── -->
+  <div class="gp-overlay popup from-tl" id="ov-menu" role="dialog" aria-label="Menu">
+    <div class="ov-header">
+      <div class="ov-hdr-ico">📋</div>
+      <span class="ov-title">MENU</span>
+      <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="ov-body">
+      <button class="gp-menu-btn" onclick="openModal(); gpCloseAll();">
+        <span class="gmn-ico">▲</span> PARTAGER
+      </button>
+      <div class="ov-sep"></div>
+      <button class="gp-menu-btn" onclick="openRulesModal(false); gpCloseAll();">
+        <span class="gmn-ico">📖</span> RÈGLES DU JEU
+      </button>
+      <button class="gp-menu-btn" onclick="gpCloseAll(); window.location.href='/';">
+        <span class="gmn-ico">🏠</span> PORTAIL
+      </button>
+    </div>
+  </div><!-- /ov-menu -->
 
 
-<!-- ═══════════════════════════════════════
-     HAUT GAUCHE — 📋 MENU JEU
-═══════════════════════════════════════ -->
-<button class="mob-fab" id="fab-menu-btn" onclick="mobToggle('menu')"
-        aria-label="Menu du jeu">📋</button>
+  <!-- ════════════════════════════════════════════════════════════
+       OVERLAY GALERIE — placeholder (pattern: sheet-bottom)
+       Sera rempli par la logique galerie quand elle sera portée ici
+  ════════════════════════════════════════════════════════════ -->
+  <div class="gp-overlay sheet-bottom" id="ov-gallery"
+       role="dialog" aria-label="Galerie des créations">
+    <div class="ov-header">
+      <button class="pal-handle-btn" onclick="gpToggle('gallery')" aria-label="Fermer">
+        <div class="pal-handle"></div>
+      </button>
+      <div class="ov-hdr-ico">🖼</div>
+      <span class="ov-title">GALERIE</span>
+      <button class="ov-close" onclick="gpToggle('gallery')" aria-label="Fermer">✕</button>
+    </div>
+    <div class="ov-body" style="align-items:center; justify-content:center; min-height:120px;">
+      <div style="text-align:center; padding:20px 0;">
+        <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.4;">🖼</div>
+        <div style="font-family:'Orbitron',monospace; font-size:0.52rem; font-weight:700;
+                    color:rgba(255,200,80,0.4); letter-spacing:0.14em; margin-bottom:6px;">
+          GALERIE DES SAISONS
+        </div>
+        <div style="font-family:'Rajdhani',sans-serif; font-size:0.65rem;
+                    color:rgba(255,255,255,0.2); line-height:1.4;">
+          Les créations de la communauté<br>seront disponibles ici prochainement
+        </div>
+      </div>
+    </div>
+  </div><!-- /ov-gallery -->
 
-<div class="mob-panel" id="panel-menu" role="dialog" aria-label="Menu du jeu">
-  <div class="mob-panel-header">
-    <span class="mob-panel-icon">📋</span>
-    <span class="mob-panel-title">MENU</span>
-    <button class="mob-panel-close" onclick="closeMobPanels()">✕</button>
-  </div>
-  <div class="mob-panel-body">
-    <button class="mob-action-btn" onclick="openRulesModal(false); closeMobPanels();">
-      <span class="btn-ico">📖</span><span class="btn-lbl">RÈGLES DU JEU</span>
-    </button>
-    <button class="mob-action-btn" onclick="closeMobPanels(); window.location.href='/';">
-      <span class="btn-ico">🏠</span><span class="btn-lbl">RETOUR AU PORTAIL</span>
-    </button>
-  </div>
-</div>
+  <!-- ════════════════════════════════════════════════════════════
+       OVERLAY TUTORIEL — placeholder (pattern: popup from-center)
+       Sera rempli par le système de tutoriel interactif
+  ════════════════════════════════════════════════════════════ -->
+  <div class="gp-overlay popup from-center" id="ov-tuto"
+       role="dialog" aria-label="Tutoriel Gold Pixel">
+    <div class="ov-header">
+      <div class="ov-hdr-ico">🎓</div>
+      <span class="ov-title">TUTORIEL</span>
+      <button class="ov-close" onclick="gpToggle('tuto')" aria-label="Fermer">✕</button>
+    </div>
+    <div class="ov-body" style="align-items:center; min-height:100px;">
+      <div style="text-align:center; padding:12px 0;">
+        <div style="font-size:2rem; margin-bottom:10px; opacity:0.4;">🎓</div>
+        <div style="font-family:'Orbitron',monospace; font-size:0.5rem; font-weight:700;
+                    color:rgba(255,200,80,0.4); letter-spacing:0.14em; margin-bottom:8px;">
+          GUIDE DU JOUEUR
+        </div>
+        <div style="font-family:'Rajdhani',sans-serif; font-size:0.65rem;
+                    color:rgba(255,255,255,0.2); line-height:1.5;">
+          Comment poser des pixels,<br>utiliser les boucliers,<br>rejoindre une armée…<br>
+          <span style="color:rgba(255,200,80,0.3);">Bientôt disponible</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- /ov-tuto -->
+
+</div><!-- /gp-hud -->
 
 
 </body>
