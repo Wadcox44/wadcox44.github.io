@@ -126,8 +126,10 @@
       border-radius: 0;
       overflow: hidden;
       background: #030810;
-      touch-action: none;
+      touch-action: none;   /* géré manuellement via les listeners */
       z-index: 1;
+      /* Supprimer le délai 300ms sur mobile */
+      -webkit-tap-highlight-color: transparent;
     }
 
     #canvas-wrapper {
@@ -3459,356 +3461,203 @@ body {
 
   
 /* ╔══════════════════════════════════════════════════════════════════
-   ║  MOBILE / TABLETTE — Layout plein écran sans scroll
-   ║
-   ║  Desktop (> 860px) : layout grid normal, panel droit visible
-   ║  Tablette / Mobile : canvas = 100% viewport
-   ║    • top-banner    : compact, hauteur réduite
-   ║    • hud-main-layout : une seule colonne, sans padding
-   ║    • hud-canvas-column + canvas-stage : occupent tout l'espace
-   ║    • hud-side-panel : masqué, remplacé par tiroir #palette-drawer
-   ║    • hud-tool-strip : remplacé par #fab-toolbar (barre flottante)
-   ║    • #fab-open      : bouton rond flottant bas-gauche
-   ║    • #palette-drawer: panneau tiroir droite
+   ║  MOBILE / TABLETTE — Layout plein écran
+   ║  Approche : chaîne flexbox pure, AUCUN position:absolute
+   ║  sur le viewport → getBoundingClientRect() reste fiable
    ╚══════════════════════════════════════════════════════════════════ */
 
-/* ── Variables mobile ── */
 :root {
   --fab-size: 48px;
   --drawer-w: 240px;
-  --toolbar-h: 52px;
 }
 
-/* ══════════════════════════════════════════
-   CORE : body = viewport exact, sans scroll
-══════════════════════════════════════════ */
+/* ══ RACINE : viewport exact, zéro scroll ══ */
 @media (max-width: 860px) {
-
-  html, body {
-    height: 100%;
-    overflow: hidden;
+  html {
+    height: 100%; height: 100dvh; overflow: hidden;
   }
-
   body {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    overflow: hidden;
+    height: 100%; height: 100dvh; overflow: hidden;
+    display: flex; flex-direction: column; align-items: stretch;
   }
 
-  /* ── Top banner compact ── */
+  /* ── Banner compact ── */
   #top-banner {
-    height: 48px !important;
-    min-height: 48px !important;
-    padding: 0 10px !important;
-    flex-shrink: 0;
-    grid-template-columns: 1fr auto 1fr !important;
+    height: 48px !important; min-height: 48px !important;
+    padding: 0 10px !important; flex-shrink: 0;
   }
-  .banner-subtitle  { display: none !important; }
-  .banner-nav-actions { display: none !important; }
-  .id-pack-name     { display: none !important; }
-  .id-flag-label    { display: none !important; }
-  .id-sep           { margin: 0 4px !important; }
-  .banner-title     { font-size: 0.9rem !important; }
+  .banner-subtitle, .banner-nav-actions,
+  .id-pack-name, .id-flag-label { display: none !important; }
+  .id-sep { margin: 0 4px !important; }
+  .banner-title { font-size: 0.9rem !important; }
   .banner-cube-icon { width: 20px !important; height: 20px !important; }
-  .tw-label         { display: none !important; }
-  .tw-countdown-bar,
-  .tw-reservoir-bar { display: none !important; }
+  .tw-label, .tw-countdown-bar, .tw-reservoir-bar { display: none !important; }
 
-  /* ── Layout principal : 1 colonne, sans padding, occupe tout ── */
+  /* ── Layout principal : flex column, tout l'espace restant ── */
   .hud-main-layout {
-    grid-template-columns: 1fr !important;
-    gap: 0 !important;
-    padding: 0 !important;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important;
+    overflow: hidden !important;
+    gap: 0 !important; padding: 0 !important;
+    grid-template-columns: none !important;
+    max-width: 100% !important;
   }
 
-  /* ── Colonne canvas : prend tout l'espace restant ── */
+  /* ── Colonne canvas : flex:1 ── */
   .hud-canvas-column {
-    gap: 0 !important;
-    height: 100%;
-    overflow: hidden;
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important; gap: 0 !important;
   }
 
-  /* ── Canvas stage : remplit toute la colonne ── */
+  /* ── Canvas stage : flex:1 ── */
   .canvas-stage {
-    flex: 1;
-    min-height: 0;
-    height: 100%;
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important;
   }
 
-  /* ── Canvas frame et viewport : remplissent le stage ── */
+  /* ── Canvas frame : flex:1 ── */
   .canvas-frame {
-    height: 100% !important;
+    display: flex !important; flex-direction: column !important;
+    flex: 1 1 0 !important; min-height: 0 !important;
     aspect-ratio: unset !important;
-    border-radius: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
+    border-radius: 0 !important; border-left: none !important; border-right: none !important;
   }
 
-  .canvas-frame #viewport-container {
-    height: 100% !important;
+  /* ── Viewport : flex:1, POSITION RELATIVE (pas absolute !)
+     CRITIQUE : si position:absolute → getBoundingClientRect()
+     retourne des coords décalées → les clicks ne dessinent pas ── */
+  #viewport-container {
+    flex: 1 1 0 !important; min-height: 0 !important;
+    width: 100% !important; height: auto !important;
     aspect-ratio: unset !important;
-    position: absolute !important;
-    inset: 0 !important;
+    position: relative !important; inset: auto !important;
   }
 
-  /* viewport en absolu dans le frame OK pour mobile
-     car getCanvasPos utilise canvas.getBoundingClientRect()
-     qui tient compte du transform du canvas-container */
-  .canvas-frame {
-    position: relative;
+  /* canvas-wrapper remplit le viewport */
+  #canvas-wrapper {
+    width: 100% !important; height: 100% !important;
   }
 
-  /* ── Panel droit masqué — remplacé par #palette-drawer ── */
-  .hud-side-panel {
-    display: none !important;
-  }
-
-  /* ── Barre d'outils sous le canvas : masquée ── */
-  .hud-tool-strip {
-    display: none !important;
-  }
-
+  /* Panel droit masqué, barre outil masquée */
+  .hud-side-panel { display: none !important; }
+  .hud-tool-strip { display: none !important; }
 }
 
-/* ══════════════════════════════════════════
-   FAB TOOLBAR — barre flottante bas de l'écran
-   Visible sur mobile uniquement
-══════════════════════════════════════════ */
-#fab-toolbar {
-  display: none; /* caché desktop */
-}
+/* ══ FAB TOOLBAR ══ */
+#fab-toolbar { display: none; }
 
 @media (max-width: 860px) {
   #fab-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    position: fixed;
-    bottom: 12px;
-    left: 50%;
+    display: flex; align-items: center; gap: 6px;
+    position: fixed; bottom: 14px; left: 50%;
     transform: translateX(-50%);
     z-index: 500;
     padding: 7px 12px;
-    background: rgba(6,12,24,0.94);
-    border: 1px solid rgba(255,170,0,0.3);
+    background: rgba(6,12,24,0.95);
+    border: 1px solid rgba(255,170,0,0.35);
     border-radius: 28px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,170,0,0.06);
-    transition: transform .3s, opacity .3s;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.7);
   }
 
-  #fab-toolbar.hidden {
-    transform: translateX(-50%) translateY(80px);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Boutons dans la FAB */
   .fab-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px; height: 36px;
-    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%;
     background: rgba(255,170,0,0.1);
     border: 1px solid rgba(255,170,0,0.25);
     color: rgba(255,200,80,0.85);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all .2s;
-    flex-shrink: 0;
-    position: relative;
+    font-size: 1rem; cursor: pointer; transition: all .18s; flex-shrink: 0;
+    /* touch-action none sur les boutons FAB pour éviter le délai 300ms */
+    touch-action: manipulation;
   }
-  .fab-btn:hover, .fab-btn:active { background: rgba(255,170,0,0.22); }
+  .fab-btn:active { background: rgba(255,170,0,0.3); transform: scale(0.9); }
   .fab-btn.active {
-    background: rgba(255,170,0,0.25);
-    border-color: rgba(255,200,60,0.7);
-    box-shadow: 0 0 10px rgba(255,170,0,0.25);
-  }
-  .fab-btn.danger {
-    border-color: rgba(255,80,80,0.3);
-    color: rgba(255,120,100,0.8);
+    background: rgba(255,170,0,0.28);
+    border-color: rgba(255,200,60,0.75);
+    box-shadow: 0 0 10px rgba(255,170,0,0.3);
   }
 
-  /* Label du mode actuel */
-  #fab-mode-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.5rem;
-    font-weight: 700;
-    color: rgba(255,200,80,0.7);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0 4px;
-    min-width: 36px;
-    text-align: center;
-  }
-
-  /* Séparateur */
-  .fab-sep {
-    width: 1px; height: 22px;
-    background: rgba(255,170,0,0.15);
-    flex-shrink: 0;
-  }
-
-  /* Zoom label dans la fab */
   #fab-zoom-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.48rem;
-    color: rgba(255,200,80,0.6);
-    min-width: 32px;
-    text-align: center;
-    letter-spacing: 0.05em;
+    font-family: 'Orbitron', monospace; font-size: 0.48rem;
+    color: rgba(255,200,80,0.65); min-width: 32px;
+    text-align: center; letter-spacing: 0.05em;
   }
+  .fab-sep { width: 1px; height: 22px; background: rgba(255,170,0,0.15); flex-shrink: 0; }
 }
 
-/* ══════════════════════════════════════════
-   PALETTE DRAWER — tiroir latéral droite
-   Glisse depuis la droite sur mobile
-══════════════════════════════════════════ */
-#palette-drawer {
-  display: none; /* caché desktop */
-}
-
-@media (max-width: 860px) {
-  /* Overlay sombre derrière le tiroir */
-  #palette-drawer-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    z-index: 490;
-    background: rgba(0,0,0,0);
-    transition: background .3s;
-  }
-  #palette-drawer-overlay.open {
-    display: block;
-    background: rgba(0,0,0,0.4);
-  }
-
-  /* Tiroir */
-  #palette-drawer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: fixed;
-    top: 48px; /* sous le banner */
-    right: 0; bottom: 0;
-    width: var(--drawer-w);
-    z-index: 495;
-    background: rgba(8,14,26,0.97);
-    border-left: 1px solid rgba(255,170,0,0.2);
-    padding: 14px 12px 80px; /* padding-bottom pour la fab */
-    overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform .3s cubic-bezier(.22,1,.36,1);
-    backdrop-filter: blur(16px);
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,170,0,0.2) transparent;
-  }
-  #palette-drawer.open {
-    transform: translateX(0);
-  }
-
-  /* Titre tiroir */
-  .drawer-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.5rem;
-    color: rgba(255,200,80,0.5);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,170,0,0.1);
-    margin-bottom: 4px;
-  }
-
-  /* Palette dans le tiroir */
-  #palette-drawer .palette {
-    display: grid !important;
-    grid-template-columns: repeat(6, 1fr) !important;
-    gap: 5px !important;
-  }
-
-  /* Métaux */
-  #palette-drawer .metals-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    width: 100%;
-  }
-  #palette-drawer .metal-swatch {
-    width: 100% !important;
-    aspect-ratio: 1;
-  }
-  #palette-drawer .metals-labels {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    width: 100%;
-  }
-  #palette-drawer .metals-wrapper {
-    align-items: stretch;
-  }
-  #palette-drawer .gold-reserve { width: 100%; }
-
-  /* Boutons pub et boutique dans le tiroir */
-  #drawer-publish-btn,
-  #drawer-shop-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    padding: 11px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.56rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    border: none;
-    transition: all .2s;
-    flex-shrink: 0;
-  }
-  #drawer-publish-btn {
-    background: linear-gradient(135deg, #bf953f, #ffaa00, #fcf6ba, #ffaa00, #bf953f);
-    background-size: 200% auto;
-    color: #000;
-    box-shadow: 0 2px 12px rgba(255,170,0,0.3);
-  }
-  #drawer-publish-btn:hover { background-position: right center; }
-  #drawer-shop-btn {
-    background: rgba(255,170,0,0.08);
-    border: 1px solid rgba(255,170,0,0.25);
-    color: rgba(255,200,80,0.85);
-  }
-
-  /* Cacher le bouton couleur-picker desktop quand tiroir ouvert */
-}
-
-/* ══════════════════════════════════════════
-   BOUTON COULEUR ACTIVE (mobile) — visible 
-   dans la FAB pour montrer la couleur courante
-══════════════════════════════════════════ */
-#fab-color-dot {
-  display: none;
-}
+/* ══ POINT COULEUR ACTIVE ══ */
+#fab-color-dot { display: none; }
 @media (max-width: 860px) {
   #fab-color-dot {
-    display: block;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.6);
-    flex-shrink: 0;
-    background: #FFFFFF;
-    transition: background .15s;
+    display: block; width: 14px; height: 14px;
+    border-radius: 50%; border: 2px solid rgba(255,255,255,0.55);
+    flex-shrink: 0; background: #FFFFFF; transition: background .12s;
   }
 }
 
-/* ══════════════════════════════════════════
-   HIDE COORDS sur mobile (trop petites)
-══════════════════════════════════════════ */
+/* ══ PALETTE DRAWER ══ */
+#palette-drawer { display: none; }
+#palette-drawer-overlay { display: none; }
+
+@media (max-width: 860px) {
+  #palette-drawer-overlay {
+    display: none; position: fixed; inset: 0; z-index: 490;
+    background: rgba(0,0,0,0); transition: background .25s; pointer-events: none;
+  }
+  #palette-drawer-overlay.open {
+    display: block; background: rgba(0,0,0,0.45); pointer-events: all;
+  }
+
+  #palette-drawer {
+    display: flex; flex-direction: column; gap: 10px;
+    position: fixed; top: 48px; right: 0; bottom: 0;
+    width: var(--drawer-w); z-index: 495;
+    background: rgba(7,12,22,0.98);
+    border-left: 1px solid rgba(255,170,0,0.22);
+    padding: 14px 12px 80px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.22,1,.36,1);
+    backdrop-filter: blur(18px);
+    scrollbar-width: thin;
+  }
+  #palette-drawer.open { transform: translateX(0); }
+
+  .drawer-title {
+    font-family: 'Orbitron', monospace; font-size: 0.5rem;
+    color: rgba(255,200,80,0.5); letter-spacing: 0.18em; text-transform: uppercase;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,170,0,0.1); margin-bottom: 4px;
+  }
+
+  #palette-drawer .palette {
+    display: grid !important; grid-template-columns: repeat(6,1fr) !important; gap: 5px !important;
+  }
+  #palette-drawer .metals-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
+  #palette-drawer .metal-swatch { width: 100% !important; aspect-ratio: 1; }
+  #palette-drawer .metals-labels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
+  #palette-drawer .metals-wrapper { align-items: stretch; }
+  #palette-drawer .gold-reserve { width: 100%; }
+
+  #drawer-publish-btn, #drawer-shop-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; padding: 11px 12px; border-radius: 8px; cursor: pointer;
+    font-family: 'Orbitron', monospace; font-size: 0.56rem; font-weight: 700;
+    letter-spacing: 0.08em; transition: all .2s; flex-shrink: 0;
+    touch-action: manipulation;
+  }
+  #drawer-publish-btn {
+    background: linear-gradient(135deg,#bf953f,#ffaa00,#fcf6ba,#ffaa00,#bf953f);
+    background-size: 200% auto; color: #000; border: none;
+    box-shadow: 0 2px 12px rgba(255,170,0,0.3);
+  }
+  #drawer-shop-btn {
+    background: rgba(255,170,0,0.08);
+    border: 1px solid rgba(255,170,0,0.25) !important;
+    color: rgba(255,200,80,0.85);
+  }
+}
+
+/* ══ COORDS masquées sur mobile ══ */
 @media (max-width: 480px) {
   .coords { display: none !important; }
 }
@@ -7700,22 +7549,67 @@ if (_shopOrigCheckGold) {
 
 
 /* ════════════════════════════════════════════════════════════════
-   MOBILE UI — FAB toolbar + Palette Drawer
+   MOBILE UI — FAB toolbar + Palette Drawer + Plein écran
    ────────────────────────────────────────────────────────────────
-   Actif uniquement sur mobile (< 860px) — sur desktop les éléments
-   sont cachés par CSS, les fonctions sont sans effet.
+   ⚠ Le CSS flexbox (position:relative sur viewport) gère le layout.
+   Ce JS ne touche PLUS à position/inset du viewport.
    ════════════════════════════════════════════════════════════════ */
 
 const IS_MOBILE = () => window.innerWidth <= 860;
 
-/* ══════════════════════════════════
-   DRAWER PALETTE
-══════════════════════════════════ */
+/* ══ FULLSCREEN ══════════════════════════════════════════════════
+   Masque la barre de navigation du navigateur et les boutons
+   système Android/iOS. Déclenché par le bouton ⛶ dans la FAB.
+   Sur iOS Safari : utilise webkitRequestFullscreen.
+   Fallback si l'API n'est pas disponible : scrollTo(0,1) trick.
+══════════════════════════════════════════════════════════════ */
+let _isFullscreen = false;
+
+function toggleFullscreen() {
+  const el  = document.documentElement; // demander le fullscreen sur l'élément root
+  const btn = document.getElementById('fab-btn-fullscreen');
+
+  if (_isFullscreen) {
+    // ── Quitter le plein écran ──
+    const exit = document.exitFullscreen
+               || document.webkitExitFullscreen
+               || document.mozCancelFullScreen;
+    if (exit) exit.call(document);
+    _isFullscreen = false;
+    if (btn) { btn.textContent = '⛶'; btn.title = 'Plein écran'; }
+  } else {
+    // ── Entrer en plein écran ──
+    const req = el.requestFullscreen
+             || el.webkitRequestFullscreen
+             || el.mozRequestFullScreen
+             || el.msRequestFullscreen;
+    if (req) {
+      req.call(el, { navigationUI: 'hide' }) // 'hide' masque l'UI du navigateur
+        .catch(() => {}); // ignorer les erreurs si refusé (nécessite user gesture)
+    } else {
+      // Fallback iOS Safari qui ne supporte pas l'API fullscreen
+      // Scroll trick : masque la barre d'adresse
+      window.scrollTo(0, 1);
+    }
+    _isFullscreen = true;
+    if (btn) { btn.textContent = '✕'; btn.title = 'Quitter plein écran'; }
+  }
+}
+
+// Écouter les changements de fullscreen (ex: Echap pour sortir)
+document.addEventListener('fullscreenchange',       _onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', _onFullscreenChange);
+function _onFullscreenChange() {
+  const isNow = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  _isFullscreen = isNow;
+  const btn = document.getElementById('fab-btn-fullscreen');
+  if (btn) btn.textContent = isNow ? '✕' : '⛶';
+}
+
+/* ══ DRAWER PALETTE ══════════════════════════════════════════ */
 let _drawerOpen = false;
 
-function togglePaletteDrawer() {
-  _drawerOpen ? closePaletteDrawer() : openPaletteDrawer();
-}
+function togglePaletteDrawer() { _drawerOpen ? closePaletteDrawer() : openPaletteDrawer(); }
 
 function openPaletteDrawer() {
   if (!IS_MOBILE()) return;
@@ -7733,198 +7627,153 @@ function closePaletteDrawer() {
   document.getElementById('fab-btn-palette')?.classList.remove('active');
 }
 
-/* Synchroniser la palette du tiroir avec la palette principale */
+/* Synchroniser la palette du tiroir depuis la palette desktop */
 function _syncDrawerPalette() {
-  const src  = document.getElementById('palette');
-  const dest = document.getElementById('palette-drawer-colors');
-  if (!src || !dest) return;
-  /* Cloner les boutons couleur dans le tiroir */
-  dest.innerHTML = '';
-  src.querySelectorAll('.c-btn').forEach(btn => {
+  const srcPalette = document.getElementById('palette');
+  const destPalette = document.getElementById('palette-drawer-colors');
+  if (!srcPalette || !destPalette) return;
+
+  destPalette.innerHTML = '';
+  srcPalette.querySelectorAll('.c-btn').forEach(btn => {
     const clone = btn.cloneNode(true);
-    /* Le click sur le clone sélectionne la couleur et ferme le tiroir */
-    clone.addEventListener('click', () => {
-      const bg = btn.style.backgroundColor;
-      color = btn.dataset.color || rgbToHex(bg) || color;
-      /* Mettre à jour visuellement les deux palettes */
-      document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      clone.classList.add('active');
-      /* Mettre à jour le point couleur de la FAB */
-      const dot = document.getElementById('fab-color-dot');
-      if (dot) dot.style.background = color;
+    // Récupérer la couleur stockée dans le style backgroundColor
+    const hexColor = btn.dataset.color || _rgbToHex(btn.style.backgroundColor);
+
+    clone.addEventListener('touchstart', (e) => {
+      e.preventDefault();            // empêcher le délai 300ms iOS
+      e.stopPropagation();
+      if (hexColor) {
+        color = hexColor;            // variable globale couleur active
+        // Mettre à jour les classes active sur les deux palettes
+        document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active'); // original
+        clone.classList.add('active'); // clone
+        // Mettre à jour le point couleur dans la FAB
+        _fabSetColor(color);
+      }
+      closePaletteDrawer();          // fermer le tiroir après sélection
+    }, { passive: false });
+
+    // Fallback click pour les appareils sans touch
+    clone.addEventListener('click', (e) => {
+      if (hexColor) {
+        color = hexColor;
+        document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _fabSetColor(color);
+      }
       closePaletteDrawer();
     });
-    dest.appendChild(clone);
+
+    destPalette.appendChild(clone);
   });
 
-  /* Synchro swatches métaux */
+  // Synchro swatches métaux
+  const metalMap = { silver: '#C0C0C0', gold: '#ffaa00', bronze: '#cd7f32' };
   ['silver', 'gold', 'bronze'].forEach(m => {
-    const d = document.getElementById(m + '-swatch-d');
-    if (d) d.className = document.getElementById(m + '-swatch')?.className || d.className;
+    const orig  = document.getElementById(m + '-swatch');
+    const clone = document.getElementById(m + '-swatch-d');
+    if (orig && clone) clone.className = orig.className;
   });
 }
 
-/* Helper RGB → Hex */
-function rgbToHex(rgb) {
+/* Mettre à jour le point couleur dans la FAB */
+function _fabSetColor(hex) {
+  const dot = document.getElementById('fab-color-dot');
+  if (dot) dot.style.background = hex;
+}
+
+/* Helper RGB → Hex pour récupérer la couleur d'un bouton palette */
+function _rgbToHex(rgb) {
   if (!rgb) return null;
+  if (rgb.startsWith('#')) return rgb;
   const m = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
   if (!m) return null;
-  return '#' + [m[1],m[2],m[3]].map(n => parseInt(n).toString(16).padStart(2,'0')).join('').toUpperCase();
+  return '#' + [m[1],m[2],m[3]]
+    .map(n => parseInt(n).toString(16).padStart(2,'0'))
+    .join('')
+    .toUpperCase();
 }
 
-/* ══════════════════════════════════
-   FAB TOOLBAR — sync état
-══════════════════════════════════ */
+/* ══ FAB — sync état modes et zoom ══════════════════════════ */
 function fabUpdateMode() {
   if (!IS_MOBILE()) return;
-  const modes = { draw: 'fab-btn-draw', erase: 'fab-btn-erase', pan: 'fab-btn-pan' };
-  Object.entries(modes).forEach(([m, id]) => {
-    const btn = document.getElementById(id);
-    if (btn) btn.classList.toggle('active', mode === m);
-  });
-  /* Mettre à jour le zoom */
-  const zl = document.getElementById('fab-zoom-label');
-  if (zl) zl.textContent = document.getElementById('zoomLabel')?.textContent || '100%';
+  document.getElementById('fab-btn-draw') ?.classList.toggle('active', mode === 'draw');
+  document.getElementById('fab-btn-erase')?.classList.toggle('active', mode === 'erase');
+  document.getElementById('fab-btn-pan')  ?.classList.toggle('active', mode === 'pan');
+  fabSyncZoom();
 }
 
-/* Synchro zoom label dans la FAB */
 function fabSyncZoom() {
   if (!IS_MOBILE()) return;
-  const zl = document.getElementById('fab-zoom-label');
-  if (zl) zl.textContent = document.getElementById('zoomLabel')?.textContent || '100%';
+  const lbl = document.getElementById('fab-zoom-label');
+  if (lbl) lbl.textContent = Math.round(currentScale * 100) + '%';
 }
 
-/* ══════════════════════════════════
-   SYNCHRO COMPTEUR OR mobile
-   Le tiroir a son propre #goldCount-d
-══════════════════════════════════ */
+/* ══ SYNCHRO OR mobile ══════════════════════════════════════ */
 function _syncMobileGoldCounter() {
-  const main = document.getElementById('goldCount');
-  const mob  = document.getElementById('goldCount-d');
-  if (mob && main) mob.textContent = main.textContent;
-
+  const main    = document.getElementById('goldCount');
+  const mob     = document.getElementById('goldCount-d');
   const mainBar = document.getElementById('goldBarFill');
   const mobBar  = document.getElementById('goldBarFill-d');
+  if (mob && main)       mob.textContent    = main.textContent;
   if (mobBar && mainBar) mobBar.style.width = mainBar.style.width;
 }
 
-/* ══════════════════════════════════
-   HOOKS sur fonctions existantes
-══════════════════════════════════ */
+/* ══ HOOKS fonctions existantes ══════════════════════════════ */
 
-/* Hook zoomIn/zoomOut → synchro fab */
+/* zoomIn/Out → synchro label FAB */
 const _origZoomIn  = zoomIn;
 const _origZoomOut = zoomOut;
 window.zoomIn  = function() { _origZoomIn();  fabSyncZoom(); };
 window.zoomOut = function() { _origZoomOut(); fabSyncZoom(); };
 
-/* Hook resetView → synchro fab */
 const _origResetView = resetView;
 window.resetView = function() { _origResetView(); fabSyncZoom(); };
 
-/* Hook updateGoldCounter → synchro mobile */
+/* updateGoldCounter → synchro tiroir */
 const _origUGC = updateGoldCounter;
 window.updateGoldCounter = function() { _origUGC(); _syncMobileGoldCounter(); };
 
-/* Hook selectMetal → synchro point couleur + fermer tiroir */
+/* selectMetal → synchro dot couleur + fermer tiroir */
 const _origSelectMetal = selectMetal;
 window.selectMetal = function(type) {
   _origSelectMetal(type);
-  const dot = document.getElementById('fab-color-dot');
-  const METAL = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
-  if (dot) dot.style.background = METAL[type] || '#ffaa00';
+  const METAL_HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
+  _fabSetColor(METAL_HEX[type] || '#ffaa00');
   if (_drawerOpen) closePaletteDrawer();
 };
 
-/* ══════════════════════════════════
-   LAYOUT MOBILE : body = flex column
-   canvas-column prend tout l'espace
-══════════════════════════════════ */
-function _applyMobileLayout() {
-  if (!IS_MOBILE()) return;
-
-  /* body : flex column, height 100dvh */
-  document.body.style.height = '100dvh';
-  document.body.style.overflow = 'hidden';
-
-  /* hud-main-layout : flex column, prend le reste */
-  const layout = document.querySelector('.hud-main-layout');
-  if (layout) {
-    layout.style.display = 'flex';
-    layout.style.flexDirection = 'column';
-    layout.style.flex = '1';
-    layout.style.minHeight = '0';
-    layout.style.overflow = 'hidden';
-  }
-
-  /* hud-canvas-column : flex column, flex:1 */
-  const col = document.querySelector('.hud-canvas-column');
-  if (col) {
-    col.style.flex = '1';
-    col.style.minHeight = '0';
-    col.style.display = 'flex';
-    col.style.flexDirection = 'column';
-  }
-
-  /* canvas-stage : flex:1 */
-  const stage = document.querySelector('.canvas-stage');
-  if (stage) {
-    stage.style.flex = '1';
-    stage.style.minHeight = '0';
-    stage.style.display = 'flex';
-    stage.style.flexDirection = 'column';
-  }
-
-  /* canvas-frame : flex:1 */
-  const frame = document.querySelector('.canvas-frame');
-  if (frame) {
-    frame.style.flex = '1';
-    frame.style.minHeight = '0';
-    frame.style.aspectRatio = 'unset';
-  }
-
-  /* viewport-container : position absolute inset:0 dans le frame */
-  const vp = document.getElementById('viewport-container');
-  if (vp && frame) {
-    frame.style.position = 'relative';
-    vp.style.position = 'absolute';
-    vp.style.inset = '0';
-    vp.style.width = '100%';
-    vp.style.height = '100%';
-    vp.style.aspectRatio = 'unset';
-  }
-}
-
-/* Appliquer au load et au resize */
+/* ══ RESIZE ══════════════════════════════════════════════════
+   Sur resize, recalculer la vue canvas (scale et pan).
+   Le layout est géré par CSS flexbox — pas besoin de JS layout.
+══════════════════════════════════════════════════════════════ */
 function _onResize() {
-  if (IS_MOBILE()) {
-    _applyMobileLayout();
-    fabSyncZoom();
-    fabUpdateMode();
-  } else {
-    /* Rétablir le layout desktop */
-    const layout = document.querySelector('.hud-main-layout');
-    if (layout) { layout.style.display = ''; layout.style.flex = ''; }
-    const col = document.querySelector('.hud-canvas-column');
-    if (col) { col.style.flex = ''; }
-    const stage = document.querySelector('.canvas-stage');
-    if (stage) { stage.style.flex = ''; stage.style.display = ''; }
-    const frame = document.querySelector('.canvas-frame');
-    if (frame) { frame.style.flex = ''; frame.style.aspectRatio = ''; }
-    const vp = document.getElementById('viewport-container');
-    if (vp) { vp.style.position = ''; vp.style.inset = ''; vp.style.height = ''; vp.style.aspectRatio = ''; }
-  }
-  /* Toujours recalculer la vue après resize */
-  setTimeout(resetView, 100);
+  // Recalculer la vue après un délai pour laisser le browser relayer
+  setTimeout(() => {
+    resetView();       // recalcule currentScale selon la nouvelle taille du viewport
+    fabSyncZoom();     // mettre à jour le label zoom dans la FAB
+    fabUpdateMode();   // mettre à jour les boutons mode actifs
+  }, 120);
 }
 
 window.addEventListener('resize', _onResize);
+window.addEventListener('orientationchange', _onResize); // portrait ↔ paysage
+
+/* ══ INIT au chargement ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  _onResize();
   /* Init couleur dot */
   const dot = document.getElementById('fab-color-dot');
   if (dot) dot.style.background = '#FFFFFF';
+
+  /* Sur mobile, initialiser la vue après que le layout CSS soit appliqué */
+  if (IS_MOBILE()) {
+    // Délai pour laisser le browser calculer les dimensions flexbox
+    setTimeout(() => {
+      resetView();
+      fabSyncZoom();
+    }, 200);
+  }
 });
 
 </script>
@@ -8422,18 +8271,28 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- FAB Toolbar — barre flottante bas de l'écran -->
 <div id="fab-toolbar" role="toolbar" aria-label="Outils de dessin">
 
-  <!-- Zoom — -->
+  <!-- Plein écran -->
+  <button class="fab-btn" id="fab-btn-fullscreen"
+          onclick="toggleFullscreen()" title="Plein écran"
+          style="font-size:0.85rem;">⛶</button>
+
+  <div class="fab-sep"></div>
+
+  <!-- Zoom -->
   <button class="fab-btn" onclick="zoomOut()" title="Zoom arrière">－</button>
   <span id="fab-zoom-label">100%</span>
   <button class="fab-btn" onclick="zoomIn()" title="Zoom avant">＋</button>
 
   <div class="fab-sep"></div>
 
-  <!-- Mode dessin : affiche un point de couleur -->
+  <!-- Point couleur active + modes dessin -->
   <div id="fab-color-dot" style="background:#FFFFFF;" title="Couleur active"></div>
-  <button class="fab-btn active" id="fab-btn-draw" onclick="setMode('draw'); fabUpdateMode();" title="Mode dessin">✏</button>
-  <button class="fab-btn" id="fab-btn-erase" onclick="setMode('erase'); fabUpdateMode();" title="Gomme">◻</button>
-  <button class="fab-btn" id="fab-btn-pan"   onclick="togglePan(); fabUpdateMode();"  title="Navigation">
+  <button class="fab-btn active" id="fab-btn-draw"
+          onclick="setMode('draw'); fabUpdateMode();" title="Dessiner">✏</button>
+  <button class="fab-btn" id="fab-btn-erase"
+          onclick="setMode('erase'); fabUpdateMode();" title="Gomme">◻</button>
+  <button class="fab-btn" id="fab-btn-pan"
+          onclick="togglePan(); fabUpdateMode();" title="Déplacer">
     <svg width="14" height="14" viewBox="0 0 22 22" fill="currentColor">
       <polygon points="11,1 14,7 12,7 12,10 10,10 10,7 8,7"/>
       <polygon points="11,21 14,15 12,15 12,12 10,12 10,15 8,15"/>
@@ -8445,8 +8304,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   <div class="fab-sep"></div>
 
-  <!-- Ouvrir palette -->
-  <button class="fab-btn" id="fab-btn-palette" onclick="togglePaletteDrawer()" title="Palette & options">🎨</button>
+  <!-- Palette & options -->
+  <button class="fab-btn" id="fab-btn-palette"
+          onclick="togglePaletteDrawer()" title="Palette & options">🎨</button>
 
 </div><!-- /fab-toolbar -->
 
