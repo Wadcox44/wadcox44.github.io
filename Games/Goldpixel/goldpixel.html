@@ -6381,16 +6381,19 @@ function updateGoldUI() {
   updateBannerPixelModule();
 }
 
-// Hook sur sélection couleur or (updateGoldCounter) → synchro banner
-const _origUpdateGoldCounter = window.updateGoldCounter;
-if (typeof updateGoldCounter === 'function') {
-  const __origGC = updateGoldCounter;
-  window.updateGoldCounter = function() {
-    __origGC();
-    updateBannerPixelModule();
-  };
-}
+// Hook sur updateGoldCounter → synchro banner
+if (typeof window.updateGoldCounter === 'function' && !window.__gpGoldCounterBannerHooked) {
+  const __origGC = window.updateGoldCounter;
 
+  window.updateGoldCounter = function(...args) {
+    __origGC.apply(this, args);
+    if (typeof updateBannerPixelModule === 'function') {
+      updateBannerPixelModule();
+    }
+  };
+
+  window.__gpGoldCounterBannerHooked = true;
+}
 /* ── Init au chargement ── */
 document.addEventListener('DOMContentLoaded', () => {
   // Init état offline par défaut
