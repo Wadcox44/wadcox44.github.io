@@ -1770,6 +1770,38 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   border-color: rgba(159,88,240,.85) !important;
   box-shadow: 0 6px 24px rgba(112,40,200,.3) !important;
 }
+
+/* ── Visuel hero Pixel War ── */
+.hero-pw-visual {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #000818 0%, #001228 50%, #000c20 100%);
+  overflow: hidden;
+}
+.hero-pw-grid {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.hero-pw-pi {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Orbitron', monospace;
+  font-size: 3.5rem; font-weight: 900;
+  color: rgba(0,243,255,0.08);
+  letter-spacing: -2px;
+  pointer-events: none;
+  text-shadow: 0 0 40px rgba(0,243,255,0.15);
+  animation: piBreath 4s ease-in-out infinite;
+}
+@keyframes piBreath {
+  0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.04); }
+}
+@keyframes pwPulse {
+  0%,100% { opacity: 0.3; transform: scale(1); }
+  50%     { opacity: 0.9; transform: scale(1.3); }
+}
 </style>
 </head>
 <body>
@@ -1942,24 +1974,73 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- Titre fort + accroche -->
     <div class="hero-headline">
       <div class="hero-headline-label"
-           data-fr="🎮 Le portail gaming Pi Network" data-en="🎮 The Pi Network gaming portal">
-        🎮 The Pi Network gaming portal
+           data-fr="🎮 Le jeu phare du portail" data-en="🎮 Le jeu phare du portail">
+        🎮 Le jeu phare du portail
       </div>
       <div class="hero-headline-title"
-           data-fr="Pixel War.<br><span>La guerre des pixels Pi.</span>"
-           data-en="Pixel War.<br><span>The Pi pixel war.</span>">
-        Pixel War.<br><span>The Pi pixel war.</span>
+           data-fr="Pixel War.<br><span>Conquiers ta place.</span>"
+           data-en="Pixel War.<br><span>Conquiers ta place.</span>">
+        Pixel War.<br><span>Conquiers ta place.</span>
       </div>
       <div class="hero-headline-sub"
-           data-fr="Le premier jeu de pixels collaboratif sur Pi Network. Pose, conquiers, défends."
-           data-en="The first collaborative pixel game on Pi Network. Place, conquer, defend.">
-        The first collaborative pixel game on Pi Network. Place, conquer, defend.
+           data-fr="Pose ton pixel, défends ton territoire, écrase tes adversaires."
+           data-en="Pose ton pixel, défends ton territoire, écrase tes adversaires.">
+        Pose ton pixel, défends ton territoire, écrase tes adversaires.
       </div>
     </div>
 
     <!-- Carte Pi-xel War redesignée -->
     <div class="hero-card-new" onclick="window.location.href='/pixelwar'">
-      <img src="Images/Gold%20Pixel.png" alt="Pi-xel War" onerror="this.style.opacity='0'">
+      <!-- Visuel Pixel War — grille animée style arcade, identité Pi subtile -->
+      <div class="hero-pw-visual" aria-hidden="true">
+        <!-- Fond grille pixel guerre -->
+        <svg class="hero-pw-grid" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="pgrid" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="11" height="11" fill="none" stroke="rgba(0,243,255,0.08)" stroke-width="0.5"/>
+            </pattern>
+            <radialGradient id="pglow" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="rgba(0,243,255,0.06)"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="200" fill="url(#pgrid)"/>
+          <rect width="400" height="200" fill="url(#pglow)"/>
+          <!-- Pixels "territoires" colorés — simulation bataille -->
+          <!-- Zone équipe A (cyan) -->
+          <rect x="20" y="20" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
+          <rect x="32" y="20" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
+          <rect x="20" y="32" width="12" height="12" fill="rgba(0,243,255,0.60)" class="px-a"/>
+          <rect x="32" y="32" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
+          <rect x="44" y="20" width="12" height="12" fill="rgba(0,243,255,0.50)" class="px-a"/>
+          <rect x="44" y="32" width="12" height="12" fill="rgba(0,243,255,0.65)" class="px-a"/>
+          <rect x="56" y="20" width="12" height="12" fill="rgba(0,243,255,0.40)" class="px-a px-front"/>
+          <!-- Zone équipe B (orange/or — Pi colors) -->
+          <rect x="340" y="20" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
+          <rect x="352" y="20" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
+          <rect x="340" y="32" width="12" height="12" fill="rgba(255,170,0,0.60)" class="px-b"/>
+          <rect x="352" y="32" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
+          <rect x="328" y="20" width="12" height="12" fill="rgba(255,170,0,0.50)" class="px-b"/>
+          <rect x="328" y="32" width="12" height="12" fill="rgba(255,170,0,0.65)" class="px-b"/>
+          <rect x="316" y="32" width="12" height="12" fill="rgba(255,170,0,0.40)" class="px-b px-front"/>
+          <!-- Zone neutre / combat central -->
+          <rect x="188" y="80" width="12" height="12" fill="rgba(255,70,80,0.7)" class="px-c"/>
+          <rect x="200" y="80" width="12" height="12" fill="rgba(0,243,255,0.7)" class="px-c"/>
+          <rect x="188" y="92" width="12" height="12" fill="rgba(255,170,0,0.7)" class="px-c"/>
+          <rect x="200" y="92" width="12" height="12" fill="rgba(255,70,80,0.5)" class="px-c"/>
+          <rect x="176" y="80" width="12" height="12" fill="rgba(100,180,100,0.6)" class="px-c"/>
+          <rect x="212" y="92" width="12" height="12" fill="rgba(180,100,255,0.6)" class="px-c"/>
+          <!-- Particules / pixels isolés qui "avancent" -->
+          <rect x="100" y="60" width="8" height="8" fill="rgba(0,243,255,0.5)" class="px-solo" style="animation:pwPulse 1.8s ease-in-out infinite"/>
+          <rect x="280" y="60" width="8" height="8" fill="rgba(255,170,0,0.5)" class="px-solo" style="animation:pwPulse 2.1s ease-in-out infinite .4s"/>
+          <rect x="150" y="150" width="8" height="8" fill="rgba(255,70,80,0.5)" class="px-solo" style="animation:pwPulse 1.6s ease-in-out infinite .8s"/>
+          <rect x="240" y="140" width="8" height="8" fill="rgba(100,180,100,0.5)" class="px-solo" style="animation:pwPulse 2.3s ease-in-out infinite 1.1s"/>
+          <!-- Ligne de front animée -->
+          <line x1="180" y1="0" x2="220" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 8" class="front-line"/>
+        </svg>
+        <!-- Logo Pi subtil centré -->
+        <div class="hero-pw-pi">π</div>
+      </div>
 
       <!-- Badge type -->
       <div class="hero-badge-type">
@@ -1976,18 +2057,18 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         <div class="hero-card-game-name">PIXEL WAR</div>
         <div class="hero-card-game-tag"
              data-fr="Attaquer · Défendre · Conquérir"
-             data-en="Attack · Defend · Conquer">Attack · Defend · Conquer</div>
+             data-en="Attaquer · Défendre · Conquérir">Attaquer · Défendre · Conquérir</div>
       </div>
 
       <!-- Barre CTA en bas de la carte -->
       <div class="hero-cta-bar">
         <button class="hero-cta-btn"
                 onclick="event.stopPropagation();window.location.href='/pixelwar'">
-          ▶ PLAY NOW
+          ▶ JOUER
         </button>
         <button class="hero-cta-explore"
                 onclick="event.stopPropagation();switchTab('games')">
-          EXPLORE →
+          LES JEUX →
         </button>
       </div>
     </div>
@@ -2002,11 +2083,11 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- En-tête section -->
     <div class="showcase-header">
       <div class="showcase-title">
-        🎮 <span data-fr="Autres Jeux" data-en="More Games">More Games</span>
+        🎮 <span data-fr="Autres Jeux" data-en="Autres Jeux">Autres Jeux</span>
       </div>
       <div class="showcase-count"
-           data-fr="4 jeux · 1 slot libre"
-           data-en="4 games · 1 open slot">4 games · 1 open slot</div>
+           data-fr="4 jeux · 3 slots libres"
+           data-en="4 jeux · 3 slots libres">4 jeux · 3 slots libres</div>
     </div>
 
     <!-- Grille vitrine : 4 slots — Breaker · Stracker · ×2 libres -->
@@ -2079,14 +2160,39 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- ── SLOT LIBRE 2 ── -->
-      <div class="sc-card your-game rv d1" onclick="openDevModal()">
+      <div class="sc-card your-game rv d1" onclick="openGameModal()">
         <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
           <div style="position:absolute;width:7px;height:7px;border-radius:2px;background:var(--cy);top:30px;left:50%;animation:pwFloat 2.9s ease-in-out infinite .4s;"></div>
           <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:60px;left:25%;animation:pwFloat 3.5s ease-in-out infinite .9s;"></div>
         </div>
         <div class="sc-your-inner">
           <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="VOTRE JEU ICI">VOTRE JEU ICI</div>
+        </div>
+      </div>
+
+      <!-- ── SLOT LIBRE 3 ── -->
+      <div class="sc-card your-game rv d2" onclick="openGameModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:8px;height:8px;border-radius:2px;background:var(--cy);top:24px;left:38%;animation:pwFloat 3.1s ease-in-out infinite .2s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:65px;left:62%;animation:pwFloat 2.8s ease-in-out infinite .7s;"></div>
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:45px;left:20%;animation:pwFloat 3.4s ease-in-out infinite 1.3s;"></div>
+        </div>
+        <div class="sc-your-inner">
+          <div class="sc-your-plus">✚</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="VOTRE JEU ICI">VOTRE JEU ICI</div>
+        </div>
+      </div>
+
+      <!-- ── SLOT LIBRE 4 ── -->
+      <div class="sc-card your-game rv d3" onclick="openGameModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:20px;left:55%;animation:pwFloat 2.6s ease-in-out infinite .5s;"></div>
+          <div style="position:absolute;width:7px;height:7px;border-radius:50%;background:var(--cy);top:58px;left:30%;animation:pwFloat 3.2s ease-in-out infinite 1.0s;"></div>
+        </div>
+        <div class="sc-your-inner">
+          <div class="sc-your-plus">✚</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="VOTRE JEU ICI">VOTRE JEU ICI</div>
         </div>
       </div>
 
@@ -2094,9 +2200,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
     <!-- Note développeurs -->
     <p class="showcase-note">
-      <span data-fr="Rejoignez le portail ·" data-en="Join the portal ·">Join the portal ·</span>
-      <a onclick="switchTab('devs')"
-         data-fr=" Proposer mon jeu →" data-en=" List your game →"> List your game →</a>
+      <span data-fr="Rejoignez le portail ·" data-en="Rejoignez le portail ·">Rejoignez le portail ·</span>
+      <a onclick="openGameModal()" style="cursor:pointer;"
+         data-fr=" Proposer mon jeu →" data-en=" Proposer mon jeu →"> Proposer mon jeu →</a>
     </p>
 
   </div><!-- /showcase-section -->
@@ -2111,15 +2217,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         <div class="dev-home-title"
              data-fr="Publiez votre jeu.<br><span>Trouvez vos joueurs.</span>"
              data-en="Publish your game.<br><span>Find your players.</span>">
-          Publish your game.<br><span>Find your players.</span>
+          Publiez votre jeu.<br><span>Trouvez vos joueurs.</span>
         </div>
-        <div class="dev-home-badge" data-fr="GRATUIT" data-en="FREE">FREE</div>
+        <div class="dev-home-badge" data-fr="GRATUIT" data-en="GRATUIT">GRATUIT</div>
       </div>
 
       <div class="dev-home-sub"
            data-fr="JeuxVideo.Pi est le premier portail de jeux Pi Network ouvert aux développeurs. Référencez votre jeu, atteignez une audience Pi déjà active."
            data-en="JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.">
-        JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.
+        JeuxVideo.Pi est le premier portail gaming Pi Network ouvert aux développeurs. Référencez votre jeu et touchez une audience Pi active.
       </div>
 
       <div class="dev-home-perks">
@@ -2127,24 +2233,24 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         <div class="dev-home-perk">
           <span class="dev-home-perk-icon">👁️</span>
           <div class="dev-home-perk-text">
-            <strong data-fr="VISIBILITÉ" data-en="VISIBILITY">VISIBILITY</strong>
-            <span data-fr="Communauté Pi engagée" data-en="Engaged Pi community">Engaged Pi community</span>
+            <strong data-fr="VISIBILITÉ" data-en="VISIBILITÉ">VISIBILITÉ</strong>
+            <span data-fr="Communauté Pi engagée" data-en="Communauté Pi engagée">Communauté Pi engagée</span>
           </div>
         </div>
 
         <div class="dev-home-perk">
           <span class="dev-home-perk-icon">🎮</span>
           <div class="dev-home-perk-text">
-            <strong data-fr="PAGE DÉDIÉE" data-en="DEDICATED PAGE">DEDICATED PAGE</strong>
-            <span data-fr="Vitrine premium" data-en="Premium showcase">Premium showcase</span>
+            <strong data-fr="PAGE DÉDIÉE" data-en="PAGE DÉDIÉE">PAGE DÉDIÉE</strong>
+            <span data-fr="Vitrine premium" data-en="Vitrine premium">Vitrine premium</span>
           </div>
         </div>
 
         <div class="dev-home-perk">
           <span class="dev-home-perk-icon">🤝</span>
           <div class="dev-home-perk-text">
-            <strong data-fr="ACCOMPAGNEMENT" data-en="SUPPORT">SUPPORT</strong>
-            <span data-fr="Intégration guidée" data-en="Guided onboarding">Guided onboarding</span>
+            <strong data-fr="ACCOMPAGNEMENT" data-en="ACCOMPAGNEMENT">ACCOMPAGNEMENT</strong>
+            <span data-fr="Intégration guidée" data-en="Intégration guidée">Intégration guidée</span>
           </div>
         </div>
 
@@ -2152,21 +2258,21 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           <span class="dev-home-perk-icon">🏆</span>
           <div class="dev-home-perk-text">
             <strong data-fr="0% COMMISSION" data-en="0% COMMISSION">0% COMMISSION</strong>
-            <span data-fr="Vos gains, 100% vôtres" data-en="Your earnings, 100% yours">Your earnings, 100% yours</span>
+            <span data-fr="Vos gains, 100% vôtres" data-en="Vos gains, 100% vôtres">Vos gains, 100% vôtres</span>
           </div>
         </div>
 
       </div>
 
-      <button class="dev-home-cta" onclick="switchTab('devs')"
-              data-fr="EN SAVOIR PLUS →" data-en="LEARN MORE →">
-        LEARN MORE →
+      <button class="dev-home-cta" onclick="openGameModal()"
+              data-fr="PROPOSER MON JEU →" data-en="PROPOSER MON JEU →">
+        PROPOSER MON JEU →
       </button>
 
       <div class="dev-home-note"
            data-fr="Réponse sous 48h · Sans engagement · Formulaire simple"
            data-en="Reply within 48h · No commitment · Simple form">
-        Reply within 48h · No commitment · Simple form
+        Réponse sous 48h · Sans engagement · Formulaire simple
       </div>
 
     </div>
@@ -2265,20 +2371,20 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="nv-featured rv d2" style="background:linear-gradient(135deg,rgba(0,10,30,.98),rgba(0,20,50,.95));border-color:rgba(0,243,255,.35);cursor:pointer;" onclick="switchTab('devs')">
       <div class="nv-featured-badge" style="background:rgba(0,243,255,.12);border:1px solid rgba(0,243,255,.4);color:var(--cy);">
         <span class="nv-badge-dot" style="background:var(--cy);box-shadow:0 0 6px var(--cy);"></span>
-        WE'RE HIRING
+        JE RECRUTE
       </div>
       <div class="nv-featured-title" style="-webkit-text-fill-color:unset;color:var(--cy);"
-           data-fr="Recherche : Responsable Éditorial &amp; News"
-           data-en="Wanted: Editorial &amp; News Manager">
-        Wanted: Editorial &amp; News Manager
+           data-fr="Je cherche quelqu'un pour gérer les news"
+           data-en="Je cherche quelqu'un pour gérer les news">
+        Je cherche quelqu'un pour gérer les news
       </div>
       <div class="nv-featured-desc"
-           data-fr="Nous cherchons quelqu'un pour gérer les actualités, la veille Pi Network et animer cette section News. Intéressé(e) ? Rejoignez l'aventure JeuxVideo.Pi."
-           data-en="We're looking for someone to manage news, Pi Network updates and animate this News section. Interested? Join the JeuxVideo.Pi adventure.">
-        We're looking for someone to manage news, Pi Network updates and animate this News section. Interested? Join the JeuxVideo.Pi adventure.
+           data-fr="Je gère ce portail seul et je cherche quelqu'un pour animer la section News. Intéressé(e) ? Rejoins l'aventure."
+           data-en="Je gère ce portail seul et je cherche quelqu'un pour animer la section News. Intéressé(e) ? Rejoins l'aventure.">
+        Je gère ce portail seul et je cherche quelqu'un pour animer la section News. Intéressé(e) ? Rejoins l'aventure.
       </div>
       <div class="nv-featured-meta" style="color:var(--cy);">
-        <span data-fr="Voir le poste →" data-en="See the position →">See the position →</span>
+        <span data-fr="Voir le poste →" data-en="Voir le poste →">Voir le poste →</span>
       </div>
     </div>
 
@@ -2410,54 +2516,74 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 <!-- ══ DEVS ══ -->
 <div class="view" id="view-devs">
 
-  <!-- ══ Rejoignez-nous — recrutement uniquement ══ -->
+  <!-- ══ REJOIGNEZ-NOUS ══ -->
   <section style="border:none;padding-top:14px;">
+
+    <!-- Accroche humaine -->
     <div class="recruit-section rv">
-      <div class="recruit-eyebrow" data-fr="NOUS RECRUTONS" data-en="WE'RE HIRING">WE'RE HIRING</div>
-      <div class="recruit-title"
-           data-fr="Rejoignez l'aventure<br><span>JeuxVideo.Pi</span>"
-           data-en="Join the<br><span>JeuxVideo.Pi</span> adventure">
-        Join the<br><span>JeuxVideo.Pi</span> adventure
+      <div class="recruit-eyebrow">JE RECRUTE</div>
+      <div class="recruit-title">
+        M'aider à faire grandir<br><span>JeuxVideo.Pi</span>
       </div>
-      <div class="recruit-intro"
-           data-fr="Deux postes sont ouverts pour structurer et animer le premier portail gaming Pi Network indépendant."
-           data-en="Two positions are open to structure and energize the first independent Pi Network gaming portal.">
-        Two positions are open to structure and energize the first independent Pi Network gaming portal.
+      <div class="recruit-intro">
+        Je gère ce portail seul, avec passion. Si tu aimes les jeux, Pi Network, et que tu veux m'aider à le faire vivre et grandir — je serais ravi de t'avoir à mes côtés. Deux rôles sont ouverts, sans obligation, à ton rythme.
       </div>
 
       <div class="recruit-roles">
         <div class="recruit-role rv d1">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">✍️</span>
-            <div class="recruit-role-title"
-                 data-fr="Responsable Éditorial & Actualités"
-                 data-en="Editorial & News Manager">Editorial &amp; News Manager</div>
+            <div class="recruit-role-title">Gestion News &amp; Actualités</div>
           </div>
-          <div class="recruit-role-desc"
-               data-fr="Gérez les actualités, la veille Pi Network et animez la section News du portail."
-               data-en="Manage news, Pi Network updates and animate the portal's News section.">
-            Manage news, Pi Network updates and animate the portal's News section.
+          <div class="recruit-role-desc">
+            Tu rédiges les actualités du portail, tu fais de la veille sur Pi Network et tu animes la section News. Idéal si tu aimes écrire et rester informé de l'écosystème Pi.
           </div>
         </div>
         <div class="recruit-role rv d2">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">⚙️</span>
-            <div class="recruit-role-title"
-                 data-fr="Responsable Portail & Intégration"
-                 data-en="Portal & Integration Manager">Portal &amp; Integration Manager</div>
+            <div class="recruit-role-title">Gestion Portail &amp; Intégration des jeux</div>
           </div>
-          <div class="recruit-role-desc"
-               data-fr="Gérez l'intégration des jeux, le suivi des bugs et la maintenance du portail."
-               data-en="Manage game integrations, bug tracking and portal maintenance.">
-            Manage game integrations, bug tracking and portal maintenance.
+          <div class="recruit-role-desc">
+            Tu m'aides à intégrer les nouveaux jeux, à suivre les retours des joueurs, et à maintenir le portail opérationnel. Idéal si tu as un minimum de sensibilité technique ou de curiosité.
           </div>
         </div>
       </div>
-
-      <button class="recruit-cta rv" onclick="openRecruitModal()">
-        👉 <span data-fr="POSTULER MAINTENANT" data-en="APPLY NOW">APPLY NOW</span>
-      </button>
     </div>
+
+    <!-- Formulaire de candidature intégré -->
+    <div class="recruit-section rv" style="margin-top:10px;">
+      <div class="recruit-eyebrow" style="color:var(--cy);">POSTULER</div>
+
+      <div id="recruit-inline-ok" style="display:none;text-align:center;padding:16px 0;">
+        <div class="ok-ico">⭐</div>
+        <div class="ok-title">Candidature reçue !</div>
+        <div class="ok-sub">Merci ! Je te contacterai très prochainement.</div>
+      </div>
+
+      <form id="recruit-inline-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+            onsubmit="handleRecruitInline(event)"
+            style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+        <input type="hidden" name="type" value="recruitment">
+        <div class="form-row">
+          <input type="text"  name="name"  placeholder="Ton nom ou pseudo *" required>
+          <input type="email" name="email" placeholder="Ton email *" required>
+        </div>
+        <select name="role" required>
+          <option value="">Poste souhaité *</option>
+          <option value="news">Gestion News / Actualités</option>
+          <option value="portail">Gestion Portail / Intégration des jeux</option>
+          <option value="les deux">Les deux</option>
+        </select>
+        <textarea name="motivation" rows="3" placeholder="Présente-toi brièvement — qui tu es, pourquoi tu veux m'aider *" required></textarea>
+        <textarea name="disponibilites" rows="2" placeholder="Tes disponibilités (heures/semaine, timezone, rythme...)"></textarea>
+        <button type="submit" class="btn-send">
+          ENVOYER MA CANDIDATURE →
+        </button>
+      </form>
+      <p class="form-note">✔ Je réponds sous 48h · Bénévolat · Passion · Long terme</p>
+    </div>
+
   </section>
 
 </div><!-- /devs -->
@@ -2472,13 +2598,13 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="devs-sub rv" style="margin-bottom:16px;"
          data-fr="Pour toute question, demande ou prise de contact."
          data-en="For any question, request or message.">
-      For any question, request or message.
+      Pour toute question ou demande.
     </div>
 
     <div id="contact-form-ok" style="display:none;text-align:center;padding:20px 0;">
       <div class="ok-ico">✉️</div>
-      <div class="ok-title" data-fr="Message envoyé !" data-en="Message sent!">Message sent!</div>
-      <div class="ok-sub" data-fr="Nous vous répondrons sous 48h." data-en="We'll reply within 48h.">We'll reply within 48h.</div>
+      <div class="ok-title" data-fr="Message envoyé !" data-en="Message envoyé !">Message envoyé !</div>
+      <div class="ok-sub" data-fr="Nous vous répondrons sous 48h." data-en="Réponse sous 48h.">Réponse sous 48h.</div>
     </div>
 
     <form id="contact-form" action="https://formspree.io/f/xwvoaroz" method="POST"
@@ -2486,15 +2612,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           style="display:flex;flex-direction:column;gap:10px;">
       <input type="hidden" name="type" value="contact">
       <div class="form-row">
-        <input type="text"  name="name"    placeholder="Name / Pi Username" required>
-        <input type="email" name="email"   placeholder="Email" required>
+        <input type="text"  name="name"    placeholder="Nom ou pseudo Pi *" required>
+        <input type="email" name="email"   placeholder="Email *" required>
       </div>
-      <input type="text" name="subject" placeholder="Subject" required>
-      <textarea name="message" rows="4" placeholder="Your message..."></textarea>
+      <input type="text" name="subject" placeholder="Sujet *" required>
+      <textarea name="message" rows="4" placeholder="Votre message..."></textarea>
       <button type="submit" class="btn-send"
-              data-fr="ENVOYER →" data-en="SEND →">SEND →</button>
+              data-fr="ENVOYER →" data-en="ENVOYER →">ENVOYER →</button>
     </form>
-    <p class="form-note" data-fr="✔ Réponse sous 48h" data-en="✔ Reply within 48h">✔ Reply within 48h</p>
+    <p class="form-note" data-fr="✔ Réponse sous 48h" data-en="✔ Réponse sous 48h">✔ Réponse sous 48h</p>
 
   </section>
 </div><!-- /contact -->
@@ -2733,6 +2859,30 @@ function syncHdrNav(tabName) {
    BARRE DE NAV — switchTab
    Gère à la fois la nav-bar et la syncHdrNav
 ════════════════════════════════════════════════════════ */
+/* ── openGameModal — alias propre vers la modale "Proposer un jeu" ── */
+function openGameModal() {
+  document.getElementById('dev-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+/* ── Formulaire candidature inline (view-devs) ── */
+function handleRecruitInline(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type="submit"]');
+  btn.disabled = true;
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        e.target.style.display = 'none';
+        document.getElementById('recruit-inline-ok').style.display = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Erreur — réessayez', '');
+    });
+}
+
 function handleContactForm(e) {
   e.preventDefault();
   const btn = e.target.querySelector('[type="submit"]');
@@ -2769,45 +2919,51 @@ function switchTab(name) {
 </script>
 
 <!-- ═══════════════════════════════════════
-     MODAL DÉVELOPPEUR — formulaire
+     MODAL — Proposer un jeu
+     Accessible depuis bloc dev home et slots uniquement
+     N'apparaît PAS dans les onglets de navigation
 ═══════════════════════════════════════ -->
 <div class="dev-modal-overlay" id="dev-modal-overlay" onclick="if(event.target===this)closeDevModal()">
   <div class="dev-modal">
     <div class="dev-modal-handle"></div>
-    <div class="dev-modal-title" data-fr="🎮 INTÉGRER VOTRE JEU" data-en="🎮 LIST YOUR GAME">🎮 LIST YOUR GAME</div>
-    <div class="dev-modal-sub" data-fr="Gratuit · 0% commission · Réponse sous 48h" data-en="Free · 0% commission · Reply within 48h">Free · 0% commission · Reply within 48h</div>
+    <div class="dev-modal-title">🎮 PROPOSER UN JEU</div>
+    <div class="dev-modal-sub">Gratuit · 0% commission · Réponse sous 48h</div>
 
     <div class="dev-modal-ok" id="dev-modal-ok">
       <div class="ok-ico">🚀</div>
-      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
-      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue sur JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to JEUXVIDEO.PI!">We'll reply within 48h. Welcome to JEUXVIDEO.PI!</div>
-      <button class="dev-modal-close" onclick="closeDevModal()" data-fr="FERMER" data-en="CLOSE">CLOSE</button>
+      <div class="ok-title">Demande envoyée !</div>
+      <div class="ok-sub">Je vous réponds sous 48h. Merci de votre intérêt pour JeuxVideo.Pi !</div>
+      <button class="dev-modal-close" onclick="closeDevModal()">FERMER</button>
     </div>
 
-    <form id="dev-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleDevModal(event)" style="display:flex;flex-direction:column;gap:9px;">
-      <input type="hidden" name="type" value="developer-integration">
+    <form id="dev-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+          onsubmit="handleDevModal(event)"
+          style="display:flex;flex-direction:column;gap:9px;">
+      <input type="hidden" name="type" value="game-proposal">
       <div class="form-row">
-        <input type="text" name="dev_name" placeholder="Developer name *" required>
+        <input type="text"  name="dev_name"  placeholder="Nom du développeur / studio *" required>
         <input type="email" name="dev_email" placeholder="Email *" required>
       </div>
-      <input type="text" name="game_name" placeholder="Game name *" required>
-      <input type="url" name="game_url" placeholder="Game URL (https://...)">
-      <textarea name="game_description" rows="3" placeholder="Describe your game — genre, gameplay, current status..." required></textarea>
-      <select name="game_category">
-        <option value="">Game category</option>
-        <option>Pixel Art</option>
-        <option>Puzzle / Thinking</option>
-        <option>Action / Arcade</option>
-        <option>RPG / Adventure</option>
-        <option>Strategy</option>
+      <input type="text" name="game_name" placeholder="Nom du jeu *" required>
+      <select name="game_type">
+        <option value="">Type de jeu *</option>
+        <option>Arcade</option>
+        <option>Puzzle / Réflexion</option>
+        <option>Pixel Art / Créatif</option>
+        <option>Action / Combat</option>
+        <option>RPG / Aventure</option>
+        <option>Stratégie</option>
         <option>Casual / Idle</option>
-        <option>Other</option>
+        <option>Autre</option>
       </select>
-      <textarea name="expectations" rows="2" placeholder="What do you expect from JEUXVIDEO.PI?"></textarea>
+      <textarea name="pitch" rows="2" placeholder="Court pitch du jeu (2–3 phrases) *" required></textarea>
+      <input type="url"  name="game_url"   placeholder="Lien du jeu (https://...)">
+      <input type="url"  name="media_url"  placeholder="Lien captures / médias (drive, imgur...)">
+      <textarea name="message" rows="2" placeholder="Message complémentaire (optionnel)"></textarea>
       <button type="submit" class="btn-send" id="dev-modal-send" style="margin-top:4px;">
-        <span data-fr="ENVOYER MA CANDIDATURE →" data-en="SUBMIT MY APPLICATION →">SUBMIT MY APPLICATION →</span>
+        ENVOYER MA DEMANDE →
       </button>
-      <button type="button" class="dev-modal-close" onclick="closeDevModal()" data-fr="ANNULER" data-en="CANCEL">CANCEL</button>
+      <button type="button" class="dev-modal-close" onclick="closeDevModal()">ANNULER</button>
     </form>
   </div>
 </div>
