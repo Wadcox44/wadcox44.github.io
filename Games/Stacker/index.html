@@ -468,8 +468,23 @@ body::after {
 const COLS      = 10;   // largeur du terrain (cases)
 const ROWS      = 20;   // hauteur du terrain (cases)
 const CELL      = 28;   // taille d'une case en pixels (ajusté dynamiquement)
-const TICK_BASE = 800;  // vitesse de base (ms par descente)
-const TICK_MIN  = 80;   // vitesse maximale
+const TICK_BASE  = 800;  // vitesse de base (ms par descente)
+const TICK_MIN   = 80;   // vitesse maximale
+const MAX_LEVEL  = 30;   // niveaux de campagne
+
+// ── CHECKPOINT ──
+const LS_CKP_STACKER = 'stacker_checkpoint_v1';
+function saveCkp(lvl, sc) {
+  try {
+    const prev = loadCkp();
+    if (lvl > (prev.level||0) || (lvl===(prev.level||0) && sc>(prev.score||0)))
+      localStorage.setItem(LS_CKP_STACKER, JSON.stringify({level:lvl, score:sc}));
+  } catch(_){}
+}
+function loadCkp() {
+  try { return JSON.parse(localStorage.getItem(LS_CKP_STACKER)||'{}'); }
+  catch(_){ return {}; }
+}
 
 // Couleurs des blocs — palette 100% originale cyberpunk
 const COLORS = [
@@ -642,16 +657,31 @@ function showTutorial() {
         </div>
       </div>
 
-      <button class="btn-start-game" onclick="startGame()">▶ JOUER</button>
+      <div id="stk-resume-wrap" style="margin-top:4px;"></div>
+      <button class="btn-start-game" onclick="startGame(false)" style="margin-top:6px;">▶ NOUVELLE PARTIE</button>
     </div>
   `;
   ov.classList.remove('hidden');
+  // Injecter le bouton "reprendre" si checkpoint
+  (function(){
+    const cp   = loadCkp();
+    const wrap = ov.querySelector('#stk-resume-wrap');
+    if(wrap && cp.level > 0){
+      wrap.innerHTML = '<button class="btn-start-game" style="background:rgba(255,136,0,.12);border:1px solid rgba(255,136,0,.5);color:#ff8800;margin-bottom:2px;" onclick="startGame(true)">'
+        +'↩ REPRENDRE — Niveau '+cp.level+' ('+((cp.score||0).toLocaleString('fr'))+' pts)</button>';
+    }
+  })();
 }
 
 /* Démarrer la partie */
-function startGame() {
+function startGame(fromCheckpoint) {
   initBoard();
-  score = lines = 0; level = 1;
+  const cp   = fromCheckpoint ? loadCkp() : {};
+  // En mode reprise : on repart du niveau sauvegardé, score remis à 0
+  const cpLvl = Math.max(0, Math.min((cp.level||1)-1, MAX_LEVEL-1));
+  level  = fromCheckpoint && cp.level > 0 ? cpLvl + 1 : 1;
+  lines  = fromCheckpoint && cp.level > 0 ? cpLvl * 10 : 0;
+  score  = 0;
   particles = [];
   currentPiece = createPiece();
   nextPiece    = createPiece();
@@ -828,8 +858,16 @@ function checkLines() {
     const pts = [0, 100, 300, 600, 1000][Math.min(cleared, 4)] * level;
     score += pts;
     lines += cleared;
-    level  = Math.floor(lines / 10) + 1;
+    level = Math.min(Math.floor(lines / 10) + 1, MAX_LEVEL);
     scheduleDrop();
+    // Détecter la fin des 30 niveaux de campagne
+    if (level >= MAX_LEVEL && Math.floor(lines / 10) + 1 >= MAX_LEVEL) {
+      saveCkp(level, score);
+      gameState = 'gameover';
+      clearInterval(dropInterval);
+      showOverlay('win');
+      return;
+    }
 
     if (cleared >= 4) toast('⚡ PI COMBO ×' + cleared, 'gold');
     else if (cleared >= 2) toast('✦ ×' + cleared + ' LIGNES', '');
@@ -840,6 +878,7 @@ function checkLines() {
 function gameOver() {
   gameState = 'gameover';
   clearInterval(dropInterval);
+  saveCkp(level, score); // sauvegarder la progression
   showOverlay('gameover');
 }
 
@@ -1008,7 +1047,7 @@ function drawNext() {
 // ── HUD ──────────────────────────────────────────────────
 function updateHUD() {
   document.getElementById('hud-score').textContent = score.toLocaleString('fr');
-  document.getElementById('hud-level').textContent = level;
+  document.getElementById('hud-level').textContent = level + '/' + MAX_LEVEL;
   document.getElementById('hud-lines').textContent = lines;
 }
 
@@ -1037,13 +1076,33 @@ function showOverlay(type) {
   } else if (type === 'gameover') {
     title.className = 'ov-title rd';
     title.textContent = 'GAME OVER';
-    sub.innerHTML = '';
+    sub.innerHTML = 'Niveau ' + level + ' / ' + MAX_LEVEL;
+    scoreW.style.display = 'block';
+    scoreEl.textContent = score.toLocaleString('fr');
+    // Bouton reprendre si checkpoint disponible
+    const cp = loadCkp();
+    if(cp.level > 0) {
+      btnMain.textContent = '↩ REPRENDRE — Niv. ' + cp.level;
+      btnMain.onclick = function(){ startGame(true); };
+      btnMenu.style.display = '';
+      btnMenu.textContent = '↺ NOUVELLE PARTIE';
+      btnMenu.onclick = function(){ startGame(false); };
+    } else {
+      btnMain.textContent = '↺ REJOUER';
+      btnMain.onclick = function(){ startGame(false); };
+      btnMenu.style.display = '';
+      btnMenu.onclick = showTutorial;
+    }
+    controls.style.display = 'none';
+  } else if (type === 'win') {
+    title.className = 'ov-title or';
+    title.textContent = 'CAMPAGNE TERMINÉE !';
+    sub.innerHTML = "🏆 30 niveaux complétés !<br><span style=\"color:#ff8800;font-size:.72rem;\">D'autres niveaux arrivent bientôt !</span>";
     scoreW.style.display = 'block';
     scoreEl.textContent = score.toLocaleString('fr');
     btnMain.textContent = '↺ REJOUER';
-    btnMain.onclick = startGame;
-    btnMenu.style.display = '';
-    btnMenu.onclick = showTutorial;
+    btnMain.onclick = function(){ startGame(false); };
+    btnMenu.style.display = 'none';
     controls.style.display = 'none';
   } else if (type === 'pause') {
     title.className = 'ov-title cy';
