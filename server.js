@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  JEUXVIDEO.PI — Server v3.5
+//  JEUXVIDEO.PI — Server v3.6
 //  Hébergement : Render  |  DB : MongoDB Atlas
 //  Architecture : portail Pi Network + 6 systèmes configurables + Shop Gold Credits
 //               + Pont Portail (snapshot mensuel, scores déportés, galerie des saisons)
@@ -2246,6 +2246,13 @@ app.post('/api/pixelwar/place', async (req, res) => {
       });
     }
 
+    /* Vérifier si la case était déjà occupée par quelqu'un d'autre (pixel recouvert) */
+    const existing = await db.collection('pixelwar_grid').findOne(
+      { col, row }, { projection: { user: 1 } }
+    );
+    const coveredUser = (existing && existing.user && existing.user !== '@' + user)
+      ? existing.user : null;
+
     /* Poser le pixel */
     await db.collection('pixelwar_grid').updateOne(
       { col, row },
@@ -2253,12 +2260,13 @@ app.post('/api/pixelwar/place', async (req, res) => {
       { upsert: true }
     );
 
-    /* Décrémenter le stock */
+    /* Incrémenter le compteur 'covered' du joueur attaquant si recouvrement */
     const newStock      = stock - 1;
     const newRechargeTs = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
+    const updateFields  = { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now };
     await db.collection('pixelwar_players').updateOne(
       { username: user },
-      { $set: { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now } }
+      { $set: updateFields, $inc: { totalPlaced: 1, ...(coveredUser ? { covered: 1 } : {}) } }
     );
 
     const newRechargeLeft = newStock >= PW_STOCK_DEFAULT
@@ -2298,11 +2306,56 @@ app.get('/api/pixelwar/player', async (req, res) => {
 ───────────────────────────────────────────────────────────── */
 app.get('/api/pixelwar/leaderboard', async (req, res) => {
   try {
-    const rows = await db.collection('pixelwar_grid').aggregate([
+    /* Pixels actuels sur la grille + données joueur (covered) */
+    const gridRows = await db.collection('pixelwar_grid').aggregate([
       { $group: { _id: '$user', pixels: { $sum: 1 } } },
       { $sort:  { pixels: -1 } },
       { $limit: 10 },
       { $project: { _id:0, user:'$_id', pixels:1 } },
+    ]).toArray();
+
+    /* Enrichir avec le compteur covered depuis pixelwar_players */
+    const enriched = await Promise.all(gridRows.map(async row => {
+      const uname = (row.user || '').replace(/^@/, '');
+      const player = await db.collection('pixelwar_players').findOne(
+        { username: uname }, { projection: { covered:1 } }
+      );
+      return { ...row, covered: (player && player.covered) || 0 };
+    }));
+
+    res.json({ ok: true, leaderboard: enriched });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/pixelwar/leaderboard/countries
+   Top 10 pays par pixels posés actuellement sur la grille
+───────────────────────────────────────────────────────────── */
+app.get('/api/pixelwar/leaderboard/countries', async (req, res) => {
+  try {
+    /* Joindre pixelwar_grid avec pixelwar_players pour connaître le pays */
+    const rows = await db.collection('pixelwar_grid').aggregate([
+      /* Récupérer le nom de joueur unique */
+      { $group: { _id: '$user', pixels: { $sum: 1 } } },
+      /* Lookup vers pixelwar_players */
+      { $lookup: {
+          from: 'pixelwar_players',
+          let:  { uname: { $ltrim: { input: '$_id', chars: '@' } } },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$username', '$$uname'] } } },
+            { $project: { country: 1 } },
+          ],
+          as: 'pdata',
+        }
+      },
+      { $set: { country: { $ifNull: [{ $arrayElemAt: ['$pdata.country', 0] }, 'XX'] } } },
+      /* Grouper par pays */
+      { $group: { _id: '$country', pixels: { $sum: '$pixels' } } },
+      { $sort:  { pixels: -1 } },
+      { $limit: 10 },
+      { $project: { _id:0, country:'$_id', pixels:1 } },
     ]).toArray();
     res.json({ ok: true, leaderboard: rows });
   } catch (e) {
@@ -2364,6 +2417,33 @@ app.post('/api/pixelwar/shop/complete', async (req, res) => {
   }
 });
 
+/* ─────────────────────────────────────────────────────────────
+   POST /api/pixelwar/player/country
+   Body : { username, country }
+   Enregistre le pays du joueur (1 seule fois, modifiable)
+───────────────────────────────────────────────────────────── */
+app.post('/api/pixelwar/player/country', async (req, res) => {
+  try {
+    const { username, country } = req.body;
+    if (!username || !country) return res.status(400).json({ ok:false, error:'username et country requis' });
+    const validCodes = [
+      'FR','US','GB','DE','ES','IT','BR','CN','JP','KR','IN','NG','GH',
+      'KE','PH','VN','ID','TR','MX','MA','DZ','SN','CI','CM','TN','PL',
+      'PT','AR','CO','ZA',
+    ];
+    if (!validCodes.includes(country)) return res.status(400).json({ ok:false, error:'Code pays invalide' });
+    const user = pwNormalizeUser(username);
+    await db.collection('pixelwar_players').updateOne(
+      { username: user },
+      { $set: { country } },
+      { upsert: true }
+    );
+    res.json({ ok: true, country });
+  } catch (e) {
+    res.status(500).json({ ok:false, error: e.message });
+  }
+});
+
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
 app.get('/goldpixel', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), err => { if (err) res.status(404).send('goldpixel.html introuvable'); }));
 
@@ -2389,4 +2469,4 @@ app.get('/pixelwar', (req, res) => res.sendFile(
 
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.5 actif sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.6 actif sur le port ${PORT}`));
