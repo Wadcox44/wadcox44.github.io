@@ -2373,7 +2373,7 @@ body {
     inset -1px 0 0 rgba(255,200,60,0.1),
     inset 0 -1px 0 rgba(255,180,20,0.08);
   overflow: hidden;
-  background: #060f1e;
+  background: #d8e8f4;
   transition: border-color .3s, box-shadow .3s;
 }
 .canvas-frame.active {
@@ -3502,14 +3502,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    background: #030710;
+    background: #f0e8d5;  /* Crème doré chaud */
   }
 
   /* Banner : masqué sur mobile — remplacé par le HUD overlay */
   #top-banner            { display: none !important; }
   #pi-status-bar         { display: none !important; }
 
-  /* Layout principal : plein écran */
+  /* Layout principal : décalé sous le header HUD fixe (44px) */
   .hud-main-layout {
     display: flex !important;
     flex-direction: column !important;
@@ -3517,9 +3517,13 @@ body {
     min-height: 0 !important;
     overflow: hidden !important;
     gap: 0 !important;
-    padding: 0 !important;
+    padding-top: 44px !important; /* Compenser le header HUD position:fixed */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
     grid-template-columns: none !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Colonne canvas : 100% */
@@ -3602,8 +3606,8 @@ body {
     padding: 4px 8px;
     height: 44px;
     flex-shrink: 0;
-    background: rgba(4,8,18,0.92);
-    border-top: 1px solid rgba(255,185,40,0.14);
+    background: #e8dfc8;  /* Crème légèrement plus sombre */
+    border-top: 2px solid rgba(180,130,20,0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     pointer-events: all;
@@ -3615,8 +3619,8 @@ body {
   #gp-pb-color-dot {
     width: 28px; height: 28px; border-radius: 7px;
     background: #FFFFFF;
-    border: 1.5px solid rgba(255,255,255,0.5);
-    box-shadow: 0 0 6px rgba(255,255,255,0.2);
+    border: 2px solid rgba(130,90,10,0.4);
+    box-shadow: 0 1px 4px rgba(130,90,10,0.15);
     flex-shrink: 0; transition: background .12s, box-shadow .12s;
     cursor: default;
   }
@@ -3653,8 +3657,8 @@ body {
 
   /* Séparateur vertical dans la barre */
   .gp-pb-sep {
-    width: 1px; height: 22px;
-    background: rgba(255,170,0,0.14);
+    width: 1.5px; height: 22px;
+    background: rgba(150,100,10,0.3);
     flex-shrink: 0;
   }
 
@@ -3663,61 +3667,59 @@ body {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 1px;
-    width: 36px; height: 34px;
+    width: 38px; height: 36px;
     border-radius: 8px; flex-shrink: 0;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,170,0,0.16);
-    color: rgba(255,210,80,0.8);
+    background: rgba(180,130,10,0.1);
+    border: 1.5px solid rgba(160,110,10,0.35);
+    color: #7a4e00;
     cursor: pointer; touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     transition: background .15s, border-color .15s, transform .1s;
     pointer-events: all;
   }
   .gp-pb-btn:active  { transform: scale(0.9); }
-  .gp-pb-btn:hover   { background: rgba(255,170,0,0.08); border-color: rgba(255,200,60,0.38); }
+  .gp-pb-btn:hover   { background: rgba(180,130,10,0.18); border-color: rgba(150,100,10,0.6); }
   .gp-pb-btn.active  {
-    background: rgba(255,170,0,0.14); border-color: rgba(255,200,60,0.6);
-    color: rgba(255,230,100,0.95);
-    box-shadow: 0 0 8px rgba(255,170,0,0.15);
+    background: rgba(180,130,10,0.25); border-color: rgba(140,90,10,0.8);
+    color: #5a3500;
+    box-shadow: 0 0 8px rgba(180,130,10,0.2);
   }
   .gp-pb-btn-ico  { font-size: 0.82rem; line-height: 1; }
   .gp-pb-btn-lbl  {
     font-family: 'Orbitron', monospace; font-size: 0.3rem;
     font-weight: 700; letter-spacing: 0.06em; line-height: 1;
-    color: inherit; opacity: 0.7;
+    color: inherit; opacity: 0.8;
   }
 
   /* ── Popup Move (zoom+/zoom-/centrer) ──
      Apparaît au-dessus du bouton Move, fixe dans le HUD
   ── */
   #gp-move-popup {
-    display: none;
     position: absolute;
     bottom: calc(100% + 6px); right: 8px;
     z-index: 30;
-    background: rgba(5,10,22,0.96);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,185,40,0.22);
+    background: #ede6d4;
+    border: 1.5px solid rgba(150,100,10,0.4);
     border-radius: 12px;
     padding: 7px 8px;
     display: none;
     flex-direction: column; gap: 5px;
-    box-shadow: 0 -6px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,170,0,0.05);
+    box-shadow: 0 -4px 16px rgba(150,100,10,0.15);
     pointer-events: all;
-    min-width: 100px;
+    min-width: 110px;
   }
   #gp-move-popup.open { display: flex; }
 
   .gp-mp-btn {
     display: flex; align-items: center; gap: 8px;
     padding: 7px 10px; border-radius: 8px;
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,170,0,0.1);
-    color: rgba(255,215,100,0.82);
+    background: rgba(180,130,10,0.08); border: 1px solid rgba(150,100,10,0.2);
+    color: #6a4000;
     font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 600;
     cursor: pointer; touch-action: manipulation; width: 100%;
     transition: background .14s; -webkit-tap-highlight-color: transparent;
   }
-  .gp-mp-btn:active  { background: rgba(255,170,0,0.1); transform: scale(0.97); }
+  .gp-mp-btn:active  { background: rgba(180,130,10,0.18); transform: scale(0.97); }
   .gp-mp-btn .mp-ico { font-size: 0.9rem; flex-shrink: 0; }
 
   /* Coins décoratifs : masqués sur mobile (trop petits) */
@@ -3862,15 +3864,14 @@ body {
     padding: 0 10px;
     gap: 8px;
     background: linear-gradient(180deg,
-      rgba(4,8,20,0.94) 0%,
-      rgba(4,8,18,0.86) 100%);
-    border-bottom: 1px solid rgba(255,185,40,0.18);
+      #e8dfc8 0%,
+      #dfd6bc 100%);
+    border-bottom: 2px solid rgba(180,130,20,0.5);
     box-shadow:
-      0 1px 0 rgba(255,255,255,0.03),
-      0 4px 28px rgba(0,0,0,0.6),
-      0 0 40px rgba(255,170,0,0.04);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+      0 2px 12px rgba(150,100,10,0.15),
+      0 1px 0 rgba(255,220,100,0.3);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     pointer-events: none;
     z-index: 15;
   }
@@ -3886,8 +3887,8 @@ body {
   /* Avatar */
   .hdr-avatar {
     width: 26px; height: 26px; border-radius: 7px;
-    background: rgba(255,170,0,0.1);
-    border: 1px solid rgba(255,170,0,0.28);
+    background: rgba(180,120,10,0.18);
+    border: 1.5px solid rgba(140,90,10,0.5);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Orbitron', monospace; font-size: 0.5rem; font-weight: 900;
     color: rgba(255,200,80,0.82); flex-shrink: 0;
@@ -3905,12 +3906,12 @@ body {
   }
   .hdr-username {
     font-family: 'Orbitron', monospace; font-size: 0.44rem; font-weight: 700;
-    color: rgba(255,215,100,0.88); letter-spacing: 0.04em;
+    color: #5a3800; letter-spacing: 0.04em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
   }
   .hdr-army {
     font-family: 'Rajdhani', sans-serif; font-size: 0.48rem; font-weight: 600;
-    color: rgba(255,255,255,0.28); white-space: nowrap;
+    color: rgba(90,56,0,0.55); white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis; line-height: 1;
   }
 
@@ -3929,12 +3930,12 @@ body {
     letter-spacing: 0.07em; line-height: 1;
   }
   .hdr-pack.essential {
-    background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.32);
+    background: rgba(130,90,10,0.1); border-color: rgba(130,90,10,0.35);
+    color: rgba(90,56,0,0.65);
   }
   .hdr-pack.elite {
-    background: rgba(255,170,0,0.1); border-color: rgba(255,185,40,0.38);
-    color: rgba(255,210,80,0.88); box-shadow: 0 0 8px rgba(255,170,0,0.14);
+    background: rgba(180,120,0,0.18); border-color: rgba(140,90,0,0.55);
+    color: #7a4500; box-shadow: 0 0 6px rgba(160,110,0,0.2);
   }
   .hdr-pack-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
   .hdr-pack.essential .hdr-pack-dot { background: rgba(255,255,255,0.22); }
@@ -3958,11 +3959,10 @@ body {
     line-height: 1;
     /* Dégradé or premium */
     background: linear-gradient(135deg,
-      #9a6a00 0%, #d4a017 15%,
-      #f5d97a 30%, #ffcc44 42%,
-      #ffffff 50%,
-      #ffe680 58%, #ffcc44 70%,
-      #c8940e 84%, #7a5000 100%);
+      #5a3a00 0%, #9a6a00 20%,
+      #c8920a 38%, #e8a820 50%,
+      #c8920a 62%, #9a6a00 80%,
+      #5a3a00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -3993,10 +3993,10 @@ body {
   .hdr-res-count {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.6rem; font-weight: 700;
-    color: rgba(255,215,100,0.92); white-space: nowrap; line-height: 1;
+    color: #6a4000; white-space: nowrap; line-height: 1;
   }
-  .hdr-res-count.low    { color: rgba(255,100,80,0.9); }
-  .hdr-res-count.medium { color: rgba(255,160,40,0.9); }
+  .hdr-res-count.low    { color: #c03010; }
+  .hdr-res-count.medium { color: #8a5000; }
   /* Ligne du bas : barre de progression + timer */
   .hdr-res-bot {
     display: flex; align-items: center; gap: 4px;
@@ -4044,7 +4044,7 @@ body {
     background: rgba(80,220,140,0.9);
     box-shadow: 0 0 5px rgba(80,220,140,0.6);
   }
-  .hdr-dot.offline { background: rgba(255,100,80,0.6); }
+  .hdr-dot.offline { background: rgba(200,60,40,0.7); }
 
   /* ── MODALE PORTRAIT — bloquante ── */
   #gp-portrait-modal {
@@ -4143,17 +4143,9 @@ body {
     color: rgba(255,235,100,0.98);
   }
 
-  /* ── Wrapper toolbar droite ── */
+  /* ── Wrapper toolbar droite — masquée (tous boutons cachés) ── */
   #gp-toolbar-right {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    pointer-events: none; /* les boutons internes ont pointer-events:all */
+    display: none !important;
   }
 
   /* ── Séparateur visuel dans la toolbar ── */
@@ -4208,10 +4200,9 @@ body {
   }
 
   /* ── Bouton UNDO — bas gauche isolé ── */
+  /* Bouton UNDO : masqué aussi (remplacé par bouton ANNULER dans barre palette) */
   #gp-fab-undo {
-    position: absolute;
-    bottom: 16px; left: 10px;
-    z-index: 10;
+    display: none !important;
   }
   /* Couleur différente pour l'undo : teinte bleue pour le distinguer */
   #gp-fab-undo {
@@ -4231,14 +4222,16 @@ body {
   #gp-fab-shop  { display: none !important; }
   #gp-fab-menu  { display: none !important; }
 
-  /* Bouton palette + gomme : supprimés de la toolbar, maintenant dans la barre */
+  /* Bouton palette + gomme : dans la barre permanente en bas */
   #gp-fab-palette { display: none !important; }
   #gp-tb-erase    { display: none !important; }
-  /* Zoom + / Zoom - / Centrer : supprimés de la toolbar, maintenant dans le popup Move */
+  /* Zoom + / Zoom - / Centrer : dans le popup Move en bas */
   #gp-tb-zoomin   { display: none !important; }
   #gp-tb-zoomout  { display: none !important; }
   #gp-tb-recenter { display: none !important; }
-  /* Séparateurs de la toolbar droite : masqués si plus de contenu au-dessus */
+  /* Bouton Shop de la toolbar : supprimé (accessible via header) */
+  #gp-tb-shop     { display: none !important; }
+  /* Séparateurs de la toolbar droite : masqués */
   #gp-toolbar-right .tb-sep { display: none !important; }
 
   /* Point couleur (dans gp-fab-palette, masqué) */
@@ -5913,7 +5906,7 @@ const COLS = 80, ROWS = 45, PX = 10;   // grille 80×45 = canevas 800×450px
 const CANVAS_W = COLS * PX;             // 800
 const CANVAS_H = ROWS * PX;             // 450
 const MAX_GOLD = 50;                    // pixels or max par dessin
-const BG_COLOR = '#0a1628';             // Bleu Nuit Profond — fond du canevas
+const BG_COLOR = '#d8e8f4';             // Bleu glacier clair — fond du canevas
 
 // 36 couleurs de la palette
 const COLORS = [
@@ -6312,15 +6305,15 @@ function drawBase() {
     CANVAS_W * 0.5, CANVAS_H * 0.5, 0,
     CANVAS_W * 0.5, CANVAS_H * 0.5, CANVAS_W * 0.72
   );
-  bgGrad.addColorStop(0,   '#0d1e36'); // Bleu Nuit Profond — centre
-  bgGrad.addColorStop(0.6, '#0a1628'); // milieu = BG_COLOR
-  bgGrad.addColorStop(1,   '#060f1e'); // bords très sombres
+  bgGrad.addColorStop(0,   '#e0eef8'); // Bleu glacier clair — centre
+  bgGrad.addColorStop(0.6, '#d8e8f4'); // milieu = BG_COLOR
+  bgGrad.addColorStop(1,   '#c8dced'); // bords légèrement plus sombres
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
   // ── Grille principale — cellules pixel ──
   // Lignes fines, couleur légèrement bleue dorée
-  ctx.strokeStyle = 'rgba(80,140,220,0.1)';
+  ctx.strokeStyle = 'rgba(80,130,200,0.22)';
   ctx.lineWidth   = 0.5;
   for (let c = 0; c <= COLS; c++) {
     ctx.beginPath(); ctx.moveTo(c * PX, 0); ctx.lineTo(c * PX, CANVAS_H); ctx.stroke();
@@ -6330,7 +6323,7 @@ function drawBase() {
   }
 
   // ── Grille secondaire — blocs 10×10 cellules (repères majeurs) ──
-  ctx.strokeStyle = 'rgba(255,185,40,0.07)';
+  ctx.strokeStyle = 'rgba(180,130,20,0.18)';
   ctx.lineWidth   = 0.8;
   for (let c = 0; c <= COLS; c += 10) {
     ctx.beginPath(); ctx.moveTo(c * PX, 0); ctx.lineTo(c * PX, CANVAS_H); ctx.stroke();
@@ -6377,11 +6370,11 @@ function eraseCell(col, row) {
   const dx = (x + PX/2 - CANVAS_W/2) / (CANVAS_W * 0.72);
   const dy = (y + PX/2 - CANVAS_H/2) / (CANVAS_W * 0.72);
   const dist = Math.sqrt(dx*dx + dy*dy);
-  // Interpoler entre centre #0d1e36 et bord #060f1e (Bleu Nuit Profond)
+  // Interpoler entre centre #e0eef8 et bord #c8dced (Bleu glacier clair)
   const t = Math.min(1, dist);
-  const r = Math.round(13 + (6-13)*t);
-  const g = Math.round(30 + (15-30)*t);
-  const b = Math.round(54 + (30-54)*t);
+  const r = Math.round(224 + (200-224)*t);
+  const g = Math.round(238 + (220-238)*t);
+  const b = Math.round(248 + (237-248)*t);
   ctx.fillStyle = `rgb(${r},${g},${b})`;
   ctx.fillRect(x, y, PX, PX);
 
