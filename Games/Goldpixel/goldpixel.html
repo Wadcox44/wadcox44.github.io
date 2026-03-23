@@ -2354,38 +2354,39 @@ body {
 ════════════════════════════════════════ */
 .canvas-frame {
   position: relative;
-  border-radius: 10px;
-  /* Bordure or principale — plus épaisse et visible */
-  border: 2px solid rgba(255,185,40,0.6);
-  /* Ombres empilées pour l'effet premium */
+  border-radius: 6px;
+  /* Cadre doré massif et métallique */
+  border: 3px solid rgba(255,185,40,0.75);
   box-shadow:
-    /* Ring 1 : anneau sombre interne */
-    0 0 0 3px rgba(5,10,20,0.97),
-    /* Ring 2 : halo or fin */
-    0 0 0 5px rgba(255,160,20,0.2),
-    /* Ring 3 : ombre de profondeur */
-    0 6px 40px rgba(0,0,0,0.8),
-    /* Ring 4 : glow extérieur doré */
-    0 0 60px rgba(255,170,0,0.1),
-    /* Ring 5 : inset bords lumineux */
-    inset 0 1px 0 rgba(255,210,80,0.1),
-    inset 1px 0 0 rgba(255,200,60,0.05),
-    inset -1px 0 0 rgba(255,200,60,0.05);
+    /* Halo externe doré — ressort du portail sombre */
+    0 0 20px rgba(255,170,0,0.4),
+    0 0 48px rgba(255,170,0,0.18),
+    /* Anneau sombre interne */
+    0 0 0 2px rgba(4,8,18,0.98),
+    /* Double halo or */
+    0 0 0 4px rgba(255,165,10,0.22),
+    /* Profondeur */
+    0 8px 48px rgba(0,0,0,0.85),
+    /* Reflet interne */
+    inset 0 1px 0 rgba(255,220,90,0.18),
+    inset 1px 0 0 rgba(255,200,60,0.1),
+    inset -1px 0 0 rgba(255,200,60,0.1),
+    inset 0 -1px 0 rgba(255,180,20,0.08);
   overflow: hidden;
-  background: #040c18;
-  transition: border-color .35s, box-shadow .35s;
+  background: #060f1e;
+  transition: border-color .3s, box-shadow .3s;
 }
-/* Activation au dessin — cadre s'illumine */
 .canvas-frame.active {
-  border-color: rgba(255,210,60,0.82);
+  border-color: rgba(255,215,60,0.92);
   box-shadow:
-    0 0 0 3px rgba(5,10,20,0.97),
-    0 0 0 5px rgba(255,185,30,0.35),
-    0 6px 44px rgba(0,0,0,0.82),
-    0 0 80px rgba(255,170,0,0.16),
-    inset 0 1px 0 rgba(255,230,100,0.14),
-    inset 1px 0 0 rgba(255,210,80,0.07),
-    inset -1px 0 0 rgba(255,210,80,0.07);
+    0 0 28px rgba(255,185,40,0.55),
+    0 0 64px rgba(255,170,0,0.25),
+    0 0 0 2px rgba(4,8,18,0.98),
+    0 0 0 4px rgba(255,185,30,0.38),
+    0 8px 52px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(255,240,110,0.22),
+    inset 1px 0 0 rgba(255,220,80,0.12),
+    inset -1px 0 0 rgba(255,220,80,0.12);
 }
 
 /* ── 4 coins dorés — signature galerie ── */
@@ -3549,29 +3550,30 @@ body {
     flex: 1 1 0 !important; min-height: 0 !important;
     aspect-ratio: unset !important;
     border-radius: 0 !important;
-    /* Contour doré épais sur les 4 côtés — tous bien visibles */
-    border-top:    2px solid rgba(255,185,40,0.55) !important;
-    border-bottom: 2px solid rgba(255,185,40,0.45) !important;
-    border-left:   2px solid rgba(255,185,40,0.38) !important;
-    border-right:  2px solid rgba(255,185,40,0.38) !important;
-    /* Glow doré sur les 4 côtés */
+    /* Cadre doré massif sur les 4 côtés */
+    border-top:    3px solid rgba(255,185,40,0.72) !important;
+    border-bottom: 3px solid rgba(255,185,40,0.62) !important;
+    border-left:   3px solid rgba(255,185,40,0.55) !important;
+    border-right:  3px solid rgba(255,185,40,0.55) !important;
+    /* Halo or externe + reflet interne */
     box-shadow:
-      inset 0 1px 0 rgba(255,220,80,0.1),
-      inset 1px 0 0 rgba(255,200,60,0.06),
-      inset -1px 0 0 rgba(255,200,60,0.06),
-      0 0 24px rgba(255,170,0,0.12),
-      0 0 6px rgba(255,185,40,0.2) !important;
+      0 0 20px rgba(255,170,0,0.4),
+      0 0 8px rgba(255,185,40,0.22),
+      inset 0 1px 0 rgba(255,220,80,0.14),
+      inset 1px 0 0 rgba(255,200,60,0.1),
+      inset -1px 0 0 rgba(255,200,60,0.1) !important;
   }
-  /* Activation au dessin sur mobile — glow renforcé */
   .canvas-frame.active {
-    border-top-color:    rgba(255,210,60,0.75) !important;
-    border-bottom-color: rgba(255,200,50,0.65) !important;
-    border-left-color:   rgba(255,200,50,0.55) !important;
-    border-right-color:  rgba(255,200,50,0.55) !important;
+    border-top-color:    rgba(255,215,60,0.9) !important;
+    border-bottom-color: rgba(255,205,50,0.82) !important;
+    border-left-color:   rgba(255,205,50,0.72) !important;
+    border-right-color:  rgba(255,205,50,0.72) !important;
     box-shadow:
-      inset 0 1px 0 rgba(255,230,100,0.14),
-      0 0 36px rgba(255,170,0,0.2),
-      0 0 10px rgba(255,185,40,0.25) !important;
+      0 0 28px rgba(255,185,40,0.55),
+      0 0 12px rgba(255,200,60,0.3),
+      inset 0 1px 0 rgba(255,240,110,0.18),
+      inset 1px 0 0 rgba(255,220,80,0.12),
+      inset -1px 0 0 rgba(255,220,80,0.12) !important;
   }
   /* Viewport : flow normal OBLIGATOIRE pour getBoundingClientRect() */
   #viewport-container {
@@ -3968,25 +3970,7 @@ body {
     white-space: nowrap;
   }
 
-  /* Bouton SHOP */
-  .hdr-shop-btn {
-    display: flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 10px; cursor: pointer;
-    background: rgba(255,170,0,0.1);
-    border: 1px solid rgba(255,185,40,0.3);
-    color: rgba(255,200,80,0.85);
-    font-family: 'Orbitron', monospace; font-size: 0.36rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    transition: background .18s, border-color .18s, box-shadow .18s;
-    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-  }
-  .hdr-shop-btn:hover {
-    background: rgba(255,170,0,0.18);
-    border-color: rgba(255,200,60,0.55);
-    box-shadow: 0 0 10px rgba(255,170,0,0.18);
-  }
-  .hdr-shop-btn:active { transform: scale(0.93); }
-  .hdr-shop-btn .shop-cart-ico { font-size: 0.7rem; line-height: 1; }
+
 
   /* ── ZONE DROITE : réservoir + timer + bouclier + dot ── */
   .hdr-right {
@@ -4092,14 +4076,7 @@ body {
     width: 64px; height: 64px;
   }
   /* Téléphone SVG animé rotation */
-  .portrait-ico-wrap svg {
-    width: 100%; height: 100%;
-    animation: rotatePhone 2.8s cubic-bezier(.22,1,.36,1) infinite;
-  }
-  @keyframes rotatePhone {
-    0%,30%    { transform: rotate(0deg); }
-    55%,100%  { transform: rotate(90deg); }
-  }
+  /* rotatePhone supprimé — modale portrait simplifiée */
   .portrait-title {
     font-family: 'Orbitron', monospace; font-size: 0.72rem; font-weight: 900;
     color: rgba(255,210,80,0.9); letter-spacing: 0.12em;
@@ -4129,40 +4106,41 @@ body {
      z-index < overlays (20) mais > canvas (1)
   ══════════════════════════════════════════════════════════ */
 
-  /* ── Bouton générique (partagé toolbar + undo) ── */
+  /* ── Bouton générique toolbar ── */
   .gp-fab {
     position: absolute; z-index: 10;
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    background: rgba(5,10,22,0.88);
-    border: 1.5px solid rgba(255,170,0,0.28);
+    font-size: 1.2rem;
+    background: rgba(5,10,22,0.92);
+    border: 2px solid rgba(255,170,0,0.38);
     box-shadow:
-      0 3px 12px rgba(0,0,0,0.6),
-      inset 0 1px 0 rgba(255,255,255,0.05);
+      0 3px 14px rgba(0,0,0,0.65),
+      0 0 6px rgba(255,170,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.06);
     pointer-events: all; cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     transition: border-color .18s, box-shadow .18s, transform .12s, background .18s;
-    color: rgba(255,210,80,0.85);
+    color: rgba(255,215,80,0.92);
   }
   .gp-fab:hover {
-    background: rgba(10,18,36,0.95);
-    border-color: rgba(255,200,60,0.6);
+    background: rgba(10,18,36,0.97);
+    border-color: rgba(255,200,60,0.7);
     box-shadow:
-      0 0 16px rgba(255,170,0,0.2),
-      0 3px 12px rgba(0,0,0,0.6),
-      inset 0 1px 0 rgba(255,255,255,0.07);
+      0 0 18px rgba(255,170,0,0.28),
+      0 3px 14px rgba(0,0,0,0.65),
+      inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .gp-fab:active { transform: scale(0.86); }
   .gp-fab.active {
-    background: rgba(255,170,0,0.12);
-    border-color: rgba(255,200,60,0.8);
+    background: rgba(255,170,0,0.14);
+    border-color: rgba(255,205,60,0.88);
     box-shadow:
-      0 0 20px rgba(255,170,0,0.3),
-      0 3px 12px rgba(0,0,0,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.08);
-    color: rgba(255,230,100,0.95);
+      0 0 22px rgba(255,170,0,0.35),
+      0 3px 14px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+    color: rgba(255,235,100,0.98);
   }
 
   /* ── Wrapper toolbar droite ── */
@@ -4755,16 +4733,159 @@ body {
   ══════════════════════════════════════════════════════════════ */
 
   /* Corps boutique — grille 3 colonnes */
+  /* Corps boutique — flex colonne : barre onglets + panneau actif */
   #ov-shop .sh-body {
-    flex: 1; overflow: hidden;
-    padding: 10px 12px 12px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    align-items: start;
+    flex: 1 1 0; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 0; gap: 0;
   }
 
-  /* Colonne */
+  /* ── Barre onglets ── */
+  .sh-tabs {
+    display: flex; flex-direction: row;
+    gap: 0; flex-shrink: 0;
+    padding: 8px 12px 0;
+    background: rgba(4,8,18,0.6);
+    border-bottom: 1px solid rgba(255,170,0,0.1);
+  }
+  .sh-tab {
+    flex: 1; text-align: center;
+    padding: 7px 4px 6px;
+    font-family: 'Orbitron', monospace; font-size: 0.38rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,200,80,0.38);
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .18s, background .18s, border-color .18s, box-shadow .18s;
+    user-select: none;
+  }
+  .sh-tab:hover { color: rgba(255,200,80,0.62); }
+  .sh-tab.active {
+    color: rgba(255,215,80,0.95);
+    background: rgba(255,170,0,0.08);
+    border-color: rgba(255,185,40,0.35);
+    box-shadow: 0 0 12px rgba(255,170,0,0.15), inset 0 1px 0 rgba(255,220,80,0.12);
+  }
+
+  /* ── Panneaux onglets ── */
+  .sh-panel {
+    display: none; flex-direction: column;
+    /* flex:1 + min-height:0 = occupe tout l'espace restant après les onglets */
+    flex: 1 1 0; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    padding: 12px 14px 16px;
+    gap: 12px;
+    scrollbar-width: thin; scrollbar-color: rgba(255,170,0,0.15) transparent;
+  }
+  .sh-panel::-webkit-scrollbar { width: 3px; }
+  .sh-panel::-webkit-scrollbar-thumb { background: rgba(255,170,0,0.18); border-radius: 2px; }
+  .sh-panel.active { display: flex; }
+
+  /* ── Carte produit large ── */
+  .sh-card-wide {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #0d1e36;
+    border: 1px solid rgba(255,185,40,0.28);
+    touch-action: manipulation; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .18s, box-shadow .18s, transform .12s;
+    position: relative; overflow: hidden;
+  }
+  /* Ligne or en haut */
+  .sh-card-wide::before {
+    content: '';
+    position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,185,40,0.38), transparent);
+  }
+  .sh-card-wide:hover {
+    border-color: rgba(255,200,60,0.5);
+    box-shadow: 0 0 18px rgba(255,170,0,0.14), 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .sh-card-wide:active { transform: scale(0.97); }
+
+  /* Icône grande dans la carte large */
+  .sh-cw-icon {
+    width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    background: rgba(255,170,0,0.09);
+    border: 1px solid rgba(255,185,40,0.22);
+  }
+  .sh-cw-icon.blue  { background: rgba(100,180,255,0.09); border-color: rgba(100,180,255,0.22); }
+  .sh-cw-icon.red   { background: rgba(255,80,80,0.08);   border-color: rgba(255,80,80,0.22); }
+  .sh-cw-icon.green { background: rgba(80,200,155,0.08);  border-color: rgba(80,200,155,0.22); }
+
+  /* Texte central */
+  .sh-cw-body { flex: 1; min-width: 0; }
+  .sh-cw-name {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.88rem; font-weight: 700;
+    color: rgba(255,215,100,0.92); line-height: 1.1; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .sh-cw-desc {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.62rem; font-weight: 500;
+    color: rgba(255,255,255,0.32); line-height: 1.4; margin-top: 2px;
+  }
+  .sh-cw-badge {
+    font-family: 'Orbitron', monospace; font-size: 0.3rem; font-weight: 700;
+    letter-spacing: 0.07em; padding: 2px 6px; border-radius: 5px;
+    text-transform: uppercase; display: inline-block; margin-top: 3px;
+  }
+  .sh-cw-badge.gold  { color: rgba(255,200,60,0.9); background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.28); }
+  .sh-cw-badge.blue  { color: rgba(100,180,255,0.9); background: rgba(100,180,255,0.1); border: 1px solid rgba(100,180,255,0.28); }
+  .sh-cw-badge.red   { color: rgba(255,110,90,0.9);  background: rgba(255,80,80,0.08);  border: 1px solid rgba(255,80,80,0.25); }
+  .sh-cw-badge.green { color: rgba(80,210,140,0.9);  background: rgba(80,210,140,0.08); border: 1px solid rgba(80,210,140,0.25); }
+  .sh-cw-badge.dim   { color: rgba(255,255,255,0.3);  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* Bloc prix + bouton */
+  .sh-cw-footer { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .sh-cw-price {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+    color: rgba(255,200,80,0.88); white-space: nowrap; line-height: 1;
+    text-align: right;
+  }
+  .sh-cw-sub {
+    font-family: 'Orbitron', monospace; font-size: 0.28rem;
+    color: rgba(255,200,80,0.38); white-space: nowrap;
+  }
+
+  /* Bouton achat dans carte large */
+  .sh-cw-btn {
+    font-family: 'Orbitron', monospace; font-size: 0.38rem; font-weight: 700;
+    letter-spacing: 0.07em; padding: 5px 12px; border-radius: 18px;
+    background: linear-gradient(135deg,#7a5200,#bf953f,#ffaa00,#fef6c0,#ffaa00,#bf953f);
+    background-size: 200% auto; color: rgba(0,0,0,0.88); border: none;
+    cursor: pointer; touch-action: manipulation; white-space: nowrap;
+    transition: background-position .3s, box-shadow .2s, transform .12s;
+    box-shadow: 0 2px 8px rgba(255,170,0,0.22);
+  }
+  .sh-cw-btn:hover   { background-position: right center; box-shadow: 0 3px 14px rgba(255,170,0,0.35); }
+  .sh-cw-btn:active  { transform: scale(0.92); }
+  .sh-cw-btn:disabled{ opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  /* Encart info (overfill, radar…) */
+  .sh-info-box {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 10px 13px; border-radius: 10px;
+    background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.12);
+    flex-shrink: 0;
+  }
+  .sh-info-ico { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .sh-info-title {
+    font-family: 'Orbitron', monospace; font-size: 0.38rem; font-weight: 700;
+    color: rgba(255,200,80,0.75); letter-spacing: 0.08em; margin-bottom: 3px;
+  }
+  .sh-info-desc {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.6rem;
+    color: rgba(255,255,255,0.3); line-height: 1.4;
+  }
+
+  /* Colonne (conservée pour compat shop) */
   .sh-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
   /* Section label */
@@ -5486,16 +5607,7 @@ body {
   ════════════════════════════════════════════════════════ -->
   <div id="gp-palette-bar">
 
-    <!-- Dot couleur active -->
-    <div id="gp-pb-color-dot" title="Couleur active"></div>
-
-    <!-- Grille palette matte (clonée depuis #palette desktop) -->
-    <div id="gp-pb-palette"></div>
-
-    <!-- Séparateur -->
-    <div class="gp-pb-sep"></div>
-
-    <!-- Bouton GOMME -->
+    <!-- Bouton GOMME — premier élément, bien identifiable -->
     <button class="gp-pb-btn" id="gp-pb-erase"
             onclick="setMode(mode === 'erase' ? 'draw' : 'erase'); gpSyncModes();"
             aria-label="Gomme">
@@ -5508,6 +5620,18 @@ body {
       </svg>
       <span class="gp-pb-btn-lbl">GOMME</span>
     </button>
+
+    <!-- Séparateur -->
+    <div class="gp-pb-sep"></div>
+
+    <!-- Dot couleur active -->
+    <div id="gp-pb-color-dot" title="Couleur active"></div>
+
+    <!-- Grille palette matte -->
+    <div id="gp-pb-palette"></div>
+
+    <!-- Séparateur -->
+    <div class="gp-pb-sep"></div>
 
     <!-- Bouton CALQUE -->
     <button class="gp-pb-btn" id="gp-pb-layer"
@@ -5789,7 +5913,7 @@ const COLS = 80, ROWS = 45, PX = 10;   // grille 80×45 = canevas 800×450px
 const CANVAS_W = COLS * PX;             // 800
 const CANVAS_H = ROWS * PX;             // 450
 const MAX_GOLD = 50;                    // pixels or max par dessin
-const BG_COLOR = '#081422';             // couleur de fond (centre du dégradé radial)
+const BG_COLOR = '#0a1628';             // Bleu Nuit Profond — fond du canevas
 
 // 36 couleurs de la palette
 const COLORS = [
@@ -6188,9 +6312,9 @@ function drawBase() {
     CANVAS_W * 0.5, CANVAS_H * 0.5, 0,
     CANVAS_W * 0.5, CANVAS_H * 0.5, CANVAS_W * 0.72
   );
-  bgGrad.addColorStop(0,   '#0d1829'); // centre légèrement plus chaud
-  bgGrad.addColorStop(0.6, '#081422'); // milieu = BG_COLOR
-  bgGrad.addColorStop(1,   '#040c14'); // bords très sombres
+  bgGrad.addColorStop(0,   '#0d1e36'); // Bleu Nuit Profond — centre
+  bgGrad.addColorStop(0.6, '#0a1628'); // milieu = BG_COLOR
+  bgGrad.addColorStop(1,   '#060f1e'); // bords très sombres
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
@@ -6253,11 +6377,11 @@ function eraseCell(col, row) {
   const dx = (x + PX/2 - CANVAS_W/2) / (CANVAS_W * 0.72);
   const dy = (y + PX/2 - CANVAS_H/2) / (CANVAS_W * 0.72);
   const dist = Math.sqrt(dx*dx + dy*dy);
-  // Interpoler entre centre (#0d1829) et bord (#040c14)
+  // Interpoler entre centre #0d1e36 et bord #060f1e (Bleu Nuit Profond)
   const t = Math.min(1, dist);
-  const r = Math.round(13 + (4-13)*t);
-  const g = Math.round(24 + (12-24)*t);
-  const b = Math.round(41 + (20-41)*t);
+  const r = Math.round(13 + (6-13)*t);
+  const g = Math.round(30 + (15-30)*t);
+  const b = Math.round(54 + (30-54)*t);
   ctx.fillStyle = `rgb(${r},${g},${b})`;
   ctx.fillRect(x, y, PX, PX);
 
@@ -6461,10 +6585,7 @@ function clearAll() {
   }
   // ── Undo ──
   if (typeof hideUndoButton === 'function') hideUndoButton(true);
-  // ── Artwork ──
-  if (typeof hideArtworkPrompt === 'function') hideArtworkPrompt();
-  if (typeof _namedArtworks !== 'undefined') _namedArtworks.clear();
-  if (typeof _pendingArtName !== 'undefined') _pendingArtName = '';
+  // Artwork naming désactivé
   showToast('CANEVAS EFFACÉ');
 }
 
@@ -6537,9 +6658,7 @@ function handleDraw(clientX, clientY) {
         for (let dr=-half2; dr<=half2; dr++)
           if (typeof invalidateUndo === 'function') invalidateUndo(col+dc, row+dr);
     }
-    // Artwork : masquer prompt si gomme
-    if (typeof _promptVisible !== 'undefined' && _promptVisible)
-      if (typeof hideArtworkPrompt === 'function') hideArtworkPrompt();
+    // Artwork prompt désactivé
 
   } else if (mode === 'draw') {
     // ── Dessin ──
@@ -6573,15 +6692,7 @@ function handleDraw(clientX, clientY) {
       }
     }
 
-    // ── Artwork : détecter île après pose (debounce 400ms) ──
-    if (typeof _milestoneDebounceTimer !== 'undefined') {
-      _lastDrawnCol = col; _lastDrawnRow = row;
-      clearTimeout(_milestoneDebounceTimer);
-      _milestoneDebounceTimer = setTimeout(() => {
-        if (_lastDrawnCol >= 0 && typeof checkArtworkMilestone === 'function')
-          checkArtworkMilestone(_lastDrawnCol, _lastDrawnRow);
-      }, 400);
-    }
+    // Artwork naming désactivé (Guerre de Territoire — publication directe)
   }
 }
 
@@ -6658,11 +6769,7 @@ function openModal() {
   document.getElementById('btn-send').disabled        = false;
   document.getElementById('btn-request-review').style.display = 'none';
   document.getElementById('modal-overlay').classList.add('open');
-  // Pré-remplir le titre si un nom artwork est en attente
-  if (typeof _pendingArtName !== 'undefined' && _pendingArtName) {
-    const tf = document.getElementById('p-title');
-    if (tf && !tf.value.trim()) tf.value = _pendingArtName;
-  }
+  // Artwork pre-fill désactivé
   setTimeout(() => document.getElementById('p-name').focus(), 100);
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
@@ -9129,7 +9236,7 @@ function gpToggle(name) {
     _gpSetColorDot(color);
   }
   if (name === 'nav')   { gpSyncZoom(); gpSyncModes(); }
-  if (name === 'shop')  { _gpSyncShop(); }
+  if (name === 'shop')  { _gpSyncShop(); if (typeof _shResetTabs === 'function') _shResetTabs(); }
 }
 
 function gpCloseAll() {
@@ -9381,15 +9488,7 @@ function _gpSyncMetals() {
   });
 }
 
-function _gpSyncShop() {
-  // Vengeance pack : inclus pour Elite, payant sinon
-  const tile  = document.getElementById('gp-vengeance-tile');
-  const price = document.getElementById('gp-vengeance-price');
-  if (typeof playerGold !== 'undefined' && playerGold && price) {
-    price.textContent = 'INCLUS ✓';
-    if (tile) { tile.disabled = true; tile.style.opacity = '0.5'; }
-  }
-}
+// _gpSyncShop v1 supprimée (fusionnée dans v2 ci-dessous)
 
 /* ────────────────────────────────────────────────────────────
    SYNC HEADER HUD — nom joueur, dot connexion, réservoir
@@ -9472,6 +9571,40 @@ function shDonAction(type) {
   }
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   BOUTIQUE — Gestion des onglets
+   shSwitchTab(tabName) : 'pixels' | 'domes' | 'vengeance'
+──────────────────────────────────────────────────────────── */
+let _shActiveTab = 'pixels';
+
+function shSwitchTab(tabName) {
+  if (_shActiveTab === tabName) return;
+  _shActiveTab = tabName;
+  document.querySelectorAll('.sh-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('.sh-panel').forEach(p => p.classList.remove('active'));
+  const tab   = document.getElementById('sh-tab-'   + tabName);
+  const panel = document.getElementById('sh-panel-' + tabName);
+  if (tab)   { tab.classList.add('active');   tab.setAttribute('aria-selected', 'true'); }
+  if (panel) { panel.classList.add('active'); panel.scrollTop = 0; }
+}
+
+function _shResetTabs() {
+  _shActiveTab = 'pixels';
+  document.querySelectorAll('.sh-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('.sh-panel').forEach(p => p.classList.remove('active'));
+  const tab   = document.getElementById('sh-tab-pixels');
+  const panel = document.getElementById('sh-panel-pixels');
+  if (tab)   { tab.classList.add('active');   tab.setAttribute('aria-selected', 'true'); }
+  if (panel) { panel.classList.add('active'); panel.scrollTop = 0; }
+}
+
 /* Adapter la carte Vengeance selon le pack du joueur */
 function _gpSyncShop() {
   const isElite = typeof playerGold !== 'undefined' && playerGold;
@@ -9482,22 +9615,20 @@ function _gpSyncShop() {
   const btn     = document.getElementById('gp-vengeance-btn');
 
   if (isElite) {
-    // Elite : inclus gratuitement
     if (tile)  { tile.classList.add('included'); tile.onclick = null; }
-    if (badge) { badge.textContent = 'INCLUS ELITE'; badge.style.cssText = 'color:rgba(80,220,140,0.85);background:rgba(80,220,140,0.08);border:1px solid rgba(80,220,140,0.22);'; }
+    if (badge) { badge.textContent = 'INCLUS ELITE'; badge.style.cssText = 'color:rgba(80,220,140,0.88);background:rgba(80,220,140,0.1);border:1px solid rgba(80,220,140,0.28);'; }
     if (price) price.textContent = 'Gratuit';
     if (sub)   sub.textContent   = 'Compris dans votre Pack Elite';
     if (btn)   { btn.textContent = 'INCLUS ✓'; btn.disabled = true; }
   } else {
-    // Essentiel : payant
     if (tile)  { tile.classList.remove('included'); tile.onclick = () => shopPiPay('vengeance_pack',1); }
-    if (badge) { badge.textContent = 'ESSENTIEL'; badge.style.cssText = 'color:rgba(255,120,100,0.85);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.22);'; }
+    if (badge) { badge.textContent = 'ESSENTIEL'; badge.style.cssText = 'color:rgba(255,110,90,0.9);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);'; }
     if (price) price.textContent = '1 Pi';
-    if (sub)   sub.textContent   = 'par mois · Essentiel uniquement';
+    if (sub)   sub.textContent   = 'par mois · Essentiel';
     if (btn)   { btn.textContent = 'ACHETER'; btn.disabled = false; }
   }
 
-  // Réinitialiser le toggle anonyme à chaque ouverture
+  // Reset toggle anonyme
   _shAnonActive = false;
   const toggle = document.getElementById('sh-anon-toggle');
   if (toggle) { toggle.classList.remove('on'); toggle.setAttribute('aria-checked','false'); }
@@ -9980,44 +10111,7 @@ document.addEventListener('DOMContentLoaded', () => {
      Apparaît discrètement quand 20 pixels connectés sont détectés.
      Non-bloquant — deux choix : nommer maintenant, ou plus tard.
 ══════════════════════════════════════════════════════════════ -->
-<div id="artwork-prompt" role="dialog" aria-label="Nommer votre œuvre">
-
-  <div class="ap-header">
-    <!-- Icône cadre pixel art -->
-    <div class="ap-icon" aria-hidden="true">
-      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1.5" y="1.5" width="15" height="15" rx="2"
-              stroke="rgba(255,200,80,0.65)" stroke-width="1.1" fill="rgba(255,170,0,0.05)"/>
-        <rect x="4" y="5"  width="2" height="2" fill="rgba(255,200,80,0.8)" rx="0.4"/>
-        <rect x="7" y="5"  width="2" height="2" fill="rgba(255,170,0,0.6)" rx="0.4"/>
-        <rect x="10" y="5" width="2" height="2" fill="rgba(255,200,80,0.5)" rx="0.4"/>
-        <rect x="4" y="8"  width="2" height="2" fill="rgba(255,170,0,0.5)" rx="0.4"/>
-        <rect x="7" y="8"  width="5" height="2" fill="rgba(255,200,80,0.7)" rx="0.4"/>
-        <rect x="4" y="11" width="8" height="2" fill="rgba(255,200,80,0.4)" rx="0.4"/>
-      </svg>
-    </div>
-
-    <div class="ap-text-block">
-      <div class="ap-eyebrow">
-        Création détectée —
-        <span class="ap-count" id="ap-pixel-count">20</span> pixels connectés
-      </div>
-      <div class="ap-message">
-        Voulez-vous nommer<br>cette œuvre ?
-      </div>
-    </div>
-  </div>
-
-  <div class="ap-actions">
-    <button class="ap-btn-name" onclick="artworkPromptName()">
-      ✦ NOMMER L'ŒUVRE
-    </button>
-    <button class="ap-btn-later" onclick="artworkPromptLater()">
-      PLUS TARD
-    </button>
-  </div>
-
-</div><!-- /artwork-prompt -->
+<!-- artwork-prompt supprimé (Guerre de Territoire) -->
 
 
 <!-- ══════════════════════════════════════════════════════════════
@@ -10237,22 +10331,23 @@ document.addEventListener('DOMContentLoaded', () => {
 ══════════════════════════════════════════════════════ -->
 <div id="gp-launch-overlay">
   <div class="launch-logo">GOLD PIXEL</div>
-  <div class="launch-sub">Studio Pixel Art · Pi Network</div>
+  <div class="launch-sub">Guerre de Territoire · Pi Network</div>
   <div class="launch-card">
-    <div class="launch-card-title">Choisissez votre orientation</div>
-    <div class="launch-choices">
-      <button class="launch-choice-btn" onclick="gpStartGame('landscape')">
-        <span class="launch-choice-icon">🖥</span>
-        <span class="launch-choice-label">PAYSAGE</span>
-        <span class="launch-choice-desc">Recommandé<br>Meilleure expérience</span>
-      </button>
-      <button class="launch-choice-btn" onclick="gpStartGame('portrait')">
-        <span class="launch-choice-icon">📱</span>
-        <span class="launch-choice-label">PORTRAIT</span>
-        <span class="launch-choice-desc">Tenir le téléphone<br>à la verticale</span>
+    <div class="launch-card-title">Bienvenue sur le champ de bataille</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:8px 0 4px;">
+      <div style="font-size:2rem;">⛶</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.45);text-align:center;line-height:1.5;">
+        Gold Pixel se joue <strong style="color:rgba(255,200,80,0.8);">uniquement en paysage plein écran</strong>.<br>
+        Tournez votre téléphone si nécessaire,<br>puis appuyez sur JOUER.
+      </div>
+    </div>
+    <div class="launch-choices" style="justify-content:center;">
+      <button class="launch-choice-btn" onclick="gpStartGame('landscape')" style="min-width:160px;">
+        <span class="launch-choice-icon">⚔️</span>
+        <span class="launch-choice-label">JOUER</span>
+        <span class="launch-choice-desc">Lancer en plein écran</span>
       </button>
     </div>
-    <div class="launch-hint">⛶ Le jeu passera automatiquement en plein écran</div>
   </div>
 </div>
 
@@ -10288,13 +10383,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="hdr-center">
       <!-- Titre doré premium -->
       <div class="hdr-title">✦ GOLD PIXEL ✦</div>
-      <!-- Bouton SHOP -->
-      <button class="hdr-shop-btn"
-              onclick="gpToggle('shop')"
-              aria-label="Ouvrir la boutique">
-        <span class="shop-cart-ico">🛒</span>
-        SHOP
-      </button>
     </div>
 
     <!-- ══ ZONE DROITE : réservoir + timer + bouclier + dot ══ -->
@@ -10617,9 +10705,14 @@ document.addEventListener('DOMContentLoaded', () => {
        Col 2 : BOUCLIERS + PACK VENGEANCE
        Col 3 : DISTINCTION + DONS (avec toggle anonyme)
   ════════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════
+       BOUTIQUE GOLD PIXEL — Système d'onglets
+       3 onglets : PIXELS · DÔMES · VENGEANCE
+       Plein écran, cartes larges, fond Bleu Nuit Profond
+  ═══════════════════════════════════════════════════════════ -->
   <div class="gp-overlay sheet-bottom" id="ov-shop" role="dialog" aria-label="Boutique Gold Pixel">
 
-    <!-- En-tête -->
+    <!-- ── En-tête ── -->
     <div class="ov-header">
       <button class="pal-handle-btn" onclick="gpCloseAll()" aria-label="Fermer">
         <div class="pal-handle"></div>
@@ -10629,234 +10722,162 @@ document.addEventListener('DOMContentLoaded', () => {
       <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
     </div>
 
-    <!-- Corps 3 colonnes -->
+    <!-- ── Corps : barre d'onglets + panneaux ── -->
     <div class="sh-body">
 
+      <!-- Barre d'onglets -->
+      <div class="sh-tabs" role="tablist">
+        <button class="sh-tab active" id="sh-tab-pixels"
+                role="tab" aria-selected="true" aria-controls="sh-panel-pixels"
+                onclick="shSwitchTab('pixels')">⚡ PIXELS</button>
+        <button class="sh-tab" id="sh-tab-domes"
+                role="tab" aria-selected="false" aria-controls="sh-panel-domes"
+                onclick="shSwitchTab('domes')">🛡 DÔMES</button>
+        <button class="sh-tab" id="sh-tab-vengeance"
+                role="tab" aria-selected="false" aria-controls="sh-panel-vengeance"
+                onclick="shSwitchTab('vengeance')">⚔️ VENGEANCE</button>
+      </div>
+
       <!-- ══════════════════════════════════
-           COLONNE 1 — PIXELS
+           PANNEAU 1 — PIXELS
       ══════════════════════════════════ -->
-      <div class="sh-col">
-        <div class="sh-sec-lbl">PIXELS</div>
+      <div class="sh-panel active" id="sh-panel-pixels" role="tabpanel">
 
-        <div class="sh-grid">
-          <!-- Chargeur Moyen -->
-          <div class="sh-card" onclick="shopPiPay('pixels_100',1);">
-            <div class="sh-card-top">
-              <div class="sh-card-icon">⚡</div>
-              <span class="sh-badge gold">OVERFILL</span>
-            </div>
-            <div class="sh-card-name">Chargeur Moyen</div>
-            <div class="sh-card-desc">+ 100 pixels</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">1 Pi</div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('pixels_100',1);">ACHETER</button>
-            </div>
+        <!-- Chargeur Moyen -->
+        <div class="sh-card-wide" onclick="shopPiPay('pixels_100',1);">
+          <div class="sh-cw-icon">⚡</div>
+          <div class="sh-cw-body">
+            <div class="sh-cw-name">Chargeur Moyen</div>
+            <div class="sh-cw-desc">Ajoute 100 pixels à votre réservoir.</div>
+            <span class="sh-cw-badge gold">OVERFILL — dépasse le stock max</span>
           </div>
-
-          <!-- Grand Chargeur -->
-          <div class="sh-card" onclick="shopPiPay('pixels_250',2);">
-            <div class="sh-card-top">
-              <div class="sh-card-icon">⚡</div>
-              <span class="sh-badge gold">OVERFILL</span>
-            </div>
-            <div class="sh-card-name">Grand Chargeur</div>
-            <div class="sh-card-desc">+ 250 pixels</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">2 Pi</div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('pixels_250',2);">ACHETER</button>
-            </div>
+          <div class="sh-cw-footer">
+            <div class="sh-cw-price">1 Pi</div>
+            <button class="sh-cw-btn"
+                    onclick="event.stopPropagation();shopPiPay('pixels_100',1);">ACHETER</button>
           </div>
         </div>
 
-        <!-- Mécanique Overfill -->
-        <div class="sh-overfill-banner">
-          <span class="sh-overfill-ico">🔓</span>
+        <!-- Grand Chargeur -->
+        <div class="sh-card-wide" onclick="shopPiPay('pixels_250',2);">
+          <div class="sh-cw-icon">⚡</div>
+          <div class="sh-cw-body">
+            <div class="sh-cw-name">Grand Chargeur</div>
+            <div class="sh-cw-desc">Ajoute 250 pixels à votre réservoir.</div>
+            <span class="sh-cw-badge gold">OVERFILL — idéal pour les grandes offensives</span>
+          </div>
+          <div class="sh-cw-footer">
+            <div class="sh-cw-price">2 Pi</div>
+            <button class="sh-cw-btn"
+                    onclick="event.stopPropagation();shopPiPay('pixels_250',2);">ACHETER</button>
+          </div>
+        </div>
+
+        <!-- Encart Overfill -->
+        <div class="sh-info-box">
+          <span class="sh-info-ico">🔓</span>
           <div>
-            <span class="sh-overfill-lbl">SYSTÈME OVERFILL</span>
-            <span class="sh-overfill-txt">Dépasse le stock max de ton réservoir — idéal pour les opérations massives.</span>
+            <div class="sh-info-title">SYSTÈME OVERFILL</div>
+            <div class="sh-info-desc">Les chargeurs dépassent votre stock maximum de pixels. Idéal pour lancer une offensive massive sur la carte.</div>
           </div>
         </div>
-      </div><!-- /col 1 -->
+
+      </div><!-- /sh-panel-pixels -->
 
       <!-- ══════════════════════════════════
-           COLONNE 2 — BOUCLIERS + TACTIQUE
+           PANNEAU 2 — DÔMES
       ══════════════════════════════════ -->
-      <div class="sh-col">
-        <div class="sh-sec-lbl">BOUCLIERS</div>
+      <div class="sh-panel" id="sh-panel-domes" role="tabpanel">
 
-        <div class="sh-grid">
-          <!-- Dôme 4H -->
-          <div class="sh-card" onclick="shopPiPay('dome_4h',0.5);">
-            <div class="sh-card-top">
-              <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">4H</span>
-            </div>
-            <div class="sh-card-name">Dôme 4H</div>
-            <div class="sh-card-desc">Pixels protégés 4h</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">0,5 Pi</div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('dome_4h',0.5);">ACHETER</button>
-            </div>
+        <!-- Dôme 4H -->
+        <div class="sh-card-wide" onclick="shopPiPay('dome_4h',0.5);">
+          <div class="sh-cw-icon blue">🛡</div>
+          <div class="sh-cw-body">
+            <div class="sh-cw-name">Dôme 4H</div>
+            <div class="sh-cw-desc">Aucun ennemi ne peut recouvrir vos pixels pendant 4 heures.</div>
+            <span class="sh-cw-badge blue">PROTECTION 4 HEURES</span>
           </div>
-
-          <!-- Dôme 8H -->
-          <div class="sh-card" onclick="shopPiPay('dome_8h',1);">
-            <div class="sh-card-top">
-              <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">8H</span>
-            </div>
-            <div class="sh-card-name">Dôme 8H</div>
-            <div class="sh-card-desc">Protection maximale</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">1 Pi</div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('dome_8h',1);">ACHETER</button>
-            </div>
+          <div class="sh-cw-footer">
+            <div class="sh-cw-price">0,5 Pi</div>
+            <button class="sh-cw-btn"
+                    onclick="event.stopPropagation();shopPiPay('dome_4h',0.5);">ACHETER</button>
           </div>
         </div>
 
-        <div class="sh-sec-lbl" style="margin-top:4px;">TACTIQUE</div>
-
-        <!-- Pack Vengeance (adapté selon pack) -->
-        <div class="sh-card" id="gp-vengeance-tile" onclick="shopPiPay('vengeance_pack',1);">
-          <div class="sh-card-top">
-            <div class="sh-card-icon red">⚔️</div>
-            <span class="sh-badge" id="gp-vengeance-badge" style="color:rgba(255,110,90,0.85);background:rgba(255,80,80,0.07);border:1px solid rgba(255,80,80,0.2);">ESSENTIEL</span>
+        <!-- Dôme 8H -->
+        <div class="sh-card-wide" onclick="shopPiPay('dome_8h',1);">
+          <div class="sh-cw-icon blue">🛡</div>
+          <div class="sh-cw-body">
+            <div class="sh-cw-name">Dôme 8H</div>
+            <div class="sh-cw-desc">Protection maximale. Vos œuvres sont intouchables pendant 8 heures.</div>
+            <span class="sh-cw-badge blue">PROTECTION 8 HEURES</span>
           </div>
-          <div class="sh-card-name">Pack Vengeance</div>
-          <div class="sh-card-desc">Révèle votre attaquant · Ciblez ses œuvres</div>
-          <div class="sh-card-footer">
-            <div>
-              <div class="sh-price" id="gp-vengeance-price">1 Pi</div>
-              <span class="sh-price-sub" id="gp-vengeance-sub">par mois · Essentiel</span>
+          <div class="sh-cw-footer">
+            <div class="sh-cw-price">1 Pi</div>
+            <button class="sh-cw-btn"
+                    onclick="event.stopPropagation();shopPiPay('dome_8h',1);">ACHETER</button>
+          </div>
+        </div>
+
+        <!-- Encart info dôme -->
+        <div class="sh-info-box">
+          <span class="sh-info-ico">🛡</span>
+          <div>
+            <div class="sh-info-title">COMMENT ÇA MARCHE</div>
+            <div class="sh-info-desc">Le dôme s'active immédiatement après l'achat. Il couvre les cellules que vous avez peintes au moment de l'activation.</div>
+          </div>
+        </div>
+
+      </div><!-- /sh-panel-domes -->
+
+      <!-- ══════════════════════════════════
+           PANNEAU 3 — VENGEANCE
+      ══════════════════════════════════ -->
+      <div class="sh-panel" id="sh-panel-vengeance" role="tabpanel">
+
+        <!-- Pack Vengeance -->
+        <div class="sh-card-wide" id="gp-vengeance-tile" onclick="shopPiPay('vengeance_pack',1);">
+          <div class="sh-cw-icon red">⚔️</div>
+          <div class="sh-cw-body">
+            <div class="sh-cw-name">Pack Vengeance</div>
+            <div class="sh-cw-desc">
+              Révèle l'identité de votre attaquant.<br>
+              Ciblez ses œuvres pour contre-attaquer.<br>
+              Inclut le <strong style="color:rgba(255,200,80,0.75);">Radar tactique</strong> pour localiser l'ennemi.
             </div>
-            <button class="sh-buy-btn" id="gp-vengeance-btn"
+            <span class="sh-cw-badge" id="gp-vengeance-badge"
+                  style="color:rgba(255,110,90,0.9);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);">ESSENTIEL</span>
+          </div>
+          <div class="sh-cw-footer">
+            <div>
+              <div class="sh-cw-price" id="gp-vengeance-price">1 Pi</div>
+              <div class="sh-cw-sub" id="gp-vengeance-sub">par mois · Essentiel</div>
+            </div>
+            <button class="sh-cw-btn" id="gp-vengeance-btn"
                     onclick="event.stopPropagation();shopPiPay('vengeance_pack',1);">ACHETER</button>
           </div>
         </div>
 
-      </div><!-- /col 2 -->
+        <!-- Encart Radar -->
+        <div class="sh-info-box">
+          <span class="sh-info-ico">📡</span>
+          <div>
+            <div class="sh-info-title">RADAR TACTIQUE INCLUS</div>
+            <div class="sh-info-desc">Le Pack Vengeance active le radar qui affiche en temps réel l'emplacement des dernières attaques ennemies sur votre territoire. Inclus gratuitement dans le Pack Elite.</div>
+          </div>
+        </div>
 
-      <!-- ══════════════════════════════════
-           COLONNE 3 — DISTINCTION + DONS
-      ══════════════════════════════════ -->
-      <div class="sh-col">
-
-        <!-- Toggle anonyme — en tête de colonne 3 -->
-        <div class="sh-anon-bar">
-          <span class="sh-anon-label">
-            🎭 Don anonyme
-          </span>
+        <!-- Toggle anonyme -->
+        <div class="sh-anon-bar" style="margin-top:4px;">
+          <span class="sh-anon-label">🎭 Masquer mon identité lors des contre-attaques</span>
           <div class="sh-toggle" id="sh-anon-toggle"
-               onclick="shToggleAnon(this)"
-               role="switch" aria-checked="false"
-               title="Activer le don anonyme"></div>
+               onclick="shToggleAnon(this)" role="switch" aria-checked="false"></div>
         </div>
-        <div id="sh-anon-status" style="display:none;">
-          🎭 Anonyme activé
+        <div id="sh-anon-status" style="display:none;font-family:'Rajdhani',sans-serif;font-size:0.55rem;color:rgba(80,210,140,0.7);padding:3px 0;letter-spacing:0.04em;">
+          🎭 Mode anonyme activé
         </div>
 
-        <div class="sh-sec-lbl">DISTINCTION</div>
-
-        <!-- Féliciter un artiste (montant libre) -->
-        <div class="sh-card don" onclick="shDonAction('distinction');">
-          <div class="sh-card-top">
-            <div class="sh-card-icon green">🎨</div>
-            <span class="sh-badge green">LIBRE</span>
-          </div>
-          <div class="sh-card-name">Distinction</div>
-          <div class="sh-card-desc">Offrir un montant libre pour féliciter un artiste</div>
-          <div class="sh-card-footer">
-            <div class="sh-price">libre</div>
-            <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('distinction');">OFFRIR</button>
-          </div>
-        </div>
-
-        <div class="sh-sec-lbl" style="margin-top:4px;">OFFRIR À UN AMI</div>
-
-        <!-- Grille de dons 2×3 -->
-        <div class="sh-grid">
-
-          <!-- Offrir Elite -->
-          <div class="sh-card don" onclick="shDonAction('gift_elite');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon green">🌟</div>
-              <span class="sh-badge green">ELITE</span>
-            </div>
-            <div class="sh-card-name">Pack Elite</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">10 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_elite');">OFFRIR</button>
-            </div>
-          </div>
-
-          <!-- Offrir Vengeance -->
-          <div class="sh-card don" onclick="shDonAction('gift_vengeance');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon red">⚔️</div>
-              <span class="sh-badge dim">VENGEANCE</span>
-            </div>
-            <div class="sh-card-name">Pack Vengeance</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">1 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_vengeance');">OFFRIR</button>
-            </div>
-          </div>
-
-          <!-- Offrir Chargeur 100 -->
-          <div class="sh-card don" onclick="shDonAction('gift_pixels_100');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon">⚡</div>
-              <span class="sh-badge gold">100 PX</span>
-            </div>
-            <div class="sh-card-name">Chargeur Moyen</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">1 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_pixels_100');">OFFRIR</button>
-            </div>
-          </div>
-
-          <!-- Offrir Grand Chargeur 250 -->
-          <div class="sh-card don" onclick="shDonAction('gift_pixels_250');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon">⚡</div>
-              <span class="sh-badge gold">250 PX</span>
-            </div>
-            <div class="sh-card-name">Grand Chargeur</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">2 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_pixels_250');">OFFRIR</button>
-            </div>
-          </div>
-
-          <!-- Offrir Dôme 4H -->
-          <div class="sh-card don" onclick="shDonAction('gift_dome_4h');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">4H</span>
-            </div>
-            <div class="sh-card-name">Dôme 4H</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">0,5 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_dome_4h');">OFFRIR</button>
-            </div>
-          </div>
-
-          <!-- Offrir Dôme 8H -->
-          <div class="sh-card don" onclick="shDonAction('gift_dome_8h');">
-            <div class="sh-card-top">
-              <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">8H</span>
-            </div>
-            <div class="sh-card-name">Dôme 8H</div>
-            <div class="sh-card-footer">
-              <div class="sh-price">1 Pi</div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_dome_8h');">OFFRIR</button>
-            </div>
-          </div>
-
-        </div><!-- /sh-grid dons -->
-
-      </div><!-- /col 3 -->
+      </div><!-- /sh-panel-vengeance -->
 
     </div><!-- /sh-body -->
   </div><!-- /ov-shop -->
@@ -10943,33 +10964,15 @@ document.addEventListener('DOMContentLoaded', () => {
   <!-- ══ MODALE PORTRAIT — bloquante, s'affiche si orientation portrait ══ -->
   <div id="gp-portrait-modal" role="alertdialog" aria-label="Tournez votre téléphone">
     <div class="portrait-card">
-      <!-- Icône téléphone animé → rotation vers paysage -->
-      <div class="portrait-ico-wrap">
-        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Corps du téléphone -->
-          <rect x="16" y="6" width="28" height="48" rx="5"
-                stroke="rgba(255,185,40,0.6)" stroke-width="2"
-                fill="rgba(255,170,0,0.07)"/>
-          <!-- Écran -->
-          <rect x="20" y="12" width="20" height="32" rx="2"
-                fill="rgba(255,170,0,0.1)" stroke="rgba(255,185,40,0.25)" stroke-width="1"/>
-          <!-- Bouton home -->
-          <circle cx="30" cy="50" r="2.2"
-                  stroke="rgba(255,185,40,0.4)" stroke-width="1" fill="none"/>
-          <!-- Flèche rotation -->
-          <path d="M44 20 C50 20 54 26 54 32 C54 38 50 44 44 44"
-                stroke="rgba(255,200,60,0.7)" stroke-width="2"
-                fill="none" stroke-linecap="round"/>
-          <polyline points="41,18 44,20 42,23"
-                    stroke="rgba(255,200,60,0.7)" stroke-width="2"
-                    fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="portrait-title">MODE PAYSAGE<br>REQUIS</div>
+      <div style="font-size:2.2rem;line-height:1;">⛶</div>
+      <div class="portrait-title">PAYSAGE<br>PLEIN ÉCRAN</div>
       <div class="portrait-sub">
-        Tournez votre téléphone<br>pour jouer à Gold Pixel
+        Gold Pixel se joue uniquement<br>
+        en mode paysage plein écran.<br>
+        <span style="color:rgba(255,200,80,0.5);font-size:0.65rem;">
+          Tournez votre téléphone pour continuer.
+        </span>
       </div>
-      <div class="portrait-arrow">↻</div>
     </div>
   </div>
 
