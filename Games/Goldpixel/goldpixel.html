@@ -2355,33 +2355,37 @@ body {
 .canvas-frame {
   position: relative;
   border-radius: 10px;
-  /* Bordure or principale */
-  border: 1px solid rgba(255,185,40,0.5);
+  /* Bordure or principale — plus épaisse et visible */
+  border: 2px solid rgba(255,185,40,0.6);
   /* Ombres empilées pour l'effet premium */
   box-shadow:
     /* Ring 1 : anneau sombre interne */
     0 0 0 3px rgba(5,10,20,0.97),
-    /* Ring 2 : halo or très fin */
-    0 0 0 4px rgba(255,160,20,0.15),
+    /* Ring 2 : halo or fin */
+    0 0 0 5px rgba(255,160,20,0.2),
     /* Ring 3 : ombre de profondeur */
     0 6px 40px rgba(0,0,0,0.8),
-    /* Ring 4 : glow extérieur doux */
-    0 0 70px rgba(255,170,0,0.07),
-    /* Ring 5 : inset bord lumineux en haut */
-    inset 0 1px 0 rgba(255,210,80,0.08);
+    /* Ring 4 : glow extérieur doré */
+    0 0 60px rgba(255,170,0,0.1),
+    /* Ring 5 : inset bords lumineux */
+    inset 0 1px 0 rgba(255,210,80,0.1),
+    inset 1px 0 0 rgba(255,200,60,0.05),
+    inset -1px 0 0 rgba(255,200,60,0.05);
   overflow: hidden;
-  background: #040c18; /* fond légèrement bleuté avant le canvas */
+  background: #040c18;
   transition: border-color .35s, box-shadow .35s;
 }
 /* Activation au dessin — cadre s'illumine */
 .canvas-frame.active {
-  border-color: rgba(255,200,60,0.72);
+  border-color: rgba(255,210,60,0.82);
   box-shadow:
     0 0 0 3px rgba(5,10,20,0.97),
-    0 0 0 4px rgba(255,185,30,0.28),
+    0 0 0 5px rgba(255,185,30,0.35),
     0 6px 44px rgba(0,0,0,0.82),
-    0 0 90px rgba(255,170,0,0.12),
-    inset 0 1px 0 rgba(255,220,100,0.12);
+    0 0 80px rgba(255,170,0,0.16),
+    inset 0 1px 0 rgba(255,230,100,0.14),
+    inset 1px 0 0 rgba(255,210,80,0.07),
+    inset -1px 0 0 rgba(255,210,80,0.07);
 }
 
 /* ── 4 coins dorés — signature galerie ── */
@@ -3530,34 +3534,44 @@ body {
   .canvas-stage {
     display: flex !important; flex-direction: column !important;
     flex: 1 1 0 !important; min-height: 0 !important;
-    /* Glow ambiant même sur mobile */
-    filter: drop-shadow(0 0 18px rgba(255,170,0,0.09)) !important;
+    /* Glow ambiant — harmonieux avec le contour doré */
+    filter:
+      drop-shadow(0 0 14px rgba(255,170,0,0.12))
+      drop-shadow(0 0 3px rgba(255,185,40,0.18)) !important;
   }
   .canvas-stage.drawing {
-    filter: drop-shadow(0 0 32px rgba(255,185,40,0.18)) !important;
+    filter:
+      drop-shadow(0 0 28px rgba(255,185,40,0.22))
+      drop-shadow(0 0 6px rgba(255,200,60,0.2)) !important;
   }
   .canvas-frame {
     display: flex !important; flex-direction: column !important;
     flex: 1 1 0 !important; min-height: 0 !important;
     aspect-ratio: unset !important;
-    /* Sur mobile : pas de border-radius pour coller aux bords */
     border-radius: 0 !important;
-    /* Mais on garde une bordure top/bottom or très fine */
-    border-top:    1px solid rgba(255,185,40,0.3) !important;
-    border-bottom: 1px solid rgba(255,185,40,0.18) !important;
-    border-left:   none !important;
-    border-right:  none !important;
-    /* Glow interne subtil */
+    /* Contour doré épais sur les 4 côtés — tous bien visibles */
+    border-top:    2px solid rgba(255,185,40,0.55) !important;
+    border-bottom: 2px solid rgba(255,185,40,0.45) !important;
+    border-left:   2px solid rgba(255,185,40,0.38) !important;
+    border-right:  2px solid rgba(255,185,40,0.38) !important;
+    /* Glow doré sur les 4 côtés */
     box-shadow:
-      inset 0 1px 0 rgba(255,210,80,0.06),
-      0 0 50px rgba(255,170,0,0.06) !important;
+      inset 0 1px 0 rgba(255,220,80,0.1),
+      inset 1px 0 0 rgba(255,200,60,0.06),
+      inset -1px 0 0 rgba(255,200,60,0.06),
+      0 0 24px rgba(255,170,0,0.12),
+      0 0 6px rgba(255,185,40,0.2) !important;
   }
-  /* Activation au dessin sur mobile */
+  /* Activation au dessin sur mobile — glow renforcé */
   .canvas-frame.active {
-    border-top-color: rgba(255,200,60,0.55) !important;
+    border-top-color:    rgba(255,210,60,0.75) !important;
+    border-bottom-color: rgba(255,200,50,0.65) !important;
+    border-left-color:   rgba(255,200,50,0.55) !important;
+    border-right-color:  rgba(255,200,50,0.55) !important;
     box-shadow:
-      inset 0 1px 0 rgba(255,220,100,0.1),
-      0 0 70px rgba(255,170,0,0.1) !important;
+      inset 0 1px 0 rgba(255,230,100,0.14),
+      0 0 36px rgba(255,170,0,0.2),
+      0 0 10px rgba(255,185,40,0.25) !important;
   }
   /* Viewport : flow normal OBLIGATOIRE pour getBoundingClientRect() */
   #viewport-container {
@@ -3573,6 +3587,136 @@ body {
   /* Masquer les éléments desktop */
   .hud-side-panel  { display: none !important; }
   .hud-tool-strip  { display: none !important; }
+
+  /* ════════════════════════════════════════════════════════
+     ZONE PALETTE PERMANENTE — sous le canevas
+     Hauteur fixe, ne prend pas trop de place.
+     Layout : [dot couleur] [palette matte] | [gomme] [Calque] [Move▾]
+  ════════════════════════════════════════════════════════ */
+  #gp-palette-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    height: 44px;
+    flex-shrink: 0;
+    background: rgba(4,8,18,0.92);
+    border-top: 1px solid rgba(255,185,40,0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: all;
+    z-index: 8;
+    position: relative;
+  }
+
+  /* Dot couleur active — carré arrondi à gauche */
+  #gp-pb-color-dot {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 6px rgba(255,255,255,0.2);
+    flex-shrink: 0; transition: background .12s, box-shadow .12s;
+    cursor: default;
+  }
+
+  /* Grille couleurs matte — toujours visible */
+  #gp-pb-palette {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    align-items: center;
+  }
+  #gp-pb-palette .c-btn {
+    flex: 1 1 0;
+    min-width: 18px; max-width: 32px;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .1s, border-color .1s, box-shadow .1s;
+    flex-shrink: 1;
+  }
+  #gp-pb-palette .c-btn:active  { transform: scale(0.88); }
+  #gp-pb-palette .c-btn:hover   { border-color: rgba(255,255,255,0.35); transform: scale(1.08); z-index: 1; }
+  #gp-pb-palette .c-btn.active  {
+    border: 2px solid rgba(255,255,255,0.92) !important;
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    transform: scale(1.12); z-index: 2;
+  }
+
+  /* Séparateur vertical dans la barre */
+  .gp-pb-sep {
+    width: 1px; height: 22px;
+    background: rgba(255,170,0,0.14);
+    flex-shrink: 0;
+  }
+
+  /* Boutons d'action dans la barre — compacts */
+  .gp-pb-btn {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1px;
+    width: 36px; height: 34px;
+    border-radius: 8px; flex-shrink: 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,170,0,0.16);
+    color: rgba(255,210,80,0.8);
+    cursor: pointer; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s, border-color .15s, transform .1s;
+    pointer-events: all;
+  }
+  .gp-pb-btn:active  { transform: scale(0.9); }
+  .gp-pb-btn:hover   { background: rgba(255,170,0,0.08); border-color: rgba(255,200,60,0.38); }
+  .gp-pb-btn.active  {
+    background: rgba(255,170,0,0.14); border-color: rgba(255,200,60,0.6);
+    color: rgba(255,230,100,0.95);
+    box-shadow: 0 0 8px rgba(255,170,0,0.15);
+  }
+  .gp-pb-btn-ico  { font-size: 0.82rem; line-height: 1; }
+  .gp-pb-btn-lbl  {
+    font-family: 'Orbitron', monospace; font-size: 0.3rem;
+    font-weight: 700; letter-spacing: 0.06em; line-height: 1;
+    color: inherit; opacity: 0.7;
+  }
+
+  /* ── Popup Move (zoom+/zoom-/centrer) ──
+     Apparaît au-dessus du bouton Move, fixe dans le HUD
+  ── */
+  #gp-move-popup {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px); right: 8px;
+    z-index: 30;
+    background: rgba(5,10,22,0.96);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,185,40,0.22);
+    border-radius: 12px;
+    padding: 7px 8px;
+    display: none;
+    flex-direction: column; gap: 5px;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,170,0,0.05);
+    pointer-events: all;
+    min-width: 100px;
+  }
+  #gp-move-popup.open { display: flex; }
+
+  .gp-mp-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,170,0,0.1);
+    color: rgba(255,215,100,0.82);
+    font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 600;
+    cursor: pointer; touch-action: manipulation; width: 100%;
+    transition: background .14s; -webkit-tap-highlight-color: transparent;
+  }
+  .gp-mp-btn:active  { background: rgba(255,170,0,0.1); transform: scale(0.97); }
+  .gp-mp-btn .mp-ico { font-size: 0.9rem; flex-shrink: 0; }
 
   /* Coins décoratifs : masqués sur mobile (trop petits) */
   .canvas-corner   { display: none !important; }
@@ -3699,159 +3843,282 @@ body {
   }
 
   /* ════════════════════════════════════════════════════════════
-     HEADER PREMIUM — barre fine en haut du canevas
-     Hauteur : 40px — fond verre sombre — bordure or subtile
-     Contenu : avatar · nom · armée · drapeau · pack
-               pixels · timer · bouclier · menu
+     HEADER PREMIUM RESTRUCTURÉ — 3 zones horizontales
+     ┌──────────────┬──────────────────┬────────────────────┐
+     │  GAUCHE       │   CENTRE          │   DROITE           │
+     │  Avatar + nom │  ✦ GOLD PIXEL ✦  │  Réservoir +timer  │
+     │  Pack + drap. │  [SHOP]           │  Bouclier + dot    │
+     └──────────────┴──────────────────┴────────────────────┘
+     Hauteur : 44px
   ════════════════════════════════════════════════════════════ */
   #gp-hud-header {
     position: absolute; top: 0; left: 0; right: 0;
-    height: 40px;
-    display: flex; align-items: center;
+    height: 44px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     padding: 0 10px;
-    gap: 6px;
-    /* Verre sombre avec bordure dorée subtile */
-    background:
-      linear-gradient(180deg,
-        rgba(4,8,18,0.91) 0%,
-        rgba(4,8,18,0.82) 100%);
+    gap: 8px;
+    background: linear-gradient(180deg,
+      rgba(4,8,20,0.94) 0%,
+      rgba(4,8,18,0.86) 100%);
     border-bottom: 1px solid rgba(255,185,40,0.18);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.03),
-      0 4px 24px rgba(0,0,0,0.55),
+      0 4px 28px rgba(0,0,0,0.6),
       0 0 40px rgba(255,170,0,0.04);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    /* pointer-events none globalement — activé item par item */
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     pointer-events: none;
     z-index: 15;
   }
 
-  /* ── BLOC JOUEUR (gauche) ── */
-  .hdr-player-bloc {
+  /* ── ZONE GAUCHE : joueur ── */
+  .hdr-left {
     display: flex; align-items: center; gap: 6px;
-    flex-shrink: 0; pointer-events: all; cursor: pointer;
+    min-width: 0; justify-content: flex-start;
+    pointer-events: all; cursor: pointer;
     touch-action: manipulation;
   }
 
-  /* Avatar : carré arrondi avec initiale */
+  /* Avatar */
   .hdr-avatar {
-    width: 26px; height: 26px; border-radius: 6px;
+    width: 26px; height: 26px; border-radius: 7px;
     background: rgba(255,170,0,0.1);
     border: 1px solid rgba(255,170,0,0.28);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Orbitron', monospace; font-size: 0.52rem; font-weight: 900;
-    color: rgba(255,200,80,0.8); flex-shrink: 0;
+    font-family: 'Orbitron', monospace; font-size: 0.5rem; font-weight: 900;
+    color: rgba(255,200,80,0.82); flex-shrink: 0;
     transition: border-color .25s, box-shadow .25s;
   }
   .hdr-avatar.elite {
-    border-color: rgba(255,200,60,0.65);
-    box-shadow: 0 0 10px rgba(255,170,0,0.22), inset 0 0 6px rgba(255,200,0,0.06);
+    border-color: rgba(255,200,60,0.7);
+    box-shadow: 0 0 10px rgba(255,170,0,0.25), inset 0 0 6px rgba(255,200,0,0.07);
   }
 
-  /* Textes nom + armée */
+  /* Nom + armée */
   .hdr-names {
     display: flex; flex-direction: column; gap: 1px;
-    min-width: 0; max-width: 90px;
+    min-width: 0; max-width: 85px;
   }
   .hdr-username {
-    font-family: 'Orbitron', monospace; font-size: 0.46rem; font-weight: 700;
-    color: rgba(255,215,100,0.85); letter-spacing: 0.04em;
+    font-family: 'Orbitron', monospace; font-size: 0.44rem; font-weight: 700;
+    color: rgba(255,215,100,0.88); letter-spacing: 0.04em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
   }
   .hdr-army {
-    font-family: 'Rajdhani', sans-serif; font-size: 0.5rem; font-weight: 600;
-    color: rgba(255,255,255,0.28); letter-spacing: 0.03em;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.48rem; font-weight: 600;
+    color: rgba(255,255,255,0.28); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; line-height: 1;
   }
 
-  /* ── DRAPEAU ── */
+  /* Drapeau */
   .hdr-flag {
-    font-size: 0.85rem; line-height: 1; flex-shrink: 0;
-    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
+    font-size: 0.82rem; line-height: 1; flex-shrink: 0;
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.6));
   }
 
-  /* ── BADGE PACK ── */
+  /* Badge pack */
   .hdr-pack {
     display: flex; align-items: center; gap: 3px;
-    padding: 2px 6px; border-radius: 10px;
+    padding: 2px 5px; border-radius: 8px;
     border: 1px solid; flex-shrink: 0;
-    font-family: 'Orbitron', monospace; font-size: 0.36rem; font-weight: 700;
-    letter-spacing: 0.08em; line-height: 1;
+    font-family: 'Orbitron', monospace; font-size: 0.34rem; font-weight: 700;
+    letter-spacing: 0.07em; line-height: 1;
   }
   .hdr-pack.essential {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.32);
   }
   .hdr-pack.elite {
-    background: rgba(255,170,0,0.1);
-    border-color: rgba(255,185,40,0.35);
-    color: rgba(255,210,80,0.85);
-    box-shadow: 0 0 8px rgba(255,170,0,0.12);
+    background: rgba(255,170,0,0.1); border-color: rgba(255,185,40,0.38);
+    color: rgba(255,210,80,0.88); box-shadow: 0 0 8px rgba(255,170,0,0.14);
   }
-  .hdr-pack-dot {
-    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
-  }
-  .hdr-pack.essential .hdr-pack-dot { background: rgba(255,255,255,0.2); }
-  .hdr-pack.elite     .hdr-pack-dot {
-    background: rgba(255,200,60,0.9);
-    box-shadow: 0 0 5px rgba(255,200,0,0.7);
+  .hdr-pack-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .hdr-pack.essential .hdr-pack-dot { background: rgba(255,255,255,0.22); }
+  .hdr-pack.elite .hdr-pack-dot {
+    background: rgba(255,200,60,0.9); box-shadow: 0 0 5px rgba(255,200,0,0.7);
   }
 
-  /* ── SÉPARATEUR flexible ── */
-  .hdr-sep { flex: 1; }
+  /* ── ZONE CENTRE : titre + bouton SHOP ── */
+  .hdr-center {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px; pointer-events: all;
+  }
 
-  /* ── WIDGETS (pilules à droite) ── */
-  .hdr-pill {
+  /* Titre "GOLD PIXEL" */
+  .hdr-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.55rem, 2vw, 0.72rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    /* Dégradé or premium */
+    background: linear-gradient(135deg,
+      #9a6a00 0%, #d4a017 15%,
+      #f5d97a 30%, #ffcc44 42%,
+      #ffffff 50%,
+      #ffe680 58%, #ffcc44 70%,
+      #c8940e 84%, #7a5000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 8px rgba(255,185,40,0.35));
+    white-space: nowrap;
+  }
+
+  /* Bouton SHOP */
+  .hdr-shop-btn {
     display: flex; align-items: center; gap: 4px;
-    padding: 3px 7px; border-radius: 20px;
-    background: rgba(4,9,20,0.7);
-    border: 1px solid rgba(255,170,0,0.14);
+    padding: 2px 8px; border-radius: 10px; cursor: pointer;
+    background: rgba(255,170,0,0.1);
+    border: 1px solid rgba(255,185,40,0.3);
+    color: rgba(255,200,80,0.85);
+    font-family: 'Orbitron', monospace; font-size: 0.36rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: background .18s, border-color .18s, box-shadow .18s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .hdr-shop-btn:hover {
+    background: rgba(255,170,0,0.18);
+    border-color: rgba(255,200,60,0.55);
+    box-shadow: 0 0 10px rgba(255,170,0,0.18);
+  }
+  .hdr-shop-btn:active { transform: scale(0.93); }
+  .hdr-shop-btn .shop-cart-ico { font-size: 0.7rem; line-height: 1; }
+
+  /* ── ZONE DROITE : réservoir + timer + bouclier + dot ── */
+  .hdr-right {
+    display: flex; align-items: center; gap: 5px;
+    justify-content: flex-end; min-width: 0;
+  }
+
+  /* Module réservoir — bloc compact colonne */
+  .hdr-reservoir {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 2px; flex-shrink: 0;
+  }
+  /* Ligne du haut : icône pixel + compteur */
+  .hdr-res-top {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .hdr-res-ico {
+    font-size: 0.6rem; line-height: 1; flex-shrink: 0;
+  }
+  .hdr-res-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; font-weight: 700;
+    color: rgba(255,215,100,0.92); white-space: nowrap; line-height: 1;
+  }
+  .hdr-res-count.low    { color: rgba(255,100,80,0.9); }
+  .hdr-res-count.medium { color: rgba(255,160,40,0.9); }
+  /* Ligne du bas : barre de progression + timer */
+  .hdr-res-bot {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .hdr-res-bar-wrap {
+    width: 44px; height: 3px;
+    background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
     flex-shrink: 0;
   }
-  .hdr-pill-ico {
-    font-size: 0.65rem; line-height: 1; flex-shrink: 0;
+  .hdr-res-bar-fill {
+    height: 100%; width: 100%;
+    background: linear-gradient(90deg, #bf953f, #ffcc44, #fffde0);
+    border-radius: 2px; transition: width .4s;
   }
-  .hdr-pill-val {
+  .hdr-res-timer {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.5rem; color: rgba(255,200,80,0.82);
-    letter-spacing: 0.03em; white-space: nowrap;
+    font-size: 0.42rem; color: rgba(255,200,80,0.55);
+    white-space: nowrap; line-height: 1;
   }
-  .hdr-pill-val.green  { color: rgba(80,230,140,0.9); }
-  .hdr-pill-val.red    { color: rgba(255,100,80,0.9); }
-  .hdr-pill-val.orange { color: rgba(255,160,40,0.9); }
+  .hdr-res-timer.ready { color: rgba(80,220,140,0.8); }
 
-  /* ── BOUCLIER actif — affiché seulement quand actif ── */
+  /* Bouclier actif */
   .hdr-shield {
-    display: none; /* caché par défaut */
-    align-items: center; gap: 4px;
-    padding: 3px 7px; border-radius: 20px;
-    background: rgba(220,60,60,0.1);
+    display: none;
+    align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: 8px;
+    background: rgba(220,60,60,0.12);
     border: 1px solid rgba(220,80,80,0.35);
     flex-shrink: 0;
     box-shadow: 0 0 8px rgba(220,60,60,0.15);
   }
   .hdr-shield.visible { display: flex; }
-  .hdr-shield-ico { font-size: 0.65rem; line-height: 1; }
+  .hdr-shield-ico { font-size: 0.6rem; line-height: 1; }
   .hdr-shield-val {
-    font-family: 'Share Tech Mono', monospace; font-size: 0.5rem;
-    color: rgba(255,120,120,0.85); white-space: nowrap;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.42rem;
+    color: rgba(255,120,120,0.88); white-space: nowrap;
   }
 
-  /* ── DOT CONNEXION (inline dans le header) ── */
+  /* Dot connexion Pi */
   .hdr-dot {
     width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(80,200,130,0.25); transition: background .4s;
+    background: rgba(80,200,130,0.22); transition: background .4s;
   }
   .hdr-dot.online  {
     background: rgba(80,220,140,0.9);
     box-shadow: 0 0 5px rgba(80,220,140,0.6);
   }
-  .hdr-dot.offline { background: rgba(255,100,80,0.65); }
+  .hdr-dot.offline { background: rgba(255,100,80,0.6); }
 
-  /* Conserver les anciens .hud-* pour compatibilité
-     (utilisés ailleurs, ne pas supprimer) */
+  /* ── MODALE PORTRAIT — bloquante ── */
+  #gp-portrait-modal {
+    display: none;
+    position: fixed; inset: 0; z-index: 3500;
+    background: rgba(2,5,14,0.97);
+    backdrop-filter: blur(16px);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 0;
+  }
+  #gp-portrait-modal.show { display: flex; }
+
+  .portrait-card {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px; padding: 32px 28px 28px;
+    background: rgba(8,14,28,0.97);
+    border: 1px solid rgba(255,185,40,0.28);
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(255,170,0,0.08), 0 24px 60px rgba(0,0,0,0.8);
+    max-width: min(300px, 88vw);
+    animation: portraitCardIn .4s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes portraitCardIn {
+    from { opacity:0; transform: scale(0.88) translateY(12px); }
+    to   { opacity:1; transform: scale(1)    translateY(0); }
+  }
+  .portrait-ico-wrap {
+    position: relative;
+    width: 64px; height: 64px;
+  }
+  /* Téléphone SVG animé rotation */
+  .portrait-ico-wrap svg {
+    width: 100%; height: 100%;
+    animation: rotatePhone 2.8s cubic-bezier(.22,1,.36,1) infinite;
+  }
+  @keyframes rotatePhone {
+    0%,30%    { transform: rotate(0deg); }
+    55%,100%  { transform: rotate(90deg); }
+  }
+  .portrait-title {
+    font-family: 'Orbitron', monospace; font-size: 0.72rem; font-weight: 900;
+    color: rgba(255,210,80,0.9); letter-spacing: 0.12em;
+    text-align: center; line-height: 1.3;
+  }
+  .portrait-sub {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 500;
+    color: rgba(255,255,255,0.3); text-align: center; line-height: 1.5;
+  }
+  .portrait-arrow {
+    font-size: 1.4rem;
+    animation: arrowBounce 1.2s ease-in-out infinite;
+  }
+  @keyframes arrowBounce {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-5px); }
+  }
+
+  /* Conserver les anciens .hud-* pour compatibilité */
   .hud-avatar, .hud-player-name, .hud-header-sep,
   .hud-widget, .hud-widget-ico, .hud-widget-val,
   .hud-conn-dot { display: none !important; }
@@ -3980,14 +4247,23 @@ body {
       0 3px 12px rgba(0,0,0,0.6);
   }
 
-  /* ── Les 4 anciens FABs de coin — masqués, remplacés par la toolbar ── */
-  /* On garde les IDs pour les overlays qui les référencent (classList.add('active')) */
+  /* ── Anciens FABs de coin — masqués (gardés pour gpToggle) ── */
   #gp-fab-draw  { display: none !important; }
   #gp-fab-nav   { display: none !important; }
   #gp-fab-shop  { display: none !important; }
   #gp-fab-menu  { display: none !important; }
 
-  /* Point couleur (ancien — masqué) */
+  /* Bouton palette + gomme : supprimés de la toolbar, maintenant dans la barre */
+  #gp-fab-palette { display: none !important; }
+  #gp-tb-erase    { display: none !important; }
+  /* Zoom + / Zoom - / Centrer : supprimés de la toolbar, maintenant dans le popup Move */
+  #gp-tb-zoomin   { display: none !important; }
+  #gp-tb-zoomout  { display: none !important; }
+  #gp-tb-recenter { display: none !important; }
+  /* Séparateurs de la toolbar droite : masqués si plus de contenu au-dessus */
+  #gp-toolbar-right .tb-sep { display: none !important; }
+
+  /* Point couleur (dans gp-fab-palette, masqué) */
   #gp-color-dot { display: none; }
 
   /* ══════════════════════════════════════════
@@ -4091,7 +4367,7 @@ body {
 
   /* Popup haut-gauche → descend du haut */
   .gp-overlay.popup.from-tl {
-    top: 106px; left: 8px;
+    top: 104px; left: 8px;
     transform: translateY(-10px);
     transform-origin: top left;
   }
@@ -4114,7 +4390,7 @@ body {
      (dimensions propres à chaque overlay)
   ════════════════════════════════════════════ */
   #ov-draw  { max-height: 46dvh; overflow-y: auto; }
-  #ov-shop  { max-height: 62dvh; overflow: hidden; display: flex; flex-direction: column; }
+  #ov-shop  { max-height: 100dvh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; border-radius: 0 !important; border: none !important; }
   #ov-gallery { max-height: 70dvh; overflow: hidden; display: flex; flex-direction: column; }
   #ov-nav   { width: 210px; }
   #ov-menu  { width: 210px; }
@@ -4474,157 +4750,166 @@ body {
      BOUTIQUE — système de cartes premium
   ═══════════════════════════════════════════════════════ */
 
-  /* Corps scrollable de la boutique */
+  /* ══════════════════════════════════════════════════════════════
+     BOUTIQUE — layout plein écran paysage 3 colonnes
+  ══════════════════════════════════════════════════════════════ */
+
+  /* Corps boutique — grille 3 colonnes */
   #ov-shop .sh-body {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 12px 14px 18px;
-    scrollbar-width: thin; scrollbar-color: rgba(255,170,0,0.15) transparent;
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  #ov-shop .sh-body::-webkit-scrollbar { width: 3px; }
-  #ov-shop .sh-body::-webkit-scrollbar-thumb {
-    background: rgba(255,170,0,0.18); border-radius: 2px;
+    flex: 1; overflow: hidden;
+    padding: 10px 12px 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: start;
   }
 
-  /* ── Section label ── */
+  /* Colonne */
+  .sh-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+  /* Section label */
   .sh-sec-lbl {
-    display: flex; align-items: center; gap: 8px;
-    font-family: 'Orbitron', monospace; font-size: 0.42rem; font-weight: 700;
-    color: rgba(255,200,80,0.38); letter-spacing: 0.2em; text-transform: uppercase;
-    margin-bottom: -4px;
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Orbitron', monospace; font-size: 0.36rem; font-weight: 700;
+    color: rgba(255,200,80,0.42); letter-spacing: 0.16em; text-transform: uppercase;
+    flex-shrink: 0;
   }
   .sh-sec-lbl::before {
-    content: '';
-    flex: none; width: 3px; height: 11px;
-    border-radius: 2px; background: rgba(255,200,80,0.45);
+    content: ''; flex: none; width: 2px; height: 8px;
+    border-radius: 1px; background: rgba(255,200,80,0.5);
   }
   .sh-sec-lbl::after {
-    content: '';
-    flex: 1; height: 1px; background: rgba(255,170,0,0.08);
+    content: ''; flex: 1; height: 1px; background: rgba(255,170,0,0.08);
   }
 
-  /* ── Grille cartes ── */
-  .sh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .sh-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  /* Grilles */
+  .sh-grid        { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
   .sh-grid.cols-1 { grid-template-columns: 1fr; }
+  .sh-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
-  /* ── Carte produit ── */
+  /* Carte compacte */
   .sh-card {
     position: relative;
-    display: flex; flex-direction: column; gap: 8px;
-    padding: 12px 12px 10px;
-    border-radius: 12px;
-    background: rgba(8,15,30,0.7);
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 7px 8px 6px;
+    border-radius: 9px;
+    background: rgba(7,13,26,0.75);
     border: 1px solid rgba(255,170,0,0.13);
     transition: border-color .18s, box-shadow .18s, transform .12s;
     touch-action: manipulation; cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    overflow: hidden;
+    -webkit-tap-highlight-color: transparent; overflow: hidden;
   }
-  /* Ligne or en haut de la carte */
   .sh-card::before {
     content: '';
-    position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,185,40,0.35), transparent);
+    position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,185,40,0.28), transparent);
   }
-  .sh-card:hover {
-    border-color: rgba(255,185,40,0.35);
-    box-shadow: 0 0 18px rgba(255,170,0,0.1), 0 4px 16px rgba(0,0,0,0.4);
-  }
+  .sh-card:hover  { border-color: rgba(255,185,40,0.32);
+                    box-shadow: 0 0 10px rgba(255,170,0,0.1); }
   .sh-card:active { transform: scale(0.96); }
-  /* Variante bleue (dons) */
-  .sh-card.don { border-color: rgba(100,220,180,0.15); }
-  .sh-card.don::before { background: linear-gradient(90deg, transparent, rgba(100,220,180,0.25), transparent); }
-  .sh-card.don:hover { border-color: rgba(100,220,180,0.35); box-shadow: 0 0 18px rgba(100,220,180,0.08), 0 4px 16px rgba(0,0,0,0.4); }
-  /* Carte désactivée (inclus Elite) */
-  .sh-card.included { opacity: 0.55; cursor: default; }
-  .sh-card.included:hover { border-color: rgba(255,170,0,0.13); box-shadow: none; }
+  .sh-card.don         { border-color: rgba(80,200,155,0.15); }
+  .sh-card.don::before { background: linear-gradient(90deg, transparent, rgba(80,200,155,0.2), transparent); }
+  .sh-card.don:hover   { border-color: rgba(80,200,155,0.32); }
+  .sh-card.included    { opacity: 0.5; cursor: default; }
+  .sh-card.included:hover  { border-color: rgba(255,170,0,0.13); box-shadow: none; }
   .sh-card.included:active { transform: none; }
 
-  /* ── Ligne haut de carte : icône + badge ── */
   .sh-card-top {
-    display: flex; align-items: flex-start; justify-content: space-between;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 4px;
   }
   .sh-card-icon {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: rgba(255,170,0,0.08);
-    border: 1px solid rgba(255,170,0,0.14);
+    width: 20px; height: 20px; border-radius: 5px;
+    background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.14);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
+    font-size: 0.7rem; flex-shrink: 0;
   }
-  .sh-card-icon.blue { background: rgba(100,180,255,0.08); border-color: rgba(100,180,255,0.14); }
-  .sh-card-icon.green { background: rgba(100,220,160,0.08); border-color: rgba(100,220,160,0.14); }
+  .sh-card-icon.blue  { background: rgba(100,180,255,0.08); border-color: rgba(100,180,255,0.14); }
+  .sh-card-icon.green { background: rgba(80,200,155,0.08);  border-color: rgba(80,200,155,0.14); }
+  .sh-card-icon.red   { background: rgba(255,80,80,0.07);   border-color: rgba(255,80,80,0.16); }
 
-  /* Badge (OVERFILL, INCLUS ELITE, etc.) */
   .sh-badge {
-    font-family: 'Orbitron', monospace; font-size: 0.33rem; font-weight: 700;
-    letter-spacing: 0.07em; padding: 2px 6px; border-radius: 6px;
-    text-transform: uppercase; white-space: nowrap;
+    font-family: 'Orbitron', monospace; font-size: 0.29rem; font-weight: 700;
+    letter-spacing: 0.05em; padding: 1px 4px; border-radius: 4px;
+    text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
   }
-  .sh-badge.gold   { color: rgba(255,200,60,0.85); background: rgba(255,170,0,0.1); border: 1px solid rgba(255,170,0,0.2); }
-  .sh-badge.green  { color: rgba(80,220,140,0.85); background: rgba(80,220,140,0.08); border: 1px solid rgba(80,220,140,0.2); }
-  .sh-badge.blue   { color: rgba(100,180,255,0.85); background: rgba(100,180,255,0.08); border: 1px solid rgba(100,180,255,0.2); }
-  .sh-badge.dim    { color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+  .sh-badge.gold  { color: rgba(255,200,60,0.85); background: rgba(255,170,0,0.1);  border: 1px solid rgba(255,170,0,0.22); }
+  .sh-badge.green { color: rgba(80,210,140,0.85); background: rgba(80,210,140,0.08);border: 1px solid rgba(80,210,140,0.22); }
+  .sh-badge.blue  { color: rgba(100,175,255,0.85);background: rgba(100,175,255,0.08);border: 1px solid rgba(100,175,255,0.22);}
+  .sh-badge.red   { color: rgba(255,110,90,0.85); background: rgba(255,80,80,0.07); border: 1px solid rgba(255,80,80,0.2); }
+  .sh-badge.dim   { color: rgba(255,255,255,0.28);background: rgba(255,255,255,0.03);border: 1px solid rgba(255,255,255,0.08);}
 
-  /* ── Texte principal ── */
   .sh-card-name {
-    font-family: 'Rajdhani', sans-serif; font-size: 0.78rem; font-weight: 700;
-    color: rgba(255,215,100,0.88); line-height: 1; letter-spacing: 0.02em;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.64rem; font-weight: 700;
+    color: rgba(255,215,100,0.9); line-height: 1;
   }
   .sh-card-desc {
-    font-family: 'Rajdhani', sans-serif; font-size: 0.6rem; font-weight: 500;
-    color: rgba(255,255,255,0.3); line-height: 1.35; margin-top: -4px;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.5rem; font-weight: 500;
+    color: rgba(255,255,255,0.27); line-height: 1.28;
   }
-
-  /* ── Ligne bas : prix + bouton ── */
   .sh-card-footer {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    margin-top: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 4px; margin-top: auto; padding-top: 2px;
   }
   .sh-price {
-    font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
-    color: rgba(255,200,80,0.78); letter-spacing: 0.04em; line-height: 1;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.54rem;
+    color: rgba(255,200,80,0.82); line-height: 1;
   }
   .sh-price-sub {
-    font-family: 'Orbitron', monospace; font-size: 0.3rem;
-    color: rgba(255,200,80,0.35); letter-spacing: 0.06em;
-    display: block; margin-top: 1px;
+    font-family: 'Orbitron', monospace; font-size: 0.27rem;
+    color: rgba(255,200,80,0.35); display: block; margin-top: 1px;
   }
+
   .sh-buy-btn {
-    font-family: 'Orbitron', monospace; font-size: 0.42rem; font-weight: 700;
-    letter-spacing: 0.07em; padding: 5px 10px; border-radius: 20px;
-    background: linear-gradient(135deg, #8a5c00, #bf953f, #ffaa00, #fcf6ba, #ffaa00, #bf953f);
-    background-size: 200% auto; color: rgba(0,0,0,0.85); border: none;
+    font-family: 'Orbitron', monospace; font-size: 0.33rem; font-weight: 700;
+    letter-spacing: 0.05em; padding: 3px 7px; border-radius: 14px;
+    background: linear-gradient(135deg,#7a5200,#bf953f,#ffaa00,#fef6c0,#ffaa00,#bf953f);
+    background-size: 200% auto; color: rgba(0,0,0,0.88); border: none;
     cursor: pointer; touch-action: manipulation; white-space: nowrap;
     transition: background-position .3s, box-shadow .2s, transform .12s;
-    box-shadow: 0 2px 10px rgba(255,170,0,0.2);
+    box-shadow: 0 2px 7px rgba(255,170,0,0.18); flex-shrink: 0;
+  }
+  .sh-buy-btn:hover   { background-position: right center; box-shadow: 0 2px 12px rgba(255,170,0,0.3); }
+  .sh-buy-btn:active  { transform: scale(0.92); }
+  .sh-buy-btn:disabled{ opacity: 0.35; cursor: not-allowed; transform: none; }
+  .sh-buy-btn.don {
+    background: linear-gradient(135deg,rgba(25,120,75,0.9),rgba(65,195,125,0.85));
+    color: rgba(0,0,0,0.82); box-shadow: 0 2px 7px rgba(65,195,125,0.15);
+  }
+  .sh-buy-btn.don:hover { box-shadow: 0 2px 12px rgba(65,195,125,0.28); }
+
+  /* Bannière Overfill */
+  .sh-overfill-banner {
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 6px 8px; border-radius: 7px;
+    background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.1);
     flex-shrink: 0;
   }
-  .sh-buy-btn:hover { background-position: right center; box-shadow: 0 3px 16px rgba(255,170,0,0.35); }
-  .sh-buy-btn:active { transform: scale(0.93); }
-  .sh-buy-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-  /* Bouton don — teinte verte */
-  .sh-buy-btn.don {
-    background: linear-gradient(135deg, rgba(40,160,100,0.8), rgba(80,220,140,0.8));
-    color: rgba(0,0,0,0.8); box-shadow: 0 2px 10px rgba(80,220,140,0.15);
+  .sh-overfill-ico { font-size: 0.75rem; flex-shrink: 0; margin-top: 1px; }
+  .sh-overfill-lbl {
+    font-family: 'Orbitron', monospace; font-size: 0.34rem; font-weight: 700;
+    color: rgba(255,200,80,0.72); letter-spacing: 0.07em; display: block; margin-bottom: 2px;
   }
-  .sh-buy-btn.don:hover { box-shadow: 0 3px 16px rgba(80,220,140,0.28); }
+  .sh-overfill-txt {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.5rem;
+    color: rgba(255,255,255,0.27); line-height: 1.3; flex: 1;
+  }
 
-  /* ── Toggle don anonyme ── */
-  .sh-toggle-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 10px; border-radius: 8px;
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+  /* Barre anonyme */
+  .sh-anon-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: 5px 8px; border-radius: 7px;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
   }
-  .sh-toggle-label {
-    font-family: 'Rajdhani', sans-serif; font-size: 0.65rem; font-weight: 600;
-    color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 6px;
+  .sh-anon-label {
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.54rem; font-weight: 600;
+    color: rgba(255,255,255,0.38);
   }
-  .sh-toggle-label .tl-ico { font-size: 0.85rem; }
-  /* Switch ON/OFF */
   .sh-toggle {
-    position: relative; width: 32px; height: 17px;
-    background: rgba(255,255,255,0.08); border-radius: 9px;
+    position: relative; width: 28px; height: 15px;
+    background: rgba(255,255,255,0.08); border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.12);
     cursor: pointer; touch-action: manipulation; flex-shrink: 0;
     transition: background .2s, border-color .2s;
@@ -4632,34 +4917,37 @@ body {
   .sh-toggle::after {
     content: '';
     position: absolute; top: 2px; left: 2px;
-    width: 11px; height: 11px; border-radius: 50%;
-    background: rgba(255,255,255,0.3);
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255,255,255,0.28);
     transition: transform .2s, background .2s;
   }
-  .sh-toggle.on {
-    background: rgba(80,220,140,0.25); border-color: rgba(80,220,140,0.45);
-  }
+  .sh-toggle.on { background: rgba(80,210,140,0.22); border-color: rgba(80,210,140,0.45); }
   .sh-toggle.on::after {
-    transform: translateX(15px);
-    background: rgba(80,220,140,0.9);
-    box-shadow: 0 0 6px rgba(80,220,140,0.5);
+    transform: translateX(13px);
+    background: rgba(80,210,140,0.9);
+    box-shadow: 0 0 5px rgba(80,210,140,0.5);
+  }
+  #sh-anon-status {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.48rem;
+    color: rgba(80,210,140,0.7); text-align: center; padding: 2px; letter-spacing: 0.04em;
   }
 
-  /* ── Infos mécaniques (Overfill) ── */
+  /* Mécanique (Vengeance info) */
   .sh-meca-box {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 10px 12px; border-radius: 10px;
-    background: rgba(255,170,0,0.04); border: 1px solid rgba(255,170,0,0.1);
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 6px 8px; border-radius: 7px;
+    background: rgba(255,170,0,0.03); border: 1px solid rgba(255,170,0,0.09);
+    flex-shrink: 0;
   }
-  .sh-meca-ico { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-  .sh-meca-txt { flex: 1; }
+  .sh-meca-ico  { font-size: 0.78rem; flex-shrink: 0; }
+  .sh-meca-txt  { flex: 1; }
   .sh-meca-title {
-    font-family: 'Orbitron', monospace; font-size: 0.46rem; font-weight: 700;
-    color: rgba(255,200,80,0.75); letter-spacing: 0.08em; margin-bottom: 3px;
+    font-family: 'Orbitron', monospace; font-size: 0.35rem; font-weight: 700;
+    color: rgba(255,200,80,0.7); letter-spacing: 0.07em; margin-bottom: 2px;
   }
   .sh-meca-desc {
-    font-family: 'Rajdhani', sans-serif; font-size: 0.6rem;
-    color: rgba(255,255,255,0.3); line-height: 1.4;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.5rem;
+    color: rgba(255,255,255,0.27); line-height: 1.3;
   }
 
   /* ═══ CONTENU OVERLAY MENU ══════════════════ */
@@ -5192,6 +5480,88 @@ body {
       <button class="btn-tool danger" onclick="clearAll()">✕ EFFACER TOUT</button>
     </div><!-- /hud-tool-strip -->
 
+  <!-- ════════════════════════════════════════════════════════
+       BARRE PALETTE PERMANENTE — sous le canevas, toujours visible
+       Layout : [dot couleur] [grille couleurs] | [GOMME] [CALQUE] [MOVE▾]
+  ════════════════════════════════════════════════════════ -->
+  <div id="gp-palette-bar">
+
+    <!-- Dot couleur active -->
+    <div id="gp-pb-color-dot" title="Couleur active"></div>
+
+    <!-- Grille palette matte (clonée depuis #palette desktop) -->
+    <div id="gp-pb-palette"></div>
+
+    <!-- Séparateur -->
+    <div class="gp-pb-sep"></div>
+
+    <!-- Bouton GOMME -->
+    <button class="gp-pb-btn" id="gp-pb-erase"
+            onclick="setMode(mode === 'erase' ? 'draw' : 'erase'); gpSyncModes();"
+            aria-label="Gomme">
+      <svg class="gp-pb-btn-ico" width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="11" width="16" height="7" rx="1.5"
+              stroke="currentColor" stroke-width="1.2"/>
+        <path d="M4 11 L10 4 L16 11" stroke="currentColor" stroke-width="1.2"
+              stroke-linejoin="round"/>
+        <line x1="7" y1="18" x2="7" y2="11" stroke="currentColor" stroke-width="0.8" opacity=".4"/>
+      </svg>
+      <span class="gp-pb-btn-lbl">GOMME</span>
+    </button>
+
+    <!-- Bouton CALQUE -->
+    <button class="gp-pb-btn" id="gp-pb-layer"
+            onclick="gpToggle('tuto')"
+            aria-label="Calques importés">
+      <svg class="gp-pb-btn-ico" width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <!-- Couche basse -->
+        <rect x="3" y="13" width="14" height="4" rx="1.5"
+              stroke="currentColor" stroke-width="1.1" fill="rgba(255,210,80,0.06)"/>
+        <!-- Couche milieu -->
+        <rect x="3" y="8" width="14" height="4" rx="1.5"
+              stroke="currentColor" stroke-width="1.1" fill="rgba(255,210,80,0.06)"/>
+        <!-- Couche haute (active) -->
+        <rect x="3" y="3" width="14" height="4" rx="1.5"
+              stroke="currentColor" stroke-width="1.3" fill="rgba(255,210,80,0.14)"/>
+        <!-- Petite icône + -->
+        <circle cx="16.5" cy="3.5" r="2.8" fill="rgba(255,210,80,0.2)"
+                stroke="currentColor" stroke-width="0.8"/>
+        <line x1="16.5" y1="2.5" x2="16.5" y2="4.5" stroke="currentColor" stroke-width="0.9"/>
+        <line x1="15.5" y1="3.5" x2="17.5" y2="3.5" stroke="currentColor" stroke-width="0.9"/>
+      </svg>
+      <span class="gp-pb-btn-lbl">CALQUE</span>
+    </button>
+
+    <!-- Bouton MOVE — ouvre le popup zoom/centrer -->
+    <button class="gp-pb-btn" id="gp-pb-move"
+            onclick="gpToggleMovePopup()"
+            aria-label="Navigation canevas">
+      <svg class="gp-pb-btn-ico" width="16" height="16" viewBox="0 0 20 20" fill="none">
+        <!-- Croix de déplacement -->
+        <polygon points="10,2 12.5,5.5 10,4 7.5,5.5" fill="currentColor" opacity=".8"/>
+        <polygon points="10,18 12.5,14.5 10,16 7.5,14.5" fill="currentColor" opacity=".8"/>
+        <polygon points="2,10 5.5,7.5 4,10 5.5,12.5" fill="currentColor" opacity=".8"/>
+        <polygon points="18,10 14.5,7.5 16,10 14.5,12.5" fill="currentColor" opacity=".8"/>
+        <circle cx="10" cy="10" r="2" fill="currentColor" opacity=".6"/>
+      </svg>
+      <span class="gp-pb-btn-lbl">MOVE</span>
+    </button>
+
+    <!-- Popup Move — zoom + / - / centrer -->
+    <div id="gp-move-popup" role="menu" aria-label="Navigation">
+      <button class="gp-mp-btn" onclick="zoomIn(); gpSyncZoom();">
+        <span class="mp-ico">🔍</span> ZOOM +
+      </button>
+      <button class="gp-mp-btn" onclick="zoomOut(); gpSyncZoom();">
+        <span class="mp-ico">🔎</span> ZOOM −
+      </button>
+      <button class="gp-mp-btn" onclick="resetView(); gpSyncZoom(); gpCloseMovePopup();">
+        <span class="mp-ico">⊙</span> CENTRER
+      </button>
+    </div>
+
+  </div><!-- /gp-palette-bar -->
+
   </div><!-- /hud-canvas-column -->
 
 
@@ -5473,12 +5843,57 @@ async function authenticatePi() {
     piUser = { uid: auth.user.uid, username: auth.user.username };
     console.log(`✅ Pi authentifié : @${piUser.username} (uid: ${piUser.uid})`);
 
-    // Vérifie le statut Gold dans MongoDB
+    // Vérifie le statut Elite dans MongoDB
     await checkGoldStatus();
+
+    // Restaure l'état de jeu persisté (bouclier, pixels bonus, vengeance)
+    await restorePlayerStatus();
 
   } catch (e) {
     console.warn('Pi authenticate échoué:', e.message);
     setPiStatusOffline();
+  }
+}
+
+// ── Restaure l'état persisté depuis MongoDB après connexion ──
+async function restorePlayerStatus() {
+  if (!piUser) return;
+  try {
+    const res  = await fetch(`${API}/api/goldpixel/my-status`, {
+      headers: { 'Authorization': `Bearer ${piUser.uid}` }  // withPiUser(false) lit le uid
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // ── Bouclier ──
+    if (data.shieldActive && data.shieldSecsLeft > 0) {
+      window.playerShieldActive   = true;
+      window.playerShieldSecsLeft = data.shieldSecsLeft;
+      if (typeof updateTacticalWidgets === 'function') updateTacticalWidgets();
+      showToast(`🛡 Bouclier actif — ${Math.ceil(data.shieldSecsLeft / 3600)}h restantes`);
+      console.log(`✅ Bouclier restauré : ${data.shieldSecsLeft}s restantes`);
+    }
+
+    // ── Pixels bonus (Overfill) ──
+    if (data.bonusPixels > 0) {
+      try {
+        BONUS_GOLD_MAX  = data.bonusPixels;
+        bonusGoldActive = true;
+        bonusGoldUsed   = 0;
+        if (typeof updateBannerPixelModule === 'function') updateBannerPixelModule();
+        showToast(`⚡ ${data.bonusPixels} pixels bonus disponibles`);
+        console.log(`✅ ${data.bonusPixels} bonusPixels restaurés`);
+      } catch (_) {}
+    }
+
+    // ── Pack Vengeance ──
+    if (data.vengeanceActive) {
+      window.playerVengeanceActive = true;
+      console.log('✅ Pack Vengeance restauré');
+    }
+
+  } catch (e) {
+    console.warn('restorePlayerStatus échoué:', e.message);
   }
 }
 
@@ -5830,9 +6245,49 @@ function paintCell(col, row, fillColor) {
 }
 
 function eraseCell(col, row) {
-  // Efface proprement sans laisser de trace blanche
-  ctx.fillStyle = BG_COLOR;
-  ctx.fillRect(col * PX, row * PX, PX, PX);
+  // Recréer le dégradé de fond localement pour la cellule effacée
+  // (le fond est un dégradé radial — pas une couleur plate BG_COLOR)
+  const x = col * PX, y = row * PX;
+  // Approximer la couleur du dégradé radial pour cette cellule
+  // distance normalisée depuis le centre du canvas
+  const dx = (x + PX/2 - CANVAS_W/2) / (CANVAS_W * 0.72);
+  const dy = (y + PX/2 - CANVAS_H/2) / (CANVAS_W * 0.72);
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  // Interpoler entre centre (#0d1829) et bord (#040c14)
+  const t = Math.min(1, dist);
+  const r = Math.round(13 + (4-13)*t);
+  const g = Math.round(24 + (12-24)*t);
+  const b = Math.round(41 + (20-41)*t);
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.fillRect(x, y, PX, PX);
+
+  // Redessiner la grille par-dessus la cellule effacée
+  ctx.strokeStyle = 'rgba(80,140,220,0.1)';
+  ctx.lineWidth = 0.5;
+  // Lignes verticales de la cellule
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + PX); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + PX, y); ctx.lineTo(x + PX, y + PX); ctx.stroke();
+  // Lignes horizontales de la cellule
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + PX, y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y + PX); ctx.lineTo(x + PX, y + PX); ctx.stroke();
+
+  // Grille secondaire si on est sur un repère 10×10
+  if (col % 10 === 0 || (col+1) % 10 === 0) {
+    ctx.strokeStyle = 'rgba(255,185,40,0.07)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + PX); ctx.stroke();
+    if ((col+1) % 10 === 0) {
+      ctx.beginPath(); ctx.moveTo(x + PX, y); ctx.lineTo(x + PX, y + PX); ctx.stroke();
+    }
+  }
+  if (row % 10 === 0 || (row+1) % 10 === 0) {
+    ctx.strokeStyle = 'rgba(255,185,40,0.07)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + PX, y); ctx.stroke();
+    if ((row+1) % 10 === 0) {
+      ctx.beginPath(); ctx.moveTo(x, y + PX); ctx.lineTo(x + PX, y + PX); ctx.stroke();
+    }
+  }
 }
 
 // ════════════════════════════════════════════
@@ -6037,6 +6492,9 @@ function handleDraw(clientX, clientY) {
     if (color === METAL.gold && pixelGrid[col][row] !== METAL.gold && countGoldPixels() >= MAX_GOLD) {
       showToast("RÉSERVE D'OR ÉPUISÉE !"); return;
     }
+    // Ne pas repeindre si la cellule a déjà cette couleur exacte
+    // (évite le repaint inutile et protège les pixels existants d'un effacement accidentel)
+    if (pixelGrid[col][row] === color) return;
     pixelGrid[col][row] = color;
     paintCell(col, row, color);
     updateGoldCounter();
@@ -7173,7 +7631,7 @@ requestAnimationFrame(() => {
   });
 });
 
-window.addEventListener('resize', resetView);
+// resize géré par _gpOnResize (debounced 130ms) — listener dupliqué supprimé
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -8849,19 +9307,58 @@ function _gpOnFsChange() {
 ──────────────────────────────────────────────────────────── */
 let _gpPaletteBuilt = false;
 
-
-/* ── Palette : mise à jour indicateur couleur active dans le header ── */
+/* ── Mise à jour du dot couleur actif dans la barre palette ── */
 function _gpPalUpdateActive(name, hex) {
-  const dot  = document.getElementById('pal-active-dot');
-  const lbl  = document.getElementById('pal-active-name');
-  if (dot) {
-    dot.style.background  = hex || color;
-    dot.style.boxShadow   = `0 0 8px ${hex || color}55`;
+  // Dot dans la barre palette permanente
+  const pbDot = document.getElementById('gp-pb-color-dot');
+  if (pbDot) {
+    pbDot.style.background = hex || color;
+    pbDot.style.boxShadow  = `0 0 8px ${hex || color}55`;
   }
+  // Dot dans l'overlay palette (si ouvert)
+  const dot = document.getElementById('pal-active-dot');
+  const lbl = document.getElementById('pal-active-name');
+  if (dot) { dot.style.background = hex || color; dot.style.boxShadow = `0 0 8px ${hex || color}55`; }
   if (lbl) lbl.textContent = (name || '').toUpperCase();
 }
 
-/* Appeler _gpPalUpdateActive à chaque sélection de couleur depuis la grille */
+/* ── Remplissage de la barre palette permanente + de l'overlay palette ──
+   Les deux grilles partagent la même source (#palette desktop).
+   La barre permanente (#gp-pb-palette) est construite une seule fois au
+   chargement. L'overlay (#gp-palette-grid) est construit à la première ouverture.
+*/
+function _gpFillPaletteBar() {
+  const srcGrid  = document.getElementById('palette');
+  const destBar  = document.getElementById('gp-pb-palette');
+  if (!srcGrid || !destBar || destBar.children.length > 0) return;
+
+  srcGrid.querySelectorAll('.c-btn').forEach(btn => {
+    const clone    = btn.cloneNode(true);
+    const hexColor = btn.dataset.color || _gpRgbToHex(btn.style.backgroundColor);
+
+    const handler = () => {
+      if (!hexColor) return;
+      color = hexColor;
+      _gpSetColorDot(color);
+      // Sync active sur toutes les grilles
+      document.querySelectorAll('#palette .c-btn, #gp-pb-palette .c-btn, #gp-palette-grid .c-btn')
+              .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      clone.classList.add('active');
+      _gpPalUpdateActive(btn.title || hexColor, hexColor);
+      // Passer en mode dessin si on était en gomme
+      if (typeof mode !== 'undefined' && mode === 'erase') {
+        setMode('draw'); gpSyncModes();
+      }
+      // Ne PAS fermer l'overlay — la barre est permanente
+    };
+
+    clone.addEventListener('touchstart', e => { e.preventDefault(); handler(); }, { passive: false });
+    clone.addEventListener('click', handler);
+    destBar.appendChild(clone);
+  });
+}
+
 function _gpFillPalette() {
   if (_gpPaletteBuilt) return;
   const srcGrid  = document.getElementById('palette');
@@ -8874,19 +9371,19 @@ function _gpFillPalette() {
 
     const handler = () => {
       if (!hexColor) return;
-      color = hexColor; // variable globale du moteur de dessin
+      color = hexColor;
       _gpSetColorDot(color);
-      // Sync actif sur les deux grilles
-      document.querySelectorAll('#palette .c-btn, #gp-palette-grid .c-btn')
+      document.querySelectorAll('#palette .c-btn, #gp-pb-palette .c-btn, #gp-palette-grid .c-btn')
               .forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       clone.classList.add('active');
-      // Mettre à jour le dot + nom dans le header palette
       _gpPalUpdateActive(btn.title || hexColor, hexColor);
-      gpCloseAll(); // fermer l'overlay après sélection
+      if (typeof mode !== 'undefined' && mode === 'erase') {
+        setMode('draw'); gpSyncModes();
+      }
+      gpCloseAll();
     };
 
-    // Touch natif sans délai 300ms
     clone.addEventListener('touchstart', e => { e.preventDefault(); handler(); }, { passive: false });
     clone.addEventListener('click', handler);
     destGrid.appendChild(clone);
@@ -8895,13 +9392,31 @@ function _gpFillPalette() {
   _gpPaletteBuilt = true;
 }
 
+/* ── Popup Move (zoom+/zoom-/centrer) ── */
+let _gpMovePopupOpen = false;
+function gpToggleMovePopup() {
+  _gpMovePopupOpen = !_gpMovePopupOpen;
+  const popup = document.getElementById('gp-move-popup');
+  const btn   = document.getElementById('gp-pb-move');
+  if (popup) popup.classList.toggle('open', _gpMovePopupOpen);
+  if (btn)   btn.classList.toggle('active', _gpMovePopupOpen);
+}
+function gpCloseMovePopup() {
+  _gpMovePopupOpen = false;
+  document.getElementById('gp-move-popup')?.classList.remove('open');
+  document.getElementById('gp-pb-move')?.classList.remove('active');
+}
+
 /* ────────────────────────────────────────────────────────────
    HELPERS — couleur, hex, synchros
 ──────────────────────────────────────────────────────────── */
 function _gpSetColorDot(hex) {
-  // Point couleur sur le FAB dessin
-  const dot = document.getElementById('gp-color-dot');
-  if (dot) dot.style.background = hex;
+  // Dot dans l'ancienne toolbar (masqué mais conservé)
+  const dotOld = document.getElementById('gp-color-dot');
+  if (dotOld) dotOld.style.background = hex;
+  // Dot dans la barre palette permanente
+  const dotBar = document.getElementById('gp-pb-color-dot');
+  if (dotBar) { dotBar.style.background = hex; dotBar.style.boxShadow = `0 0 6px ${hex}55`; }
 }
 
 function _gpRgbToHex(rgb) {
@@ -8916,23 +9431,22 @@ function _gpRgbToHex(rgb) {
 }
 
 function gpSyncModes() {
-  // Modes dessin dans l'overlay
+  // Modes dessin dans l'overlay palette
   document.getElementById('gp-mode-draw') ?.classList.toggle('on', mode === 'draw');
   document.getElementById('gp-mode-erase')?.classList.toggle('on', mode === 'erase');
   document.getElementById('gp-nav-pan')   ?.classList.toggle('on', mode === 'pan');
 
-  // Badge mode sur le bouton palette de la toolbar
+  // Badge mode (toolbar droite, maintenant masquée mais IDs conservés)
   const badge = document.getElementById('gp-mode-badge');
   if (badge) badge.textContent = mode === 'erase' ? '⬜' : mode === 'pan' ? '✋' : '✏';
 
-  // Bouton gomme dans la toolbar — allumé si mode erase
+  // Bouton GOMME dans la barre palette permanente
+  const pbErase = document.getElementById('gp-pb-erase');
+  if (pbErase) pbErase.classList.toggle('active', mode === 'erase');
+
+  // Bouton gomme toolbar (masqué CSS mais sync quand même)
   const tbErase = document.getElementById('gp-tb-erase');
   if (tbErase) tbErase.classList.toggle('active', mode === 'erase');
-
-  // Bouton palette — allumé si mode draw ou overlay dessin ouvert
-  const tbPalette = document.getElementById('gp-fab-palette');
-  if (tbPalette) tbPalette.classList.toggle('active',
-    mode === 'draw' && _gpOpen === 'draw');
 }
 
 function gpSyncZoom() {
@@ -8990,26 +9504,63 @@ function shToggleAnon(el) {
   if (status) status.style.display = _shAnonActive ? 'block' : 'none';
 }
 
-/* Action d'un don — vérifie si anonyme ou non */
+/* Action d'un don — vérifie si anonyme ou non
+   Types supportés :
+   distinction       — montant libre pour féliciter un artiste
+   gift_elite        — offrir le Pack Elite (10 Pi)
+   gift_vengeance    — offrir le Pack Vengeance (1 Pi)
+   gift_pixels_100   — offrir Chargeur Moyen (1 Pi)
+   gift_pixels_250   — offrir Grand Chargeur (2 Pi)
+   gift_dome_4h      — offrir Dôme 4H (0,5 Pi)
+   gift_dome_8h      — offrir Dôme 8H (1 Pi)
+*/
 function shDonAction(type) {
   if (!piUser) {
-    showToast("Connectez-vous via Pi Browser pour effectuer un don");
+    showToast("Connecte-toi via Pi Browser pour effectuer un don");
     return;
   }
-  if (type === 'elite') {
-    const recipient = _shAnonActive ? null : prompt("Pseudo Pi du destinataire :");
-    if (recipient === null && !_shAnonActive) return; // annulé
-    shopPiPay('gift_elite', 10);
-  } else if (type === 'libre') {
+
+  // Demander le destinataire (sauf si anonyme activé)
+  let recipient = null;
+  if (!_shAnonActive && type !== 'distinction') {
+    recipient = prompt("Pseudo Pi du destinataire :");
+    if (recipient === null) return; // annulé
+    recipient = recipient.trim() || null;
+  }
+
+  const GIFT_MAP = {
+    distinction:      { itemId: 'distinction',    price: null,  label: 'Distinction' },
+    gift_elite:       { itemId: 'gift_elite',     price: 10,    label: 'Pack Elite' },
+    gift_vengeance:   { itemId: 'gift_vengeance', price: 1,     label: 'Pack Vengeance' },
+    gift_pixels_100:  { itemId: 'gift_pixels_100',price: 1,     label: 'Chargeur Moyen (100px)' },
+    gift_pixels_250:  { itemId: 'gift_pixels_250',price: 2,     label: 'Grand Chargeur (250px)' },
+    gift_dome_4h:     { itemId: 'gift_dome_4h',   price: 0.5,   label: 'Dôme 4H' },
+    gift_dome_8h:     { itemId: 'gift_dome_8h',   price: 1,     label: 'Dôme 8H' },
+  };
+
+  const gift = GIFT_MAP[type];
+  if (!gift) { showToast("Type de don inconnu"); return; }
+
+  if (type === 'distinction') {
+    // Montant libre
     const amtStr = prompt("Montant du don en Pi (ex: 0.5, 1, 2) :");
     if (!amtStr) return;
     const amt = parseFloat(amtStr);
     if (isNaN(amt) || amt <= 0) { showToast("Montant invalide"); return; }
-    if (!_shAnonActive) {
-      const recipient = prompt("Pseudo Pi du destinataire (laisser vide pour général) :");
-      if (recipient === null) return;
-    }
-    shopAnonDon();
+    const artiste = _shAnonActive ? null : prompt("Pseudo Pi de l'artiste (optionnel) :");
+    if (artiste === null && !_shAnonActive) return;
+    shopPiPayCustom('distinction', amt, {
+      recipient: artiste || 'ARTISTE',
+      anonymous: _shAnonActive,
+      memo: `Gold Pixel — Distinction${artiste ? ' pour @' + artiste : ''}`,
+    });
+  } else {
+    // Don à prix fixe
+    shopPiPayCustom(gift.itemId, gift.price, {
+      recipient: recipient || (type === 'gift_elite' ? 'DESTINATAIRE' : null),
+      anonymous: _shAnonActive,
+      memo: `Gold Pixel — Cadeau : ${gift.label}${recipient ? ' pour @' + recipient : ''}`,
+    });
   }
 }
 
@@ -9045,6 +9596,108 @@ function _gpSyncShop() {
   const status = document.getElementById('sh-anon-status');
   if (status) status.style.display = 'none';
 }
+/* ── Moteur de recharge pixels ──────────────────────────────
+   Essentiel : réservoir 15px · recharge 1px/4min (240s)
+   Elite     : réservoir 30px · recharge 1px/2min (120s)
+   La recharge s'applique quand le réservoir n'est pas plein.
+   goldUsed est la variable globale du moteur de dessin.
+────────────────────────────────────────────────────────── */
+let _gpRechargeTimer  = 0;   // secondes depuis le dernier pixel rechargé
+let _gpLastRechargeTs = Date.now();
+
+function _gpGetReservoirCfg() {
+  const elite = typeof playerGold !== 'undefined' && playerGold;
+  // max HUD : nombre de pixels affichés dans le réservoir (15 Essentiel / 30 Elite)
+  // interval : secondes entre chaque pixel rechargé
+  // maxDraw  : vraie limite de dessin OR (MAX_GOLD, 50 par défaut)
+  return {
+    max:      elite ? 30 : 15,
+    interval: elite ? 120 : 240,
+    isElite:  elite,
+    maxDraw:  typeof MAX_GOLD !== 'undefined' ? MAX_GOLD : 50,
+  };
+}
+
+/* Appelé toutes les secondes par setInterval (branché dans INIT) */
+/* ── Crédits de recharge : pixels supplémentaires accordés par la recharge
+   Stockés séparément de goldUsed pour ne PAS modifier pixelGrid.
+   _gpRechargeCredit s'additionne à la capacité disponible. ── */
+let _gpRechargeCredit = 0;
+
+function _gpTickRecharge() {
+  const cfg   = _gpGetReservoirCfg();
+  const now   = Date.now();
+  const delta = (now - _gpLastRechargeTs) / 1000;
+  _gpLastRechargeTs = now;
+
+  // Pixels OR utilisés dans la grille (source de vérité absolue)
+  const usedInGrid = (typeof countGoldPixels === 'function')
+    ? countGoldPixels()
+    : (typeof goldUsed !== 'undefined' ? goldUsed : 0);
+
+  // Capacité totale : cfg.max pixels avec recharge naturelle
+  // Le réservoir HUD montre : cfg.max - usedInGrid + _gpRechargeCredit
+  // clamped à cfg.max maximum
+  const remFromGrid = Math.max(0, cfg.max - usedInGrid);
+  const displayRem  = Math.min(cfg.max, remFromGrid + _gpRechargeCredit);
+
+  // Si le réservoir HUD est plein → reset timer mais garder le crédit
+  if (displayRem >= cfg.max) {
+    _gpRechargeTimer = 0;
+    _gpSyncReservoirHud(cfg.max, cfg.max, 0, cfg);
+    return;
+  }
+
+  // Avancer le timer
+  _gpRechargeTimer += delta;
+
+  // Pixel rechargé : ajouter un crédit (pas toucher goldUsed ni pixelGrid)
+  if (_gpRechargeTimer >= cfg.interval) {
+    _gpRechargeTimer -= cfg.interval;
+    // Ne créditer que si le réservoir n'est pas déjà plein
+    if (displayRem < cfg.max) {
+      _gpRechargeCredit++;
+    }
+  }
+
+  const newRem = Math.min(cfg.max, remFromGrid + _gpRechargeCredit);
+  _gpSyncReservoirHud(newRem, cfg.max, _gpRechargeTimer, cfg);
+}
+
+/* Met à jour le module réservoir dans le header HUD */
+function _gpSyncReservoirHud(rem, max, timerSec, cfg) {
+  const $ = id => document.getElementById(id);
+  const pct = max > 0 ? rem / max : 0;
+
+  // Compteur
+  const elCount = $('gp-hdr-pixels');
+  if (elCount) {
+    elCount.textContent = rem + ' / ' + max;
+    elCount.className   = 'hdr-res-count';
+    if (rem === 0)       elCount.classList.add('low');
+    else if (rem < max * 0.33) elCount.classList.add('medium');
+  }
+
+  // Barre de progression
+  const elBar = $('gp-hdr-res-bar');
+  if (elBar) elBar.style.width = (pct * 100).toFixed(1) + '%';
+
+  // Timer recharge
+  const elTimer = $('gp-hdr-timer');
+  if (elTimer) {
+    if (rem >= max) {
+      elTimer.textContent = 'PLEIN';
+      elTimer.className   = 'hdr-res-timer ready';
+    } else {
+      const secsLeft = Math.max(0, cfg.interval - timerSec);
+      const m = Math.floor(secsLeft / 60);
+      const s = Math.floor(secsLeft % 60);
+      elTimer.textContent = m + ':' + String(s).padStart(2, '0');
+      elTimer.className   = 'hdr-res-timer';
+    }
+  }
+}
+
 function _gpUpdateHudHeader() {
   // ── Sources : éléments du top-banner desktop (masqué sur mobile)
   //    Ces IDs sont toujours présents dans le DOM, juste cachés visuellement.
@@ -9057,7 +9710,6 @@ function _gpUpdateHudHeader() {
   if (srcName && hdrUser) {
     const txt = srcName.textContent.trim();
     hdrUser.textContent = txt || 'CONNEXION...';
-    // Avatar : initiale
     if (hdrAvt) {
       hdrAvt.textContent = (txt && txt !== 'CONNEXION...')
         ? txt.charAt(0).toUpperCase() : '?';
@@ -9088,33 +9740,16 @@ function _gpUpdateHudHeader() {
     hdrPack.classList.toggle('elite',     isElite);
     hdrPack.classList.toggle('essential', !isElite);
   }
-  if (hdrPackLbl) hdrPackLbl.textContent = isElite ? 'ELITE' : 'ESSENTIAL';
+  if (hdrPackLbl) hdrPackLbl.textContent = isElite ? 'ELITE' : 'ESSENTIEL';
 
-  // 5. Pixels or (depuis goldCount ou tw-reservoir-value)
-  const hdrPix  = $('gp-hdr-pixels');
-  const srcRes  = $('tw-reservoir-value');
-  const srcGold = $('goldCount');
-  if (hdrPix) {
-    const val = (srcRes && srcRes.textContent.trim() !== '—')
-      ? srcRes.textContent.trim()
-      : (srcGold ? srcGold.textContent.trim() + ' px' : '—');
-    hdrPix.textContent = val;
-    hdrPix.classList.toggle('red', parseInt(val) < 5);
-  }
+  // 5. Réservoir — géré par _gpSyncReservoirHud() via tick
+  //    Forcer une sync immédiate au chargement
+  const cfg = _gpGetReservoirCfg();
+  const usedNow = typeof goldUsed !== 'undefined' ? goldUsed : 0;
+  const maxNow  = typeof MAX_GOLD !== 'undefined' ? MAX_GOLD : cfg.max;
+  _gpSyncReservoirHud(Math.max(0, maxNow - usedNow), cfg.max, _gpRechargeTimer, cfg);
 
-  // 6. Countdown recharge
-  const hdrTimer = $('gp-hdr-timer');
-  const srcTimer = $('tw-countdown-value');
-  if (hdrTimer && srcTimer) {
-    const t = srcTimer.textContent.trim();
-    hdrTimer.textContent = t;
-    hdrTimer.className   = 'hdr-pill-val'; // reset
-    if (t === 'PRÊT')       hdrTimer.classList.add('green');
-    else if (/^\d{1}:/.test(t)) hdrTimer.classList.add('orange'); // < 2min
-    else                    hdrTimer.classList.add('orange');
-  }
-
-  // 7. Bouclier actif
+  // 6. Bouclier actif
   const hdrShield    = $('gp-hdr-shield');
   const hdrShieldVal = $('gp-hdr-shield-val');
   const srcShield    = $('tw-shield-value');
@@ -9126,7 +9761,7 @@ function _gpUpdateHudHeader() {
   }
   if (hdrShieldVal) hdrShieldVal.textContent = shieldVal;
 
-  // 8. Dot connexion Pi
+  // 7. Dot connexion Pi
   const hdrDot  = $('gp-hdr-dot');
   const srcConn = $('tw-sentinel-status');
   if (hdrDot && srcConn) {
@@ -9134,6 +9769,19 @@ function _gpUpdateHudHeader() {
     hdrDot.classList.toggle('online',  online);
     hdrDot.classList.toggle('offline', !online);
   }
+}
+
+/* ── Détection orientation portrait / paysage ───────────────
+   Affiche la modale bloquante en portrait sur mobile.
+   Ne bloque pas le dessin en paysage.
+────────────────────────────────────────────────────────── */
+function _gpCheckOrientation() {
+  if (!IS_MOBILE()) return;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const modal      = document.getElementById('gp-portrait-modal');
+  if (!modal) return;
+  if (isPortrait) modal.classList.add('show');
+  else            modal.classList.remove('show');
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -9187,8 +9835,19 @@ function _gpUpdateHudHeader() {
    RESIZE / ORIENTATION
 ──────────────────────────────────────────────────────────── */
 function _gpOnResize() {
-  setTimeout(() => { resetView(); gpSyncZoom(); gpSyncModes(); }, 130);
+  // Ne pas recalculer la vue pendant un tracé actif (évite saut de canvas mobile)
+  if (typeof isDown !== 'undefined' && isDown) return;
+  // Debounce 130ms — laisse le layout se stabiliser avant de recalculer
+  clearTimeout(_gpResizeDebounce);
+  _gpResizeDebounce = setTimeout(() => {
+    // Vérifier à nouveau au moment de l'exécution
+    if (typeof isDown !== 'undefined' && isDown) return;
+    resetView();
+    gpSyncZoom();
+    gpSyncModes();
+  }, 130);
 }
+let _gpResizeDebounce = null;
 window.addEventListener('resize',            _gpOnResize);
 window.addEventListener('orientationchange', _gpOnResize);
 
@@ -9199,11 +9858,32 @@ document.addEventListener('DOMContentLoaded', () => {
   _gpSetColorDot('#FFFFFF');
 
   if (IS_MOBILE()) {
-    // Afficher la modale de lancement après stabilisation du DOM
+    // Modale lancement (orientation + fullscreen)
     setTimeout(_gpShowLaunchModal, 450);
     // Initialiser la vue canvas après le layout
     setTimeout(() => { resetView(); gpSyncZoom(); }, 650);
+    // Vérifier orientation immédiatement et à chaque changement
+    _gpCheckOrientation();
+    window.addEventListener('resize',            _gpCheckOrientation);
+    window.addEventListener('orientationchange', _gpCheckOrientation);
+    // Moteur de recharge pixels — tick toutes les secondes
+    _gpLastRechargeTs = Date.now();
+    setInterval(_gpTickRecharge, 1000);
+    // Remplir la barre palette permanente après que #palette soit peuplé
+    // Délai pour laisser initPalette() du moteur de dessin s'exécuter
+    setTimeout(_gpFillPaletteBar, 300);
   }
+
+  // Fermer le popup Move si clic en dehors
+  document.addEventListener('click', e => {
+    if (_gpMovePopupOpen) {
+      const popup = document.getElementById('gp-move-popup');
+      const btn   = document.getElementById('gp-pb-move');
+      if (popup && !popup.contains(e.target) && btn && !btn.contains(e.target)) {
+        gpCloseMovePopup();
+      }
+    }
+  }, true);
 });
 
 </script>
@@ -9695,54 +10375,62 @@ document.addEventListener('DOMContentLoaded', () => {
   ════════════════════════════════════════════════════════ -->
   <div id="gp-hud-header">
 
-    <!-- ── BLOC GAUCHE : avatar · nom · armée · drapeau · pack ── -->
-    <div class="hdr-player-bloc" title="Votre profil">
-
-      <!-- Avatar : initiale du pseudo -->
+    <!-- ══ ZONE GAUCHE : avatar · nom · armée · drapeau · pack ══ -->
+    <div class="hdr-left" title="Votre profil">
       <div class="hdr-avatar" id="gp-hdr-avatar">?</div>
-
-      <!-- Nom + armée (deux lignes) -->
       <div class="hdr-names">
         <span class="hdr-username" id="gp-hdr-username">CONNEXION...</span>
         <span class="hdr-army"     id="gp-hdr-army">◆ SOLO</span>
       </div>
-
-      <!-- Drapeau pays -->
       <span class="hdr-flag" id="gp-hdr-flag">🌐</span>
-
-      <!-- Badge pack -->
       <div class="hdr-pack essential" id="gp-hdr-pack">
         <span class="hdr-pack-dot"></span>
-        <span id="gp-hdr-pack-lbl">ESSENTIAL</span>
+        <span id="gp-hdr-pack-lbl">ESSENTIEL</span>
+      </div>
+    </div>
+
+    <!-- ══ ZONE CENTRE : titre "GOLD PIXEL" + bouton SHOP ══ -->
+    <div class="hdr-center">
+      <!-- Titre doré premium -->
+      <div class="hdr-title">✦ GOLD PIXEL ✦</div>
+      <!-- Bouton SHOP -->
+      <button class="hdr-shop-btn"
+              onclick="gpToggle('shop')"
+              aria-label="Ouvrir la boutique">
+        <span class="shop-cart-ico">🛒</span>
+        SHOP
+      </button>
+    </div>
+
+    <!-- ══ ZONE DROITE : réservoir + timer + bouclier + dot ══ -->
+    <div class="hdr-right">
+
+      <!-- Module réservoir compact -->
+      <div class="hdr-reservoir" title="Pixels disponibles et recharge">
+        <!-- Ligne 1 : compteur -->
+        <div class="hdr-res-top">
+          <span class="hdr-res-ico">◆</span>
+          <span class="hdr-res-count" id="gp-hdr-pixels">—</span>
+        </div>
+        <!-- Ligne 2 : barre + timer recharge -->
+        <div class="hdr-res-bot">
+          <div class="hdr-res-bar-wrap">
+            <div class="hdr-res-bar-fill" id="gp-hdr-res-bar"></div>
+          </div>
+          <span class="hdr-res-timer" id="gp-hdr-timer">—</span>
+        </div>
       </div>
 
-    </div><!-- /hdr-player-bloc -->
+      <!-- Bouclier actif — visible uniquement quand actif -->
+      <div class="hdr-shield" id="gp-hdr-shield" title="Bouclier de protection actif">
+        <span class="hdr-shield-ico">🛡</span>
+        <span class="hdr-shield-val" id="gp-hdr-shield-val">—</span>
+      </div>
 
-    <!-- ── SÉPARATEUR ── -->
-    <div class="hdr-sep"></div>
+      <!-- Dot connexion Pi -->
+      <div class="hdr-dot offline" id="gp-hdr-dot" title="Connexion Pi Network"></div>
 
-    <!-- ── BLOC DROITE : pixels · timer · bouclier · connexion ── -->
-
-    <!-- Pixels or disponibles -->
-    <div class="hdr-pill" title="Pixels or disponibles">
-      <span class="hdr-pill-ico">◆</span>
-      <span class="hdr-pill-val" id="gp-hdr-pixels">—</span>
-    </div>
-
-    <!-- Countdown recharge -->
-    <div class="hdr-pill" title="Prochain pixel disponible">
-      <span class="hdr-pill-ico">⏱</span>
-      <span class="hdr-pill-val green" id="gp-hdr-timer">PRÊT</span>
-    </div>
-
-    <!-- Bouclier actif — masqué par défaut, .visible quand actif -->
-    <div class="hdr-shield" id="gp-hdr-shield" title="Bouclier actif">
-      <span class="hdr-shield-ico">🛡</span>
-      <span class="hdr-shield-val" id="gp-hdr-shield-val">—</span>
-    </div>
-
-    <!-- Dot connexion Pi -->
-    <div class="hdr-dot offline" id="gp-hdr-dot" title="Connexion Pi Network"></div>
+    </div><!-- /hdr-right -->
 
   </div><!-- /gp-hud-header -->
 
@@ -10029,7 +10717,10 @@ document.addEventListener('DOMContentLoaded', () => {
   </div><!-- /ov-nav -->
 
   <!-- ════════════════════════════════════════════════════════════
-       BOUTIQUE PREMIUM — sheet du bas, pleine largeur
+       BOUTIQUE GOLD PIXEL — plein écran, layout paysage 3 colonnes
+       Col 1 : PIXELS + mécanique Overfill
+       Col 2 : BOUCLIERS + PACK VENGEANCE
+       Col 3 : DISTINCTION + DONS (avec toggle anonyme)
   ════════════════════════════════════════════════════════════ -->
   <div class="gp-overlay sheet-bottom" id="ov-shop" role="dialog" aria-label="Boutique Gold Pixel">
 
@@ -10038,91 +10729,78 @@ document.addEventListener('DOMContentLoaded', () => {
       <button class="pal-handle-btn" onclick="gpCloseAll()" aria-label="Fermer">
         <div class="pal-handle"></div>
       </button>
-      <div class="ov-hdr-ico">🏪</div>
+      <div class="ov-hdr-ico">🛒</div>
       <span class="ov-title">BOUTIQUE</span>
       <button class="ov-close" onclick="gpCloseAll()" aria-label="Fermer">✕</button>
     </div>
 
-    <!-- Corps scrollable -->
+    <!-- Corps 3 colonnes -->
     <div class="sh-body">
 
-      <!-- ════════════════════════
-           1. PIXELS
-      ════════════════════════ -->
-      <div>
+      <!-- ══════════════════════════════════
+           COLONNE 1 — PIXELS
+      ══════════════════════════════════ -->
+      <div class="sh-col">
         <div class="sh-sec-lbl">PIXELS</div>
-        <div class="sh-grid" style="margin-top:7px;">
 
-          <!-- Chargeur Moyen 100 px -->
+        <div class="sh-grid">
+          <!-- Chargeur Moyen -->
           <div class="sh-card" onclick="shopPiPay('pixels_100',1);">
             <div class="sh-card-top">
               <div class="sh-card-icon">⚡</div>
               <span class="sh-badge gold">OVERFILL</span>
             </div>
-            <div>
-              <div class="sh-card-name">Chargeur Moyen</div>
-              <div class="sh-card-desc">+ 100 pixels à votre réservoir</div>
-            </div>
+            <div class="sh-card-name">Chargeur Moyen</div>
+            <div class="sh-card-desc">+ 100 pixels</div>
             <div class="sh-card-footer">
-              <div>
-                <div class="sh-price">1 Pi</div>
-              </div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('pixels_100',1);">ACHETER</button>
+              <div class="sh-price">1 Pi</div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('pixels_100',1);">ACHETER</button>
             </div>
           </div>
 
-          <!-- Grand Chargeur 250 px -->
+          <!-- Grand Chargeur -->
           <div class="sh-card" onclick="shopPiPay('pixels_250',2);">
             <div class="sh-card-top">
               <div class="sh-card-icon">⚡</div>
               <span class="sh-badge gold">OVERFILL</span>
             </div>
-            <div>
-              <div class="sh-card-name">Grand Chargeur</div>
-              <div class="sh-card-desc">+ 250 pixels à votre réservoir</div>
-            </div>
+            <div class="sh-card-name">Grand Chargeur</div>
+            <div class="sh-card-desc">+ 250 pixels</div>
             <div class="sh-card-footer">
-              <div>
-                <div class="sh-price">2 Pi</div>
-              </div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('pixels_250',2);">ACHETER</button>
+              <div class="sh-price">2 Pi</div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('pixels_250',2);">ACHETER</button>
             </div>
           </div>
-
         </div>
 
         <!-- Mécanique Overfill -->
-        <div class="sh-meca-box" style="margin-top:7px;">
-          <span class="sh-meca-ico">🔓</span>
-          <div class="sh-meca-txt">
-            <div class="sh-meca-title">SYSTÈME OVERFILL</div>
-            <div class="sh-meca-desc">Les chargeurs dépassent le stock max de votre réservoir. Idéal pour des actions massives en guerre territoriale.</div>
+        <div class="sh-overfill-banner">
+          <span class="sh-overfill-ico">🔓</span>
+          <div>
+            <span class="sh-overfill-lbl">SYSTÈME OVERFILL</span>
+            <span class="sh-overfill-txt">Dépasse le stock max de ton réservoir — idéal pour les opérations massives.</span>
           </div>
         </div>
-      </div>
+      </div><!-- /col 1 -->
 
-      <!-- ════════════════════════
-           2. BOUCLIER
-      ════════════════════════ -->
-      <div>
-        <div class="sh-sec-lbl">BOUCLIER</div>
-        <div class="sh-grid" style="margin-top:7px;">
+      <!-- ══════════════════════════════════
+           COLONNE 2 — BOUCLIERS + TACTIQUE
+      ══════════════════════════════════ -->
+      <div class="sh-col">
+        <div class="sh-sec-lbl">BOUCLIERS</div>
 
+        <div class="sh-grid">
           <!-- Dôme 4H -->
           <div class="sh-card" onclick="shopPiPay('dome_4h',0.5);">
             <div class="sh-card-top">
               <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">4 HEURES</span>
+              <span class="sh-badge blue">4H</span>
             </div>
-            <div>
-              <div class="sh-card-name">Dôme 4H</div>
-              <div class="sh-card-desc">Aucun ennemi ne peut recouvrir vos pixels pendant 4h</div>
-            </div>
+            <div class="sh-card-name">Dôme 4H</div>
+            <div class="sh-card-desc">Pixels protégés 4h</div>
             <div class="sh-card-footer">
-              <div>
-                <div class="sh-price">0,5 Pi</div>
-              </div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('dome_4h',0.5);">ACHETER</button>
+              <div class="sh-price">0,5 Pi</div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('dome_4h',0.5);">ACHETER</button>
             </div>
           </div>
 
@@ -10130,144 +10808,160 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="sh-card" onclick="shopPiPay('dome_8h',1);">
             <div class="sh-card-top">
               <div class="sh-card-icon blue">🛡</div>
-              <span class="sh-badge blue">8 HEURES</span>
+              <span class="sh-badge blue">8H</span>
             </div>
-            <div>
-              <div class="sh-card-name">Dôme 8H</div>
-              <div class="sh-card-desc">Protection maximale. Dormez sur vos deux oreilles</div>
-            </div>
+            <div class="sh-card-name">Dôme 8H</div>
+            <div class="sh-card-desc">Protection maximale</div>
             <div class="sh-card-footer">
-              <div>
-                <div class="sh-price">1 Pi</div>
-              </div>
-              <button class="sh-buy-btn" onclick="event.stopPropagation(); shopPiPay('dome_8h',1);">ACHETER</button>
+              <div class="sh-price">1 Pi</div>
+              <button class="sh-buy-btn" onclick="event.stopPropagation();shopPiPay('dome_8h',1);">ACHETER</button>
             </div>
           </div>
-
         </div>
-      </div>
 
-      <!-- ════════════════════════
-           3. PACK VENGEANCE
-      ════════════════════════ -->
-      <div>
-        <div class="sh-sec-lbl">TACTIQUE</div>
-        <div class="sh-grid cols-1" style="margin-top:7px;" id="sh-vengeance-wrap">
+        <div class="sh-sec-lbl" style="margin-top:4px;">TACTIQUE</div>
 
-          <!-- Vengeance — affiché selon le pack (JS adapte) -->
-          <div class="sh-card" id="gp-vengeance-tile" onclick="shopPiPay('vengeance_pack',1);">
-            <div class="sh-card-top">
-              <div class="sh-card-icon" style="background:rgba(255,80,80,0.08);border-color:rgba(255,80,80,0.18);">⚔️</div>
-              <span class="sh-badge" id="gp-vengeance-badge" style="color:rgba(255,120,100,0.85);background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.22);">ESSENTIEL</span>
-            </div>
-            <div>
-              <div class="sh-card-name">Pack Vengeance</div>
-              <div class="sh-card-desc">Révèle l'identité de votre attaquant · Ciblez ses œuvres pour contre-attaquer</div>
-            </div>
-            <div class="sh-card-footer">
-              <div>
-                <div class="sh-price" id="gp-vengeance-price">1 Pi</div>
-                <span class="sh-price-sub" id="gp-vengeance-sub">par mois · Essentiel uniquement</span>
-              </div>
-              <button class="sh-buy-btn" id="gp-vengeance-btn"
-                      onclick="event.stopPropagation(); shopPiPay('vengeance_pack',1);">ACHETER</button>
-            </div>
+        <!-- Pack Vengeance (adapté selon pack) -->
+        <div class="sh-card" id="gp-vengeance-tile" onclick="shopPiPay('vengeance_pack',1);">
+          <div class="sh-card-top">
+            <div class="sh-card-icon red">⚔️</div>
+            <span class="sh-badge" id="gp-vengeance-badge" style="color:rgba(255,110,90,0.85);background:rgba(255,80,80,0.07);border:1px solid rgba(255,80,80,0.2);">ESSENTIEL</span>
           </div>
-
+          <div class="sh-card-name">Pack Vengeance</div>
+          <div class="sh-card-desc">Révèle votre attaquant · Ciblez ses œuvres</div>
+          <div class="sh-card-footer">
+            <div>
+              <div class="sh-price" id="gp-vengeance-price">1 Pi</div>
+              <span class="sh-price-sub" id="gp-vengeance-sub">par mois · Essentiel</span>
+            </div>
+            <button class="sh-buy-btn" id="gp-vengeance-btn"
+                    onclick="event.stopPropagation();shopPiPay('vengeance_pack',1);">ACHETER</button>
+          </div>
         </div>
-      </div>
 
-      <!-- ════════════════════════
-           4. DISTINCTION
-      ════════════════════════ -->
-      <div>
+      </div><!-- /col 2 -->
+
+      <!-- ══════════════════════════════════
+           COLONNE 3 — DISTINCTION + DONS
+      ══════════════════════════════════ -->
+      <div class="sh-col">
+
+        <!-- Toggle anonyme — en tête de colonne 3 -->
+        <div class="sh-anon-bar">
+          <span class="sh-anon-label">
+            🎭 Don anonyme
+          </span>
+          <div class="sh-toggle" id="sh-anon-toggle"
+               onclick="shToggleAnon(this)"
+               role="switch" aria-checked="false"
+               title="Activer le don anonyme"></div>
+        </div>
+        <div id="sh-anon-status" style="display:none;">
+          🎭 Anonyme activé
+        </div>
+
         <div class="sh-sec-lbl">DISTINCTION</div>
-        <div class="sh-grid cols-1" style="margin-top:7px;">
 
-          <div class="sh-card don" onclick="shopPiPay('distinction',0.1);">
+        <!-- Féliciter un artiste (montant libre) -->
+        <div class="sh-card don" onclick="shDonAction('distinction');">
+          <div class="sh-card-top">
+            <div class="sh-card-icon green">🎨</div>
+            <span class="sh-badge green">LIBRE</span>
+          </div>
+          <div class="sh-card-name">Distinction</div>
+          <div class="sh-card-desc">Offrir un montant libre pour féliciter un artiste</div>
+          <div class="sh-card-footer">
+            <div class="sh-price">libre</div>
+            <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('distinction');">OFFRIR</button>
+          </div>
+        </div>
+
+        <div class="sh-sec-lbl" style="margin-top:4px;">OFFRIR À UN AMI</div>
+
+        <!-- Grille de dons 2×3 -->
+        <div class="sh-grid">
+
+          <!-- Offrir Elite -->
+          <div class="sh-card don" onclick="shDonAction('gift_elite');">
             <div class="sh-card-top">
-              <div class="sh-card-icon green">🎨</div>
-              <span class="sh-badge green">DON</span>
+              <div class="sh-card-icon green">🌟</div>
+              <span class="sh-badge green">ELITE</span>
             </div>
-            <div>
-              <div class="sh-card-name">Distinction</div>
-              <div class="sh-card-desc">Offrez un don de 0,1 Pi pour mettre en valeur l'œuvre d'un artiste dans la galerie</div>
-            </div>
+            <div class="sh-card-name">Pack Elite</div>
             <div class="sh-card-footer">
-              <div>
-                <div class="sh-price">0,1 Pi</div>
-              </div>
-              <button class="sh-buy-btn don" onclick="event.stopPropagation(); shopPiPay('distinction',0.1);">OFFRIR</button>
+              <div class="sh-price">10 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_elite');">OFFRIR</button>
             </div>
           </div>
 
-        </div>
-      </div>
-
-      <!-- ════════════════════════
-           5. SYSTÈME DE DON
-      ════════════════════════ -->
-      <div>
-        <div class="sh-sec-lbl">DONS</div>
-        <div style="margin-top:7px; display:flex; flex-direction:column; gap:8px;">
-
-          <!-- Toggle don anonyme -->
-          <div class="sh-toggle-row">
-            <span class="sh-toggle-label">
-              <span class="tl-ico">🎭</span>
-              Don anonyme
-            </span>
-            <div class="sh-toggle" id="sh-anon-toggle" onclick="shToggleAnon(this)"
-                 title="Activer le don anonyme" role="switch" aria-checked="false"></div>
+          <!-- Offrir Vengeance -->
+          <div class="sh-card don" onclick="shDonAction('gift_vengeance');">
+            <div class="sh-card-top">
+              <div class="sh-card-icon red">⚔️</div>
+              <span class="sh-badge dim">VENGEANCE</span>
+            </div>
+            <div class="sh-card-name">Pack Vengeance</div>
+            <div class="sh-card-footer">
+              <div class="sh-price">1 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_vengeance');">OFFRIR</button>
+            </div>
           </div>
 
-          <!-- Cartes don -->
-          <div class="sh-grid" id="sh-don-grid">
-
-            <!-- Offrir Pack Elite -->
-            <div class="sh-card don" id="sh-don-elite" onclick="shDonAction('elite');">
-              <div class="sh-card-top">
-                <div class="sh-card-icon green">🌟</div>
-                <span class="sh-badge green">ELITE</span>
-              </div>
-              <div>
-                <div class="sh-card-name">Pass Elite</div>
-                <div class="sh-card-desc">Offrez le pack Elite à un joueur de votre choix</div>
-              </div>
-              <div class="sh-card-footer">
-                <div class="sh-price">10 Pi</div>
-                <button class="sh-buy-btn don" onclick="event.stopPropagation(); shDonAction('elite');">OFFRIR</button>
-              </div>
+          <!-- Offrir Chargeur 100 -->
+          <div class="sh-card don" onclick="shDonAction('gift_pixels_100');">
+            <div class="sh-card-top">
+              <div class="sh-card-icon">⚡</div>
+              <span class="sh-badge gold">100 PX</span>
             </div>
-
-            <!-- Don libre -->
-            <div class="sh-card don" onclick="shDonAction('libre');">
-              <div class="sh-card-top">
-                <div class="sh-card-icon green">🎁</div>
-                <span class="sh-badge dim">LIBRE</span>
-              </div>
-              <div>
-                <div class="sh-card-name">Don Libre</div>
-                <div class="sh-card-desc">Montant au choix pour soutenir un joueur</div>
-              </div>
-              <div class="sh-card-footer">
-                <div class="sh-price">libre</div>
-                <button class="sh-buy-btn don" onclick="event.stopPropagation(); shDonAction('libre');">OFFRIR</button>
-              </div>
+            <div class="sh-card-name">Chargeur Moyen</div>
+            <div class="sh-card-footer">
+              <div class="sh-price">1 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_pixels_100');">OFFRIR</button>
             </div>
-
-          </div><!-- /sh-don-grid -->
-
-          <!-- Statut don anonyme -->
-          <div id="sh-anon-status" style="display:none;
-               font-family:'Rajdhani',sans-serif; font-size:0.6rem;
-               color:rgba(80,220,140,0.7); text-align:center;
-               padding:5px; letter-spacing:0.04em;">
-            🎭 Don anonyme activé — le destinataire ne saura pas qui vous êtes
           </div>
 
-        </div>
-      </div>
+          <!-- Offrir Grand Chargeur 250 -->
+          <div class="sh-card don" onclick="shDonAction('gift_pixels_250');">
+            <div class="sh-card-top">
+              <div class="sh-card-icon">⚡</div>
+              <span class="sh-badge gold">250 PX</span>
+            </div>
+            <div class="sh-card-name">Grand Chargeur</div>
+            <div class="sh-card-footer">
+              <div class="sh-price">2 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_pixels_250');">OFFRIR</button>
+            </div>
+          </div>
+
+          <!-- Offrir Dôme 4H -->
+          <div class="sh-card don" onclick="shDonAction('gift_dome_4h');">
+            <div class="sh-card-top">
+              <div class="sh-card-icon blue">🛡</div>
+              <span class="sh-badge blue">4H</span>
+            </div>
+            <div class="sh-card-name">Dôme 4H</div>
+            <div class="sh-card-footer">
+              <div class="sh-price">0,5 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_dome_4h');">OFFRIR</button>
+            </div>
+          </div>
+
+          <!-- Offrir Dôme 8H -->
+          <div class="sh-card don" onclick="shDonAction('gift_dome_8h');">
+            <div class="sh-card-top">
+              <div class="sh-card-icon blue">🛡</div>
+              <span class="sh-badge blue">8H</span>
+            </div>
+            <div class="sh-card-name">Dôme 8H</div>
+            <div class="sh-card-footer">
+              <div class="sh-price">1 Pi</div>
+              <button class="sh-buy-btn don" onclick="event.stopPropagation();shDonAction('gift_dome_8h');">OFFRIR</button>
+            </div>
+          </div>
+
+        </div><!-- /sh-grid dons -->
+
+      </div><!-- /col 3 -->
 
     </div><!-- /sh-body -->
   </div><!-- /ov-shop -->
@@ -10349,6 +11043,40 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
   </div><!-- /ov-tuto -->
+
+
+  <!-- ══ MODALE PORTRAIT — bloquante, s'affiche si orientation portrait ══ -->
+  <div id="gp-portrait-modal" role="alertdialog" aria-label="Tournez votre téléphone">
+    <div class="portrait-card">
+      <!-- Icône téléphone animé → rotation vers paysage -->
+      <div class="portrait-ico-wrap">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Corps du téléphone -->
+          <rect x="16" y="6" width="28" height="48" rx="5"
+                stroke="rgba(255,185,40,0.6)" stroke-width="2"
+                fill="rgba(255,170,0,0.07)"/>
+          <!-- Écran -->
+          <rect x="20" y="12" width="20" height="32" rx="2"
+                fill="rgba(255,170,0,0.1)" stroke="rgba(255,185,40,0.25)" stroke-width="1"/>
+          <!-- Bouton home -->
+          <circle cx="30" cy="50" r="2.2"
+                  stroke="rgba(255,185,40,0.4)" stroke-width="1" fill="none"/>
+          <!-- Flèche rotation -->
+          <path d="M44 20 C50 20 54 26 54 32 C54 38 50 44 44 44"
+                stroke="rgba(255,200,60,0.7)" stroke-width="2"
+                fill="none" stroke-linecap="round"/>
+          <polyline points="41,18 44,20 42,23"
+                    stroke="rgba(255,200,60,0.7)" stroke-width="2"
+                    fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="portrait-title">MODE PAYSAGE<br>REQUIS</div>
+      <div class="portrait-sub">
+        Tournez votre téléphone<br>pour jouer à Gold Pixel
+      </div>
+      <div class="portrait-arrow">↻</div>
+    </div>
+  </div>
 
 </div><!-- /gp-hud -->
 
