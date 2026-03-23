@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pi Pixel War</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════ */
+:root {
+  --pi: #7028c8;
+  --pi-light: #9f58f0;
+  --pi-dark: #4a1a8a;
+  --gold: #f5c842;
+  --gold-d: #c8960a;
+  --bg: #0a0612;
+  --surface: #120e1e;
+  --surface2: #1a1428;
+  --border: rgba(112,40,200,0.3);
+  --text: #e8e0f8;
+  --text-dim: rgba(232,224,248,0.45);
+  --red: #e83c50;
+  --green: #38d48a;
+  --blue: #38a8f0;
+  --cooldown: 300; /* secondes, 5 minutes */
+  --tile: 10px;
+  --cols: 80;
+  --rows: 50;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  touch-action: none;
+  background: var(--bg);
+  font-family: 'Chakra Petch', sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+#app {
+  width: 100dvw; height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TOP BAR ── */
+#topbar {
+  flex-shrink: 0;
+  height: 44px;
+  display: flex; align-items: center;
+  padding: 0 10px; gap: 8px;
+  background: linear-gradient(180deg, #15102a 0%, #0e0a1e 100%);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+
+#topbar .logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.12em;
+  background: linear-gradient(135deg, var(--pi-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+}
+
+#topbar .spacer { flex: 1; }
+
+#pi-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(112,40,200,0.2);
+  border: 1px solid rgba(112,40,200,0.4);
+  font-size: 0.6rem; font-weight: 600;
+  color: var(--pi-light);
+  white-space: nowrap;
+}
+#pi-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+#user-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem; color: var(--text-dim);
+}
+
+#online-count {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.58rem; color: var(--text-dim);
+}
+#online-count .live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 5px var(--red);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* ── CANVAS AREA ── */
+#canvas-zone {
+  flex: 1 1 0; min-height: 0;
+  position: relative; overflow: hidden;
+  background: #060310;
+}
+
+#canvas-viewport {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+#canvas-container {
+  position: relative;
+  transform-origin: 0 0;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+canvas#main-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+canvas#hover-canvas {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+/* Coordonnées */
+#coords {
+  position: absolute; bottom: 8px; left: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.52rem; color: var(--text-dim);
+  background: rgba(0,0,0,0.7);
+  padding: 2px 6px; border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Minimap */
+#minimap-wrap {
+  position: absolute; top: 8px; right: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden;
+  background: rgba(10,6,18,0.9);
+  cursor: pointer;
+}
+#minimap {
+  display: block;
+  width: 80px; height: 50px;
+  image-rendering: pixelated;
+}
+#minimap-viewport {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+
+/* ── BOTTOM PALETTE ── */
+#palette-bar {
+  flex-shrink: 0;
+  background: linear-gradient(0deg, #0e0a1e 0%, #15102a 100%);
+  border-top: 1px solid var(--border);
+  padding: 6px 8px 4px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+/* Cooldown strip */
+#cooldown-strip {
+  display: flex; align-items: center; gap: 8px;
+}
+
+#cooldown-bar-wrap {
+  flex: 1; height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px; overflow: hidden;
+}
+#cooldown-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--pi), var(--gold));
+  border-radius: 2px;
+  transition: width 0.5s linear, background 0.3s;
+}
+#cooldown-bar.ready { background: var(--green); width: 100%; }
+
+#cooldown-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem; color: var(--text-dim);
+  white-space: nowrap; min-width: 54px; text-align: right;
+}
+#cooldown-label.ready { color: var(--green); }
+
+#place-btn {
+  padding: 4px 12px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--pi), var(--pi-light));
+  border: none; color: white;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer; white-space: nowrap;
+  transition: opacity .2s, transform .1s;
+  touch-action: manipulation;
+  box-shadow: 0 0 12px rgba(112,40,200,0.4);
+}
+#place-btn:active { transform: scale(0.93); }
+#place-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+#place-btn.ready {
+  background: linear-gradient(135deg, var(--green), #20a868);
+  box-shadow: 0 0 12px rgba(56,212,138,0.4);
+}
+
+/* Couleurs */
+#colors-row {
+  display: flex; align-items: center; gap: 5px;
+}
+
+#selected-preview {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.6);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(255,255,255,0.2);
+  transition: background .15s;
+}
+
+#color-swatches {
+  display: flex; flex-wrap: nowrap; gap: 4px;
+  overflow-x: auto; flex: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+#color-swatches::-webkit-scrollbar { display: none; }
+
+.swatch {
+  width: 26px; height: 26px; border-radius: 5px;
+  border: 2px solid transparent;
+  cursor: pointer; flex-shrink: 0;
+  transition: transform .1s, border-color .1s;
+  touch-action: manipulation;
+}
+.swatch:active { transform: scale(0.88); }
+.swatch.selected {
+  border-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 8px rgba(255,255,255,0.4);
+  transform: scale(1.12);
+}
+
+/* ── MODALS ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px 20px;
+  max-width: min(340px, 90vw);
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(112,40,200,0.15);
+  animation: slideUp .35s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-card h2 {
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem; font-weight: 700; letter-spacing: 0.08em;
+  background: linear-gradient(135deg, var(--pi-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 8px;
+}
+.modal-card p {
+  font-size: 0.72rem; color: var(--text-dim); line-height: 1.6;
+  margin-bottom: 16px;
+}
+.modal-card .rule-list {
+  list-style: none; text-align: left;
+  margin-bottom: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.modal-card .rule-list li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.68rem; color: var(--text-dim); line-height: 1.4;
+}
+.modal-card .rule-list li .ico {
+  font-size: 0.9rem; flex-shrink: 0; margin-top: 0px;
+}
+
+.btn-primary {
+  width: 100%; padding: 12px;
+  border-radius: 12px; border: none;
+  background: linear-gradient(135deg, var(--pi), var(--pi-light));
+  color: white; font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+  cursor: pointer; transition: opacity .2s, transform .1s;
+  box-shadow: 0 4px 20px rgba(112,40,200,0.4);
+  touch-action: manipulation;
+}
+.btn-primary:active { transform: scale(0.97); }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  padding: 8px 16px; border-radius: 20px;
+  background: rgba(10,6,18,0.95); border: 1px solid var(--border);
+  font-size: 0.65rem; color: var(--text); white-space: nowrap;
+  z-index: 2000; pointer-events: none;
+  opacity: 0; transition: opacity .25s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+#toast.show { opacity: 1; }
+
+/* ── PIXEL FLASH ── */
+#pixel-flash {
+  position: fixed; inset: 0; z-index: 900;
+  pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(112,40,200,0.3) 0%, transparent 70%);
+  transition: opacity 0.05s;
+}
+#pixel-flash.flash { opacity: 1; transition: none; }
+
+/* ── LEADERBOARD btn ── */
+#lb-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(245,200,66,0.15);
+  border: 1px solid rgba(245,200,66,0.3);
+  cursor: pointer; touch-action: manipulation;
+  font-size: 0.58rem; font-weight: 600;
+  color: var(--gold); transition: background .15s;
+}
+#lb-btn:active { background: rgba(245,200,66,0.25); }
+
+/* ── LEADERBOARD MODAL ── */
+#lb-modal .lb-rows {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 16px; text-align: left;
+}
+.lb-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  font-size: 0.65rem;
+}
+.lb-row .rank { width: 20px; text-align: center; font-weight: 700; color: var(--pi-light); }
+.lb-row .rank.gold   { color: var(--gold); }
+.lb-row .rank.silver { color: #c0c0c0; }
+.lb-row .rank.bronze { color: #cd7f32; }
+.lb-row .name { flex: 1; }
+.lb-row .count { font-family: 'Space Mono', monospace; color: var(--text-dim); }
+
+/* ── COLOR PICKER MODAL ── */
+#picker-modal .color-grid {
+  display: grid; grid-template-columns: repeat(8,1fr); gap: 6px;
+  margin-bottom: 16px;
+}
+#picker-modal .color-grid .sw {
+  aspect-ratio: 1; border-radius: 6px;
+  border: 2px solid transparent; cursor: pointer;
+  transition: transform .1s, border-color .1s;
+  touch-action: manipulation;
+}
+#picker-modal .color-grid .sw:active { transform: scale(0.88); }
+#picker-modal .color-grid .sw.selected {
+  border-color: white; box-shadow: 0 0 8px rgba(255,255,255,0.5);
+  transform: scale(1.1);
+}
+
+/* ── ZOOM BTNS ── */
+#zoom-controls {
+  position: absolute; right: 8px; bottom: 8px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.zoom-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(10,6,18,0.9); border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; touch-action: manipulation;
+  transition: background .15s, color .15s;
+}
+.zoom-btn:active { background: rgba(112,40,200,0.2); color: var(--text); }
+
+/* ── ACTIVITY FEED ── */
+#activity {
+  position: absolute; left: 8px; top: 8px;
+  display: flex; flex-direction: column; gap: 3px;
+  pointer-events: none; max-width: 140px;
+}
+.activity-item {
+  font-size: 0.5rem; color: var(--text-dim);
+  background: rgba(0,0,0,0.65); padding: 2px 6px; border-radius: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  animation: fadeInSlide .3s ease both;
+}
+@keyframes fadeInSlide {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── PORTRAIT LOCK ── */
+#portrait-lock {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  text-align: center; padding: 32px;
+}
+@media (orientation: portrait) {
+  #portrait-lock { display: flex; }
+}
+.rotate-icon {
+  font-size: 3.5rem;
+  animation: rotateAnim 2.5s ease-in-out infinite;
+}
+@keyframes rotateAnim {
+  0%,40%  { transform: rotate(0deg); }
+  60%,100% { transform: rotate(90deg); }
+}
+#portrait-lock h2 {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem; color: var(--pi-light);
+  letter-spacing: 0.08em;
+}
+#portrait-lock p { font-size: 0.68rem; color: var(--text-dim); line-height: 1.6; }
+
+/* ── SELECTION INDICATOR ── */
+#selection-indicator {
+  position: absolute; pointer-events: none; z-index: 50;
+  display: none;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+/* ── STATS BAR ── */
+#stats-bar {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 10px;
+  pointer-events: none;
+}
+.stat-pill {
+  font-size: 0.5rem; color: var(--text-dim);
+  background: rgba(0,0,0,0.65);
+  padding: 2px 7px; border-radius: 10px;
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.stat-pill strong { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ PORTRAIT LOCK ═══════════════════════════ -->
+<div id="portrait-lock">
+  <div class="rotate-icon">📱</div>
+  <h2>PI PIXEL WAR</h2>
+  <p>Ce jeu se joue en mode paysage.<br>Tournez votre téléphone pour commencer.</p>
+</div>
+
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">π PIXEL WAR</div>
+    <div class="spacer"></div>
+    <div id="online-count">
+      <div class="live-dot"></div>
+      <span id="online-num">—</span>
+    </div>
+    <div id="user-tag" id="user-tag">@—</div>
+    <div id="pi-badge">
+      <div class="dot"></div>
+      <span id="pi-status-txt">Pi Network</span>
+    </div>
+    <div id="lb-btn" onclick="openLeaderboard()">🏆</div>
+  </div>
+
+  <!-- CANVAS ZONE -->
+  <div id="canvas-zone">
+    <div id="canvas-viewport">
+      <div id="canvas-container">
+        <canvas id="main-canvas"></canvas>
+        <canvas id="hover-canvas"></canvas>
+        <div id="selection-indicator"></div>
+      </div>
+    </div>
+
+    <!-- Activity feed -->
+    <div id="activity"></div>
+
+    <!-- Minimap -->
+    <div id="minimap-wrap" onclick="resetView()">
+      <canvas id="minimap"></canvas>
+    </div>
+
+    <!-- Zoom controls -->
+    <div id="zoom-controls">
+      <div class="zoom-btn" onclick="zoomIn()">+</div>
+      <div class="zoom-btn" onclick="zoomOut()">−</div>
+      <div class="zoom-btn" onclick="resetView()" style="font-size:0.7rem;">⊙</div>
+    </div>
+
+    <!-- Coords -->
+    <div id="coords">X:— Y:—</div>
+
+    <!-- Stats bar -->
+    <div id="stats-bar">
+      <div class="stat-pill">🖌 <strong id="stat-placed">0</strong> posés</div>
+      <div class="stat-pill">🕐 Session: <strong id="stat-session">00:00</strong></div>
+    </div>
+  </div>
+
+  <!-- PALETTE BAR -->
+  <div id="palette-bar">
+    <!-- Cooldown row -->
+    <div id="cooldown-strip">
+      <div id="cooldown-bar-wrap">
+        <div id="cooldown-bar"></div>
+      </div>
+      <div id="cooldown-label">PRÊT</div>
+      <button id="place-btn" class="ready" onclick="placePixel()">PLACER ▸</button>
+    </div>
+    <!-- Colors row -->
+    <div id="colors-row">
+      <div id="selected-preview"></div>
+      <div id="color-swatches"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ FLASH ═══════════════════════════ -->
+<div id="pixel-flash"></div>
+
+<!-- ═══════════════════════════ TOAST ═══════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════ MODALS ═══════════════════════════ -->
+
+<!-- Welcome -->
+<div class="modal-overlay open" id="welcome-modal">
+  <div class="modal-card">
+    <h2>π PIXEL WAR</h2>
+    <p>La guerre des pixels sur Pi Network.<br>Chaque joueur place un pixel toutes les <strong style="color:var(--gold)">5 minutes</strong>.<br>Défendez votre territoire !</p>
+    <ul class="rule-list">
+      <li><span class="ico">🎨</span><span>Choisissez une couleur dans la palette</span></li>
+      <li><span class="ico">👆</span><span>Touchez une case sur le canevas pour la sélectionner</span></li>
+      <li><span class="ico">✅</span><span>Appuyez sur PLACER quand le timer est prêt</span></li>
+      <li><span class="ico">⚔️</span><span>Recouvrez les pixels adverses, défendez les vôtres</span></li>
+      <li><span class="ico">🤝</span><span>Organisez-vous avec la communauté Pi !</span></li>
+    </ul>
+    <button class="btn-primary" onclick="startGame()">ENTRER EN GUERRE →</button>
+  </div>
+</div>
+
+<!-- Leaderboard -->
+<div class="modal-overlay" id="lb-modal">
+  <div class="modal-card">
+    <h2>🏆 CLASSEMENT</h2>
+    <div class="lb-rows" id="lb-rows"></div>
+    <button class="btn-primary" onclick="closeModal('lb-modal')">FERMER</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCRIPT ═══════════════════════════ -->
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════
+   PALETTE — 32 couleurs (identiques à r/place 2022)
+═══════════════════════════════════════════════════ */
+const COLORS = [
+  '#6d001a','#be0039','#ff4500','#ffa800','#ffd635','#fff8b8',
+  '#00a368','#00cc78','#7eed56','#00756f','#009eaa','#00ccc0',
+  '#2450a4','#3690ea','#51e9f4','#493ac1','#6a5cff','#94b3ff',
+  '#811e9f','#b44ac0','#e4abff','#de107f','#ff3881','#ff99aa',
+  '#6d482f','#9c6926','#ffb470','#000000','#515252','#898d90',
+  '#d4d7d9','#ffffff',
+];
+
+const COOLDOWN_SEC = 300; // 5 minutes
+const COLS = 80;
+const ROWS = 50;
+const TILE  = 10; // px par cellule sur le canvas interne
+
+/* ═══════════════════════════════════════════════════
+   ÉTAT GLOBAL
+═══════════════════════════════════════════════════ */
+let selectedColor = '#3690ea';
+let selectedCol   = -1;
+let selectedRow   = -1;
+let cooldownLeft  = 0; // secondes restantes
+let canPlace      = true;
+let pixelsPlaced  = 0;
+let sessionStart  = Date.now();
+let gameStarted   = false;
+let piUsername    = 'Explorateur';
+
+// Grille : null = vide, sinon { color, user }
+const grid = Array.from({length:COLS}, () => new Array(ROWS).fill(null));
+
+// Faux joueurs actifs (simulation communauté)
+const BOTS = [
+  {name:'@pi_artiste',  color:'#ff4500'},
+  {name:'@luna_pixels', color:'#7eed56'},
+  {name:'@dkr_pi',      color:'#3690ea'},
+  {name:'@stellar_w',   color:'#ffd635'},
+  {name:'@nova_craft',  color:'#b44ac0'},
+  {name:'@pi_flag',     color:'#be0039'},
+  {name:'@alphapix',    color:'#00cc78'},
+  {name:'@omegawar',    color:'#ff99aa'},
+];
+const leaderboard = [
+  {name:'@pi_artiste',  pixels: 842},
+  {name:'@luna_pixels', pixels: 631},
+  {name:'@dkr_pi',      pixels: 589},
+  {name:'@stellar_w',   pixels: 445},
+  {name:'@nova_craft',  pixels: 312},
+  {name:'@omegawar',    pixels: 298},
+  {name:'@alphapix',    pixels: 211},
+  {name:'@pi_flag',     pixels: 187},
+  {name:null,           pixels: 0},   // joueur réel, à remplir
+];
+
+/* ═══════════════════════════════════════════════════
+   CANVAS
+═══════════════════════════════════════════════════ */
+const mainCv  = document.getElementById('main-canvas');
+const mainCtx = mainCv.getContext('2d');
+const hoverCv = document.getElementById('hover-canvas');
+const hoverCtx = hoverCv.getContext('2d');
+const minimapCv = document.getElementById('minimap');
+const minimapCtx = minimapCv.getContext('2d');
+
+const CW = COLS * TILE;
+const CH = ROWS * TILE;
+
+mainCv.width  = hoverCv.width  = CW;
+mainCv.height = hoverCv.height = CH;
+minimapCv.width  = COLS;
+minimapCv.height = ROWS;
+
+/* ═══════════════════════════════════════════════════
+   TRANSFORM (pan + zoom)
+═══════════════════════════════════════════════════ */
+let scale = 1;
+let panX  = 0;
+let panY  = 0;
+let isPanning = false;
+let panStartX = 0, panStartY = 0;
+let panOriginX= 0, panOriginY= 0;
+let lastPinchDist = null;
+let lastPinchScale = 1;
+
+const container = document.getElementById('canvas-container');
+const viewport  = document.getElementById('canvas-viewport');
+
+function applyTransform() {
+  container.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
+  container.style.transformOrigin = '0 0';
+}
+
+function resetView() {
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  scale  = Math.min(vw / CW, vh / CH) * 0.92;
+  panX   = (vw - CW * scale) / 2;
+  panY   = (vh - CH * scale) / 2;
+  applyTransform();
+}
+
+function zoomIn()  { applyZoom(1.4); }
+function zoomOut() { applyZoom(0.7); }
+
+function applyZoom(factor, cx, cy) {
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  cx = cx ?? vw/2;
+  cy = cy ?? vh/2;
+  const newScale = Math.min(Math.max(scale * factor, 0.4), 20);
+  const ratio = newScale / scale;
+  panX = cx - (cx - panX) * ratio;
+  panY = cy - (cy - panY) * ratio;
+  scale = newScale;
+  applyTransform();
+}
+
+/* ═══════════════════════════════════════════════════
+   DESSIN
+═══════════════════════════════════════════════════ */
+const BG = '#0a0e1a';
+
+function drawGrid() {
+  mainCtx.fillStyle = BG;
+  mainCtx.fillRect(0, 0, CW, CH);
+  // Grille fine
+  mainCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+  mainCtx.lineWidth = 0.5;
+  for (let c = 0; c <= COLS; c++) {
+    mainCtx.beginPath();
+    mainCtx.moveTo(c*TILE, 0);
+    mainCtx.lineTo(c*TILE, CH);
+    mainCtx.stroke();
+  }
+  for (let r = 0; r <= ROWS; r++) {
+    mainCtx.beginPath();
+    mainCtx.moveTo(0, r*TILE);
+    mainCtx.lineTo(CW, r*TILE);
+    mainCtx.stroke();
+  }
+  // Repères 10×10
+  mainCtx.strokeStyle = 'rgba(112,40,200,0.1)';
+  mainCtx.lineWidth = 0.8;
+  for (let c = 0; c <= COLS; c+=10) {
+    mainCtx.beginPath(); mainCtx.moveTo(c*TILE,0); mainCtx.lineTo(c*TILE,CH); mainCtx.stroke();
+  }
+  for (let r = 0; r <= ROWS; r+=10) {
+    mainCtx.beginPath(); mainCtx.moveTo(0,r*TILE); mainCtx.lineTo(CW,r*TILE); mainCtx.stroke();
+  }
+}
+
+function drawCell(col, row, color) {
+  mainCtx.fillStyle = color;
+  mainCtx.fillRect(col*TILE+0.5, row*TILE+0.5, TILE-1, TILE-1);
+  mainCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+  mainCtx.lineWidth = 0.5;
+  mainCtx.strokeRect(col*TILE+0.5, row*TILE+0.5, TILE-1, TILE-1);
+  // Minimap
+  minimapCtx.fillStyle = color;
+  minimapCtx.fillRect(col, row, 1, 1);
+}
+
+function eraseCell(col, row) {
+  mainCtx.fillStyle = BG;
+  mainCtx.fillRect(col*TILE, row*TILE, TILE, TILE);
+  // Regrille
+  mainCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+  mainCtx.lineWidth = 0.5;
+  mainCtx.strokeRect(col*TILE, row*TILE, TILE, TILE);
+  minimapCtx.fillStyle = BG;
+  minimapCtx.fillRect(col, row, 1, 1);
+}
+
+function drawHover(col, row) {
+  hoverCtx.clearRect(0, 0, CW, CH);
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+  const x = col*TILE, y = row*TILE;
+  hoverCtx.fillStyle = hexToRgba(selectedColor, 0.4);
+  hoverCtx.fillRect(x, y, TILE, TILE);
+  hoverCtx.strokeStyle = 'rgba(255,255,255,0.8)';
+  hoverCtx.lineWidth = 1.5;
+  hoverCtx.strokeRect(x+0.75, y+0.75, TILE-1.5, TILE-1.5);
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function redrawAll() {
+  drawGrid();
+  for (let c=0;c<COLS;c++) for (let r=0;r<ROWS;r++) {
+    if (grid[c][r]) drawCell(c, r, grid[c][r].color);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SÉLECTION & COORDONNÉES
+═══════════════════════════════════════════════════ */
+function getCell(clientX, clientY) {
+  const rect = viewport.getBoundingClientRect();
+  const vx   = clientX - rect.left;
+  const vy   = clientY - rect.top;
+  const cx   = (vx - panX) / scale;
+  const cy   = (vy - panY) / scale;
+  return {
+    col: Math.floor(cx / TILE),
+    row: Math.floor(cy / TILE),
+  };
+}
+
+function setSelected(col, row) {
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) {
+    selectedCol = -1; selectedRow = -1;
+    document.getElementById('selection-indicator').style.display = 'none';
+    document.getElementById('coords').textContent = 'X:— Y:—';
+    return;
+  }
+  selectedCol = col; selectedRow = row;
+  // Indicateur
+  const ind = document.getElementById('selection-indicator');
+  ind.style.display = 'block';
+  ind.style.left   = (col * TILE) + 'px';
+  ind.style.top    = (row * TILE) + 'px';
+  ind.style.width  = TILE + 'px';
+  ind.style.height = TILE + 'px';
+  document.getElementById('coords').textContent = `X:${col} Y:${row}`;
+
+  // Info sur la cellule
+  const cell = grid[col][row];
+  if (cell) {
+    showToast(`${cell.user} — ${col},${row}`);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PLACER UN PIXEL
+═══════════════════════════════════════════════════ */
+function placePixel() {
+  if (!canPlace) { showToast('⏳ Patiente encore un peu…'); return; }
+  if (selectedCol < 0 || selectedRow < 0) {
+    showToast('👆 Touche d\'abord une case'); return;
+  }
+
+  const c = selectedCol, r = selectedRow;
+  grid[c][r] = { color: selectedColor, user: `@${piUsername}` };
+  drawCell(c, r, selectedColor);
+  hoverCtx.clearRect(0,0,CW,CH);
+  pixelsPlaced++;
+  document.getElementById('stat-placed').textContent = pixelsPlaced;
+
+  // Flash
+  const flash = document.getElementById('pixel-flash');
+  flash.classList.add('flash');
+  setTimeout(() => flash.classList.remove('flash'), 80);
+
+  showToast(`✅ Pixel posé en ${c},${r} !`);
+  addActivity(`@${piUsername} → ${c},${r}`);
+
+  // Cooldown
+  canPlace = false;
+  cooldownLeft = COOLDOWN_SEC;
+  updateCooldownUI();
+  document.getElementById('place-btn').disabled = true;
+  document.getElementById('place-btn').classList.remove('ready');
+  document.getElementById('place-btn').textContent = 'COOLDOWN…';
+  // Mettre à jour leaderboard
+  const me = leaderboard.find(l => l.name === null);
+  if (me) me.pixels = pixelsPlaced;
+
+  // Sauvegarder
+  saveState();
+  // Désélectionner
+  selectedCol = -1; selectedRow = -1;
+  document.getElementById('selection-indicator').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════
+   COOLDOWN TIMER
+═══════════════════════════════════════════════════ */
+function updateCooldownUI() {
+  const bar   = document.getElementById('cooldown-bar');
+  const label = document.getElementById('cooldown-label');
+  const btn   = document.getElementById('place-btn');
+
+  if (canPlace) {
+    bar.style.width = '100%';
+    bar.className = 'ready';
+    label.textContent = 'PRÊT';
+    label.className = 'ready';
+    btn.disabled = false;
+    btn.classList.add('ready');
+    btn.textContent = 'PLACER ▸';
+    return;
+  }
+  const pct = ((COOLDOWN_SEC - cooldownLeft) / COOLDOWN_SEC * 100).toFixed(1);
+  bar.style.width = pct + '%';
+  bar.className = '';
+  const m = Math.floor(cooldownLeft / 60);
+  const s = cooldownLeft % 60;
+  label.textContent = `${m}:${String(s).padStart(2,'0')}`;
+  label.className = '';
+}
+
+setInterval(() => {
+  if (!gameStarted) return;
+  if (!canPlace && cooldownLeft > 0) {
+    cooldownLeft--;
+    updateCooldownUI();
+    if (cooldownLeft === 0) {
+      canPlace = true;
+      updateCooldownUI();
+      showToast('🎨 Tu peux placer un pixel !');
+      saveState();
+    }
+  }
+  // Session timer
+  const sec = Math.floor((Date.now() - sessionStart) / 1000);
+  const sm = Math.floor(sec/60), ss = sec%60;
+  document.getElementById('stat-session').textContent = `${String(sm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}, 1000);
+
+/* ═══════════════════════════════════════════════════
+   BOTS — simulation d'activité communautaire
+═══════════════════════════════════════════════════ */
+let onlineCount = 127 + Math.floor(Math.random()*60);
+document.getElementById('online-num').textContent = onlineCount;
+
+function botTick() {
+  if (!gameStarted) return;
+  const bot = BOTS[Math.floor(Math.random()*BOTS.length)];
+  const c   = Math.floor(Math.random()*COLS);
+  const r   = Math.floor(Math.random()*ROWS);
+  grid[c][r] = { color: bot.color, user: bot.name };
+  drawCell(c, r, bot.color);
+  addActivity(`${bot.name} → ${c},${r}`);
+  // Fluctuation joueurs en ligne
+  onlineCount += Math.floor(Math.random()*5) - 2;
+  onlineCount = Math.max(80, Math.min(320, onlineCount));
+  document.getElementById('online-num').textContent = onlineCount;
+  // Prochain bot dans 2-8s
+  setTimeout(botTick, 2000 + Math.random()*6000);
+}
+
+/* ═══════════════════════════════════════════════════
+   ACTIVITÉ
+═══════════════════════════════════════════════════ */
+const actFeed = document.getElementById('activity');
+const actItems = [];
+function addActivity(text) {
+  const el = document.createElement('div');
+  el.className = 'activity-item';
+  el.textContent = text;
+  actFeed.prepend(el);
+  actItems.push(el);
+  if (actItems.length > 5) {
+    const old = actItems.shift();
+    old.remove();
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PALETTE
+═══════════════════════════════════════════════════ */
+function buildPalette() {
+  const swatches = document.getElementById('color-swatches');
+  COLORS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'swatch' + (c === selectedColor ? ' selected' : '');
+    div.style.background = c;
+    div.onclick = () => selectColor(c);
+    swatches.appendChild(div);
+  });
+  document.getElementById('selected-preview').style.background = selectedColor;
+}
+
+function selectColor(c) {
+  selectedColor = c;
+  document.getElementById('selected-preview').style.background = c;
+  document.querySelectorAll('.swatch').forEach((s,i) => {
+    s.classList.toggle('selected', COLORS[i] === c);
+  });
+  if (selectedCol >= 0 && selectedRow >= 0) {
+    drawHover(selectedCol, selectedRow);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOUCH / POINTER EVENTS
+═══════════════════════════════════════════════════ */
+let touchStartX=0, touchStartY=0, touchMoved=false;
+
+viewport.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchMoved  = false;
+    isPanning   = false;
+  } else if (e.touches.length === 2) {
+    lastPinchDist  = pinchDist(e);
+    lastPinchScale = scale;
+    isPanning = false;
+  }
+}, {passive:false});
+
+viewport.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (!isPanning && (Math.abs(dx)>4 || Math.abs(dy)>4)) {
+      isPanning  = true; touchMoved = true;
+      panOriginX = panX; panOriginY = panY;
+    }
+    if (isPanning) {
+      panX = panOriginX + (e.touches[0].clientX - touchStartX);
+      panY = panOriginY + (e.touches[0].clientY - touchStartY);
+      applyTransform();
+    }
+    // Hover
+    if (!isPanning) {
+      const { col, row } = getCell(e.touches[0].clientX, e.touches[0].clientY);
+      drawHover(col, row);
+      document.getElementById('coords').textContent = `X:${col} Y:${row}`;
+    }
+  } else if (e.touches.length === 2) {
+    touchMoved = true;
+    const d = pinchDist(e);
+    const cx = (e.touches[0].clientX + e.touches[1].clientX)/2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY)/2;
+    const factor = d / lastPinchDist;
+    const newScale = Math.min(Math.max(lastPinchScale * factor, 0.4), 20);
+    const ratio = newScale / scale;
+    panX = cx - (cx - panX) * ratio;
+    panY = cy - (cy - panY) * ratio;
+    scale = newScale;
+    applyTransform();
+  }
+}, {passive:false});
+
+viewport.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (e.touches.length === 0 && !touchMoved) {
+    const { col, row } = getCell(
+      e.changedTouches[0].clientX,
+      e.changedTouches[0].clientY
+    );
+    if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+      setSelected(col, row);
+      drawHover(col, row);
+    }
+  }
+  if (e.touches.length < 2) lastPinchDist = null;
+}, {passive:false});
+
+// Mouse (desktop fallback)
+let mouseDown = false, mousePanning = false;
+let mousePX=0,mousePY=0,mouseOX=0,mouseOY=0;
+viewport.addEventListener('mousedown', e => {
+  mouseDown  = true;
+  mousePanning= false;
+  mousePX    = e.clientX; mousePY = e.clientY;
+  mouseOX    = panX;      mouseOY  = panY;
+});
+window.addEventListener('mousemove', e => {
+  if (!mouseDown) return;
+  const dx = e.clientX - mousePX, dy = e.clientY - mousePY;
+  if (!mousePanning && (Math.abs(dx)>4||Math.abs(dy)>4)) mousePanning=true;
+  if (mousePanning) { panX=mouseOX+dx; panY=mouseOY+dy; applyTransform(); }
+  const { col, row } = getCell(e.clientX, e.clientY);
+  drawHover(col, row);
+  document.getElementById('coords').textContent = `X:${col} Y:${row}`;
+});
+window.addEventListener('mouseup', e => {
+  if (!mousePanning && mouseDown) {
+    const { col, row } = getCell(e.clientX, e.clientY);
+    if (col>=0&&col<COLS&&row>=0&&row<ROWS) { setSelected(col,row); drawHover(col,row); }
+  }
+  mouseDown=false; mousePanning=false;
+});
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  applyZoom(e.deltaY < 0 ? 1.2 : 0.83, e.clientX, e.clientY);
+},{passive:false});
+
+function pinchDist(e) {
+  const dx = e.touches[0].clientX - e.touches[1].clientX;
+  const dy = e.touches[0].clientY - e.touches[1].clientY;
+  return Math.hypot(dx,dy);
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════ */
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function openLeaderboard() {
+  const me = leaderboard.find(l => l.name === null);
+  if (me) me.name = `@${piUsername}`;
+  const sorted = [...leaderboard].sort((a,b) => b.pixels - a.pixels);
+  const container = document.getElementById('lb-rows');
+  container.innerHTML = '';
+  const medals = ['gold','silver','bronze'];
+  sorted.forEach((entry,i) => {
+    const div = document.createElement('div');
+    div.className = 'lb-row';
+    const isMe = entry.name === `@${piUsername}`;
+    div.innerHTML = `
+      <span class="rank ${medals[i]||''}">${['🥇','🥈','🥉'][i]||('#'+(i+1))}</span>
+      <span class="name" style="${isMe?'color:var(--gold);font-weight:700':''}">
+        ${entry.name}${isMe?' (toi)':''}
+      </span>
+      <span class="count">${entry.pixels} px</span>
+    `;
+    container.appendChild(div);
+  });
+  document.getElementById('lb-modal').classList.add('open');
+}
+
+/* ═══════════════════════════════════════════════════
+   PERSISTANCE localStorage
+═══════════════════════════════════════════════════ */
+const LS_KEY = 'pi_pixelwar_v1';
+
+function saveState() {
+  const compressed = [];
+  for (let c=0;c<COLS;c++) for (let r=0;r<ROWS;r++) {
+    if (grid[c][r]) compressed.push({c,r,color:grid[c][r].color,user:grid[c][r].user});
+  }
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      pixels: compressed,
+      cooldownLeft: canPlace ? 0 : cooldownLeft,
+      canPlace,
+      placed: pixelsPlaced,
+      ts: Date.now(),
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s.pixels) {
+      s.pixels.forEach(({c,r,color,user}) => {
+        if (c>=0&&c<COLS&&r>=0&&r<ROWS) {
+          grid[c][r] = {color,user};
+          drawCell(c, r, color);
+        }
+      });
+    }
+    pixelsPlaced = s.placed || 0;
+    document.getElementById('stat-placed').textContent = pixelsPlaced;
+    // Recalculer cooldown
+    if (!s.canPlace && s.cooldownLeft > 0) {
+      const elapsed = Math.floor((Date.now() - s.ts)/1000);
+      cooldownLeft  = Math.max(0, s.cooldownLeft - elapsed);
+      if (cooldownLeft > 0) {
+        canPlace = false;
+        updateCooldownUI();
+      }
+    }
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════════
+   DÉMARRAGE
+═══════════════════════════════════════════════════ */
+function startGame() {
+  closeModal('welcome-modal');
+  gameStarted  = true;
+  sessionStart = Date.now();
+  // Remplir initiale la grille avec quelques dessins communautaires
+  populateInitialCanvas();
+  // Charger état sauvegardé
+  loadState();
+  // Bots
+  setTimeout(botTick, 3000 + Math.random()*4000);
+  updateCooldownUI();
+  showToast('Bienvenue sur Pi Pixel War ! 🎨');
+}
+
+function populateInitialCanvas() {
+  // Drapeau France en haut à gauche
+  const flag = [
+    {c:2,r:2,color:'#002395'},{c:3,r:2,color:'#002395'},{c:4,r:2,color:'#002395'},
+    {c:5,r:2,color:'#ffffff'},{c:6,r:2,color:'#ffffff'},{c:7,r:2,color:'#ffffff'},
+    {c:8,r:2,color:'#ed2939'},{c:9,r:2,color:'#ed2939'},{c:10,r:2,color:'#ed2939'},
+    {c:2,r:3,color:'#002395'},{c:3,r:3,color:'#002395'},{c:4,r:3,color:'#002395'},
+    {c:5,r:3,color:'#ffffff'},{c:6,r:3,color:'#ffffff'},{c:7,r:3,color:'#ffffff'},
+    {c:8,r:3,color:'#ed2939'},{c:9,r:3,color:'#ed2939'},{c:10,r:3,color:'#ed2939'},
+    {c:2,r:4,color:'#002395'},{c:3,r:4,color:'#002395'},{c:4,r:4,color:'#002395'},
+    {c:5,r:4,color:'#ffffff'},{c:6,r:4,color:'#ffffff'},{c:7,r:4,color:'#ffffff'},
+    {c:8,r:4,color:'#ed2939'},{c:9,r:4,color:'#ed2939'},{c:10,r:4,color:'#ed2939'},
+  ];
+  // Logo Pi (cercle violet)
+  const pi_art = [];
+  const piCX=50, piCY=25, piR=6;
+  for (let dc=-piR;dc<=piR;dc++) for (let dr=-piR;dr<=piR;dr++) {
+    if (dc*dc+dr*dr <= piR*piR) {
+      pi_art.push({c:piCX+dc, r:piCY+dr, color:'#7028c8'});
+    }
+  }
+  // Lettre Pi stylisée
+  const pi_letter = [
+    {c:49,r:22,color:'#f5c842'},{c:50,r:22,color:'#f5c842'},{c:51,r:22,color:'#f5c842'},
+    {c:49,r:23,color:'#f5c842'},{c:51,r:23,color:'#f5c842'},
+    {c:49,r:24,color:'#f5c842'},{c:51,r:24,color:'#f5c842'},
+    {c:49,r:25,color:'#f5c842'},{c:51,r:25,color:'#f5c842'},
+    {c:49,r:26,color:'#f5c842'},{c:51,r:26,color:'#f5c842'},{c:52,r:26,color:'#f5c842'},
+  ];
+  // Zone de "guerre" centrale colorée (pixels aléatoires)
+  const warZone = [];
+  const warColors = COLORS.filter((_,i) => i > 4); // couleurs vives
+  for (let i=0;i<200;i++) {
+    const c = 30 + Math.floor(Math.random()*20);
+    const r = 15 + Math.floor(Math.random()*20);
+    const bot = BOTS[Math.floor(Math.random()*BOTS.length)];
+    warZone.push({c,r,color:bot.color,user:bot.name});
+  }
+
+  [...flag, ...pi_art, ...pi_letter].forEach(({c,r,color}) => {
+    if (c>=0&&c<COLS&&r>=0&&r<ROWS) {
+      grid[c][r] = {color, user:'@communauté'};
+      drawCell(c, r, color);
+    }
+  });
+  warZone.forEach(({c,r,color,user}) => {
+    if (c>=0&&c<COLS&&r>=0&&r<ROWS) {
+      grid[c][r] = {color, user};
+      drawCell(c, r, color);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  drawGrid();
+  buildPalette();
+  resetView();
+  document.getElementById('user-tag').textContent = `@${piUsername}`;
+  // Recalculer vue au resize
+  window.addEventListener('resize', () => {
+    setTimeout(resetView, 50);
+  });
+});
+</script>
+</body>
+</html>
