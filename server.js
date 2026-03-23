@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  JEUXVIDEO.PI — Server v3.2
+//  JEUXVIDEO.PI — Server v3.3
 //  Hébergement : Render  |  DB : MongoDB Atlas
 //  Architecture : portail Pi Network + 6 systèmes configurables + Shop Gold Credits
 //               + Pont Portail (snapshot mensuel, scores déportés, galerie des saisons)
@@ -962,18 +962,296 @@ app.post('/api/payment/approve', async (req, res) => {
 });
 
 app.post('/api/payment/complete', async (req, res) => {
-  const { paymentId, txid, artId, type } = req.body;
+  const { paymentId, txid, artId, type, piUsername } = req.body;
   try {
-    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, { method: 'POST', headers: { Authorization: `Key ${PI_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ txid }) });
-    if (type === 'feature_24h' && artId) await artworks.updateOne({ id: artId }, { $set: { featured: true, featuredUntil: new Date(Date.now() + 86400000) } });
-    if (type === 'gold_pixels' && artId) await artworks.updateOne({ id: artId }, { $set: { goldPixels: true } });
+    // ── 1. Compléter la transaction côté Pi Network (toujours en premier) ──
+    await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+      method:  'POST',
+      headers: { Authorization: `Key ${PI_API_KEY}`, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ txid }),
+    });
+
+    const now = new Date();
+
+    // ── 2. Anciens types portail (conservés intacts) ──
+    if (type === 'feature_24h' && artId)
+      await artworks.updateOne({ id: artId }, { $set: { featured: true, featuredUntil: new Date(now.getTime() + 86400000) } });
+    if (type === 'gold_pixels' && artId)
+      await artworks.updateOne({ id: artId }, { $set: { goldPixels: true } });
     if (type === 'extra_slots') {
-      const slotUsername = req.body.username || req.body.piUsername;
-      if (slotUsername) { const today = new Date(); today.setHours(0,0,0,0); await users.updateOne({ piUsername: slotUsername }, { $set: { extraSlots: true, extraSlotsDate: today } }, { upsert: false }); }
+      const u = req.body.username || piUsername;
+      if (u) {
+        const today = new Date(); today.setHours(0,0,0,0);
+        await users.updateOne({ piUsername: u }, { $set: { extraSlots: true, extraSlotsDate: today } }, { upsert: false });
+      }
     }
+
+    // ── 3. Nouveaux items Gold Pixel shop (persistance MongoDB) ──
+    // Chaque effet est idempotent : relancer avec le même paymentId ne double pas l'effet.
+
+    if (piUsername && users) {
+
+      // ── Boucliers — écriture de shieldExpiry en base ──
+      // Au rechargement, /api/goldpixel/my-status lira ce champ et restaurera le bouclier.
+      if (type === 'dome_4h') {
+        const expiry = new Date(now.getTime() + 4 * 60 * 60 * 1000); // +4h
+        await users.updateOne(
+          { piUsername },
+          { $set: { shieldExpiry: expiry, shieldPaymentId: paymentId } },
+          { upsert: false }
+        );
+        console.log(`[shop] dome_4h → @${piUsername} shieldExpiry=${expiry.toISOString()}`);
+      }
+
+      if (type === 'dome_8h') {
+        const expiry = new Date(now.getTime() + 8 * 60 * 60 * 1000); // +8h
+        await users.updateOne(
+          { piUsername },
+          { $set: { shieldExpiry: expiry, shieldPaymentId: paymentId } },
+          { upsert: false }
+        );
+        console.log(`[shop] dome_8h → @${piUsername} shieldExpiry=${expiry.toISOString()}`);
+      }
+
+      // ── Pixels chargeurs — incrément de bonusPixels en base ──
+      // Le front lit ce champ au démarrage via /api/goldpixel/my-status.
+      // bonusPixels est décrémenté à chaque pixel Or utilisé (implémentation future côté moteur).
+      // Pour l'instant : le montant est crédité et utilisé en session locale.
+      if (type === 'pixels_100') {
+        await users.updateOne(
+          { piUsername },
+          { $inc: { bonusPixels: 100 } },
+          { upsert: false }
+        );
+        console.log(`[shop] pixels_100 → @${piUsername} +100 bonusPixels`);
+      }
+
+      if (type === 'pixels_250') {
+        await users.updateOne(
+          { piUsername },
+          { $inc: { bonusPixels: 250 } },
+          { upsert: false }
+        );
+        console.log(`[shop] pixels_250 → @${piUsername} +250 bonusPixels`);
+      }
+
+      // ── Pack Vengeance — abonnement mensuel ──
+      // Actif 30 jours à partir de l'achat (renouvelable).
+      if (type === 'vengeance_pack') {
+        const expiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 jours
+        await users.updateOne(
+          { piUsername },
+          { $set: { vengeanceActive: true, vengeanceExpiry: expiry, vengeancePaymentId: paymentId } },
+          { upsert: false }
+        );
+        console.log(`[shop] vengeance_pack → @${piUsername} expiry=${expiry.toISOString()}`);
+      }
+
+      // ── Distinction — don de 0,1 Pi pour valoriser une œuvre ──
+      // Enregistré dans la collection 'donations' pour historique et galerie.
+      if (type === 'distinction') {
+        if (db) {
+          const donations = db.collection('donations');
+          await donations.insertOne({
+            type:      'distinction',
+            fromUser:  piUsername,
+            paymentId,
+            txid,
+            amount:    0.1,
+            createdAt: now,
+          });
+        }
+        console.log(`[shop] distinction → @${piUsername} don enregistré`);
+      }
+
+      // ── Don Elite — offrir le pack Elite à un autre joueur ──
+      // Le recipient est passé dans les metadata (à implémenter côté front).
+      if (type === 'gift_elite') {
+        const recipient = req.body.recipient || null;
+        if (db) {
+          const donations = db.collection('donations');
+          await donations.insertOne({
+            type:      'gift_elite',
+            fromUser:  piUsername,
+            toUser:    recipient,
+            paymentId,
+            txid,
+            amount:    10,
+            createdAt: now,
+          });
+        }
+        // Si le destinataire est connu, lui activer l'Elite 30 jours
+        if (recipient) {
+          const giftExpiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          await users.updateOne(
+            { piUsername: recipient },
+            { $set: { isGold: true, goldExpiry: giftExpiry, goldSource: 'gift', goldGiftFrom: piUsername } },
+            { upsert: false }
+          );
+          console.log(`[shop] gift_elite → @${piUsername} offre Elite à @${recipient}`);
+        }
+      }
+
+      // ── Don anonyme — montant libre ──
+      if (type === 'anon_don') {
+        const recipient = req.body.recipient || 'ANONYME';
+        if (db) {
+          const donations = db.collection('donations');
+          await donations.insertOne({
+            type:      'anon_don',
+            fromUser:  req.body.anonymous ? 'ANONYME' : piUsername,
+            toUser:    recipient,
+            paymentId,
+            txid,
+            amount:    req.body.amount || null,
+            createdAt: now,
+          });
+        }
+        console.log(`[shop] anon_don → don enregistré`);
+      }
+
+    } // fin if (piUsername && users)
+
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[payment/complete] erreur:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
+
+// ═══════════════════════════════════════════════════════════════
+//  GOLD PIXEL — ROUTES STATUT JOUEUR
+//  Ces deux routes sont appelées par goldpixel.html au démarrage.
+// ═══════════════════════════════════════════════════════════════
+
+// ── GET /api/member/status/:username ─────────────────────────
+// Appelé par checkGoldStatus() dans goldpixel.html juste après
+// l'authentification Pi. Retourne :
+//   { isGold, daysLeft, isElite }
+//
+// isGold / isElite correspondent au Pack Elite (abonnement 1 Pi/mois).
+// La distinction "Gold" vs "Elite" est historique — le terme en base
+// est `isGold` mais l'UI affiche "Elite".
+app.get('/api/member/status/:username', async (req, res) => {
+  const { username } = req.params;
+  if (!username) return res.status(400).json({ error: 'username requis' });
+
+  try {
+    if (!users) return res.json({ isGold: false, daysLeft: 0 });
+
+    const user = await users.findOne(
+      { piUsername: username },
+      { projection: { isGold: 1, goldExpiry: 1, goldSource: 1 } }
+    );
+
+    if (!user) return res.json({ isGold: false, daysLeft: 0 });
+
+    // Vérifier si l'abonnement Elite est encore valide
+    const now       = new Date();
+    const expiry    = user.goldExpiry ? new Date(user.goldExpiry) : null;
+    const isActive  = user.isGold && expiry && expiry > now;
+    const daysLeft  = isActive
+      ? Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    // Si l'abonnement a expiré, mettre à jour la base (lazy expiry)
+    if (user.isGold && !isActive) {
+      await users.updateOne(
+        { piUsername: username },
+        { $set: { isGold: false } }
+      );
+    }
+
+    res.json({
+      isGold:   isActive,   // compatibilité front existant
+      isElite:  isActive,   // alias — même valeur
+      daysLeft: daysLeft,
+    });
+  } catch (e) {
+    console.error('[member/status]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+// ── GET /api/goldpixel/my-status ─────────────────────────────
+// Appelé par goldpixel.html au démarrage (après authenticate).
+// Restaure l'état de jeu persisté en base :
+//   • bouclier actif + secondes restantes
+//   • pixels bonus restants (overfill)
+//   • pack vengeance actif
+//
+// Requiert le header Authorization: Bearer <Pi accessToken>
+// (utilise withPiUser existant)
+app.get('/api/goldpixel/my-status', withPiUser(false), async (req, res) => {
+  try {
+    if (!users || !req.piUser) return res.json({ ok: true });
+
+    const user = await users.findOne(
+      { piUsername: req.piUser.username },
+      {
+        projection: {
+          shieldExpiry:     1,
+          bonusPixels:      1,
+          vengeanceActive:  1,
+          vengeanceExpiry:  1,
+          isGold:           1,
+          goldExpiry:       1,
+        }
+      }
+    );
+
+    if (!user) return res.json({ ok: true });
+
+    const now = new Date();
+
+    // ── Bouclier ──
+    const shieldExpiry  = user.shieldExpiry ? new Date(user.shieldExpiry) : null;
+    const shieldActive  = shieldExpiry && shieldExpiry > now;
+    const shieldSecsLeft = shieldActive
+      ? Math.ceil((shieldExpiry - now) / 1000)
+      : 0;
+
+    // Si le bouclier a expiré, on le nettoie (lazy)
+    if (user.shieldExpiry && !shieldActive) {
+      await users.updateOne(
+        { piUsername: req.piUser.username },
+        { $unset: { shieldExpiry: '', shieldPaymentId: '' } }
+      );
+    }
+
+    // ── Vengeance ──
+    const vengeanceExpiry  = user.vengeanceExpiry ? new Date(user.vengeanceExpiry) : null;
+    const vengeanceActive  = user.vengeanceActive && vengeanceExpiry && vengeanceExpiry > now;
+
+    if (user.vengeanceActive && !vengeanceActive) {
+      await users.updateOne(
+        { piUsername: req.piUser.username },
+        { $set: { vengeanceActive: false } }
+      );
+    }
+
+    // ── Bonus pixels ──
+    const bonusPixels = Math.max(0, user.bonusPixels || 0);
+
+    // ── Elite ──
+    const goldExpiry  = user.goldExpiry ? new Date(user.goldExpiry) : null;
+    const isElite     = user.isGold && goldExpiry && goldExpiry > now;
+
+    res.json({
+      ok:             true,
+      shieldActive:   shieldActive,
+      shieldSecsLeft: shieldSecsLeft,
+      bonusPixels:    bonusPixels,
+      vengeanceActive: vengeanceActive,
+      isElite:        isElite,
+    });
+  } catch (e) {
+    console.error('[my-status]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 
 app.get('/api/leaderboard/countries', async (req, res) => {
   if (!artworks) return res.json([]);
@@ -1862,6 +2140,17 @@ app.get('/stacker', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'St
 app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
 app.get('/2048', (req, res) => res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), err => { if (err) res.status(404).send('index.html introuvable'); }));
 
+// ── PI PIXEL WAR ─────────────────────────────────────────────────────────────
+// Fichier : Games/PixelWar/pixelwar-pi.html
+// Accès   : https://jeuxvideo.onrender.com/pixelwar
+// Jeu pixel war collaboratif style r/Place, mobile-first, Pi Network
+// ─────────────────────────────────────────────────────────────────────────────
+app.use('/pixelwar', express.static(path.join(__dirname, 'Games', 'PixelWar')));
+app.get('/pixelwar', (req, res) => res.sendFile(
+  path.join(__dirname, 'Games', 'PixelWar', 'pixelwar-pi.html'),
+  err => { if (err) res.status(404).send('pixelwar-pi.html introuvable — vérifier Games/PixelWar/'); }
+));
+
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.2 actif sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.3 actif sur le port ${PORT}`));
