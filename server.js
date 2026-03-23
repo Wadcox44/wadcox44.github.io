@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  JEUXVIDEO.PI — Server v3.3
+//  JEUXVIDEO.PI — Server v3.5
 //  Hébergement : Render  |  DB : MongoDB Atlas
 //  Architecture : portail Pi Network + 6 systèmes configurables + Shop Gold Credits
 //               + Pont Portail (snapshot mensuel, scores déportés, galerie des saisons)
@@ -233,6 +233,7 @@ async function connectDB() {
 
     // Injecter db dans le shop
     ShopRoutes.inject(db, withPiUser, PI_API_KEY);
+    ensurePixelwarIndexes(); // Pi-xel War indexes
 
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
   } catch (e) {
@@ -2128,6 +2129,241 @@ app.get('/validation-key.txt', (req, res) => res.send(PI_API_KEY));
 app.get('/health', (req, res) => { res.header('Access-Control-Allow-Origin', '*'); res.status(200).send('OK'); });
 app.get('/ping',   (req, res) => { res.header('Access-Control-Allow-Origin', '*'); res.status(200).json({ status: 'alive', ts: new Date().toISOString() }); });
 
+
+/* ═══════════════════════════════════════════════════════════════
+   PI-XEL WAR V1 — Routes API
+   Collections MongoDB :
+     pixelwar_grid    : { col, row, color, user, ts }
+     pixelwar_players : { username, stock, rechargeTs, lastPixelTs }
+   ─────────────────────────────────────────────────────────────
+   Règles V1 :
+     Stock de départ : 10 pixels
+     Recharge        : 1 pixel toutes les 3 minutes (180s)
+     Plafond stock   : 10 (20 avec achat boutique)
+     Pas de cooldown global — c'est le stock qui limite
+═══════════════════════════════════════════════════════════════ */
+
+const PW_STOCK_DEFAULT = 10;
+const PW_STOCK_CAP     = 20;
+const PW_RECHARGE_MS   = 3 * 60 * 1000; // 3 minutes
+
+/* ── Init indexes ── */
+async function ensurePixelwarIndexes() {
+  try {
+    await db.collection('pixelwar_grid').createIndex({ col: 1, row: 1 }, { unique: true });
+    await db.collection('pixelwar_grid').createIndex({ ts: -1 });
+    await db.collection('pixelwar_players').createIndex({ username: 1 }, { unique: true });
+    console.log('Pi-xel War : indexes OK');
+  } catch (e) {
+    console.error('Pi-xel War index error:', e.message);
+  }
+}
+
+/* ── Helpers ── */
+function pwNormalizeUser(username) {
+  const u = String(username || 'anonyme').slice(0, 30).replace(/^@+/, '');
+  return u;
+}
+
+/* Calculer le stock actuel d'un joueur en tenant compte de la recharge */
+function pwCalcStock(player) {
+  if (!player) return { stock: PW_STOCK_DEFAULT, rechargeLeft: PW_RECHARGE_MS / 1000 };
+  const now       = Date.now();
+  let stock       = player.stock;
+  let rechargeTs  = player.rechargeTs || now;
+
+  /* Créditer les pixels rechargés depuis la dernière mise à jour */
+  if (stock < PW_STOCK_DEFAULT) {
+    const elapsed = now - rechargeTs;
+    const gained  = Math.floor(elapsed / PW_RECHARGE_MS);
+    if (gained > 0) {
+      stock      = Math.min(PW_STOCK_DEFAULT, stock + gained);
+      rechargeTs = rechargeTs + gained * PW_RECHARGE_MS;
+    }
+  }
+
+  const rechargeLeft = stock >= PW_STOCK_DEFAULT
+    ? 0
+    : Math.max(0, Math.ceil((rechargeTs + PW_RECHARGE_MS - now) / 1000));
+
+  return { stock, rechargeLeft, rechargeTs };
+}
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/pixelwar/grid[?since=ts]
+   Retourne la grille (ou delta depuis since), ts, online
+───────────────────────────────────────────────────────────── */
+app.get('/api/pixelwar/grid', async (req, res) => {
+  try {
+    const since = parseInt(req.query.since) || 0;
+    const query = since > 0 ? { ts: { $gt: since } } : {};
+    const pixels = await db.collection('pixelwar_grid')
+      .find(query, { projection: { _id:0, col:1, row:1, color:1, user:1, ts:1 } })
+      .toArray();
+    const fiveMin = Date.now() - 5 * 60 * 1000;
+    const online = await db.collection('pixelwar_grid')
+      .distinct('user', { ts: { $gt: fiveMin } });
+    res.json({ ok: true, pixels, ts: Date.now(), online: online.length });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/pixelwar/place
+   Body : { col, row, color, username }
+   Vérifie le stock, décrémente, pose le pixel
+───────────────────────────────────────────────────────────── */
+app.post('/api/pixelwar/place', async (req, res) => {
+  try {
+    const { col, row, color, username } = req.body;
+    if (typeof col !== 'number' || typeof row !== 'number')
+      return res.status(400).json({ ok: false, error: 'col et row requis (number)' });
+    if (col < 0 || col >= 80 || row < 0 || row >= 50)
+      return res.status(400).json({ ok: false, error: 'Coordonnées hors-limites' });
+    if (!color || !/^#[0-9a-fA-F]{6}$/.test(color))
+      return res.status(400).json({ ok: false, error: 'Couleur invalide' });
+
+    const user = pwNormalizeUser(username);
+    const now  = Date.now();
+
+    /* Lire ou créer le profil joueur */
+    let player = await db.collection('pixelwar_players').findOne({ username: user });
+    if (!player) {
+      player = { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0 };
+      await db.collection('pixelwar_players').insertOne(player);
+    }
+
+    /* Calculer le stock actuel */
+    const { stock, rechargeLeft, rechargeTs } = pwCalcStock(player);
+
+    if (stock <= 0) {
+      return res.status(429).json({
+        ok: false,
+        error: `Stock vide — +1 pixel dans ${rechargeLeft}s`,
+        stock: 0,
+        rechargeLeft,
+      });
+    }
+
+    /* Poser le pixel */
+    await db.collection('pixelwar_grid').updateOne(
+      { col, row },
+      { $set: { col, row, color, user: '@' + user, ts: now } },
+      { upsert: true }
+    );
+
+    /* Décrémenter le stock */
+    const newStock      = stock - 1;
+    const newRechargeTs = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
+    await db.collection('pixelwar_players').updateOne(
+      { username: user },
+      { $set: { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now } }
+    );
+
+    const newRechargeLeft = newStock >= PW_STOCK_DEFAULT
+      ? 0
+      : Math.max(0, Math.ceil((newRechargeTs + PW_RECHARGE_MS - now) / 1000));
+
+    res.json({ ok: true, col, row, color, ts: now, stock: newStock, rechargeLeft: newRechargeLeft });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/pixelwar/player?username=xxx
+   Renvoie le stock et le temps avant recharge du joueur
+───────────────────────────────────────────────────────────── */
+app.get('/api/pixelwar/player', async (req, res) => {
+  try {
+    const user = pwNormalizeUser(req.query.username);
+    let player = await db.collection('pixelwar_players').findOne({ username: user });
+    if (!player) {
+      /* Premier accès — créer le profil */
+      const now = Date.now();
+      player = { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0 };
+      await db.collection('pixelwar_players').insertOne(player);
+    }
+    const { stock, rechargeLeft } = pwCalcStock(player);
+    res.json({ ok: true, username: user, stock, rechargeLeft });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/pixelwar/leaderboard
+   Top 10 joueurs par pixels posés
+───────────────────────────────────────────────────────────── */
+app.get('/api/pixelwar/leaderboard', async (req, res) => {
+  try {
+    const rows = await db.collection('pixelwar_grid').aggregate([
+      { $group: { _id: '$user', pixels: { $sum: 1 } } },
+      { $sort:  { pixels: -1 } },
+      { $limit: 10 },
+      { $project: { _id:0, user:'$_id', pixels:1 } },
+    ]).toArray();
+    res.json({ ok: true, leaderboard: rows });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/pixelwar/shop/approve   (délégation Pi SDK)
+   POST /api/pixelwar/shop/complete  (créditer stock après paiement)
+───────────────────────────────────────────────────────────── */
+app.post('/api/pixelwar/shop/approve', async (req, res) => {
+  try {
+    const { paymentId } = req.body;
+    if (!paymentId) return res.status(400).json({ ok: false, error: 'paymentId requis' });
+    const r = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+      method: 'POST',
+      headers: { Authorization: `Key ${PI_API_KEY}`, 'Content-Type': 'application/json' },
+    });
+    const data = await r.json();
+    res.json({ ok: r.ok, data });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.post('/api/pixelwar/shop/complete', async (req, res) => {
+  try {
+    const { paymentId, txid, type, username } = req.body;
+    if (!paymentId || !txid) return res.status(400).json({ ok: false, error: 'paymentId et txid requis' });
+
+    /* Finaliser côté Pi */
+    const r = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/complete`, {
+      method: 'POST',
+      headers: { Authorization: `Key ${PI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ txid }),
+    });
+    if (!r.ok) return res.status(400).json({ ok: false, error: 'Echec finalisation Pi' });
+
+    /* Créditer les pixels */
+    const added  = type === 'large' ? 10 : (type === 'support' ? 0 : 5);
+    const user   = pwNormalizeUser(username);
+    const now    = Date.now();
+
+    if (added > 0) {
+      let player = await db.collection('pixelwar_players').findOne({ username: user });
+      let { stock } = player ? pwCalcStock(player) : { stock: PW_STOCK_DEFAULT };
+      const newStock = Math.min(PW_STOCK_CAP, stock + added);
+      await db.collection('pixelwar_players').updateOne(
+        { username: user },
+        { $set: { stock: newStock, rechargeTs: now } },
+        { upsert: true }
+      );
+      return res.json({ ok: true, stock: newStock });
+    }
+    res.json({ ok: true, stock: null });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
 app.get('/goldpixel', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), err => { if (err) res.status(404).send('goldpixel.html introuvable'); }));
 
@@ -2153,4 +2389,4 @@ app.get('/pixelwar', (req, res) => res.sendFile(
 
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.3 actif sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.5 actif sur le port ${PORT}`));
