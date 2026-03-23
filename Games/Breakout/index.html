@@ -378,28 +378,83 @@ const PU_TYPES = {
   wide:  { icon:'↔',  col:'#44ff88', label:'WIDE PAD',    dur:7000 },
 };
 
-// Level definitions  rows cols speedMult brickHp  special (powerup brick %)
+// Level definitions — 30 niveaux de campagne
+// rows cols spd(vitesse) hp(résistance briques) maxPU(powerups max)
 const LEVELS = [
-  // rows, cols, spd, hp, maxPU — vitesse globale augmentée (+40%)
-  {rows:3,cols:7, spd:1.90,hp:1,maxPU:0},  // 1
-  {rows:4,cols:7, spd:1.55,hp:1,maxPU:2},  // 2
-  {rows:4,cols:8, spd:1.70,hp:1,maxPU:2},  // 3
-  {rows:5,cols:8, spd:1.88,hp:2,maxPU:3},  // 4
-  {rows:5,cols:9, spd:2.05,hp:2,maxPU:3},  // 5
-  {rows:5,cols:9, spd:2.22,hp:2,maxPU:4},  // 6
-  {rows:6,cols:9, spd:2.40,hp:3,maxPU:4},  // 7
-  {rows:6,cols:9, spd:2.58,hp:3,maxPU:4},  // 8
-  {rows:6,cols:10,spd:2.78,hp:3,maxPU:5},  // 9
-  {rows:7,cols:10,spd:3.00,hp:3,maxPU:5},  // 10 — nightmare
+  // ── Zone 1 : Initiation (niveaux 1–5) ──
+  {rows:3,cols:7, spd:1.40,hp:1,maxPU:0},  // 1
+  {rows:4,cols:7, spd:1.52,hp:1,maxPU:2},  // 2
+  {rows:4,cols:8, spd:1.65,hp:1,maxPU:2},  // 3
+  {rows:5,cols:8, spd:1.78,hp:1,maxPU:3},  // 4
+  {rows:5,cols:8, spd:1.92,hp:2,maxPU:3},  // 5
+  // ── Zone 2 : Confrontation (niveaux 6–10) ──
+  {rows:5,cols:9, spd:2.06,hp:2,maxPU:3},  // 6
+  {rows:6,cols:9, spd:2.20,hp:2,maxPU:4},  // 7
+  {rows:6,cols:9, spd:2.35,hp:2,maxPU:4},  // 8
+  {rows:6,cols:10,spd:2.50,hp:3,maxPU:4},  // 9
+  {rows:7,cols:10,spd:2.66,hp:3,maxPU:5},  // 10
+  // ── Zone 3 : Assaut (niveaux 11–15) ──
+  {rows:7,cols:10,spd:2.82,hp:3,maxPU:5},  // 11
+  {rows:7,cols:11,spd:3.00,hp:3,maxPU:5},  // 12
+  {rows:8,cols:11,spd:3.18,hp:3,maxPU:5},  // 13
+  {rows:8,cols:11,spd:3.36,hp:4,maxPU:6},  // 14
+  {rows:8,cols:11,spd:3.55,hp:4,maxPU:6},  // 15
+  // ── Zone 4 : Cyber Nexus (niveaux 16–20) ──
+  {rows:8,cols:12,spd:3.74,hp:4,maxPU:6},  // 16
+  {rows:9,cols:12,spd:3.94,hp:4,maxPU:6},  // 17
+  {rows:9,cols:12,spd:4.14,hp:5,maxPU:7},  // 18
+  {rows:9,cols:12,spd:4.35,hp:5,maxPU:7},  // 19
+  {rows:9,cols:12,spd:4.56,hp:5,maxPU:7},  // 20
+  // ── Zone 5 : Pi Core (niveaux 21–25) ──
+  {rows:9,cols:12,spd:4.78,hp:5,maxPU:7},  // 21
+  {rows:10,cols:12,spd:5.00,hp:5,maxPU:8}, // 22
+  {rows:10,cols:12,spd:5.22,hp:6,maxPU:8}, // 23
+  {rows:10,cols:12,spd:5.45,hp:6,maxPU:8}, // 24
+  {rows:10,cols:12,spd:5.68,hp:6,maxPU:8}, // 25
+  // ── Zone 6 : Singularité (niveaux 26–30) ──
+  {rows:10,cols:12,spd:5.92,hp:6,maxPU:9}, // 26
+  {rows:10,cols:12,spd:6.16,hp:7,maxPU:9}, // 27
+  {rows:11,cols:12,spd:6.40,hp:7,maxPU:9}, // 28
+  {rows:11,cols:12,spd:6.65,hp:7,maxPU:9}, // 29
+  {rows:11,cols:12,spd:6.90,hp:8,maxPU:10},// 30 — Singularité finale
 ];
-// After level 10, loop increasing speed
+
+const MAX_CAMPAIGN = LEVELS.length; // 30 niveaux de campagne
+
+// getLevelCfg : retourne la config pour un niveau donné
+// Au-delà des 30 niveaux de campagne → mode infini avec vitesse croissante
 function getLevelCfg(lvl){
-  if(lvl<LEVELS.length) return LEVELS[lvl];
-  const base = {...LEVELS[LEVELS.length-1]};
-  base.spd   = LEVELS[LEVELS.length-1].spd + (lvl-LEVELS.length+1)*0.15;
-  base.hp    = 3 + Math.floor((lvl-LEVELS.length)/3);
-  base.maxPU = 5 + Math.floor((lvl-LEVELS.length)/2); // croît lentement en infini
+  if(lvl < MAX_CAMPAIGN) return LEVELS[lvl];
+  // Mode infini (ne s'active qu'après avoir terminé la campagne)
+  const base   = {...LEVELS[MAX_CAMPAIGN-1]};
+  base.spd     = LEVELS[MAX_CAMPAIGN-1].spd + (lvl-MAX_CAMPAIGN+1)*0.15;
+  base.hp      = 8 + Math.floor((lvl-MAX_CAMPAIGN)/3);
+  base.maxPU   = 10 + Math.floor((lvl-MAX_CAMPAIGN)/2);
   return base;
+}
+
+// ── CHECKPOINT — localStorage ──
+// Sauvegarde le niveau le plus haut atteint (même en cas de game over)
+const LS_CHECKPOINT = 'breaker_checkpoint_v1';
+
+function saveCheckpoint(lvl, sc) {
+  try {
+    const saved = loadCheckpoint();
+    // Mettre à jour seulement si on progresse
+    if (lvl > (saved.level || 0) || (lvl === (saved.level || 0) && sc > (saved.score || 0))) {
+      localStorage.setItem(LS_CHECKPOINT, JSON.stringify({ level: lvl, score: sc }));
+    }
+  } catch(_) {}
+}
+
+function loadCheckpoint() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_CHECKPOINT) || '{}');
+  } catch(_) { return {}; }
+}
+
+function clearCheckpoint() {
+  try { localStorage.removeItem(LS_CHECKPOINT); } catch(_) {}
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -597,14 +652,26 @@ function showTutorial(){
         </div>
       </div>
 
-      <button class="btn-start-game" onclick="startGame()">▶ START GAME</button>
+      <div id="tut-resume-wrap" style="margin-top:6px;"></div>
+      <button class="btn-start-game" onclick="startGame(false)" style="margin-top:6px;">▶ NOUVELLE PARTIE</button>
     </div>
   `;
   ov.classList.remove('hide');
+  // Injecter le bouton "reprendre" si un checkpoint existe
+  (function(){
+    const cp = loadCheckpoint();
+    const wrap = ov.querySelector('#tut-resume-wrap');
+    if(wrap && cp.level > 0){
+      wrap.innerHTML = '<button class="btn-start-game" style="background:rgba(255,136,0,.12);border:1px solid rgba(255,136,0,.5);color:#ff8800;margin-bottom:4px;" onclick="startGame(true)">\u21a9 REPRENDRE — Niveau '+(cp.level+1)+' ('+((cp.score||0).toLocaleString('fr'))+' pts)</button>';
+    }
+  })();
 }
 
-function startGame(){
-  score=0; lives=3; lvl=0; combo=0; maxCombo=0;
+function startGame(fromCheckpoint){
+  const cp = fromCheckpoint ? loadCheckpoint() : {};
+  score   = cp.score || 0;
+  lvl     = cp.level || 0;
+  lives   = 3; combo=0; maxCombo=0;
   totalBricksHit=0; bricksHit=0;
   activePU={}; drops=[]; lasers=[]; parts=[];
   scoreSubmitted=false;
@@ -654,6 +721,7 @@ function loseLife(){
   if(lives<=0){
     cancelAnimationFrame(raf);
     state='dead';
+    saveCheckpoint(lvl, score); // garder le checkpoint au niveau atteint
     setTimeout(()=>{ parts=[]; showResultScreen(); }, 300);
   } else {
     bonPad=true;
@@ -670,18 +738,25 @@ function nextLevel(){
   updateHUD();
   balls=[];activePU={};drops=[];lasers=[];
   cancelAnimationFrame(raf);
+  // Sauvegarder la progression à chaque niveau passé
+  saveCheckpoint(lvl, score);
+  // Détecter la fin des 30 niveaux de campagne
+  if(lvl >= MAX_CAMPAIGN){ state='win'; showResultScreen(); return; }
   state='brief';
   showBrief();
 }
 
 function showBrief(){
   const ov=document.getElementById('ov');
-  const isInfinite = lvl>=LEVELS.length;
+  const zone = Math.floor(lvl/5)+1;
+  const zoneNames=['','Initiation','Confrontation','Assaut','Cyber Nexus','Pi Core','Singularité'];
+  const zoneName = zoneNames[Math.min(zone,6)] || '';
+  const newZone  = lvl % 5 === 0 && lvl > 0 && lvl < MAX_CAMPAIGN;
   ov.innerHTML=`
     <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
       <div class="brief-sub">LEVEL CLEAR!</div>
       <div class="brief-title">LEVEL ${lvl+1}</div>
-      ${isInfinite?'<div class="brief-sub" style="color:#ff8800;">INFINITE MODE — SPEED UP!</div>':''}
+      ${newZone ? `<div class="brief-sub" style="color:#ff8800;font-size:.72rem;">⚡ ZONE ${zone} — ${zoneName}</div>` : ''}
       <div style="font-size:.75rem;color:rgba(200,216,232,.5);margin-top:4px;">+${500+lvl*100} bonus points</div>
     </div>`;
   ov.classList.remove('hide');
@@ -691,23 +766,40 @@ function showBrief(){
     state='playing';
     cancelAnimationFrame(raf);
     loop();
-  },1400);
+  },1600);
 }
 
 // ═══════════════════════════════════════════════════════════
 //  RESULT SCREEN + LEADERBOARD
 // ═══════════════════════════════════════════════════════════
 function showResultScreen(){
-  const ov=document.getElementById('ov');
-  const isWin = state==='win';
+  const ov     = document.getElementById('ov');
+  const isWin  = state==='win';
+  const cp     = loadCheckpoint();
+  const cpLvl  = cp.level || 0;
+  // Bouton reprendre : visible si le checkpoint est plus avancé que le niveau 0
+  const resumeBtn = (!isWin && cpLvl > 0)
+    ? `<button class="lb-skip" style="margin-top:4px;" onclick="startGame(true)">
+         ↩ REPRENDRE AU NIVEAU ${cpLvl+1}
+       </button>`
+    : '';
+  // Message fin de campagne
+  const winMsg = isWin
+    ? `<div style="font-size:.7rem;color:rgba(200,216,232,.55);line-height:1.6;text-align:center;margin:6px 0 2px;">
+         🎮 Tu as terminé les 30 niveaux de la campagne.<br>
+         <span style="color:#ff8800;">D'autres niveaux arrivent bientôt !</span><br>
+         <span style="font-size:.62rem;opacity:.6;">Reste connecté pour la mise à jour.</span>
+       </div>`
+    : '';
   ov.innerHTML=`
     <div class="ov-result">
       <div class="ov-icon">${isWin?'🏆':'💀'}</div>
-      <div class="ov-title ${isWin?'or':'rd'}">${isWin?'YOU WIN!':'GAME OVER'}</div>
+      <div class="ov-title ${isWin?'or':'rd'}">${isWin?'CAMPAGNE TERMINÉE !':'GAME OVER'}</div>
+      ${winMsg}
       <div class="ov-score-big">${score}</div>
       <div class="ov-score-sub">POINTS</div>
       <div class="ov-stats">
-        <div class="ov-stat"><div class="ov-stat-val">${lvl+1}</div><div class="ov-stat-lbl">Level</div></div>
+        <div class="ov-stat"><div class="ov-stat-val">${isWin ? MAX_CAMPAIGN : lvl+1}</div><div class="ov-stat-lbl">Level</div></div>
         <div class="ov-stat"><div class="ov-stat-val">${maxCombo}</div><div class="ov-stat-lbl">Best combo</div></div>
         <div class="ov-stat"><div class="ov-stat-val">${totalBricksHit}</div><div class="ov-stat-lbl">Bricks</div></div>
       </div>
@@ -716,6 +808,7 @@ function showResultScreen(){
         <input class="lb-input" id="lb-name-input" placeholder="YOUR NAME / PI USERNAME" maxlength="20"
                value="${playerName}" oninput="playerName=this.value">
         <button class="lb-submit" onclick="submitScore()">SUBMIT SCORE →</button>
+        ${resumeBtn}
         <button class="lb-skip" onclick="showLeaderboard(false)">SKIP — VIEW LEADERBOARD</button>
       </div>
     </div>`;
@@ -1193,7 +1286,8 @@ function loop(){
 function updateHUD(){
   document.getElementById('h-score').textContent=score.toLocaleString();
   document.getElementById('h-lives').textContent='❤'.repeat(Math.max(0,lives));
-  document.getElementById('h-level').textContent=lvl+1;
+  const isInfMode = lvl>=MAX_CAMPAIGN;
+  document.getElementById('h-level').textContent = isInfMode ? (lvl+1)+'∞' : (lvl+1)+'/'+MAX_CAMPAIGN;
   const cv=document.getElementById('h-combo');
   const cl=document.getElementById('h-combo-lbl');
   if(combo>1){
