@@ -791,20 +791,19 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 /* ── BOUTON DON ── */
 #btn-don-toggle {
   position: relative;
-  padding: 5px 12px;
-  background: transparent;
-  border: 1.5px solid rgba(255,170,0,.5);
-  border-radius: 5px;
+  padding: 7px 18px;
+  background: rgba(255,170,0,.08);
+  border: 2px solid rgba(255,170,0,.7);
+  border-radius: 6px;
   color: var(--or);
   font-family: 'Orbitron', monospace;
-  font-size: .48rem;
+  font-size: .58rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
-  transition: border-color .25s, box-shadow .25s, color .25s;
-  /* Shimmer cyclique pour attirer l'œil */
+  transition: border-color .25s, box-shadow .25s, background .25s;
   animation: donGlow 2.5s ease-in-out infinite;
 }
 @keyframes donGlow {
@@ -1920,21 +1919,14 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <button class="nav-bar-btn"
             onclick="switchTab('devs')"
             data-tab="devs"
-            data-fr="Devs" data-en="Devs">Devs</button>
+            data-fr="Rejoignez-nous" data-en="Join Us">Join Us</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
-            onclick="showSection('contact')"
+            onclick="switchTab('contact')"
             data-tab="contact"
             data-fr="Contact" data-en="Contact">Contact</button>
-
-    <div class="nav-bar-sep"></div>
-
-    <button class="nav-bar-btn"
-            onclick="openRecruitModal()"
-            data-tab="recruit"
-            data-fr="Recrutement" data-en="Recruit">Recruit</button>
 
   </div>
 </div>
@@ -1954,14 +1946,14 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         🎮 The Pi Network gaming portal
       </div>
       <div class="hero-headline-title"
-           data-fr="Attaque. Défends.<br><span>Conquiers ta place.</span>"
-           data-en="Attack. Defend.<br><span>Conquer your place.</span>">
-        Attack. Defend.<br><span>Conquer your place.</span>
+           data-fr="Pixel War.<br><span>La guerre des pixels Pi.</span>"
+           data-en="Pixel War.<br><span>The Pi pixel war.</span>">
+        Pixel War.<br><span>The Pi pixel war.</span>
       </div>
       <div class="hero-headline-sub"
-           data-fr="La première guerre de pixels sur Pi Network. Pose ton pixel, défends ton territoire, élimine tes adversaires."
-           data-en="The first pixel war on Pi Network. Place your pixel, defend your territory, eliminate your rivals.">
-        The first pixel war on Pi Network. Place your pixel, defend your territory, eliminate your rivals.
+           data-fr="Le premier jeu de pixels collaboratif sur Pi Network. Pose, conquiers, défends."
+           data-en="The first collaborative pixel game on Pi Network. Place, conquer, defend.">
+        The first collaborative pixel game on Pi Network. Place, conquer, defend.
       </div>
     </div>
 
@@ -1981,7 +1973,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
       <!-- Overlay nom du jeu -->
       <div class="hero-card-overlay">
-        <div class="hero-card-game-name">PI-XEL WAR</div>
+        <div class="hero-card-game-name">PIXEL WAR</div>
         <div class="hero-card-game-tag"
              data-fr="Attaquer · Défendre · Conquérir"
              data-en="Attack · Defend · Conquer">Attack · Defend · Conquer</div>
@@ -2010,233 +2002,91 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- En-tête section -->
     <div class="showcase-header">
       <div class="showcase-title">
-        🎮 <span data-fr="Jeux" data-en="Games">Games</span>
+        🎮 <span data-fr="Autres Jeux" data-en="More Games">More Games</span>
       </div>
       <div class="showcase-count"
-           data-fr="5 jeux · 2 slots libres"
-           data-en="5 games · 2 open slots">5 games · 2 open slots</div>
+           data-fr="4 jeux · 1 slot libre"
+           data-en="4 games · 1 open slot">4 games · 1 open slot</div>
     </div>
 
-    <!-- Grille vitrine -->
+    <!-- Grille vitrine : 4 slots — Breaker · Stracker · ×2 libres -->
     <div class="showcase-grid">
 
-      <!-- ── PI-XEL WAR — FEATURED (pleine largeur) ── -->
-      <div class="sc-card featured rv d1"
-           onclick="window.location.href='/pixelwar'">
-        <!-- Image de fond -->
-        <img class="sc-card-bg"
-             src="Images/Gold%20Pixel.png"
-             alt="Pi-xel War"
-             onerror="this.style.display='none'">
-        <div class="sc-card-overlay"></div>
-        <!-- Emoji centré comme les autres cartes -->
-        <!-- Icône Pi-xel War (⚔ — gardé le SVG cube) -->
-        <div class="sc-card-emoji" style="width:52px;height:52px;filter:drop-shadow(0 0 12px rgba(255,170,0,.6)) drop-shadow(0 0 24px rgba(255,170,0,.25));">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <defs>
-              <linearGradient id="scGF" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stop-color="#fffde0"/>
-                <stop offset="20%"  stop-color="#fcf6ba"/>
-                <stop offset="45%"  stop-color="#ffaa00"/>
-                <stop offset="70%"  stop-color="#fcf6ba"/>
-                <stop offset="100%" stop-color="#bf953f"/>
-              </linearGradient>
-              <linearGradient id="scGR" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#5a3e00"/>
-                <stop offset="60%"  stop-color="#bf953f"/>
-                <stop offset="100%" stop-color="#e8c96a"/>
-              </linearGradient>
-              <linearGradient id="scGT" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#ffaa00"/>
-                <stop offset="50%"  stop-color="#fffde0"/>
-                <stop offset="100%" stop-color="#fcf6ba"/>
-              </linearGradient>
-              <filter id="scGlow">
-                <feGaussianBlur stdDeviation="1.2" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <!-- Face avant brillante -->
-            <rect x="10" y="18" width="24" height="24" fill="url(#scGF)" filter="url(#scGlow)"/>
-            <!-- Face droite -->
-            <polygon points="34,18 42,10 42,34 34,42" fill="url(#scGR)"/>
-            <!-- Face top -->
-            <polygon points="10,18 18,10 42,10 34,18" fill="url(#scGT)"/>
-            <!-- Reflets -->
-            <rect x="13" y="20" width="7" height="7" fill="rgba(255,255,255,0.65)" rx="1"/>
-            <rect x="22" y="24" width="3" height="3" fill="rgba(255,255,255,0.3)" rx="0.5"/>
-            <rect x="13" y="30" width="4" height="4" fill="rgba(255,255,255,0.2)" rx="0.5"/>
-            <!-- Contours lumineux -->
-            <rect x="10" y="18" width="24" height="24" fill="none" stroke="rgba(255,230,100,0.7)" stroke-width="0.7"/>
-            <polygon points="34,18 42,10 42,34 34,42" fill="none" stroke="rgba(255,200,0,0.4)" stroke-width="0.5"/>
-            <polygon points="10,18 18,10 42,10 34,18" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
-            <!-- Arêtes lumineuses -->
-            <line x1="10" y1="18" x2="18" y2="10" stroke="rgba(255,255,255,0.9)" stroke-width="0.8"/>
-            <line x1="18" y1="10" x2="34" y2="10" stroke="rgba(255,255,255,0.7)" stroke-width="0.6"/>
-          </svg>
+      <!-- ── BREAKER ── -->
+      <div class="sc-card live rv d1" onclick="window.location.href='/breakout'">
+        <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
+        <!-- Particules néon déco -->
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:20px;left:25%;opacity:.6;animation:pwFloat 2.8s ease-in-out infinite;"></div>
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:55px;left:60%;opacity:.5;animation:pwFloat 3.4s ease-in-out infinite .5s;"></div>
+          <div style="position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(0,243,255,.8);top:35px;left:80%;opacity:.7;animation:pwFloat 2.2s ease-in-out infinite 1s;"></div>
         </div>
-
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
-        </div>
-
-        <!-- Contenu bas de carte -->
-        <div class="sc-card-body">
-          <div class="sc-card-info">
-            <div class="sc-card-name">PI-XEL WAR</div>
-            <div class="sc-card-tags">
-              <span class="sc-tag or">Pixel War</span>
-              <span class="sc-tag cy">Multijoueur</span>
-              <span class="sc-tag gr">Live</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── BREAKER — LIVE ── -->
-      <div class="sc-card live rv d2"
-           onclick="window.location.href='/breakout'">
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
-        </div>
-        <!-- Emoji -->
         <div class="sc-card-emoji">🧱</div>
-        <!-- Contenu bas -->
         <div class="sc-card-overlay"></div>
         <div class="sc-card-body">
           <div class="sc-card-info">
             <div class="sc-card-name">BREAKER</div>
             <div class="sc-card-tags">
               <span class="sc-tag cy">Arcade</span>
+              <span class="sc-tag cy">Néon</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── 2048 — LIVE ── -->
-      <div class="sc-card live rv d3" onclick="window.location.href='/2048'">
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
+      <!-- ── STRACKER ── -->
+      <div class="sc-card live rv d2" onclick="window.location.href='/stacker'"
+           style="border-color:rgba(0,243,255,.38);">
+        <div class="sc-badge" style="background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.5);color:var(--cy);top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
+          <div class="sc-badge-dot" style="background:var(--cy);box-shadow:0 0 5px var(--cy);"></div>NEW
         </div>
-        <!-- Emoji -->
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:7px;height:7px;border-radius:2px;background:var(--cy);top:18px;left:45%;opacity:.55;animation:pwFloat 3.1s ease-in-out infinite .3s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:2px;background:var(--cy);top:60px;left:20%;opacity:.5;animation:pwFloat 2.5s ease-in-out infinite .8s;"></div>
+        </div>
+        <div class="sc-card-emoji" style="filter:drop-shadow(0 0 10px var(--cy));">🔷</div>
+        <div class="sc-card-overlay"></div>
+        <div class="sc-card-body">
+          <div class="sc-card-info">
+            <div class="sc-card-name" style="color:var(--cy);">STRACKER</div>
+            <div class="sc-card-tags">
+              <span class="sc-tag cy">Puzzle</span>
+              <span class="sc-tag cy">Blocs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 2048 ── -->
+      <div class="sc-card live rv d3" onclick="window.location.href='/2048'">
+        <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:24px;left:35%;opacity:.55;animation:pwFloat 3.2s ease-in-out infinite;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:58px;left:70%;opacity:.5;animation:pwFloat 2.7s ease-in-out infinite .6s;"></div>
+          <div style="position:absolute;width:4px;height:4px;border-radius:2px;background:var(--cy);top:38px;left:18%;opacity:.6;animation:pwFloat 3.5s ease-in-out infinite 1.2s;"></div>
+        </div>
         <div class="sc-card-emoji">🧩</div>
-        <!-- Contenu bas -->
         <div class="sc-card-overlay"></div>
         <div class="sc-card-body">
           <div class="sc-card-info">
             <div class="sc-card-name">2048</div>
             <div class="sc-card-tags">
               <span class="sc-tag cy">Puzzle</span>
+              <span class="sc-tag cy">Néon</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── YOUR GAME HERE × 3 + STRACKER ── -->
-      <div class="sc-card live rv d1" onclick="window.location.href='/stacker'"
-           style="background:linear-gradient(135deg,rgba(10,0,30,.95),rgba(20,0,50,.9));border-color:rgba(204,68,255,.4);">
-        <div class="sc-badge" style="background:rgba(204,68,255,.12);border:1px solid rgba(204,68,255,.5);color:#cc44ff;top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
-          <div class="sc-badge-dot"></div>NEW
-        </div>
-        <div class="sc-card-emoji" style="filter:drop-shadow(0 0 10px rgba(204,68,255,.6));font-size:2.2rem;position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);">🔷</div>
-        <div class="sc-card-overlay"></div>
-        <div class="sc-card-body">
-          <div class="sc-card-info">
-            <div class="sc-card-name" style="color:#cc44ff;text-shadow:0 0 10px rgba(204,68,255,.4);">STRACKER</div>
-            <div class="sc-card-tags">
-              <span class="sc-tag" style="background:rgba(204,68,255,.08);border:1px solid rgba(204,68,255,.3);color:rgba(204,68,255,.8);">Puzzle</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── PI PIXEL WAR — NOUVEAU ── -->
-      <div class="sc-card rv d2 pw-card"
-           onclick="window.location.href='/pixelwar'"
-           style="
-             height:120px;
-             background:linear-gradient(135deg,#08021a 0%,#12063a 50%,#08021a 100%);
-             border:1px solid rgba(112,40,200,.5);
-             box-shadow:0 0 14px rgba(112,40,200,.08);
-             position:relative; overflow:hidden; cursor:pointer;
-             border-radius:12px;
-           ">
-        <!-- Fond grille pixel -->
-        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.08;pointer-events:none;"
-             xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="pw-grid" width="8" height="8" patternUnits="userSpaceOnUse">
-              <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#9f58f0" stroke-width="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#pw-grid)"/>
-        </svg>
-        <!-- Pixels déco animés -->
-        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
-          <div class="pw-pixel" style="width:8px;height:8px;background:#f5c842;top:18px;left:20%;animation:pwFloat 3.2s ease-in-out infinite;"></div>
-          <div class="pw-pixel" style="width:8px;height:8px;background:#9f58f0;top:30px;left:55%;animation:pwFloat 2.4s ease-in-out infinite .6s;"></div>
-          <div class="pw-pixel" style="width:8px;height:8px;background:#38d48a;top:50px;left:35%;animation:pwFloat 2.8s ease-in-out infinite 1.2s;"></div>
-          <div class="pw-pixel" style="width:8px;height:8px;background:#e83c50;top:22px;left:75%;animation:pwFloat 3.5s ease-in-out infinite .3s;"></div>
-          <div class="pw-pixel" style="width:8px;height:8px;background:#38a8f0;top:60px;left:15%;animation:pwFloat 2.6s ease-in-out infinite .9s;"></div>
-          <div class="pw-pixel" style="width:8px;height:8px;background:#f5c842;top:65px;left:80%;animation:pwFloat 3.0s ease-in-out infinite 1.5s;"></div>
-        </div>
-        <!-- Badge NEW -->
-        <div style="position:absolute;top:9px;left:9px;z-index:3;
-                    background:rgba(112,40,200,.2);border:1px solid rgba(159,88,240,.7);
-                    color:#c084fc;font-family:'Orbitron',monospace;font-size:.38rem;
-                    letter-spacing:1.5px;padding:3px 9px;border-radius:100px;font-weight:700;
-                    display:flex;align-items:center;gap:4px;">
-          <div style="width:5px;height:5px;border-radius:50%;background:#c084fc;
-                      box-shadow:0 0 5px #c084fc;animation:blink 1.4s infinite;"></div>
-          NEW
-        </div>
-        <!-- Overlay bas -->
-        <div style="position:absolute;inset:0;
-                    background:linear-gradient(to top,rgba(8,2,26,.95) 0%,rgba(8,2,26,.35) 55%,transparent 100%);
-                    pointer-events:none;"></div>
-        <!-- Emoji central -->
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);
-                    font-size:2rem;filter:drop-shadow(0 0 12px rgba(112,40,200,.7));
-                    pointer-events:none;">⚔️</div>
-        <!-- Contenu bas -->
-        <div style="position:absolute;bottom:0;left:0;right:0;padding:10px 12px 12px;">
-          <div style="font-family:'Orbitron',monospace;font-weight:900;font-size:.72rem;
-                      color:#c084fc;letter-spacing:1.5px;text-shadow:0 0 10px rgba(159,88,240,.5);
-                      margin-bottom:4px;">PI PIXEL WAR</div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
-            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
-                         border-radius:100px;background:rgba(112,40,200,.12);
-                         border:1px solid rgba(159,88,240,.35);color:rgba(159,88,240,.85);">War</span>
-            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
-                         border-radius:100px;background:rgba(245,200,66,.08);
-                         border:1px solid rgba(245,200,66,.3);color:rgba(245,200,66,.8);">Pixel</span>
-            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
-                         border-radius:100px;background:rgba(56,212,138,.06);
-                         border:1px solid rgba(56,212,138,.3);color:rgba(56,212,138,.8);">Mobile</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="sc-card your-game rv d3" onclick="openDevModal()">
-        <div class="sc-your-inner">
-          <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
-        </div>
-      </div>
-
+      <!-- ── SLOT LIBRE 2 ── -->
       <div class="sc-card your-game rv d1" onclick="openDevModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:7px;height:7px;border-radius:2px;background:var(--cy);top:30px;left:50%;animation:pwFloat 2.9s ease-in-out infinite .4s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:60px;left:25%;animation:pwFloat 3.5s ease-in-out infinite .9s;"></div>
+        </div>
         <div class="sc-your-inner">
           <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
         </div>
       </div>
 
@@ -2244,45 +2094,41 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
     <!-- Note développeurs -->
     <p class="showcase-note">
-      <span data-fr="0% commission · Intégration gratuite ·" data-en="0% commission · Free integration ·">0% commission · Free integration ·</span>
-      <a onclick="openDevModal()"
-         data-fr=" Publier mon jeu →" data-en=" List my game →"> List my game →</a>
+      <span data-fr="Rejoignez le portail ·" data-en="Join the portal ·">Join the portal ·</span>
+      <a onclick="switchTab('devs')"
+         data-fr=" Proposer mon jeu →" data-en=" List your game →"> List your game →</a>
     </p>
 
   </div><!-- /showcase-section -->
 
   <!-- ════════════════════════════════════════
-       BLOC DÉVELOPPEUR — compact, secondaire
+       BLOC DÉVELOPPEUR — compact, home
   ════════════════════════════════════════ -->
   <div class="dev-home-block rv">
     <div class="dev-home-inner">
 
-      <!-- En-tête -->
       <div class="dev-home-head">
         <div class="dev-home-title"
              data-fr="Publiez votre jeu.<br><span>Trouvez vos joueurs.</span>"
-             data-en="Ship your game.<br><span>Find your players.</span>">
-          Ship your game.<br><span>Find your players.</span>
+             data-en="Publish your game.<br><span>Find your players.</span>">
+          Publish your game.<br><span>Find your players.</span>
         </div>
-        <div class="dev-home-badge"
-             data-fr="GRATUIT" data-en="FREE">FREE</div>
+        <div class="dev-home-badge" data-fr="GRATUIT" data-en="FREE">FREE</div>
       </div>
 
-      <!-- Accroche -->
       <div class="dev-home-sub"
-           data-fr="JeuxVideo.Pi, le 1er portail gaming Pi Network — zéro coût pour intégrer votre jeu."
-           data-en="JeuxVideo.Pi, the 1st Pi Network gaming portal — zero cost to list your game.">
-        JeuxVideo.Pi, the 1st Pi Network gaming portal — zero cost to list your game.
+           data-fr="JeuxVideo.Pi est le premier portail de jeux Pi Network ouvert aux développeurs. Référencez votre jeu, atteignez une audience Pi déjà active."
+           data-en="JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.">
+        JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.
       </div>
 
-      <!-- 4 avantages compacts -->
       <div class="dev-home-perks">
 
         <div class="dev-home-perk">
           <span class="dev-home-perk-icon">👁️</span>
           <div class="dev-home-perk-text">
             <strong data-fr="VISIBILITÉ" data-en="VISIBILITY">VISIBILITY</strong>
-            <span data-fr="Communauté Pi active" data-en="Active Pi community">Active Pi community</span>
+            <span data-fr="Communauté Pi engagée" data-en="Engaged Pi community">Engaged Pi community</span>
           </div>
         </div>
 
@@ -2295,10 +2141,10 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
 
         <div class="dev-home-perk">
-          <span class="dev-home-perk-icon">⚡</span>
+          <span class="dev-home-perk-icon">🤝</span>
           <div class="dev-home-perk-text">
-            <strong data-fr="PI SDK INCLUS" data-en="PI SDK INCLUDED">PI SDK INCLUDED</strong>
-            <span data-fr="Intégration guidée" data-en="Guided integration">Guided integration</span>
+            <strong data-fr="ACCOMPAGNEMENT" data-en="SUPPORT">SUPPORT</strong>
+            <span data-fr="Intégration guidée" data-en="Guided onboarding">Guided onboarding</span>
           </div>
         </div>
 
@@ -2310,17 +2156,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           </div>
         </div>
 
-      </div><!-- /perks -->
+      </div>
 
-      <!-- CTA -->
-      <button class="dev-home-cta" onclick="openDevModal()"
-              data-fr="PROPOSER MON JEU →" data-en="LIST MY GAME →">
-        LIST MY GAME →
+      <button class="dev-home-cta" onclick="switchTab('devs')"
+              data-fr="EN SAVOIR PLUS →" data-en="LEARN MORE →">
+        LEARN MORE →
       </button>
 
-      <!-- Note -->
       <div class="dev-home-note"
-           data-fr="Réponse sous 48h · Aucun engagement · Formulaire simple"
+           data-fr="Réponse sous 48h · Sans engagement · Formulaire simple"
            data-en="Reply within 48h · No commitment · Simple form">
         Reply within 48h · No commitment · Simple form
       </div>
@@ -2328,126 +2172,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
   </div><!-- /dev-home-block -->
 
-  <!-- ════════════════════════════════════════
-       MINI BLOC ACTIVITÉ — home
-  ════════════════════════════════════════ -->
-  <div class="news-home-block rv">
-
-    <div class="news-home-header">
-      <div class="news-home-title">
-        📡 <span data-fr="Activité" data-en="Activity">Activity</span>
-      </div>
-      <button class="news-home-more" onclick="switchTab('news')"
-              data-fr="TOUT VOIR →" data-en="SEE ALL →">SEE ALL →</button>
-    </div>
-
-    <div class="news-feed">
-
-      <!-- Pi-xel War — LIVE -->
-      <div class="nf-card live rv d1" onclick="window.location.href='/pixelwar'">
-        <div class="nf-icon live">🟡</div>
-        <div class="nf-body">
-          <div class="nf-top">
-            <span class="nf-badge live">
-              <span style="width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block;margin-right:3px;animation:pulse 1.6s ease-in-out infinite;"></span>
-              LIVE
-            </span>
-            <span class="nf-name"
-                  data-fr="Pi-xel War — Conquiers ta place"
-                  data-en="Pi-xel War — Conquer your place">Pi-xel War — Conquer your place</span>
-          </div>
-          <div class="nf-desc"
-               data-fr="Crée du pixel art 80×45, publie et vote. Chaque chef-d'œuvre compte."
-               data-en="Create 80×45 pixel art, publish &amp; vote. Every masterpiece counts.">
-            Create 80×45 pixel art, publish &amp; vote. Every masterpiece counts.
-          </div>
-        </div>
-        <div class="nf-arrow">→</div>
-      </div>
-
-      <!-- Neon Breaker — LIVE -->
-      <div class="nf-card live rv d2" onclick="window.location.href='/breakout'">
-        <div class="nf-icon live">🧱</div>
-        <div class="nf-body">
-          <div class="nf-top">
-            <span class="nf-badge live">
-              <span style="width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block;margin-right:3px;animation:pulse 1.6s ease-in-out infinite;"></span>
-              LIVE
-            </span>
-            <span class="nf-name"
-                  data-fr="Breaker — Casse les briques"
-                  data-en="Breaker — Smash the bricks">Breaker — Smash the bricks</span>
-          </div>
-          <div class="nf-desc"
-               data-fr="10 niveaux, powerups, multiballe. Ton score dans le classement mondial ?"
-               data-en="10 levels, powerups, multiball. Your score on the global leaderboard?">
-            10 levels, powerups, multiball. Your score on the global leaderboard?
-          </div>
-        </div>
-        <div class="nf-arrow">→</div>
-      </div>
-
-      <!-- 2048 — NEW -->
-      <div class="nf-card new rv d3" onclick="window.location.href='/2048'">
-        <div class="nf-icon new">🧩</div>
-        <div class="nf-body">
-          <div class="nf-top">
-            <span class="nf-badge new">NEW</span>
-            <span class="nf-name"
-                  data-fr="2048 — Fusionne jusqu'au max"
-                  data-en="2048 — Merge to the max">2048 — Merge to the max</span>
-          </div>
-          <div class="nf-desc"
-               data-fr="Puzzle néon cyberpunk. Fusionne les tuiles et atteins le 2048 !"
-               data-en="Cyberpunk neon puzzle. Merge tiles and reach 2048!">
-            Cyberpunk neon puzzle. Merge tiles and reach 2048!
-          </div>
-        </div>
-        <div class="nf-arrow">→</div>
-      </div>
-
-      <!-- Stracker — NEW -->
-      <div class="nf-card new rv d1" onclick="window.location.href='/stacker'">
-        <div class="nf-icon new">🔷</div>
-        <div class="nf-body">
-          <div class="nf-top">
-            <span class="nf-badge new">NEW</span>
-            <span class="nf-name"
-                  data-fr="Stracker — Empile les blocs"
-                  data-en="Stracker — Stack the blocks">Stracker — Stack the blocks</span>
-          </div>
-          <div class="nf-desc"
-               data-fr="Puzzle de blocs cyberpunk. Empile, élimine les lignes, bat ton record !"
-               data-en="Cyberpunk falling blocks puzzle. Stack, clear lines, beat your record!">
-            Cyberpunk falling blocks puzzle. Stack, clear lines, beat your record!
-          </div>
-        </div>
-        <div class="nf-arrow">→</div>
-      </div>
-
-      <!-- Coming Soon -->
-      <div class="nf-card soon rv d2">
-        <div class="nf-icon soon">🚀</div>
-        <div class="nf-body">
-          <div class="nf-top">
-            <span class="nf-badge soon">COMING SOON</span>
-            <span class="nf-name"
-                  data-fr="Nouveaux jeux en approche"
-                  data-en="New games incoming">New games incoming</span>
-          </div>
-          <div class="nf-desc"
-               data-fr="D'autres expériences Pi Network arrivent bientôt sur le portail."
-               data-en="More Pi Network gaming experiences coming to the portal soon.">
-            More Pi Network gaming experiences coming to the portal soon.
-          </div>
-        </div>
-        <div class="nf-arrow" style="opacity:.3;">→</div>
-      </div>
-
-    </div><!-- /news-feed -->
-  </div><!-- /news-home-block -->
 
 </div><!-- /home -->
+
 
 <!-- ══ GAMES ══ -->
 <div class="view" id="view-games">
@@ -2465,13 +2192,13 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           <img src="Images/Gold%20Pixel.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
         </div>
         <div style="flex:1;min-width:0;">
-          <div class="av-title" style="margin-bottom:3px;">PI-XEL WAR</div>
+          <div class="av-title" style="margin-bottom:3px;">PIXEL WAR</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(255,170,0,.08);color:rgba(255,170,0,.7);border:1px solid rgba(255,170,0,.2);">Pixel Art</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Gallery</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Votes</span>
           </div>
-          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="Draw, share and vote on 80×45 pixel art.">Draw, share and vote on 80×45 pixel art.</div>
+          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="The first collaborative pixel war on Pi Network.">The first collaborative pixel war on Pi Network.</div>
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
@@ -2531,7 +2258,28 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   <section style="border:none;padding-top:14px;">
 
     <div class="news-view-header rv">
-      <div class="news-view-title">📡 <span data-fr="Actualités & Activité" data-en="News & Activity">News & Activity</span></div>
+      <div class="news-view-title">📡 <span data-fr="Actualités" data-en="News">News</span></div>
+    </div>
+
+    <!-- ── Bannière recrutement éditorial — priorité éditoriale ── -->
+    <div class="nv-featured rv d2" style="background:linear-gradient(135deg,rgba(0,10,30,.98),rgba(0,20,50,.95));border-color:rgba(0,243,255,.35);cursor:pointer;" onclick="switchTab('devs')">
+      <div class="nv-featured-badge" style="background:rgba(0,243,255,.12);border:1px solid rgba(0,243,255,.4);color:var(--cy);">
+        <span class="nv-badge-dot" style="background:var(--cy);box-shadow:0 0 6px var(--cy);"></span>
+        WE'RE HIRING
+      </div>
+      <div class="nv-featured-title" style="-webkit-text-fill-color:unset;color:var(--cy);"
+           data-fr="Recherche : Responsable Éditorial &amp; News"
+           data-en="Wanted: Editorial &amp; News Manager">
+        Wanted: Editorial &amp; News Manager
+      </div>
+      <div class="nv-featured-desc"
+           data-fr="Nous cherchons quelqu'un pour gérer les actualités, la veille Pi Network et animer cette section News. Intéressé(e) ? Rejoignez l'aventure JeuxVideo.Pi."
+           data-en="We're looking for someone to manage news, Pi Network updates and animate this News section. Interested? Join the JeuxVideo.Pi adventure.">
+        We're looking for someone to manage news, Pi Network updates and animate this News section. Interested? Join the JeuxVideo.Pi adventure.
+      </div>
+      <div class="nv-featured-meta" style="color:var(--cy);">
+        <span data-fr="Voir le poste →" data-en="See the position →">See the position →</span>
+      </div>
     </div>
 
     <!-- Carte featured — Lancement du portail -->
@@ -2546,8 +2294,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         JEUXVIDEO.PI — The portal is <span>live</span>.
       </div>
       <div class="nv-featured-desc"
-           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Pi-xel War, Neon Breaker, 2048 et Stracker sont disponibles dès maintenant. Attaque, défends, joue — l'aventure commence."
-           data-en="The 1st independent Pi Network gaming portal is officially live. Pi-xel War, Neon Breaker, 2048 &amp; Stracker are available now. War, defend, play — the adventure starts here.">
+           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Pixel War, Breaker, Stracker et 2048 sont disponibles dès maintenant. Attaque, défends, joue — l'aventure commence."
+           data-en="The 1st independent Pi Network gaming portal is officially live. Pixel War, Breaker, Stracker &amp; 2048 are available now. War, defend, play — the adventure starts here.">
         The 1st independent Pi Network gaming portal is officially live. Pi-xel War, Neon Breaker, 2048 &amp; Stracker are available now. War, defend, play — the adventure starts here.
       </div>
       <div class="nv-featured-meta">
@@ -2565,8 +2313,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           <div class="nv-item-head">
             <span class="nv-item-badge live">LIVE</span>
             <span class="nv-item-title"
-                  data-fr="Pi-xel War — Conquiers ta place"
-                  data-en="Pi-xel War — Conquer your place">Pi-xel War — Conquer your place</span>
+                  data-fr="Pixel War — Conquiers ta place"
+                  data-en="Pixel War — Conquer your place">Pixel War — Conquer your place</span>
           </div>
           <div class="nv-item-desc"
                data-fr="Crée des œuvres pixel art 80×45, publie dans la galerie, vote pour tes favoris. Chaque dessin raconte une histoire. Le challenge du jour t'attend."
@@ -2634,24 +2382,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
       </div>
 
-      <!-- Challenge quotidien -->
-      <div class="nv-item update-item rv d2">
-        <div class="nv-item-icon">🎯</div>
-        <div class="nv-item-body">
-          <div class="nv-item-head">
-            <span class="nv-item-badge update">UPDATE</span>
-            <span class="nv-item-title"
-                  data-fr="Challenge quotidien Pi-xel War"
-                  data-en="Pi-xel War Daily Challenge">Pi-xel War Daily Challenge</span>
-          </div>
-          <div class="nv-item-desc"
-               data-fr="Un modèle pixel art différent chaque jour. Reproduis-le fidèlement et gagne +10 pixels Or bonus. Reviens demain pour un nouveau défi."
-               data-en="A new pixel art template every day. Survive the longest and earn +10 bonus pixels. Come back tomorrow for a new challenge.">
-            A new pixel art template every day. Reproduce it precisely and earn +10 bonus Gold pixels. Come back tomorrow for a new challenge.
-          </div>
-          <div class="nv-item-date">Coming soon · Pi-xel War · Feature</div>
-        </div>
-      </div>
+
 
       <!-- Open dev slot -->
       <div class="nv-item soon-item clickable rv d3" onclick="openDevModal()">
@@ -2679,174 +2410,47 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 <!-- ══ DEVS ══ -->
 <div class="view" id="view-devs">
 
-  <section>
-    <div class="cat-title rv"><span>💼 <span data-fr="Pourquoi rejoindre JEUXVIDEO.PI ?" data-en="Why join JEUXVIDEO.PI?">Why join JEUXVIDEO.PI?</span></span></div>
-
-    <div class="devs-headline rv" data-fr="Publiez votre jeu. Gratuitement. Sans commission." data-en="Publish your game. For free. Zero commission.">Publish your game. For free. Zero commission.</div>
-    <div class="devs-sub rv" data-fr="JEUXVIDEO.PI est la seule plateforme Pi Network à proposer 0% de commission et une intégration Pi SDK sans frais pour tous les développeurs." data-en="JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.">JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.</div>
-
-    <div class="highlight-card gold-hl rv d1">
-      <div class="hl-icon">🏆</div>
-      <div>
-        <div class="hl-title gold" data-fr="0% DE COMMISSION — GARANTI À VIE" data-en="0% COMMISSION — GUARANTEED FOREVER">0% COMMISSION — GUARANTEED FOREVER</div>
-        <div class="hl-text" data-fr="Toutes vos recettes Pi vous appartiennent intégralement. Aucun frais caché, aucun partage de revenus, aucune condition." data-en="Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.">Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.</div>
-      </div>
-    </div>
-
-    <div class="highlight-card cy-hl rv d2">
-      <div class="hl-icon">⚡</div>
-      <div>
-        <div class="hl-title cy" data-fr="INTÉGRATION PI SDK — SANS FRAIS" data-en="PI SDK INTEGRATION — AT NO COST">PI SDK INTEGRATION — AT NO COST</div>
-        <div class="hl-text" data-fr="Nous vous accompagnons dans l'intégration complète : paiements Pi, authentification, déploiement. Aucune expertise requise." data-en="We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.">We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.</div>
-      </div>
-    </div>
-
-    <div class="avantages-grid">
-      <div class="av-card rv d1"><div class="av-icon">📄</div><div class="av-title" data-fr="Page dédiée" data-en="Dedicated page">Dedicated page</div><div class="av-text" data-fr="Une page Steam-like avec screenshots, pitch et profil développeur." data-en="A Steam-like page with screenshots, pitch and developer profile.">A Steam-like page with screenshots, pitch and developer profile.</div></div>
-      <div class="av-card rv d2"><div class="av-icon">🌍</div><div class="av-title" data-fr="Communauté Pi mondiale" data-en="Global Pi community">Global Pi community</div><div class="av-text" data-fr="Des milliers de joueurs Pi Network actifs dans le monde entier." data-en="Thousands of active Pi Network players worldwide.">Thousands of active Pi Network players worldwide.</div></div>
-      <div class="av-card rv d3"><div class="av-icon">🎤</div><div class="av-title" data-fr="Mise en avant" data-en="Spotlight">Spotlight</div><div class="av-text" data-fr="Votre profil développeur mis en avant sur le portail et les réseaux." data-en="Your developer profile featured on the portal and social channels.">Your developer profile featured on the portal and social channels.</div></div>
-      <div class="av-card rv d1"><div class="av-icon">🚀</div><div class="av-title" data-fr="Déploiement 48h" data-en="Live in 48h">Live in 48h</div><div class="av-text" data-fr="Votre jeu en ligne en 48h. Nous gérons l'hébergement et la visibilité." data-en="Your game live in 48h. We handle hosting and visibility.">Your game live in 48h. We handle hosting and visibility.</div></div>
-      <div class="av-card rv d2"><div class="av-icon">💬</div><div class="av-title" data-fr="Feedback joueurs" data-en="Player feedback">Player feedback</div><div class="av-text" data-fr="Les joueurs votent et commentent directement depuis le portail." data-en="Players vote and give you direct feedback from the portal.">Players vote and give you direct feedback from the portal.</div></div>
-      <div class="av-card rv d3"><div class="av-icon">🔎</div><div class="av-title" data-fr="Portail centralisé" data-en="Central hub">Central hub</div><div class="av-text" data-fr="Tous les jeux Pi au même endroit, facilement trouvables." data-en="All Pi games in one place, easy to discover.">All Pi games in one place, easy to discover.</div></div>
-    </div>
-
-    <a class="cta-devs rv" onclick="showSection('contact')" data-fr="INTÉGRER MON JEU — GRATUIT →" data-en="LIST MY GAME — FREE →">LIST MY GAME — FREE →</a>
-  </section>
-
-  <!-- Formulaire -->
-  <section id="contact" style="border:none;padding-top:20px;">
-    <div class="cat-title rv">
-      <span>📬 <span data-fr="Soumettre votre jeu" data-en="Submit your game">Submit your game</span></span>
-    </div>
-
-    <div id="form-ok">
-      <div class="ok-ico">🚀</div>
-      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
-      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!</div>
-    </div>
-
-    <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
-      <div class="form-row">
-        <input type="text" name="name" id="fi-name" placeholder="Name / Pi Username" required>
-        <input type="email" name="email" id="fi-email" placeholder="Contact email" required>
-      </div>
-      <input type="text" name="game" id="fi-game" placeholder="Game name" required>
-      <input type="url" name="url" id="fi-url" placeholder="https://your-game.com (optional)">
-      <select name="category" id="fi-cat">
-        <option value="" id="fi-cat-ph">Game category</option>
-        <option id="o1">Strategy</option>
-        <option id="o2">Action / Arcade</option>
-        <option id="o3">Puzzle / Thinking</option>
-        <option id="o4">RPG / Adventure</option>
-        <option id="o5">Casual / Idle</option>
-        <option id="o6">Other</option>
-      </select>
-      <textarea name="message" id="fi-msg" rows="3" placeholder="Describe your game and what you expect from us..."></textarea>
-      <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SUBMIT MY GAME →</button>
-    </form>
-    <p class="form-note" data-fr="✔ Réponse sous 48h · 0% de commission · Pi SDK incluse" data-en="✔ Reply within 48h · 0% commission · Pi SDK integration included">✔ Reply within 48h · 0% commission · Pi SDK integration included</p>
-  </section>
-
-
-  <!-- ═══════════════════════════════════════
-       BLOC DÉVELOPPEURS PREMIUM
-  ═══════════════════════════════════════ -->
-  <section style="border:none;padding-top:20px;">
-    <div class="dev-premium rv">
-      <div class="dev-premium-header">
-        <div class="dev-premium-eyebrow" data-fr="REJOIGNEZ LE MOUVEMENT" data-en="JOIN THE MOVEMENT">JOIN THE MOVEMENT</div>
-        <div class="dev-premium-title" data-fr="Publiez votre jeu. Trouvez vos joueurs.<br><span>Gagnez en visibilité.</span>" data-en="Publish your game. Find your players.<br><span>Gain visibility.</span>">Publish your game. Find your players.<br><span>Gain visibility.</span></div>
-        <div class="dev-premium-sub" data-fr="Rejoignez le 1er portail indépendant et bâtissez l'avenir du jeu sur Pi." data-en="Join the 1st independent portal and build the future of gaming on Pi.">Join the 1st independent portal and build the future of gaming on Pi.</div>
-      </div>
-
-      <!-- Badges -->
-      <div class="dev-badges rv d1">
-        <span class="dev-badge or" data-fr="0% FRAIS" data-en="0% FEES">0% FEES</span>
-        <span class="dev-badge cy" data-fr="PI SDK INCLUS" data-en="PI SDK INCLUDED">PI SDK INCLUDED</span>
-        <span class="dev-badge gr" data-fr="VITRINE GRATUITE" data-en="FREE SHOWCASE">FREE SHOWCASE</span>
-      </div>
-
-      <!-- Avantages -->
-      <ul class="dev-perks">
-        <li class="dev-perk rv d1">
-          <span class="dev-perk-icon">👁️</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Visibilité immédiate" data-en="Immediate visibility">Immediate visibility</div>
-            <div class="dev-perk-text" data-fr="Votre jeu présenté à une audience Pi Network déjà connectée et engagée." data-en="Your game presented to an already connected and engaged Pi Network audience.">Your game presented to an already connected and engaged Pi Network audience.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d2">
-          <span class="dev-perk-icon">🌟</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Mise en avant prioritaire" data-en="Priority spotlight">Priority spotlight</div>
-            <div class="dev-perk-text" data-fr="Les premiers développeurs bénéficient d'une mise en avant exclusive sur le portail." data-en="Early developers get exclusive featured placement on the portal.">Early developers get exclusive featured placement on the portal.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d3">
-          <span class="dev-perk-icon">🎮</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Vitrine immersive" data-en="Immersive showcase">Immersive showcase</div>
-            <div class="dev-perk-text" data-fr="Une page dédiée avec screenshots, pitch et profil développeur. Votre identité mise en valeur." data-en="A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.">A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d1">
-          <span class="dev-perk-icon">🏆</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="0% frais · 0% commission" data-en="0% fees · 0% commission">0% fees · 0% commission</div>
-            <div class="dev-perk-text" data-fr="Toutes vos recettes Pi vous appartiennent. Sans exception. Sans surprise." data-en="Every Pi you earn is yours. No exceptions. No surprises.">Every Pi you earn is yours. No exceptions. No surprises.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d2">
-          <span class="dev-perk-icon">🎯</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Concentrez-vous sur votre jeu" data-en="Focus on your game">Focus on your game</div>
-            <div class="dev-perk-text" data-fr="On s'occupe des joueurs, de la visibilité et de l'intégration Pi SDK." data-en="We handle the players, visibility and Pi SDK integration.">We handle the players, visibility and Pi SDK integration.</div>
-          </div>
-        </li>
-      </ul>
-
-      <!-- CTA principal -->
-      <button class="dev-cta-main rv" onclick="openDevModal()">
-        👉 <span data-fr="INTÉGRER MON JEU — GRATUIT" data-en="LIST MY GAME — FREE">LIST MY GAME — FREE</span>
-      </button>
-      <p class="dev-cta-note rv" data-fr="Réponse sous 48h · Intégration accompagnée · Aucun engagement" data-en="Reply within 48h · Guided integration · No commitment">Reply within 48h · Guided integration · No commitment</p>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════
-       BLOC RECRUTEMENT
-  ═══════════════════════════════════════ -->
-  <section style="border:none;padding-top:4px;">
+  <!-- ══ Rejoignez-nous — recrutement uniquement ══ -->
+  <section style="border:none;padding-top:14px;">
     <div class="recruit-section rv">
       <div class="recruit-eyebrow" data-fr="NOUS RECRUTONS" data-en="WE'RE HIRING">WE'RE HIRING</div>
-      <div class="recruit-title" data-fr="Rejoignez l'aventure<br><span>JeuxVideo.Pi</span>" data-en="Join the<br><span>JeuxVideo.Pi</span> adventure">Join the<br><span>JeuxVideo.Pi</span> adventure</div>
-      <div class="recruit-intro" data-fr="Nous recherchons deux passionnés de jeux vidéo et de l'écosystème Pi Network pour structurer et faire vibrer le premier portail indépendant." data-en="We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.">We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.</div>
+      <div class="recruit-title"
+           data-fr="Rejoignez l'aventure<br><span>JeuxVideo.Pi</span>"
+           data-en="Join the<br><span>JeuxVideo.Pi</span> adventure">
+        Join the<br><span>JeuxVideo.Pi</span> adventure
+      </div>
+      <div class="recruit-intro"
+           data-fr="Deux postes sont ouverts pour structurer et animer le premier portail gaming Pi Network indépendant."
+           data-en="Two positions are open to structure and energize the first independent Pi Network gaming portal.">
+        Two positions are open to structure and energize the first independent Pi Network gaming portal.
+      </div>
 
       <div class="recruit-roles">
-        <!-- Rôle 1 -->
         <div class="recruit-role rv d1">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">✍️</span>
-            <div class="recruit-role-title" data-fr="Responsable Éditorial & Veille Stratégique" data-en="Editorial & Strategic Watch Manager">Editorial & Strategic Watch Manager</div>
+            <div class="recruit-role-title"
+                 data-fr="Responsable Éditorial & Actualités"
+                 data-en="Editorial & News Manager">Editorial &amp; News Manager</div>
           </div>
-          <div class="recruit-role-desc" data-fr="Voix officielle du portail, vous pilotez la ligne éditoriale, décryptez l'actualité du réseau Pi et animez les sections Blog/News pour la communauté." data-en="Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.">Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.</div>
+          <div class="recruit-role-desc"
+               data-fr="Gérez les actualités, la veille Pi Network et animez la section News du portail."
+               data-en="Manage news, Pi Network updates and animate the portal's News section.">
+            Manage news, Pi Network updates and animate the portal's News section.
+          </div>
         </div>
-        <!-- Rôle 2 -->
         <div class="recruit-role rv d2">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">⚙️</span>
-            <div class="recruit-role-title" data-fr="Responsable Opérationnel & Intégration" data-en="Operational & Integration Manager">Operational & Integration Manager</div>
+            <div class="recruit-role-title"
+                 data-fr="Responsable Portail & Intégration"
+                 data-en="Portal & Integration Manager">Portal &amp; Integration Manager</div>
           </div>
-          <div class="recruit-role-desc" data-fr="Garant de la fluidité du portail, vous orchestrez les mises à jour techniques et assurez l'intégration qualitative des nouvelles expériences de jeu." data-en="Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.">Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.</div>
-        </div>
-      </div>
-
-      <div class="recruit-avantages rv d3">
-        <div class="recruit-avantages-title" data-fr="Vos avantages" data-en="Your benefits">Your benefits</div>
-        <div class="recruit-av-list">
-          <div class="recruit-av" data-fr="Impact — Participez activement à un projet en pleine croissance dans l'écosystème Pi." data-en="Impact — Actively contribute to a fast-growing project in the Pi ecosystem.">Impact — Actively contribute to a fast-growing project in the Pi ecosystem.</div>
-          <div class="recruit-av" data-fr="Notoriété — Une visibilité unique au sein de l'écosystème Pi Network." data-en="Recognition — Unique visibility within the Pi Network ecosystem.">Recognition — Unique visibility within the Pi Network ecosystem.</div>
-          <div class="recruit-av" data-fr="Vision — Une collaboration de long terme basée sur la passion et l'innovation." data-en="Vision — A long-term collaboration built on passion and innovation.">Vision — A long-term collaboration built on passion and innovation.</div>
+          <div class="recruit-role-desc"
+               data-fr="Gérez l'intégration des jeux, le suivi des bugs et la maintenance du portail."
+               data-en="Manage game integrations, bug tracking and portal maintenance.">
+            Manage game integrations, bug tracking and portal maintenance.
+          </div>
         </div>
       </div>
 
@@ -2858,11 +2462,48 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
 </div><!-- /devs -->
 
+<!-- ══ CONTACT ══ -->
+<div class="view" id="view-contact">
+  <section style="border:none;padding-top:14px;">
+
+    <div class="cat-title rv">
+      <span>📬 <span data-fr="Contact & Questions" data-en="Contact &amp; Questions">Contact &amp; Questions</span></span>
+    </div>
+    <div class="devs-sub rv" style="margin-bottom:16px;"
+         data-fr="Pour toute question, demande ou prise de contact."
+         data-en="For any question, request or message.">
+      For any question, request or message.
+    </div>
+
+    <div id="contact-form-ok" style="display:none;text-align:center;padding:20px 0;">
+      <div class="ok-ico">✉️</div>
+      <div class="ok-title" data-fr="Message envoyé !" data-en="Message sent!">Message sent!</div>
+      <div class="ok-sub" data-fr="Nous vous répondrons sous 48h." data-en="We'll reply within 48h.">We'll reply within 48h.</div>
+    </div>
+
+    <form id="contact-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+          onsubmit="handleContactForm(event)"
+          style="display:flex;flex-direction:column;gap:10px;">
+      <input type="hidden" name="type" value="contact">
+      <div class="form-row">
+        <input type="text"  name="name"    placeholder="Name / Pi Username" required>
+        <input type="email" name="email"   placeholder="Email" required>
+      </div>
+      <input type="text" name="subject" placeholder="Subject" required>
+      <textarea name="message" rows="4" placeholder="Your message..."></textarea>
+      <button type="submit" class="btn-send"
+              data-fr="ENVOYER →" data-en="SEND →">SEND →</button>
+    </form>
+    <p class="form-note" data-fr="✔ Réponse sous 48h" data-en="✔ Reply within 48h">✔ Reply within 48h</p>
+
+  </section>
+</div><!-- /contact -->
+
 <footer>
   © JeuxVideo.Pi &nbsp;|&nbsp;
-  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Règlement &amp; CGU</a>
+  <a onclick="switchTab('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Règlement &amp; CGU</a>
   &nbsp;|&nbsp;
-  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Support &amp; Contact</a>
+  <a onclick="switchTab('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Support &amp; Contact</a>
   &nbsp;|&nbsp;
   <a href="https://brainstorm.pi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Voter sur Brainstorm</a>
 </footer>
@@ -3092,6 +2733,23 @@ function syncHdrNav(tabName) {
    BARRE DE NAV — switchTab
    Gère à la fois la nav-bar et la syncHdrNav
 ════════════════════════════════════════════════════════ */
+function handleContactForm(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type="submit"]');
+  btn.disabled = true;
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        e.target.style.display = 'none';
+        document.getElementById('contact-form-ok').style.display = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
+    });
+}
+
 function switchTab(name) {
   /* Appeler showTab existant pour changer la vue */
   showTab(name);
@@ -3104,9 +2762,8 @@ function switchTab(name) {
 
 /* Init : synchro au chargement */
 (function initNavBar(){
-  document.querySelectorAll('.nav-bar-btn').forEach(b => {
-    if (b.dataset.tab === 'home') b.classList.add('active');
-  });
+  const homeBtn = document.querySelector('.nav-bar-btn[data-tab="home"]');
+  if (homeBtn) homeBtn.classList.add('active');
 })();
 
 </script>
