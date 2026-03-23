@@ -1756,6 +1756,21 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   color: rgba(200,216,232,.25); letter-spacing: 1px; margin-top: 5px;
 }
 
+/* ── PI PIXEL WAR — carte portail ── */
+.pw-pixel {
+  position: absolute;
+  border-radius: 2px;
+  opacity: .85;
+}
+@keyframes pwFloat {
+  0%,100% { transform: translateY(0px) scale(1);   opacity: .85; }
+  50%      { transform: translateY(-8px) scale(1.2); opacity: 1;   }
+}
+.pw-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(159,88,240,.85) !important;
+  box-shadow: 0 6px 24px rgba(112,40,200,.3) !important;
+}
 </style>
 </head>
 <body>
@@ -1998,8 +2013,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         🎮 <span data-fr="Jeux" data-en="Games">Games</span>
       </div>
       <div class="showcase-count"
-           data-fr="4 jeux · 2 slots libres"
-           data-en="4 games · 2 open slots">4 games · 2 open slots</div>
+           data-fr="5 jeux · 2 slots libres"
+           data-en="5 games · 2 open slots">5 games · 2 open slots</div>
     </div>
 
     <!-- Grille vitrine -->
@@ -2142,11 +2157,70 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
       </div>
 
-      <div class="sc-card your-game rv d2" onclick="openDevModal()">
-        <div class="sc-your-inner">
-          <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+      <!-- ── PI PIXEL WAR — NOUVEAU ── -->
+      <div class="sc-card rv d2 pw-card"
+           onclick="window.location.href='/pixelwar'"
+           style="
+             height:120px;
+             background:linear-gradient(135deg,#08021a 0%,#12063a 50%,#08021a 100%);
+             border:1px solid rgba(112,40,200,.5);
+             box-shadow:0 0 14px rgba(112,40,200,.08);
+             position:relative; overflow:hidden; cursor:pointer;
+             border-radius:12px;
+           ">
+        <!-- Fond grille pixel -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.08;pointer-events:none;"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="pw-grid" width="8" height="8" patternUnits="userSpaceOnUse">
+              <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#9f58f0" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#pw-grid)"/>
+        </svg>
+        <!-- Pixels déco animés -->
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div class="pw-pixel" style="width:8px;height:8px;background:#f5c842;top:18px;left:20%;animation:pwFloat 3.2s ease-in-out infinite;"></div>
+          <div class="pw-pixel" style="width:8px;height:8px;background:#9f58f0;top:30px;left:55%;animation:pwFloat 2.4s ease-in-out infinite .6s;"></div>
+          <div class="pw-pixel" style="width:8px;height:8px;background:#38d48a;top:50px;left:35%;animation:pwFloat 2.8s ease-in-out infinite 1.2s;"></div>
+          <div class="pw-pixel" style="width:8px;height:8px;background:#e83c50;top:22px;left:75%;animation:pwFloat 3.5s ease-in-out infinite .3s;"></div>
+          <div class="pw-pixel" style="width:8px;height:8px;background:#38a8f0;top:60px;left:15%;animation:pwFloat 2.6s ease-in-out infinite .9s;"></div>
+          <div class="pw-pixel" style="width:8px;height:8px;background:#f5c842;top:65px;left:80%;animation:pwFloat 3.0s ease-in-out infinite 1.5s;"></div>
+        </div>
+        <!-- Badge NEW -->
+        <div style="position:absolute;top:9px;left:9px;z-index:3;
+                    background:rgba(112,40,200,.2);border:1px solid rgba(159,88,240,.7);
+                    color:#c084fc;font-family:'Orbitron',monospace;font-size:.38rem;
+                    letter-spacing:1.5px;padding:3px 9px;border-radius:100px;font-weight:700;
+                    display:flex;align-items:center;gap:4px;">
+          <div style="width:5px;height:5px;border-radius:50%;background:#c084fc;
+                      box-shadow:0 0 5px #c084fc;animation:blink 1.4s infinite;"></div>
+          NEW
+        </div>
+        <!-- Overlay bas -->
+        <div style="position:absolute;inset:0;
+                    background:linear-gradient(to top,rgba(8,2,26,.95) 0%,rgba(8,2,26,.35) 55%,transparent 100%);
+                    pointer-events:none;"></div>
+        <!-- Emoji central -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);
+                    font-size:2rem;filter:drop-shadow(0 0 12px rgba(112,40,200,.7));
+                    pointer-events:none;">⚔️</div>
+        <!-- Contenu bas -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:10px 12px 12px;">
+          <div style="font-family:'Orbitron',monospace;font-weight:900;font-size:.72rem;
+                      color:#c084fc;letter-spacing:1.5px;text-shadow:0 0 10px rgba(159,88,240,.5);
+                      margin-bottom:4px;">PI PIXEL WAR</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
+                         border-radius:100px;background:rgba(112,40,200,.12);
+                         border:1px solid rgba(159,88,240,.35);color:rgba(159,88,240,.85);">War</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
+                         border-radius:100px;background:rgba(245,200,66,.08);
+                         border:1px solid rgba(245,200,66,.3);color:rgba(245,200,66,.8);">Pixel</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.38rem;padding:2px 7px;
+                         border-radius:100px;background:rgba(56,212,138,.06);
+                         border:1px solid rgba(56,212,138,.3);color:rgba(56,212,138,.8);">Mobile</span>
+          </div>
         </div>
       </div>
 
