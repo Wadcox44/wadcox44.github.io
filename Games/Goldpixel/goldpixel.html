@@ -6360,14 +6360,23 @@ COLORS.forEach(c => {
 });
 
 function selectMetal(type) {
-  if (type === 'gold' && countGoldPixels() >= MAX_GOLD) {
-    showToast("RÉSERVE D'OR ÉPUISÉE ! (50/50)"); return;
+  const limit = typeof effectiveGoldMax === 'function' ? effectiveGoldMax() : MAX_GOLD;
+  if (type === 'gold' && countGoldPixels() >= limit) {
+    const hasBonusLeft = typeof bonusGoldActive !== 'undefined' && bonusGoldActive
+                      && typeof bonusGoldUsed !== 'undefined' && bonusGoldUsed < BONUS_GOLD_MAX;
+    showToast(hasBonusLeft ? "RÉSERVE D'OR ÉPUISÉE ! (base + bonus)" : "RÉSERVE D'OR ÉPUISÉE !");
+    return;
   }
   color = METAL[type];
   setMode('draw');
   document.querySelectorAll('.c-btn, .metal-swatch').forEach(x => x.classList.remove('active'));
-  document.getElementById(type + '-swatch').classList.add('active');
+  const el = document.getElementById(type + '-swatch');
+  if (el) el.classList.add('active');
   _lastHoverCol = -1; _lastHoverRow = -1;
+  // Sync HUD
+  const HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
+  if (typeof _gpSetColorDot === 'function') _gpSetColorDot(HEX[type] || '#ffaa00');
+  if (typeof _gpSyncMetals  === 'function') setTimeout(_gpSyncMetals, 40);
 }
 
 // ════════════════════════════════════════════
@@ -6382,14 +6391,33 @@ function countGoldPixels() {
 }
 
 function updateGoldCounter() {
-  goldUsed = countGoldPixels(); // recalcul depuis la grille = toujours exact
-  const rem = MAX_GOLD - goldUsed;
-  document.getElementById('goldCount').textContent = Math.max(0, rem);
-  document.getElementById('goldBarFill').style.width = (Math.max(0, rem) / MAX_GOLD * 100) + '%';
-  if (rem <= 0 && color === METAL.gold) {
+  // ── Source de vérité absolue : compter depuis pixelGrid ──
+  const used = countGoldPixels();
+  goldUsed = used;
+  const maxEff = typeof effectiveGoldMax === 'function' ? effectiveGoldMax() : MAX_GOLD;
+  const rem = Math.max(0, MAX_GOLD - Math.min(used, MAX_GOLD));
+  // Affichage compteur + barre desktop
+  const elCount = document.getElementById('goldCount');
+  const elBar   = document.getElementById('goldBarFill');
+  if (elCount) elCount.textContent = rem;
+  if (elBar)   elBar.style.width = (rem / MAX_GOLD * 100) + '%';
+  // Désarmer la couleur or si limite atteinte
+  if (used >= maxEff && color === METAL.gold) {
     color = '#FFFFFF';
-    document.getElementById('gold-swatch').classList.remove('active');
+    const gs = document.getElementById('gold-swatch');
+    if (gs) gs.classList.remove('active');
   }
+  // Bonus gold tracking
+  if (typeof bonusGoldActive !== 'undefined' && bonusGoldActive) {
+    if (typeof bonusGoldUsed !== 'undefined') bonusGoldUsed = Math.max(0, used - MAX_GOLD);
+    if (typeof updateBonusGoldDisplay === 'function') updateBonusGoldDisplay();
+  }
+  // Challenge progress
+  if (typeof challengeActive !== 'undefined' && challengeActive)
+    if (typeof updateChallengeProgress === 'function') updateChallengeProgress();
+  // Sync banner HUD mobile
+  if (typeof _gpSyncGold === 'function') _gpSyncGold();
+  if (typeof updateBannerPixelModule === 'function') updateBannerPixelModule();
 }
 
 // ════════════════════════════════════════════
@@ -6420,12 +6448,23 @@ function setEraserSize(sz) {
 
 function clearAll() {
   if (!confirm('Effacer tout le canevas ?')) return;
+  // ── Réinitialiser la grille ──
   pixelGrid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
   updateGoldCounter();
   drawBase();
   localStorage.removeItem('gp_grid_v3');
   localStorage.removeItem('gp_gold_v3');
   clearHover();
+  // ── Bonus gold (si actif) ──
+  if (typeof bonusGoldActive !== 'undefined' && bonusGoldActive) {
+    if (typeof resetBonusGold === 'function') resetBonusGold();
+  }
+  // ── Undo ──
+  if (typeof hideUndoButton === 'function') hideUndoButton(true);
+  // ── Artwork ──
+  if (typeof hideArtworkPrompt === 'function') hideArtworkPrompt();
+  if (typeof _namedArtworks !== 'undefined') _namedArtworks.clear();
+  if (typeof _pendingArtName !== 'undefined') _pendingArtName = '';
   showToast('CANEVAS EFFACÉ');
 }
 
@@ -6477,7 +6516,11 @@ function handleDraw(clientX, clientY) {
   document.getElementById('valY').textContent = Math.max(0, Math.min(row, ROWS - 1));
   if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
 
+  // ── Lecture état AVANT modification (pour undo + artwork) ──
+  const prevColor = pixelGrid[col] ? pixelGrid[col][row] : null;
+
   if (mode === 'erase') {
+    // ── Gomme ──
     const half = eraserSize === 'big' ? 1 : 0;
     for (let dc = -half; dc <= half; dc++)
       for (let dr = -half; dr <= half; dr++) {
@@ -6487,17 +6530,58 @@ function handleDraw(clientX, clientY) {
         eraseCell(c2, r2);
       }
     updateGoldCounter();
+    // Undo : invalider si cellule undo touchée
+    if (typeof undoState !== 'undefined' && undoState) {
+      const half2 = eraserSize === 'big' ? 1 : 0;
+      for (let dc=-half2; dc<=half2; dc++)
+        for (let dr=-half2; dr<=half2; dr++)
+          if (typeof invalidateUndo === 'function') invalidateUndo(col+dc, row+dr);
+    }
+    // Artwork : masquer prompt si gomme
+    if (typeof _promptVisible !== 'undefined' && _promptVisible)
+      if (typeof hideArtworkPrompt === 'function') hideArtworkPrompt();
+
   } else if (mode === 'draw') {
-    // Bloquer si réserve OR épuisée et cellule pas déjà OR
-    if (color === METAL.gold && pixelGrid[col][row] !== METAL.gold && countGoldPixels() >= MAX_GOLD) {
+    // ── Dessin ──
+    // Bloquer si réserve OR épuisée
+    if (color === METAL.gold && prevColor !== METAL.gold && countGoldPixels() >= effectiveGoldMax()) {
       showToast("RÉSERVE D'OR ÉPUISÉE !"); return;
     }
-    // Ne pas repeindre si la cellule a déjà cette couleur exacte
-    // (évite le repaint inutile et protège les pixels existants d'un effacement accidentel)
-    if (pixelGrid[col][row] === color) return;
+    // Skip si même couleur déjà présente (pas d'effacement accidentel)
+    if (prevColor === color) return;
+
     pixelGrid[col][row] = color;
     paintCell(col, row, color);
     updateGoldCounter();
+
+    // ── Undo : enregistrer le premier pixel du tracé ──
+    if (typeof registerUndo === 'function') {
+      const wasFirst = !_undoWasDown;
+      if (wasFirst) {
+        registerUndo(col, row, prevColor, color);
+      } else if (typeof undoState !== 'undefined' && undoState &&
+                 (undoState.col !== col || undoState.row !== row)) {
+        if (typeof hideUndoButton === 'function') hideUndoButton(true);
+      }
+    }
+
+    // ── QuickNav : sauvegarder la vue toutes les 30 poses ──
+    if (typeof _qnDrawCount !== 'undefined') {
+      _qnDrawCount++;
+      if (_qnDrawCount % 30 === 0 && typeof saveCurrentView === 'function') {
+        saveCurrentView(col, row);
+      }
+    }
+
+    // ── Artwork : détecter île après pose (debounce 400ms) ──
+    if (typeof _milestoneDebounceTimer !== 'undefined') {
+      _lastDrawnCol = col; _lastDrawnRow = row;
+      clearTimeout(_milestoneDebounceTimer);
+      _milestoneDebounceTimer = setTimeout(() => {
+        if (_lastDrawnCol >= 0 && typeof checkArtworkMilestone === 'function')
+          checkArtworkMilestone(_lastDrawnCol, _lastDrawnRow);
+      }, 400);
+    }
   }
 }
 
@@ -6574,6 +6658,11 @@ function openModal() {
   document.getElementById('btn-send').disabled        = false;
   document.getElementById('btn-request-review').style.display = 'none';
   document.getElementById('modal-overlay').classList.add('open');
+  // Pré-remplir le titre si un nom artwork est en attente
+  if (typeof _pendingArtName !== 'undefined' && _pendingArtName) {
+    const tf = document.getElementById('p-title');
+    if (tf && !tf.value.trim()) tf.value = _pendingArtName;
+  }
   setTimeout(() => document.getElementById('p-name').focus(), 100);
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
@@ -7430,11 +7519,7 @@ function resetBonusGold() {
 // ─── Calcul de la limite OR totale (base + bonus) ───────────────
 // Monkey-patch de la logique existante : on surcharge countGoldPixels
 // pour tenir compte du bonus. On stocke l'original.
-const _origCountGoldPixels = countGoldPixels;
-
-function countGoldPixels() {
-  return _origCountGoldPixels();
-}
+// countGoldPixels v2 triviale — supprimée, v1 suffit
 
 // Limite effective : MAX_GOLD + bonus restant
 function effectiveGoldMax() {
@@ -7442,82 +7527,13 @@ function effectiveGoldMax() {
   return MAX_GOLD + Math.max(0, BONUS_GOLD_MAX - bonusGoldUsed);
 }
 
-// Surcharge de selectMetal pour utiliser la limite effective
-const _origSelectMetal = selectMetal;
-function selectMetal(type) {
-  if (type === 'gold' && countGoldPixels() >= effectiveGoldMax()) {
-    const hasBonusLeft = bonusGoldActive && bonusGoldUsed < BONUS_GOLD_MAX;
-    showToast(hasBonusLeft
-      ? "RÉSERVE D'OR ÉPUISÉE ! (base + bonus)"
-      : "RÉSERVE D'OR ÉPUISÉE ! (50/50)"
-    );
-    return;
-  }
-  // Appel d'origine sans le check (on vient de vérifier)
-  color = METAL[type];
-  setMode('draw');
-  document.querySelectorAll('.c-btn, .metal-swatch').forEach(x => x.classList.remove('active'));
-  const el = document.getElementById(type + '-swatch');
-  if (el) el.classList.add('active');
-  _lastHoverCol = -1; _lastHoverRow = -1;
-}
+// selectMetal v2 (bonus-aware) — fusionné dans la version principale
 
-// Surcharge handleDraw pour comptabiliser bonus gold
-const _origHandleDraw_ref = handleDraw;
-// On intercepte le draw en écoutant après le paint
-const _origPaintCell = paintCell;
+// References inutiles supprimées (fusionnées dans handleDraw principal)
 
-// On wrap paintCell pour détecter dépôt de pixel or
-const __origPaintCellWrap = paintCell;
-window._paintCellHook = function(col, row, fillColor) {
-  if (fillColor === METAL.gold && bonusGoldActive) {
-    // Vérifier si c'était déjà or (pas un remplacement)
-    // On ne peut pas facilement savoir l'avant ici, on recalcule après
-  }
-};
+// updateGoldCounter v2 (bonus/challenge) — fusionné dans la version principale
 
-// Surcharge updateGoldCounter pour intégrer bonus
-const _origUpdateGoldCounter = updateGoldCounter;
-function updateGoldCounter() {
-  const used = countGoldPixels();
-  goldUsed   = used;
-  const maxNormal  = MAX_GOLD;
-  const maxEffective = effectiveGoldMax();
-
-  // Compteur normal
-  const remNormal = Math.max(0, maxNormal - Math.min(used, maxNormal));
-  document.getElementById('goldCount').textContent = remNormal;
-  document.getElementById('goldBarFill').style.width = (remNormal / maxNormal * 100) + '%';
-
-  // Si bonus actif : calculer bonusGoldUsed
-  if (bonusGoldActive) {
-    bonusGoldUsed = Math.max(0, used - maxNormal);
-    updateBonusGoldDisplay();
-  }
-
-  // Désarmer la couleur or si limite atteinte
-  if (used >= maxEffective && color === METAL.gold) {
-    color = '#FFFFFF';
-    const gs = document.getElementById('gold-swatch');
-    if (gs) gs.classList.remove('active');
-  }
-
-  // Mise à jour du progress challenge si actif
-  if (challengeActive) updateChallengeProgress();
-};
-
-// ─── Reset bonus au clearAll / publish ──────────────────────────
-// On étend clearAll sans monkey-patch (évite la récursion infinie)
-const _clearAllBase = clearAll; // référence à la version originale
-
-// Surcharge propre : rebinde clearAll globalement
-window.clearAll = function() {
-  _clearAllBase();
-  if (typeof bonusGoldActive !== 'undefined' && bonusGoldActive) {
-    resetBonusGold();
-    showToast('Canvas cleared — bonus Gold reset.');
-  }
-};
+// window.clearAll bonus — fusionné dans clearAll principal ci-dessus
 
 // ─── Stopper l'animation quand l'utilisateur commence à dessiner ─
 function notifyDrawingStarted() {
@@ -7939,19 +7955,7 @@ function updateGoldUI() {
   updateBannerPixelModule();
 }
 
-// Hook sur updateGoldCounter → synchro banner
-if (typeof window.updateGoldCounter === 'function' && !window.__gpGoldCounterBannerHooked) {
-  const __origGC = window.updateGoldCounter;
-
-  window.updateGoldCounter = function(...args) {
-    __origGC.apply(this, args);
-    if (typeof updateBannerPixelModule === 'function') {
-      updateBannerPixelModule();
-    }
-  };
-
-  window.__gpGoldCounterBannerHooked = true;
-}
+// updateGoldCounter v3 (banner) — fusionné dans la version principale
 /* ── Init au chargement ── */
 document.addEventListener('DOMContentLoaded', () => {
   // Init état offline par défaut
@@ -8246,55 +8250,7 @@ function executeUndo() {
    On monkey-patche handleDraw pour l'intercepter proprement
    sans toucher au code existant
 ════════════════════════════════════════════════════════════════ */
-const _origHandleDraw = handleDraw;
-function handleDraw(clientX, clientY) {
-  /* Capturer l'état avant le tracé */
-  const pos = getCanvasPos(clientX, clientY);
-  const { col, row } = pos;
-
-  let prevColor = null;
-  let isNewCell = false; // true si c'est le premier tracé de cette session drag
-
-  /* Lire la couleur avant modification (copie défensive) */
-  if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-    prevColor = pixelGrid[col][row]; // null ou string
-  }
-
-  /* Mémoriser si c'était le début d'un drag (mousedown/touchstart) */
-  const wasFirstDown = !_undoWasDown;
-
-  /* Appeler la fonction originale — elle modifie pixelGrid */
-  _origHandleDraw(clientX, clientY);
-
-  /* Après le tracé : analyser ce qui s'est passé */
-  if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-    const afterColor = pixelGrid[col][row];
-
-    if (mode === 'draw') {
-      /* Nouvelle couleur posée sur la cellule */
-      if (afterColor && afterColor !== prevColor) {
-        if (wasFirstDown) {
-          /* Premier pixel de ce tracé → enregistrer un undo */
-          registerUndo(col, row, prevColor, afterColor);
-        } else {
-          /* Drag sur une autre cellule → invalider l'undo précédent
-             (on ne garde pas d'undo multi-cellules) */
-          if (undoState && (undoState.col !== col || undoState.row !== row)) {
-            hideUndoButton(true);
-          }
-        }
-      }
-    } else if (mode === 'erase') {
-      /* Gomme utilisée → invalider si la cellule undo est touchée */
-      if (undoState) {
-        const half = eraserSize === 'big' ? 1 : 0;
-        for (let dc = -half; dc <= half; dc++)
-          for (let dr = -half; dr <= half; dr++)
-            invalidateUndo(col + dc, row + dr);
-      }
-    }
-  }
-}
+// handleDraw v2 (undo) — fusionné dans la version principale ci-dessus
 
 /* ── Tracker du drag pour wasFirstDown ── */
 (function patchUndoMouseTracking() {
@@ -8312,12 +8268,7 @@ function handleDraw(clientX, clientY) {
   window.addEventListener('touchend',   () => { _undoWasDown = false; }, { passive: true });
 })();
 
-/* ── Masquer l'undo si clearAll() est appelé ── */
-const _origClearAll = clearAll;
-function clearAll() {
-  _origClearAll();
-  hideUndoButton(true);
-}
+// clearAll v3 (undo) — fusionné dans la version principale ci-dessus
 
 
 /* ════════════════════════════════════════════════════════════════
@@ -8608,15 +8559,7 @@ async function checkGoldStatus() {
    Toutes les 30 tracés pour ne pas surcharger localStorage
 ══════════════════════════════════════════════════════════ */
 let _qnDrawCount = 0;
-const _qnOrigHandleDraw = handleDraw;
-function handleDraw(clientX, clientY) {
-  _qnOrigHandleDraw(clientX, clientY);
-  _qnDrawCount++;
-  if (_qnDrawCount % 30 === 0) {
-    const pos = getCanvasPos(clientX, clientY);
-    saveCurrentView(pos.col, pos.row);
-  }
-}
+// handleDraw v3 (quicknav save) — fusionné dans la version principale ci-dessus
 
 /* Fermer avec Échap */
 document.addEventListener('keydown', e => {
@@ -8812,47 +8755,12 @@ function hideArtworkPrompt() {
 let _milestoneDebounceTimer = null;
 let _lastDrawnCol = -1, _lastDrawnRow = -1;
 
-const _artOrigHandleDraw = handleDraw;
-function handleDraw(clientX, clientY) {
-  _artOrigHandleDraw(clientX, clientY);
+// handleDraw v4 (artwork BFS) — fusionné dans la version principale ci-dessus
 
-  /* Capturer la position après le tracé */
-  if (mode === 'draw') {
-    const pos = getCanvasPos(clientX, clientY);
-    if (pos.col >= 0 && pos.col < COLS && pos.row >= 0 && pos.row < ROWS) {
-      _lastDrawnCol = pos.col;
-      _lastDrawnRow = pos.row;
-
-      /* Debounce : on attend la fin du tracé avant de lancer le BFS */
-      clearTimeout(_milestoneDebounceTimer);
-      _milestoneDebounceTimer = setTimeout(() => {
-        if (_lastDrawnCol >= 0) checkArtworkMilestone(_lastDrawnCol, _lastDrawnRow);
-      }, 400);
-    }
-  }
-
-  /* Masquer le prompt si la gomme est utilisée (état incohérent) */
-  if (mode === 'erase' && _promptVisible) hideArtworkPrompt();
-}
-
-/* ── Masquer le prompt sur clearAll ── */
-const _artOrigClearAll = clearAll;
-function clearAll() {
-  _artOrigClearAll();
-  hideArtworkPrompt();
-  _namedArtworks.clear();
-  _pendingArtName = '';
-}
+// clearAll v4 (artwork) — fusionné dans la version principale ci-dessus
 
 /* ── Pré-remplir le titre dans openModal si un nom est en attente ── */
-const _artOrigOpenModal = openModal;
-function openModal() {
-  _artOrigOpenModal();
-  if (_pendingArtName) {
-    const tf = document.getElementById('p-title');
-    if (tf && !tf.value.trim()) tf.value = _pendingArtName;
-  }
-}
+// openModal v2 (artwork pre-fill) — fusionné dans la version principale
 
 
 /* ════════════════════════════════════════════════════════════════
@@ -9798,22 +9706,9 @@ function _gpCheckOrientation() {
   window.zoomOut   = function() { if (_origZO) _origZO(); gpSyncZoom(); };
   window.resetView = function() { if (_origRV) _origRV(); gpSyncZoom(); };
 
-  // updateGoldCounter → sync compteur or HUD
-  const _origUGC = window.updateGoldCounter;
-  window.updateGoldCounter = function() {
-    if (_origUGC) _origUGC();
-    _gpSyncGold();
-  };
+  // updateGoldCounter HUD hook — fusionné dans la version principale
 
-  // selectMetal → sync dot couleur + swatches + fermer overlay
-  const _origSM = window.selectMetal;
-  window.selectMetal = function(type) {
-    if (_origSM) _origSM(type);
-    const HEX = { gold: '#ffaa00', silver: '#C0C0C0', bronze: '#cd7f32' };
-    _gpSetColorDot(HEX[type] || '#ffaa00');
-    setTimeout(_gpSyncMetals, 40);
-    gpCloseAll();
-  };
+  // selectMetal hook — fusionné dans la version principale
 
   // updateBanner → sync header HUD
   const _origUB = window.updateBanner;
