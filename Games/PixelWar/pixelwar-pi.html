@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0612">
-<title>Pi-xel War</title>
+<title>Gold Pixel — JeuxVideo.Pi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
 <!-- Pi SDK (Production URL) -->
@@ -17,18 +17,19 @@
    VARIABLES
 ══════════════════════════ */
 :root {
-  --pi:       #7028c8;
-  --pi-l:     #9f58f0;
+  --pi:       #c8960a;
+  --pi-l:     #f5c842;
   --gold:     #f5c842;
-  --bg:       #0a0612;
-  --surface:  #120e1e;
-  --border:   rgba(112,40,200,0.32);
-  --text:     #e8e0f8;
-  --dim:      rgba(232,224,248,0.44);
+  --gold-prem:#ffd700;
+  --bg:       #0e0e0e;
+  --surface:  #1a1a1a;
+  --border:   rgba(200,150,10,0.4);
+  --text:     #f0ead0;
+  --dim:      rgba(240,234,208,0.45);
   --green:    #38d48a;
   --red:      #e83c50;
-  --h-top:    40px;   /* topbar compacte */
-  --h-pal:    50px;   /* palette bar compacte */
+  --h-top:    44px;
+  --h-pal:    56px;
 }
 
 /* ══════════════════════════
@@ -56,16 +57,16 @@ html,body {
   flex-shrink:0; height:var(--h-top);
   display:flex; align-items:center;
   padding:0 8px; gap:6px;
-  background:linear-gradient(180deg,#16112b 0%,#0f0b1f 100%);
-  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,#1c1600 0%,#0e0e00 100%);
+  border-bottom:2px solid var(--gold);
   z-index:100; overflow:hidden;
 }
 .tb-logo {
   font-family:"Space Mono",monospace; font-size:.68rem; font-weight:700;
   letter-spacing:.06em;
-  background:linear-gradient(135deg,var(--pi-l),var(--gold));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  background-clip:text; white-space:nowrap; flex-shrink:0;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(245,200,66,.5), 0 0 24px rgba(245,200,66,.2);
+  white-space:nowrap; flex-shrink:0;
 }
 /* Stock + recharge — zone centrale flex */
 #tb-center {
@@ -80,14 +81,24 @@ html,body {
   flex-shrink:0;
 }
 .tb-pill-stock {
-  background:rgba(245,200,66,.1); border:1px solid rgba(245,200,66,.3);
-  color:var(--gold);
+  background:rgba(245,200,66,.12); border:1px solid rgba(245,200,66,.45);
+  color:var(--gold); font-weight:700;
 }
 .tb-pill-stock.low { background:rgba(232,60,80,.1); border-color:rgba(232,60,80,.3); color:var(--red); }
 .tb-pill-stock.full { background:rgba(56,212,138,.1); border-color:rgba(56,212,138,.3); color:var(--green); }
 .tb-pill-recharge {
-  background:rgba(112,40,200,.12); border:1px solid var(--border);
-  color:var(--pi-l);
+  background:rgba(200,150,10,.1); border:1px solid rgba(200,150,10,.3);
+  color:var(--gold);
+}
+.tb-pill-gold {
+  background:rgba(255,215,0,.15); border:1.5px solid #ffd700;
+  color:#ffd700; font-weight:700;
+  box-shadow:0 0 6px rgba(255,215,0,.3);
+  animation:goldPulse 2.5s ease-in-out infinite;
+}
+@keyframes goldPulse {
+  0%,100%{box-shadow:0 0 4px rgba(255,215,0,.25);}
+  50%{box-shadow:0 0 10px rgba(255,215,0,.6),0 0 18px rgba(255,215,0,.2);}
 }
 .tb-pill-recharge.hidden { display:none; }
 /* Boutons droite */
@@ -99,9 +110,11 @@ html,body {
   border:1px solid; user-select:none; white-space:nowrap;
 }
 .tb-btn:active { opacity:.6; }
-.tb-btn-pi   { background:rgba(112,40,200,.18); border-color:var(--border); color:var(--pi-l); }
+.tb-btn-pi   { background:rgba(200,150,10,.15); border-color:var(--gold); color:var(--gold); }
 .tb-btn-shop { background:rgba(245,200,66,.1); border-color:rgba(245,200,66,.3); color:var(--gold); }
 .tb-btn-lb   { background:rgba(56,212,138,.08); border-color:rgba(56,212,138,.28); color:var(--green); }
+.tb-btn-portal { background:rgba(245,200,66,.15); border-color:var(--gold); color:var(--gold); animation:portalGlow 2s ease-in-out infinite; font-size:.65rem; }
+@keyframes portalGlow { 0%,100%{ box-shadow:0 0 4px rgba(245,200,66,.3); } 50%{ box-shadow:0 0 12px rgba(245,200,66,.7), 0 0 20px rgba(245,200,66,.3); } }
 #tb-user-name {
   font-family:"Space Mono",monospace; font-size:.48rem; color:var(--dim);
   max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -113,7 +126,9 @@ html,body {
 ══════════════════════════ */
 #canvas-zone {
   flex:1 1 0; min-height:0; position:relative;
-  overflow:hidden; background:#050210;
+  overflow:hidden; background:#1a1600;
+  border-left:  3px solid var(--gold);
+  border-right: 3px solid var(--gold);
 }
 #canvas-viewport { position:absolute; inset:0; overflow:hidden; }
 #canvas-container {
@@ -191,8 +206,8 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 ══════════════════════════ */
 #pal-bar {
   flex-shrink:0; height:var(--h-pal);
-  background:linear-gradient(0deg,#0f0b1f 0%,#16112b 100%);
-  border-top:1px solid var(--border);
+  background:linear-gradient(0deg,#0e0e00 0%,#1c1600 100%);
+  border-top:2px solid var(--gold);
   padding:6px 8px; display:flex; align-items:center; gap:6px;
 }
 #sel-dot {
@@ -431,13 +446,17 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 
   <!-- TOPBAR — 40px -->
   <div id="topbar">
-    <div class="tb-logo">⚔ PI-XEL WAR</div>
+    <div class="tb-logo">✦ GOLD PIXEL</div>
 
     <!-- Centre : stock + recharge -->
     <div id="tb-center">
       <div class="tb-pill tb-pill-stock" id="tb-stock-pill">
         <span id="tb-stock-ico">📦</span>
         <span id="tb-stock-val">10</span><span style="opacity:.5">/10</span>
+      </div>
+      <div class="tb-pill tb-pill-gold" id="tb-gold-pill">
+        <span>✦</span>
+        <span id="tb-gold-val">5</span><span style="opacity:.5">/5</span>
       </div>
       <div class="tb-pill tb-pill-recharge" id="tb-recharge-pill">
         <span>⏱</span>
@@ -448,6 +467,7 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
     <!-- Droite : user + actions -->
     <div class="tb-right">
       <span id="tb-user-name">—</span>
+      <div class="tb-btn tb-btn-portal" onclick="window.location.href="/"">🏠</div>
       <div class="tb-btn tb-btn-pi"   id="tb-pi-btn"   onclick="openPiAuth()">🔗 Pi</div>
       <div class="tb-btn tb-btn-shop" onclick="openModal('m-shop')">🛒</div>
       <div class="tb-btn tb-btn-lb"   onclick="openLB()">🏆</div>
@@ -496,8 +516,9 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 <!-- Bienvenue -->
 <div class="m-bg open" id="m-welcome">
   <div class="m-box">
-    <div class="m-h">⚔ PI-XEL WAR</div>
-    <p class="m-p">La guerre des pixels sur Pi Network.<br>Conquiers le canevas — un pixel à la fois.</p>
+    <div class="m-h">✦ GOLD PIXEL</div>
+    <img src="/Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel" style="width:100%;max-width:260px;height:90px;object-fit:cover;border-radius:8px;margin:6px auto;display:block;border:2px solid rgba(245,200,66,.4);" onerror="this.style.display='none'">
+    <p class="m-p">Le canvas pixel collaboratif de Pi Network.<br>Conquiers le canevas — un pixel à la fois.</p>
     <ul class="rule-ul">
       <li><span class="ic">📦</span><span>Tu démarres avec <strong style="color:var(--gold)">10 pixels</strong> en stock</span></li>
       <li><span class="ic">⏱</span><span>Recharge : <strong style="color:var(--gold)">1 pixel toutes les 3 minutes</strong></span></li>
@@ -583,6 +604,9 @@ const POLL_MS    = 8000;
 const STOCK_MAX  = 10;
 const STOCK_CAP  = 20;
 const RECHARGE_S = 180;      // 3 min
+const GOLD_MAX   = 5;
+const GOLD_CAP   = 10;
+const GOLD_COLOR = '#ffd700';
 
 /* ════════════════════════════
    PALETTE 32 couleurs (r/place 2022)
@@ -594,6 +618,7 @@ const COLORS = [
   '#811e9f','#b44ac0','#e4abff','#de107f','#ff3881','#ff99aa',
   '#6d482f','#9c6926','#ffb470','#000000','#515252','#898d90',
   '#d4d7d9','#ffffff',
+  '#ffd700',  /* GOLD — couleur spéciale */
 ];
 
 /* ════════════════════════════
@@ -643,7 +668,7 @@ const ROWS = 48;
 const TILE = 10;
 const CW   = COLS * TILE;   // 800px
 const CH   = ROWS * TILE;   // 480px
-const BG   = '#0a0e1a';
+const BG   = '#f5f0e8';  /* fond crème — pixels visibles immédiatement */
 
 /* ════════════════════════════
    ÉTAT GLOBAL — une seule déclaration de chaque variable
@@ -652,6 +677,7 @@ let activeColor  = '#3690ea';
 let selCol       = -1;
 let selRow       = -1;
 let stock        = STOCK_MAX;
+let goldStock    = GOLD_MAX;
 let rechargeLeft = RECHARGE_S;  /* secondes avant prochain +1 */
 let pixelsPlaced = 0;
 let sessionStart = Date.now();
@@ -743,7 +769,7 @@ function applyZoom(f, cx, cy) {
 function drawGrid() {
   mainCtx.fillStyle = BG;
   mainCtx.fillRect(0, 0, CW, CH);
-  mainCtx.strokeStyle = 'rgba(255,255,255,0.045)';
+  mainCtx.strokeStyle = 'rgba(0,0,0,0.12)';
   mainCtx.lineWidth = 0.5;
   for (let c = 0; c <= COLS; c++) {
     mainCtx.beginPath(); mainCtx.moveTo(c*TILE,0); mainCtx.lineTo(c*TILE,CH); mainCtx.stroke();
@@ -752,7 +778,7 @@ function drawGrid() {
     mainCtx.beginPath(); mainCtx.moveTo(0,r*TILE); mainCtx.lineTo(CW,r*TILE); mainCtx.stroke();
   }
   /* Repères 10×10 */
-  mainCtx.strokeStyle = 'rgba(112,40,200,0.1)';
+  mainCtx.strokeStyle = 'rgba(200,150,10,0.25)';
   mainCtx.lineWidth = 0.8;
   for (let c = 0; c <= COLS; c += 10) {
     mainCtx.beginPath(); mainCtx.moveTo(c*TILE,0); mainCtx.lineTo(c*TILE,CH); mainCtx.stroke();
@@ -779,7 +805,7 @@ function clearCell(col, row) {
   const x = col * TILE, y = row * TILE;
   mainCtx.fillStyle = BG;
   mainCtx.fillRect(x, y, TILE, TILE);
-  mainCtx.strokeStyle = 'rgba(255,255,255,0.045)';
+  mainCtx.strokeStyle = 'rgba(0,0,0,0.10)';
   mainCtx.lineWidth = 0.5;
   mainCtx.strokeRect(x, y, TILE, TILE);
   mmCtx.fillStyle = BG;
@@ -849,6 +875,8 @@ function updateStockUI() {
   const emptyTimerEl  = document.getElementById('pal-empty-timer');
 
   stockVal.textContent = stock;
+  const goldValEl = document.getElementById('tb-gold-val');
+  if (goldValEl) goldValEl.textContent = goldStock;
 
   /* Couleur pill stock */
   stockPill.className = 'tb-pill tb-pill-stock' +
@@ -903,12 +931,14 @@ function placePixelAt(col, row) {
   pixelGrid[col][row] = { color, user };
   paintCell(col, row, color);
 
-  /* Décrémenter le stock et démarrer la recharge si pas déjà en cours */
-  stock--;
-  /* Réinitialiser le timer de recharge uniquement si on vient de passer
-     sous le plafond (stock == STOCK_MAX - 1) ou si le timer était à 0 */
-  if (stock === STOCK_MAX - 1 || rechargeLeft <= 0) {
-    rechargeLeft = RECHARGE_S;
+  /* Décrémenter stock normal ou gold selon la couleur active */
+  if (color === GOLD_COLOR) {
+    goldStock = Math.max(0, goldStock - 1);
+  } else {
+    stock--;
+    if (stock === STOCK_MAX - 1 || rechargeLeft <= 0) {
+      rechargeLeft = RECHARGE_S;
+    }
   }
   pixelsPlaced++;
   updateStockUI();
@@ -1274,6 +1304,11 @@ function buildPalette() {
     el.className = 'sw' + (c === activeColor ? ' on' : '');
     el.style.background = c;
     el.addEventListener('click', () => pickColor(c));
+    if (c === GOLD_COLOR) {
+      el.style.boxShadow = '0 0 8px 2px rgba(255,215,0,.7), 0 0 16px rgba(255,215,0,.3)';
+      el.style.border = '2px solid #ffd700';
+      el.title = '✦ Gold — stock séparé';
+    }
     el.addEventListener('touchstart', e => { e.preventDefault(); pickColor(c); }, { passive: false });
     box.appendChild(el);
   });
@@ -1281,6 +1316,8 @@ function buildPalette() {
 }
 
 function pickColor(c) {
+  if (c === GOLD_COLOR && goldStock <= 0) { showToast('✦ Stock Gold vide !'); return; }
+  if (c !== GOLD_COLOR && stock <= 0) { showToast('📦 Stock vide !'); return; }
   activeColor = c;
   document.getElementById('sel-dot').style.background = c;
   document.querySelectorAll('.sw').forEach((el, i) => el.classList.toggle('on', COLORS[i] === c));
