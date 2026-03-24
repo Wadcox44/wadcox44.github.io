@@ -772,39 +772,57 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 
 /* Boutons langue */
-.hdr-lang {
-  background: transparent;
-  border: 1px solid rgba(0,243,255,.18);
-  color: rgba(200,216,232,.5);
+/* Sélecteur langue */
+#lang-select {
+  background: rgba(5,11,20,.95);
+  border: 1px solid rgba(0,243,255,.22);
+  color: rgba(200,216,232,.7);
   font-family: 'Orbitron', monospace;
   font-size: .42rem;
-  letter-spacing: .8px;
-  padding: 3px 7px;
+  letter-spacing: .5px;
+  padding: 4px 6px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all .2s;
-  white-space: nowrap;
+  border-radius: 4px;
+  transition: border-color .2s, color .2s;
+  appearance: none;
+  -webkit-appearance: none;
+  /* petite flèche discrète */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(0,243,255,.4)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+  max-width: 130px;
 }
-.hdr-lang.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
-.hdr-lang:hover { border-color: var(--cy); color: var(--cy); }
+#lang-select:focus,
+#lang-select:hover {
+  border-color: var(--cy);
+  color: var(--cy);
+  outline: none;
+}
+#lang-select option {
+  background: #050b14;
+  color: #c8d8e8;
+  font-size: .8rem;
+}
+/* Conserver .hdr-lang pour compatibilité si référencé ailleurs */
+.hdr-lang { display: none; }
 
 /* ── BOUTON DON ── */
 #btn-don-toggle {
   position: relative;
-  padding: 5px 12px;
-  background: transparent;
-  border: 1.5px solid rgba(255,170,0,.5);
-  border-radius: 5px;
+  padding: 7px 18px;
+  background: rgba(255,170,0,.08);
+  border: 2px solid rgba(255,170,0,.7);
+  border-radius: 6px;
   color: var(--or);
   font-family: 'Orbitron', monospace;
-  font-size: .48rem;
+  font-size: .58rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
-  transition: border-color .25s, box-shadow .25s, color .25s;
-  /* Shimmer cyclique pour attirer l'œil */
+  transition: border-color .25s, box-shadow .25s, background .25s;
   animation: donGlow 2.5s ease-in-out infinite;
 }
 @keyframes donGlow {
@@ -925,7 +943,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   margin: 0 auto;
 }
 
-/* Carte hero Gold Pixel — redesignée */
+/* Carte hero Pi-xel War */
 .hero-card-new {
   width: 100%;
   height: 210px;
@@ -942,7 +960,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 .hero-card-new img {
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: brightness(.55);
+  filter: brightness(.85) saturate(1.4) contrast(1.05);
+  /* Supprime le fond blanc du JPG */
+  mix-blend-mode: multiply;
   transition: .7s ease;
   display: block;
 }
@@ -952,7 +972,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 .hero-card-new:hover img {
   transform: scale(1.06);
-  filter: brightness(.75);
+  filter: brightness(1) saturate(1.6) contrast(1.08);
 }
 
 /* Overlay contenu sur la carte */
@@ -963,16 +983,86 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Espace sous le titre pour ne pas coller au bouton PLAY */
+  padding-bottom: 58px;
   gap: 6px;
   pointer-events: none;
-  /* Dégradé sombre en bas pour lisibilité */
+  /* Dégradé sombre en bas pour lisibilité du titre */
   background: linear-gradient(
     to top,
-    rgba(5,11,20,.85) 0%,
-    rgba(5,11,20,.2) 45%,
-    transparent 70%
+    rgba(5,11,20,.88) 0%,
+    rgba(5,11,20,.3)  50%,
+    transparent       80%
   );
 }
+/* Logo pixels — au-dessus du titre, centré */
+.hero-logo-pixels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  filter:
+    drop-shadow(0 0 8px rgba(255,170,0,.4))
+    drop-shadow(0 0 18px rgba(0,243,255,.25));
+  transition: filter .4s, transform .4s;
+}
+.hero-logo-pixels svg {
+  width:  clamp(52px, 12vw, 80px);
+  height: clamp(52px, 12vw, 80px);
+}
+.hero-card-new:hover .hero-logo-pixels {
+  transform: scale(1.06);
+  filter:
+    drop-shadow(0 0 12px rgba(255,170,0,.6))
+    drop-shadow(0 0 26px rgba(0,243,255,.4));
+}
+/* ── Titre PIXEL [logo] WAR — split ── */
+.hero-title-split {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.hero-title-part {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 8vw, 2.4rem);
+  color: var(--or);
+  letter-spacing: 6px;
+  text-shadow: 0 0 22px var(--or), 0 0 50px rgba(255,170,0,.3);
+  transition: letter-spacing .4s, text-shadow .4s;
+  line-height: 1;
+}
+.hero-title-logo {
+  /* Taille proportionnelle à la police du titre */
+  width:  clamp(2rem, 7.5vw, 2.8rem);
+  height: clamp(2rem, 7.5vw, 2.8rem);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter:
+    drop-shadow(0 0 6px rgba(255,170,0,.5))
+    drop-shadow(0 0 14px rgba(0,243,255,.3));
+  transition: filter .4s, transform .4s;
+}
+.hero-title-logo svg rect {
+  /* Coins légèrement arrondis — look pixel art soigné */
+  rx: 1.5;
+  ry: 1.5;
+}
+/* Hover — les lettres s'écartent, le logo pulse */
+.hero-card-new:hover .hero-title-part {
+  letter-spacing: 10px;
+  text-shadow: 0 0 35px var(--or), 0 0 70px rgba(255,170,0,.4);
+}
+.hero-card-new:hover .hero-title-logo {
+  transform: scale(1.1) rotate(6deg);
+  filter:
+    drop-shadow(0 0 10px rgba(255,170,0,.7))
+    drop-shadow(0 0 22px rgba(0,243,255,.5));
+}
+
 .hero-card-game-name {
   font-family: 'Orbitron', monospace;
   font-weight: 900;
@@ -994,25 +1084,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   text-transform: uppercase;
 }
 
-/* Badge PIXEL ART (haut gauche) */
-.hero-badge-type {
-  position: absolute;
-  top: 11px; left: 11px;
-  background: rgba(5,11,20,.85);
-  border: 1px solid rgba(255,170,0,.55);
-  border-radius: 100px;
-  font-family: 'Orbitron', monospace;
-  font-size: .46rem;
-  letter-spacing: 1.5px;
-  color: var(--or);
-  padding: 3px 10px;
-  display: flex; align-items: center; gap: 5px;
-}
-
-/* Badge SEASON 1 (haut droit) */
+/* Badge SEASON 1 — centré en haut */
 .hero-badge-season {
   position: absolute;
-  top: 11px; right: 11px;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(5,11,20,.85);
   border: 1px solid rgba(0,243,255,.35);
   border-radius: 100px;
@@ -1021,6 +1098,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   letter-spacing: 1px;
   color: var(--cy);
   padding: 3px 10px;
+  white-space: nowrap;
+  z-index: 3;
 }
 
 /* CTA PLAY NOW sur la carte (bas) */
@@ -1144,9 +1223,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   flex-direction: column;
 }
 
-/* ── CARTE FEATURED (Gold Pixel) — pleine largeur ── */
+/* ── CARTE FEATURED (Pi-xel War) — pleine largeur ── */
 .sc-card.featured {
-  /* Même taille que les autres cartes — Gold Pixel déjà mis en avant dans le hero */
+  /* Même taille que les autres cartes */
   height: 120px;
   background: linear-gradient(135deg, #0a1a0a, #0f2a10, #0a1808);
   border: 1px solid rgba(255,170,0,.35);
@@ -1162,10 +1241,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
+  /* Supprime le fond blanc du JPG */
+  mix-blend-mode: multiply;
   transition: transform .5s, filter .5s;
 }
-.sc-card.featured .sc-card-bg { filter: brightness(.45); }
-.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(.6); }
+.sc-card.featured .sc-card-bg { filter: brightness(.82) saturate(1.45) contrast(1.05); }
+.sc-card.featured:hover .sc-card-bg { transform: scale(1.04); filter: brightness(1) saturate(1.6) contrast(1.08); }
 
 /* Overlay dégradé bas */
 .sc-card-overlay {
@@ -1194,7 +1275,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   text-shadow: 0 0 12px rgba(255,170,0,.4);
   margin-bottom: 3px;
 }
-.sc-card.featured .sc-card-name { font-size: .78rem; color: var(--or); }
+.sc-card.featured .sc-card-name { font-size: .78rem; color: var(--or); } /* Pi-xel War featured */
 .sc-card-tags {
   display: flex;
   gap: 5px;
@@ -1500,6 +1581,466 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   letter-spacing: 1px;
 }
 
+
+/* ════════════════════════════════════════════════════════
+   SECTION NEWS HOME — mini bloc activité
+════════════════════════════════════════════════════════ */
+.news-home-block {
+  width: 100%;
+  padding: 20px 0 8px;
+  border-bottom: 1px solid rgba(0,243,255,.07);
+  position: relative; z-index: 2;
+}
+.news-home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.news-home-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .72rem;
+  color: var(--cy);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-left: 3px solid var(--or);
+  padding-left: 10px;
+}
+.news-home-more {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .5rem;
+  color: rgba(0,243,255,.45);
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color .2s;
+  background: none;
+  border: none;
+  text-transform: uppercase;
+  padding: 0;
+}
+.news-home-more:hover { color: var(--cy); }
+
+/* Fil d'actualité */
+.news-feed { display: flex; flex-direction: column; gap: 8px; }
+
+/* Carte news */
+.nf-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  background: rgba(8,18,32,.7);
+  border: 1px solid rgba(0,243,255,.1);
+  border-left: 3px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .25s;
+  position: relative;
+  overflow: hidden;
+}
+.nf-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(0,243,255,.03), transparent);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.nf-card:hover { transform: translateX(4px); border-color: rgba(0,243,255,.25); }
+.nf-card:hover::before { opacity: 1; }
+
+/* Variantes couleur par type */
+.nf-card.live   { border-left-color: #44ff88; }
+.nf-card.new    { border-left-color: var(--cy); }
+.nf-card.update { border-left-color: var(--or); }
+.nf-card.soon   { border-left-color: rgba(200,216,232,.2); }
+.nf-card.dev    { border-left-color: var(--pu, #cc44ff); }
+
+/* Icône / emoji */
+.nf-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.nf-icon.live   { background: rgba(68,255,136,.1);  border: 1px solid rgba(68,255,136,.3); }
+.nf-icon.new    { background: rgba(0,243,255,.08);   border: 1px solid rgba(0,243,255,.25); }
+.nf-icon.update { background: rgba(255,170,0,.1);   border: 1px solid rgba(255,170,0,.3); }
+.nf-icon.soon   { background: rgba(200,216,232,.05); border: 1px solid rgba(200,216,232,.12); }
+.nf-icon.dev    { background: rgba(204,68,255,.08);  border: 1px solid rgba(204,68,255,.25); }
+
+/* Contenu texte */
+.nf-body { flex: 1; min-width: 0; }
+.nf-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.nf-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: .38rem;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nf-badge.live   { background: rgba(68,255,136,.12);  border: 1px solid rgba(68,255,136,.4);  color: #44ff88; }
+.nf-badge.new    { background: rgba(0,243,255,.1);    border: 1px solid rgba(0,243,255,.4);   color: var(--cy); }
+.nf-badge.update { background: rgba(255,170,0,.12);   border: 1px solid rgba(255,170,0,.45);  color: var(--or); }
+.nf-badge.soon   { background: rgba(200,216,232,.06); border: 1px solid rgba(200,216,232,.2); color: rgba(200,216,232,.5); }
+.nf-badge.dev    { background: rgba(204,68,255,.1);   border: 1px solid rgba(204,68,255,.4);  color: #cc44ff; }
+.nf-name {
+  font-family: 'Orbitron', monospace;
+  font-size: .6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nf-desc {
+  font-size: .72rem;
+  color: rgba(200,216,232,.5);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Flèche droite */
+.nf-arrow {
+  font-family: 'Orbitron', monospace;
+  font-size: .48rem;
+  color: rgba(0,243,255,.35);
+  flex-shrink: 0;
+  transition: color .2s, transform .2s;
+}
+.nf-card:hover .nf-arrow { color: var(--cy); transform: translateX(3px); }
+
+/* ════════════════════════════════════════════════════════
+   VUE NEWS — onglet refondé
+════════════════════════════════════════════════════════ */
+.news-view-header {
+  padding: 16px 0 14px;
+  border-bottom: 1px solid rgba(0,243,255,.07);
+  margin-bottom: 0;
+}
+.news-view-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .72rem;
+  color: var(--cy);
+  letter-spacing: 1.5px;
+  border-left: 3px solid var(--or);
+  padding-left: 10px;
+  text-transform: uppercase;
+}
+
+/* Grande carte news (featured) */
+.nv-featured {
+  width: 100%;
+  padding: 16px 14px 14px;
+  margin: 14px 0 10px;
+  background: linear-gradient(135deg, rgba(10,22,40,.95), rgba(5,11,20,.98));
+  border: 1px solid rgba(0,243,255,.2);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .25s, box-shadow .25s;
+}
+.nv-featured::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cy), var(--or), var(--cy));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+.nv-featured:hover { border-color: rgba(0,243,255,.4); box-shadow: 0 4px 24px rgba(0,243,255,.08); }
+.nv-featured-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Orbitron', monospace; font-size: .42rem;
+  letter-spacing: 1px; padding: 3px 10px; border-radius: 100px;
+  font-weight: 700; margin-bottom: 10px;
+}
+.nv-featured-badge.live   { background: rgba(68,255,136,.12); border: 1px solid rgba(68,255,136,.45); color: #44ff88; }
+.nv-featured-badge.new    { background: rgba(0,243,255,.1);   border: 1px solid rgba(0,243,255,.4);   color: var(--cy); }
+.nv-featured-badge.update { background: rgba(255,170,0,.12);  border: 1px solid rgba(255,170,0,.45);  color: var(--or); }
+.nv-featured-badge.soon   { background: rgba(200,216,232,.06);border: 1px solid rgba(200,216,232,.2); color: rgba(200,216,232,.5); }
+.nv-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse 1.6s ease-in-out infinite; }
+.nv-featured-title {
+  font-family: 'Orbitron', monospace;
+  font-size: .88rem; font-weight: 900;
+  color: #fff; line-height: 1.3; letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.nv-featured-title span { color: var(--cy); }
+.nv-featured-desc {
+  font-size: .78rem;
+  color: rgba(200,216,232,.55);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.nv-featured-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .5rem; color: rgba(200,216,232,.3); letter-spacing: 1px;
+}
+.nv-featured-meta span { color: rgba(0,243,255,.4); }
+
+/* Liste news secondaires */
+.nv-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.nv-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 13px;
+  background: rgba(8,18,32,.6);
+  border: 1px solid rgba(0,243,255,.08);
+  border-left: 2px solid transparent;
+  border-radius: 10px;
+  transition: all .22s;
+  cursor: default;
+}
+.nv-item.clickable { cursor: pointer; }
+.nv-item.clickable:hover { border-color: rgba(0,243,255,.2); transform: translateX(3px); }
+.nv-item.live-item   { border-left-color: #44ff88; }
+.nv-item.new-item    { border-left-color: var(--cy); }
+.nv-item.update-item { border-left-color: var(--or); }
+.nv-item.soon-item   { border-left-color: rgba(200,216,232,.15); }
+.nv-item-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+.nv-item-body { flex: 1; min-width: 0; }
+.nv-item-head {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 3px; flex-wrap: wrap;
+}
+.nv-item-badge {
+  font-family: 'Orbitron', monospace; font-size: .38rem;
+  letter-spacing: .8px; padding: 2px 7px; border-radius: 100px; font-weight: 700;
+}
+.nv-item-badge.live   { background: rgba(68,255,136,.1);  border: 1px solid rgba(68,255,136,.35); color: #44ff88; }
+.nv-item-badge.new    { background: rgba(0,243,255,.08);  border: 1px solid rgba(0,243,255,.3);   color: var(--cy); }
+.nv-item-badge.update { background: rgba(255,170,0,.1);   border: 1px solid rgba(255,170,0,.4);   color: var(--or); }
+.nv-item-badge.soon   { background: rgba(200,216,232,.05);border: 1px solid rgba(200,216,232,.15);color: rgba(200,216,232,.4); }
+.nv-item-title {
+  font-family: 'Orbitron', monospace; font-size: .62rem;
+  color: #fff; letter-spacing: .5px;
+}
+.nv-item-desc {
+  font-size: .75rem; color: rgba(200,216,232,.52); line-height: 1.55;
+}
+.nv-item-date {
+  font-family: 'Share Tech Mono', monospace; font-size: .48rem;
+  color: rgba(200,216,232,.25); letter-spacing: 1px; margin-top: 5px;
+}
+
+/* ── PI PIXEL WAR — carte portail ── */
+.pw-pixel {
+  position: absolute;
+  border-radius: 2px;
+  opacity: .85;
+}
+@keyframes pwFloat {
+  0%,100% { transform: translateY(0px) scale(1);   opacity: .85; }
+  50%      { transform: translateY(-8px) scale(1.2); opacity: 1;   }
+}
+.pw-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(159,88,240,.85) !important;
+  box-shadow: 0 6px 24px rgba(112,40,200,.3) !important;
+}
+
+/* ── Visuel hero Pixel War ── */
+/* Image de fond Pixel War */
+.hero-pw-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(.75) saturate(1.2);
+  transition: filter .45s, transform .45s;
+  display: block;
+}
+.hero-card-new:hover .hero-pw-img {
+  filter: brightness(.9) saturate(1.4);
+  transform: scale(1.04);
+}
+@keyframes pwPulse {
+  0%,100% { opacity: 0.3; transform: scale(1); }
+  50%     { opacity: 0.9; transform: scale(1.3); }
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGES JEUX DÉDIÉES — view-game
+════════════════════════════════════════════════════════ */
+#view-game { display:none; width:90%; max-width:var(--max); }
+#view-game.active { display:block; }
+
+/* Hero jeu */
+.gp-hero {
+  position:relative; width:100%; height:200px;
+  border-radius:14px; overflow:hidden;
+  border:1.5px solid rgba(255,170,0,.35);
+  margin:16px 0 0;
+  box-shadow:0 0 24px rgba(255,170,0,.08);
+}
+.gp-hero-img {
+  width:100%; height:100%; object-fit:cover; object-position:center;
+  filter:brightness(.6) saturate(1.2);
+  display:block;
+}
+.gp-hero-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top,rgba(5,11,20,.95) 0%,rgba(5,11,20,.3) 55%,transparent 100%);
+  display:flex; flex-direction:column;
+  align-items:flex-start; justify-content:flex-end;
+  padding:16px;
+}
+.gp-hero-tags {
+  display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;
+}
+.gp-tag {
+  font-family:'Share Tech Mono',monospace; font-size:.42rem;
+  padding:2px 8px; border-radius:100px; letter-spacing:.5px;
+}
+.gp-tag.or { background:rgba(255,170,0,.12); border:1px solid rgba(255,170,0,.4); color:var(--or); }
+.gp-tag.cy { background:rgba(0,243,255,.08); border:1px solid rgba(0,243,255,.3); color:var(--cy); }
+.gp-tag.gr { background:rgba(68,255,136,.06);border:1px solid rgba(68,255,136,.3);color:#44ff88; }
+.gp-hero-name {
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:clamp(1.4rem,7vw,2rem); color:var(--or);
+  letter-spacing:4px; text-shadow:0 0 20px var(--or);
+  margin-bottom:4px; line-height:1;
+}
+.gp-hero-pitch {
+  font-family:'Rajdhani',sans-serif; font-size:.82rem;
+  color:rgba(200,216,232,.7); line-height:1.5;
+  max-width:90%;
+}
+.gp-hero-badge {
+  position:absolute; top:11px; right:11px;
+  background:rgba(5,11,20,.85); border:1px solid rgba(68,255,136,.4);
+  border-radius:100px; font-family:'Orbitron',monospace;
+  font-size:.4rem; letter-spacing:1px; color:#44ff88;
+  padding:3px 10px; display:flex; align-items:center; gap:4px;
+}
+.gp-hero-badge-dot {
+  width:5px; height:5px; border-radius:50%; background:#44ff88;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+
+/* Boutons hero */
+.gp-btns {
+  display:flex; gap:8px; margin:14px 0 20px; flex-wrap:wrap;
+}
+.gp-btn-play {
+  flex:1; padding:13px 20px;
+  background:linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size:200% auto; color:#000;
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:.68rem; letter-spacing:2px; border:none;
+  border-radius:8px; cursor:pointer;
+  transition:background-position .4s,transform .2s,box-shadow .3s;
+  box-shadow:0 4px 20px rgba(255,170,0,.3);
+}
+.gp-btn-play:hover { background-position:right center; transform:translateY(-2px); box-shadow:0 6px 28px rgba(255,170,0,.5); }
+.gp-btn-back {
+  padding:13px 16px;
+  background:transparent; border:1px solid rgba(0,243,255,.3);
+  border-radius:8px; color:var(--cy);
+  font-family:'Orbitron',monospace; font-size:.58rem;
+  letter-spacing:1px; cursor:pointer;
+  transition:all .2s; white-space:nowrap;
+}
+.gp-btn-back:hover { background:rgba(0,243,255,.06); border-color:var(--cy); }
+
+/* Sections */
+.gp-section {
+  padding:16px 0 14px;
+  border-top:1px solid rgba(0,243,255,.08);
+}
+.gp-section-title {
+  font-family:'Orbitron',monospace; font-size:.62rem;
+  color:var(--cy); letter-spacing:2px; text-transform:uppercase;
+  border-left:3px solid var(--or); padding-left:10px;
+  margin-bottom:14px;
+}
+
+/* Screenshots */
+.gp-screenshots {
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:8px; margin-bottom:4px;
+}
+.gp-screenshot {
+  width:100%; aspect-ratio:16/9; object-fit:cover;
+  border-radius:8px; border:1px solid rgba(0,243,255,.12);
+  background:var(--bg2); display:block;
+  transition:transform .25s,border-color .25s;
+}
+.gp-screenshot:hover { transform:scale(1.02); border-color:rgba(0,243,255,.3); }
+.gp-screenshot.wide { grid-column:1/-1; }
+
+/* Comment jouer */
+.gp-how-list {
+  display:flex; flex-direction:column; gap:8px;
+}
+.gp-how-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px; border-radius:8px;
+  background:rgba(0,243,255,.03); border:1px solid rgba(0,243,255,.08);
+}
+.gp-how-num {
+  font-family:'Orbitron',monospace; font-size:.6rem; font-weight:700;
+  color:var(--or); flex-shrink:0; min-width:20px; margin-top:1px;
+}
+.gp-how-text {
+  font-size:.82rem; color:rgba(200,216,232,.75); line-height:1.55;
+}
+.gp-pi-note {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:10px 12px; margin-top:10px; border-radius:8px;
+  background:rgba(255,170,0,.04); border:1px solid rgba(255,170,0,.2);
+  font-size:.76rem; color:rgba(200,216,232,.65); line-height:1.5;
+}
+.gp-pi-note-icon { font-size:.9rem; flex-shrink:0; margin-top:1px; }
+
+/* À propos */
+.gp-about-text {
+  font-size:.82rem; color:rgba(200,216,232,.65); line-height:1.65;
+  margin-bottom:14px;
+}
+/* Infos utiles */
+.gp-info-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.gp-info-item {
+  padding:10px 12px; border-radius:8px;
+  background:rgba(8,18,32,.7); border:1px solid rgba(0,243,255,.1);
+}
+.gp-info-label {
+  font-family:'Orbitron',monospace; font-size:.42rem;
+  color:var(--cy); letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:3px;
+}
+.gp-info-val {
+  font-size:.78rem; color:rgba(200,216,232,.8); line-height:1.4;
+}
+
+.gp-hero-svg {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  overflow:hidden;
+}
+.gp-hero-svg svg {
+  width:100%; height:100%;
+  display:block;
+}
+/* Responsive desktop */
+@media(min-width:600px){
+  .gp-screenshots { grid-template-columns:repeat(3,1fr); }
+  .gp-info-grid   { grid-template-columns:repeat(3,1fr); }
+}
+
 </style>
 </head>
 <body>
@@ -1521,7 +2062,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
     <!-- Logo image JV manettes -->
     <img
-      src="Images/Logo%20jeuxvideo%20final.jpg"
+      src="Images/Logo_final.png"
       alt="JEUXVIDEO.PI Logo"
       class="landing-img-logo"
       onerror="this.style.display='none';"
@@ -1567,7 +2108,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <a class="hdr-brand" onclick="showTab('home')" href="#">
       <!-- Logo image JV manettes (même chemin que la landing) -->
       <img
-        src="Images/Logo%20jeuxvideo%20final.jpg"
+        src="Images/Logo_final.png"
         alt="JV"
         class="hdr-brand-img"
         onerror="this.style.display='none'"
@@ -1584,12 +2125,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       ♥ DON
     </button>
 
-    <!-- DROITE : langues collées au bord droit -->
+    <!-- DROITE : sélecteur de langue -->
     <div id="hdr-right">
-      <!-- Langue EN (priorité) -->
-      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
-      <!-- Langue FR (secondaire) -->
-      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+      <select id="lang-select" onchange="setLang(this.value)" aria-label="Language">
+        <option value="en" selected>🇬🇧 EN</option>
+        <option value="fr">🇫🇷 FR</option>
+      </select>
     </div>
 
   </div><!-- /header-top -->
@@ -1649,21 +2190,14 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <button class="nav-bar-btn"
             onclick="switchTab('devs')"
             data-tab="devs"
-            data-fr="Devs" data-en="Devs">Devs</button>
+            data-fr="Rejoignez-nous" data-en="Join Us">Join Us</button>
 
     <div class="nav-bar-sep"></div>
 
     <button class="nav-bar-btn"
-            onclick="showSection('contact')"
+            onclick="switchTab('contact')"
             data-tab="contact"
             data-fr="Contact" data-en="Contact">Contact</button>
-
-    <div class="nav-bar-sep"></div>
-
-    <button class="nav-bar-btn"
-            onclick="openRecruitModal()"
-            data-tab="recruit"
-            data-fr="Recrutement" data-en="Recruit">Recruit</button>
 
   </div>
 </div>
@@ -1672,59 +2206,54 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 <div class="view active" id="view-home">
 
   <!-- ════════════════════════════════════════
-       HERO PRINCIPAL — Gold Pixel mis en avant
+       HERO PRINCIPAL — Pi-xel War mis en avant
   ════════════════════════════════════════ -->
   <div class="hero-section">
 
     <!-- Titre fort + accroche -->
     <div class="hero-headline">
       <div class="hero-headline-label"
-           data-fr="🎮 Le portail gaming Pi Network" data-en="🎮 The Pi Network gaming portal">
-        🎮 The Pi Network gaming portal
+           data-fr="🎮 Le jeu phare du portail" data-en="🎮 Featured game">
+        🎮 Featured game
       </div>
       <div class="hero-headline-title"
-           data-fr="Dessine. Partage.<br><span>Gagne ta place.</span>"
-           data-en="Draw. Share.<br><span>Claim your place.</span>">
-        Draw. Share.<br><span>Claim your place.</span>
+           data-fr="Pixel War.<br><span>Conquiers ta place.</span>"
+           data-en="Pixel War.<br><span>Conquer your place.</span>">
+        Pixel War.<br><span>Conquer your place.</span>
       </div>
       <div class="hero-headline-sub"
-           data-fr="Le premier jeu pixel art collaboratif sur Pi Network. Crée, publie et vote pour les meilleures œuvres."
-           data-en="The first collaborative pixel art game on Pi Network. Create, publish and vote for the best artworks.">
-        The first collaborative pixel art game on Pi Network. Create, publish and vote for the best artworks.
+           data-fr="Pose ton pixel, défends ton territoire, écrase tes adversaires."
+           data-en="Place your pixel, defend your territory, crush your rivals.">
+        Place your pixel, defend your territory, crush your rivals.
       </div>
     </div>
 
-    <!-- Carte Gold Pixel redesignée -->
-    <div class="hero-card-new" onclick="window.location.href='/goldpixel'">
-      <img src="Images/Gold%20Pixel.png" alt="Gold Pixel" onerror="this.style.opacity='0'">
+    <!-- Carte Pi-xel War redesignée -->
+    <div class="hero-card-new" onclick="showGame('pixelwar')">
+      <!-- Image de fond Pixel War -->
+      <img src="Images/Gold Pixel.png" alt="Pixel War" class="hero-pw-img" onerror="this.style.display='none'">
 
-      <!-- Badge type -->
-      <div class="hero-badge-type">
-        <div class="live-dot"></div>
-        PIXEL ART
-      </div>
-
-      <!-- Badge saison -->
+      <!-- Badge saison — centré en haut -->
       <div class="hero-badge-season"
            data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</div>
 
-      <!-- Overlay nom du jeu -->
+      <!-- Overlay : titre PIXEL WAR centré -->
       <div class="hero-card-overlay">
-        <div class="hero-card-game-name">GOLD PIXEL</div>
-        <div class="hero-card-game-tag"
-             data-fr="Créer · Partager · Voter"
-             data-en="Create · Share · Vote">Create · Share · Vote</div>
+
+        <!-- Titre PIXEL WAR centré -->
+        <div class="hero-card-game-name" style="letter-spacing:8px;text-align:center;">PIXEL WAR</div>
+
+                <div class="hero-card-game-tag"
+             data-fr="Attaquer · Défendre · Conquérir"
+             data-en="Attack · Defend · Conquer">Attack · Defend · Conquer</div>
       </div>
 
-      <!-- Barre CTA en bas de la carte -->
+      <!-- Barre CTA en bas de la carte — PLAY seul, pleine largeur -->
       <div class="hero-cta-bar">
         <button class="hero-cta-btn"
-                onclick="event.stopPropagation();window.location.href='/goldpixel'">
-          ▶ PLAY NOW
-        </button>
-        <button class="hero-cta-explore"
-                onclick="event.stopPropagation();switchTab('games')">
-          EXPLORE →
+                onclick="event.stopPropagation();window.location.href='/pixelwar'"
+                data-fr="▶ JOUER" data-en="▶ PLAY">
+          ▶ PLAY
         </button>
       </div>
     </div>
@@ -1739,165 +2268,116 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- En-tête section -->
     <div class="showcase-header">
       <div class="showcase-title">
-        🎮 <span data-fr="Jeux" data-en="Games">Games</span>
+        🎮 <span data-fr="Autres Jeux" data-en="More Games">More Games</span>
       </div>
       <div class="showcase-count"
-           data-fr="3 jeux · 3 slots libres"
-           data-en="3 games · 3 open slots">3 games · 3 open slots</div>
+           data-fr="4 jeux · 3 slots libres"
+           data-en="4 games · 3 open slots">4 games · 3 open slots</div>
     </div>
 
-    <!-- Grille vitrine -->
+    <!-- Grille vitrine : 4 slots — Breaker · Stracker · ×2 libres -->
     <div class="showcase-grid">
 
-      <!-- ── GOLD PIXEL — FEATURED (pleine largeur) ── -->
-      <div class="sc-card featured rv d1"
-           onclick="window.location.href='/goldpixel'">
-        <!-- Image de fond -->
-        <img class="sc-card-bg"
-             src="Images/Gold%20Pixel.png"
-             alt="Gold Pixel"
-             onerror="this.style.display='none'">
-        <div class="sc-card-overlay"></div>
-        <!-- Emoji centré comme les autres cartes -->
-        <!-- Cube doré Gold Pixel — même SVG que dans le jeu -->
-        <div class="sc-card-emoji" style="width:52px;height:52px;filter:drop-shadow(0 0 12px rgba(255,170,0,.6)) drop-shadow(0 0 24px rgba(255,170,0,.25));">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-            <defs>
-              <linearGradient id="scGF" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stop-color="#fffde0"/>
-                <stop offset="20%"  stop-color="#fcf6ba"/>
-                <stop offset="45%"  stop-color="#ffaa00"/>
-                <stop offset="70%"  stop-color="#fcf6ba"/>
-                <stop offset="100%" stop-color="#bf953f"/>
-              </linearGradient>
-              <linearGradient id="scGR" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#5a3e00"/>
-                <stop offset="60%"  stop-color="#bf953f"/>
-                <stop offset="100%" stop-color="#e8c96a"/>
-              </linearGradient>
-              <linearGradient id="scGT" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#ffaa00"/>
-                <stop offset="50%"  stop-color="#fffde0"/>
-                <stop offset="100%" stop-color="#fcf6ba"/>
-              </linearGradient>
-              <filter id="scGlow">
-                <feGaussianBlur stdDeviation="1.2" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <!-- Face avant brillante -->
-            <rect x="10" y="18" width="24" height="24" fill="url(#scGF)" filter="url(#scGlow)"/>
-            <!-- Face droite -->
-            <polygon points="34,18 42,10 42,34 34,42" fill="url(#scGR)"/>
-            <!-- Face top -->
-            <polygon points="10,18 18,10 42,10 34,18" fill="url(#scGT)"/>
-            <!-- Reflets -->
-            <rect x="13" y="20" width="7" height="7" fill="rgba(255,255,255,0.65)" rx="1"/>
-            <rect x="22" y="24" width="3" height="3" fill="rgba(255,255,255,0.3)" rx="0.5"/>
-            <rect x="13" y="30" width="4" height="4" fill="rgba(255,255,255,0.2)" rx="0.5"/>
-            <!-- Contours lumineux -->
-            <rect x="10" y="18" width="24" height="24" fill="none" stroke="rgba(255,230,100,0.7)" stroke-width="0.7"/>
-            <polygon points="34,18 42,10 42,34 34,42" fill="none" stroke="rgba(255,200,0,0.4)" stroke-width="0.5"/>
-            <polygon points="10,18 18,10 42,10 34,18" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
-            <!-- Arêtes lumineuses -->
-            <line x1="10" y1="18" x2="18" y2="10" stroke="rgba(255,255,255,0.9)" stroke-width="0.8"/>
-            <line x1="18" y1="10" x2="34" y2="10" stroke="rgba(255,255,255,0.7)" stroke-width="0.6"/>
-          </svg>
+      <!-- ── BREAKER ── -->
+      <div class="sc-card live rv d1" onclick="showGame('breaker')">
+        <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
+        <!-- Particules néon déco -->
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:20px;left:25%;opacity:.6;animation:pwFloat 2.8s ease-in-out infinite;"></div>
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:55px;left:60%;opacity:.5;animation:pwFloat 3.4s ease-in-out infinite .5s;"></div>
+          <div style="position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(0,243,255,.8);top:35px;left:80%;opacity:.7;animation:pwFloat 2.2s ease-in-out infinite 1s;"></div>
         </div>
-
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
-        </div>
-
-        <!-- Contenu bas de carte -->
-        <div class="sc-card-body">
-          <div class="sc-card-info">
-            <div class="sc-card-name">GOLD PIXEL</div>
-            <div class="sc-card-tags">
-              <span class="sc-tag or">Pixel Art</span>
-              <span class="sc-tag cy">Gallery</span>
-              <span class="sc-tag gr">Live</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── NEON BREAKER — LIVE ── -->
-      <div class="sc-card live rv d2"
-           onclick="window.location.href='/breakout'">
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
-        </div>
-        <!-- Emoji -->
         <div class="sc-card-emoji">🧱</div>
-        <!-- Contenu bas -->
         <div class="sc-card-overlay"></div>
         <div class="sc-card-body">
           <div class="sc-card-info">
-            <div class="sc-card-name">NEON BREAKER</div>
+            <div class="sc-card-name">BREAKER</div>
             <div class="sc-card-tags">
               <span class="sc-tag cy">Arcade</span>
+              <span class="sc-tag cy">Néon</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── 2048 NEON — LIVE ── -->
-      <div class="sc-card live rv d3" onclick="window.location.href='/2048'">
-        <!-- Badge LIVE -->
-        <div class="sc-badge live-badge">
-          <div class="sc-badge-dot"></div>
-          LIVE
+      <!-- ── STRACKER ── -->
+      <div class="sc-card live rv d2" onclick="showGame('stracker')"
+           style="border-color:rgba(0,243,255,.38);">
+        <div class="sc-badge" style="background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.5);color:var(--cy);top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
+          <div class="sc-badge-dot" style="background:var(--cy);box-shadow:0 0 5px var(--cy);"></div>NEW
         </div>
-        <!-- Emoji -->
-        <div class="sc-card-emoji">🧩</div>
-        <!-- Contenu bas -->
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:7px;height:7px;border-radius:2px;background:var(--cy);top:18px;left:45%;opacity:.55;animation:pwFloat 3.1s ease-in-out infinite .3s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:2px;background:var(--cy);top:60px;left:20%;opacity:.5;animation:pwFloat 2.5s ease-in-out infinite .8s;"></div>
+        </div>
+        <div class="sc-card-emoji" style="filter:drop-shadow(0 0 10px var(--cy));">🔷</div>
         <div class="sc-card-overlay"></div>
         <div class="sc-card-body">
           <div class="sc-card-info">
-            <div class="sc-card-name">2048 NEON</div>
+            <div class="sc-card-name" style="color:var(--cy);">STRACKER</div>
             <div class="sc-card-tags">
               <span class="sc-tag cy">Puzzle</span>
+              <span class="sc-tag cy">Blocs</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── YOUR GAME HERE × 4 ── -->
-      <div class="sc-card your-game rv d1" onclick="openDevModal()">
-        <div class="sc-your-inner">
-          <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+      <!-- ── 2048 ── -->
+      <div class="sc-card live rv d3" onclick="showGame('2048')">
+        <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:24px;left:35%;opacity:.55;animation:pwFloat 3.2s ease-in-out infinite;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:58px;left:70%;opacity:.5;animation:pwFloat 2.7s ease-in-out infinite .6s;"></div>
+          <div style="position:absolute;width:4px;height:4px;border-radius:2px;background:var(--cy);top:38px;left:18%;opacity:.6;animation:pwFloat 3.5s ease-in-out infinite 1.2s;"></div>
+        </div>
+        <div class="sc-card-emoji">🧩</div>
+        <div class="sc-card-overlay"></div>
+        <div class="sc-card-body">
+          <div class="sc-card-info">
+            <div class="sc-card-name">2048</div>
+            <div class="sc-card-tags">
+              <span class="sc-tag cy">Puzzle</span>
+              <span class="sc-tag cy">Néon</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="sc-card your-game rv d2" onclick="openDevModal()">
+      <!-- ── SLOT LIBRE 2 ── -->
+      <div class="sc-card your-game rv d1" onclick="openGameModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:7px;height:7px;border-radius:2px;background:var(--cy);top:30px;left:50%;animation:pwFloat 2.9s ease-in-out infinite .4s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:60px;left:25%;animation:pwFloat 3.5s ease-in-out infinite .9s;"></div>
+        </div>
         <div class="sc-your-inner">
           <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
         </div>
       </div>
 
-      <div class="sc-card your-game rv d3" onclick="openDevModal()">
+      <!-- ── SLOT LIBRE 3 ── -->
+      <div class="sc-card your-game rv d2" onclick="openGameModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:8px;height:8px;border-radius:2px;background:var(--cy);top:24px;left:38%;animation:pwFloat 3.1s ease-in-out infinite .2s;"></div>
+          <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cy);top:65px;left:62%;animation:pwFloat 2.8s ease-in-out infinite .7s;"></div>
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:45px;left:20%;animation:pwFloat 3.4s ease-in-out infinite 1.3s;"></div>
+        </div>
         <div class="sc-your-inner">
           <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
         </div>
       </div>
 
-      <div class="sc-card your-game rv d1" onclick="openDevModal()">
+      <!-- ── SLOT LIBRE 4 ── -->
+      <div class="sc-card your-game rv d3" onclick="openGameModal()">
+        <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.35;">
+          <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:20px;left:55%;animation:pwFloat 2.6s ease-in-out infinite .5s;"></div>
+          <div style="position:absolute;width:7px;height:7px;border-radius:50%;background:var(--cy);top:58px;left:30%;animation:pwFloat 3.2s ease-in-out infinite 1.0s;"></div>
+        </div>
         <div class="sc-your-inner">
           <div class="sc-your-plus">✚</div>
-          <div class="sc-your-label"
-               data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
+          <div class="sc-your-label" data-fr="VOTRE JEU ICI" data-en="YOUR GAME HERE">YOUR GAME HERE</div>
         </div>
       </div>
 
@@ -1905,45 +2385,41 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
     <!-- Note développeurs -->
     <p class="showcase-note">
-      <span data-fr="0% commission · Intégration gratuite ·" data-en="0% commission · Free integration ·">0% commission · Free integration ·</span>
-      <a onclick="openDevModal()"
-         data-fr=" Publier mon jeu →" data-en=" List my game →"> List my game →</a>
+      <span data-fr="Rejoignez le portail ·" data-en="Join the portal ·">Join the portal ·</span>
+      <a onclick="openGameModal()" style="cursor:pointer;"
+         data-fr=" Proposer mon jeu →" data-en=" List my game →"> List my game →</a>
     </p>
 
   </div><!-- /showcase-section -->
 
   <!-- ════════════════════════════════════════
-       BLOC DÉVELOPPEUR — compact, secondaire
+       BLOC DÉVELOPPEUR — compact, home
   ════════════════════════════════════════ -->
   <div class="dev-home-block rv">
     <div class="dev-home-inner">
 
-      <!-- En-tête -->
       <div class="dev-home-head">
         <div class="dev-home-title"
              data-fr="Publiez votre jeu.<br><span>Trouvez vos joueurs.</span>"
-             data-en="Ship your game.<br><span>Find your players.</span>">
-          Ship your game.<br><span>Find your players.</span>
+             data-en="Publish your game.<br><span>Find your players.</span>">
+          Publish your game.<br><span>Find your players.</span>
         </div>
-        <div class="dev-home-badge"
-             data-fr="GRATUIT" data-en="FREE">FREE</div>
+        <div class="dev-home-badge" data-fr="GRATUIT" data-en="FREE">FREE</div>
       </div>
 
-      <!-- Accroche -->
       <div class="dev-home-sub"
-           data-fr="JeuxVideo.Pi, le 1er portail gaming Pi Network — zéro coût pour intégrer votre jeu."
-           data-en="JeuxVideo.Pi, the 1st Pi Network gaming portal — zero cost to list your game.">
-        JeuxVideo.Pi, the 1st Pi Network gaming portal — zero cost to list your game.
+           data-fr="JeuxVideo.Pi est le premier portail de jeux Pi Network ouvert aux développeurs. Référencez votre jeu, atteignez une audience Pi déjà active."
+           data-en="JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.">
+        JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game and reach an active Pi audience.
       </div>
 
-      <!-- 4 avantages compacts -->
       <div class="dev-home-perks">
 
         <div class="dev-home-perk">
           <span class="dev-home-perk-icon">👁️</span>
           <div class="dev-home-perk-text">
             <strong data-fr="VISIBILITÉ" data-en="VISIBILITY">VISIBILITY</strong>
-            <span data-fr="Communauté Pi active" data-en="Active Pi community">Active Pi community</span>
+            <span data-fr="Communauté Pi engagée" data-en="Engaged Pi community">Engaged Pi community</span>
           </div>
         </div>
 
@@ -1956,9 +2432,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
 
         <div class="dev-home-perk">
-          <span class="dev-home-perk-icon">⚡</span>
+          <span class="dev-home-perk-icon">🤝</span>
           <div class="dev-home-perk-text">
-            <strong data-fr="PI SDK INCLUS" data-en="PI SDK INCLUDED">PI SDK INCLUDED</strong>
+            <strong data-fr="ACCOMPAGNEMENT" data-en="SUPPORT">SUPPORT</strong>
             <span data-fr="Intégration guidée" data-en="Guided integration">Guided integration</span>
           </div>
         </div>
@@ -1971,17 +2447,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           </div>
         </div>
 
-      </div><!-- /perks -->
+      </div>
 
-      <!-- CTA -->
-      <button class="dev-home-cta" onclick="openDevModal()"
+      <button class="dev-home-cta" onclick="openGameModal()"
               data-fr="PROPOSER MON JEU →" data-en="LIST MY GAME →">
         LIST MY GAME →
       </button>
 
-      <!-- Note -->
       <div class="dev-home-note"
-           data-fr="Réponse sous 48h · Aucun engagement · Formulaire simple"
+           data-fr="Réponse sous 48h · Sans engagement · Formulaire simple"
            data-en="Reply within 48h · No commitment · Simple form">
         Reply within 48h · No commitment · Simple form
       </div>
@@ -1989,7 +2463,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
   </div><!-- /dev-home-block -->
 
+
 </div><!-- /home -->
+
 
 <!-- ══ GAMES ══ -->
 <div class="view" id="view-games">
@@ -2002,25 +2478,25 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       <button class="nav-tab" onclick="filterGames('arcade',this)">Arcade</button>
     </div>
     <div id="games-list" style="display:flex;flex-direction:column;gap:10px;">
-      <div class="av-card rv" data-cat="pixel" onclick="window.location.href='/goldpixel'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="pixel" onclick="showGame('pixelwar')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;">
           <img src="Images/Gold%20Pixel.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
         </div>
         <div style="flex:1;min-width:0;">
-          <div class="av-title" style="margin-bottom:3px;">GOLD PIXEL</div>
+          <div class="av-title" style="margin-bottom:3px;">PIXEL WAR</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(255,170,0,.08);color:rgba(255,170,0,.7);border:1px solid rgba(255,170,0,.2);">Pixel Art</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Gallery</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Votes</span>
           </div>
-          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="Draw, share and vote on 80×45 pixel art.">Draw, share and vote on 80×45 pixel art.</div>
+          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="The first collaborative pixel war on Pi Network.">The first collaborative pixel war on Pi Network.</div>
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="arcade" onclick="window.location.href='/breakout'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="arcade" onclick="showGame('breaker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#001020,#002035);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(0,243,255,.3);">🧱</div>
         <div style="flex:1;min-width:0;">
-          <div class="av-title" style="color:var(--cy);margin-bottom:3px;">NEON BREAKER</div>
+          <div class="av-title" style="color:var(--cy);margin-bottom:3px;">BREAKER</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Arcade</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">5 Levels</span>
@@ -2030,10 +2506,10 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
 
-      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/2048'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="puzzle" onclick="showGame('2048')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 10px rgba(0,243,255,.2);">🧩</div>
         <div style="flex:1;">
-          <div class="av-title" style="margin-bottom:3px;">2048 NEON</div>
+          <div class="av-title" style="margin-bottom:3px;">2048</div>
           <div style="display:flex;gap:5px;margin-bottom:4px;">
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Puzzle</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(68,255,136,.06);color:rgba(68,255,136,.7);border:1px solid rgba(68,255,136,.25);">Live</span>
@@ -2042,6 +2518,19 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
+      <div class="av-card rv" data-cat="puzzle" onclick="showGame('stracker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a0020,#180040);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(204,68,255,.3);">🔷</div>
+        <div style="flex:1;min-width:0;">
+          <div class="av-title" style="color:#cc44ff;margin-bottom:3px;">STRACKER</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(204,68,255,.08);color:rgba(204,68,255,.7);border:1px solid rgba(204,68,255,.2);">Puzzle</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(68,255,136,.06);color:rgba(68,255,136,.7);border:1px solid rgba(68,255,136,.25);">New</span>
+          </div>
+          <div class="av-text" data-fr="Blocs tombants cyberpunk. Empile, élimine, bats ton record !" data-en="Cyberpunk falling blocks. Stack, clear lines, beat your record!">Cyberpunk falling blocks. Stack, clear lines, beat your record!</div>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:#cc44ff;white-space:nowrap;">PLAY →</div>
+      </div>
+
       <div class="av-card rv" data-cat="arcade" style="flex-direction:row;align-items:center;gap:14px;opacity:.5;cursor:default;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a1010,#0a2a1a);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🚀</div>
         <div style="flex:1;">
@@ -2058,223 +2547,283 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 <!-- ══ NEWS ══ -->
 <div class="view" id="view-news">
   <section style="border:none;padding-top:14px;">
-    <div class="cat-title rv"><span>📰 <span data-fr="News & Actualités" data-en="News & Updates">News & Updates</span></span></div>
-    <div class="news-list">
-      <div class="news-card rv d1">
-        <div class="news-date">March 2026</div>
-        <div class="news-tag" data-fr="Lancement" data-en="Launch">Launch</div>
-        <div class="news-title" data-fr="JEUXVIDEO.PI est en ligne !" data-en="JEUXVIDEO.PI is live!">JEUXVIDEO.PI is live!</div>
-        <div class="news-body" data-fr="Le premier portail de jeux Pi Network est officiellement lancé. Gold Pixel est disponible dès maintenant — dessinez, partagez, votez." data-en="The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.">The first Pi Network gaming portal is officially live. Gold Pixel is available now — draw, share and vote.</div>
+
+    <div class="news-view-header rv">
+      <div class="news-view-title">📡 <span data-fr="Actualités" data-en="News">News</span></div>
+    </div>
+
+    <!-- ── Bannière recrutement éditorial — priorité éditoriale ── -->
+    <div class="nv-featured rv d2" style="background:linear-gradient(135deg,rgba(0,10,30,.98),rgba(0,20,50,.95));border-color:rgba(0,243,255,.35);cursor:pointer;" onclick="switchTab('devs')">
+      <div class="nv-featured-badge" style="background:rgba(0,243,255,.12);border:1px solid rgba(0,243,255,.4);color:var(--cy);">
+        <span class="nv-badge-dot" style="background:var(--cy);box-shadow:0 0 6px var(--cy);"></span>
+        <span data-fr="JE RECRUTE" data-en="NOW HIRING">NOW HIRING</span>
       </div>
-      <div class="news-card rv d2">
-        <div class="news-date">Coming soon</div>
-        <div class="news-tag" data-fr="Fonctionnalité" data-en="Feature">Feature</div>
-        <div class="news-title" data-fr="Challenge quotidien dans Gold Pixel" data-en="Daily Challenge in Gold Pixel">Daily Challenge in Gold Pixel</div>
-        <div class="news-body" data-fr="Un nouveau challenge pixel art chaque jour. Reproduis le modèle du jour et gagne des pixels Or bonus !" data-en="A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!">A new pixel art challenge every day. Reproduce the daily template and earn bonus Gold pixels!</div>
+      <div class="nv-featured-title" style="-webkit-text-fill-color:unset;color:var(--cy);"
+           data-fr="Je cherche quelqu'un pour gérer les news"
+           data-en="Looking for someone to manage the news">
+        Looking for someone to manage the news
       </div>
-      <div class="news-card rv d3">
-        <div class="news-date">Coming soon</div>
-        <div class="news-tag" data-fr="Jeux" data-en="Games">Games</div>
-        <div class="news-title" data-fr="2048 Neon est disponible !" data-en="2048 Neon is live!">2048 Neon is live!</div>
-        <div class="news-body" data-fr="Le puzzle néon 2048 est maintenant jouable sur le portail. Fusionne les tuiles jusqu'au 2048 !" data-en="The neon 2048 puzzle is now playable on the portal. Merge tiles all the way to 2048!">The neon 2048 puzzle is now playable on the portal. Merge tiles all the way to 2048!</div>
+      <div class="nv-featured-desc"
+           data-fr="Je gère ce portail seul et je cherche quelqu'un pour animer la section News. Intéressé(e) ? Rejoins l'aventure."
+           data-en="I run this portal alone and I'm looking for someone to animate the News section. Interested? Join the adventure.">
+        I run this portal alone and I'm looking for someone to animate the News section. Interested? Join the adventure.
       </div>
-      <div class="news-card rv d1">
-        <div class="news-date">Open</div>
-        <div class="news-tag" data-fr="Développeurs" data-en="Developers">Developers</div>
-        <div class="news-title" data-fr="Intégrez votre jeu — gratuitement" data-en="List your game — for free">List your game — for free</div>
-        <div class="news-body" data-fr="0% de commission, intégration Pi SDK sans frais. Soumettez votre jeu dès maintenant." data-en="0% commission, Pi SDK integration at no cost. Submit your game now.">0% commission, Pi SDK integration at no cost. Submit your game now.</div>
+      <div class="nv-featured-meta" style="color:var(--cy);">
+        <span data-fr="Voir le poste →" data-en="See the position →">See the position →</span>
       </div>
     </div>
+
+    <!-- Carte featured — Lancement du portail -->
+    <div class="nv-featured rv d1" onclick="showGame('pixelwar')">
+      <div class="nv-featured-badge live">
+        <span class="nv-badge-dot"></span>
+        LIVE
+      </div>
+      <div class="nv-featured-title"
+           data-fr="JEUXVIDEO.PI — Le portail est <span>en ligne</span>."
+           data-en="JEUXVIDEO.PI — The portal is <span>live</span>.">
+        JEUXVIDEO.PI — The portal is <span>live</span>.
+      </div>
+      <div class="nv-featured-desc"
+           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Pixel War, Breaker, Stracker et 2048 sont disponibles dès maintenant. Attaque, défends, joue — l'aventure commence."
+           data-en="The 1st independent Pi Network gaming portal is officially live. Pixel War, Breaker, Stracker &amp; 2048 are available now. War, defend, play — the adventure starts here.">
+        The 1st independent Pi Network gaming portal is officially live. Pi-xel War, Neon Breaker, 2048 &amp; Stracker are available now. War, defend, play — the adventure starts here.
+      </div>
+      <div class="nv-featured-meta">
+        March 2026 &nbsp;<span>·</span>&nbsp; JEUXVIDEO.PI
+      </div>
+    </div>
+
+    <!-- Liste des news secondaires -->
+    <div class="nv-list">
+
+      <!-- Pi-xel War -->
+      <div class="nv-item live-item clickable rv d1" onclick="showGame('pixelwar')">
+        <div class="nv-item-icon">🟡</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge live">LIVE</span>
+            <span class="nv-item-title"
+                  data-fr="Pixel War — Conquiers ta place"
+                  data-en="Pixel War — Conquer your place">Pixel War — Conquer your place</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Crée des œuvres pixel art 80×45, publie dans la galerie, vote pour tes favoris. Chaque dessin raconte une histoire. Le challenge du jour t'attend."
+               data-en="Create 80×45 pixel art, publish to the gallery, vote for your favourites. Every drawing tells a story. The daily challenge awaits.">
+            Create 80×45 pixel art, publish to the gallery, vote for your favourites. Every drawing tells a story. The daily challenge awaits.
+          </div>
+          <div class="nv-item-date">March 2026 · Pixel Art · Pi Network</div>
+        </div>
+      </div>
+
+      <!-- Neon Breaker -->
+      <div class="nv-item live-item clickable rv d2" onclick="showGame('breaker')">
+        <div class="nv-item-icon">🧱</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge live">LIVE</span>
+            <span class="nv-item-title"
+                  data-fr="Breaker — Casse-briques cyberpunk"
+                  data-en="Breaker — Cyberpunk breakout">Breaker — Cyberpunk breakout</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="10 niveaux de briques néon à détruire. Attrape les powerups — multiballe, laser, vitesse — et domine le classement mondial."
+               data-en="10 levels of neon bricks to destroy. Grab powerups — multiball, laser, speed — and dominate the global leaderboard.">
+            10 levels of neon bricks to destroy. Grab powerups — multiball, laser, speed — and dominate the global leaderboard.
+          </div>
+          <div class="nv-item-date">March 2026 · Arcade · Leaderboard</div>
+        </div>
+      </div>
+
+      <!-- 2048 -->
+      <div class="nv-item new-item clickable rv d3" onclick="showGame('2048')">
+        <div class="nv-item-icon">🧩</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge new">NEW</span>
+            <span class="nv-item-title"
+                  data-fr="2048 — Puzzle de fusion néon"
+                  data-en="2048 — Neon merge puzzle">2048 — Neon merge puzzle</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Fusionne les tuiles cyberpunk et atteins le 2048. Simple à apprendre, impossible à maîtriser. Parfait pour quelques minutes de jeu intense."
+               data-en="Merge cyberpunk tiles and reach 2048. Easy to learn, impossible to master. Perfect for a few minutes of intense play.">
+            Merge cyberpunk tiles and reach 2048. Easy to learn, impossible to master. Perfect for a few minutes of intense play.
+          </div>
+          <div class="nv-item-date">March 2026 · Puzzle · Pi Network</div>
+        </div>
+      </div>
+
+      <!-- Stracker -->
+      <div class="nv-item new-item clickable rv d1" onclick="showGame('stracker')">
+        <div class="nv-item-icon">🔷</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge new">NEW</span>
+            <span class="nv-item-title"
+                  data-fr="Stracker — Blocs tombants cyberpunk"
+                  data-en="Stracker — Cyberpunk falling blocks">Stracker — Cyberpunk falling blocks</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="Empile les blocs néon, élimine les lignes, monte en niveau. Les blocs s'envolent en particules de données quand tu fais un combo — pur style cyberpunk."
+               data-en="Stack neon blocks, clear lines, level up. Blocks explode into data particles on combos — pure cyberpunk style.">
+            Stack neon blocks, clear lines, level up. Blocks explode into data particles on combos — pure cyberpunk style.
+          </div>
+          <div class="nv-item-date">March 2026 · Puzzle · Cyberpunk</div>
+        </div>
+      </div>
+
+
+
+      <!-- Open dev slot -->
+      <div class="nv-item soon-item clickable rv d3" onclick="openDevModal()">
+        <div class="nv-item-icon">🚀</div>
+        <div class="nv-item-body">
+          <div class="nv-item-head">
+            <span class="nv-item-badge soon">OPEN</span>
+            <span class="nv-item-title"
+                  data-fr="Ton jeu ici — rejoins le portail"
+                  data-en="Your game here — join the portal">Your game here — join the portal</span>
+          </div>
+          <div class="nv-item-desc"
+               data-fr="3 slots libres pour de nouveaux jeux Pi Network. 0% commission, intégration guidée, audience déjà là."
+               data-en="3 open slots for new Pi Network games. 0% commission, guided integration, audience ready.">
+            3 open slots for new Pi Network games. 0% commission, guided integration, audience ready.
+          </div>
+          <div class="nv-item-date">Open · Developers · Free</div>
+        </div>
+      </div>
+
+    </div><!-- /nv-list -->
   </section>
 </div><!-- /news -->
 
 <!-- ══ DEVS ══ -->
 <div class="view" id="view-devs">
 
-  <section>
-    <div class="cat-title rv"><span>💼 <span data-fr="Pourquoi rejoindre JEUXVIDEO.PI ?" data-en="Why join JEUXVIDEO.PI?">Why join JEUXVIDEO.PI?</span></span></div>
+  <!-- ══ REJOIGNEZ-NOUS ══ -->
+  <section style="border:none;padding-top:14px;">
 
-    <div class="devs-headline rv" data-fr="Publiez votre jeu. Gratuitement. Sans commission." data-en="Publish your game. For free. Zero commission.">Publish your game. For free. Zero commission.</div>
-    <div class="devs-sub rv" data-fr="JEUXVIDEO.PI est la seule plateforme Pi Network à proposer 0% de commission et une intégration Pi SDK sans frais pour tous les développeurs." data-en="JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.">JEUXVIDEO.PI is the only Pi Network platform offering 0% commission and free Pi SDK integration for every developer.</div>
-
-    <div class="highlight-card gold-hl rv d1">
-      <div class="hl-icon">🏆</div>
-      <div>
-        <div class="hl-title gold" data-fr="0% DE COMMISSION — GARANTI À VIE" data-en="0% COMMISSION — GUARANTEED FOREVER">0% COMMISSION — GUARANTEED FOREVER</div>
-        <div class="hl-text" data-fr="Toutes vos recettes Pi vous appartiennent intégralement. Aucun frais caché, aucun partage de revenus, aucune condition." data-en="Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.">Every Pi you earn is 100% yours. No hidden fees, no revenue share, no strings attached.</div>
-      </div>
-    </div>
-
-    <div class="highlight-card cy-hl rv d2">
-      <div class="hl-icon">⚡</div>
-      <div>
-        <div class="hl-title cy" data-fr="INTÉGRATION PI SDK — SANS FRAIS" data-en="PI SDK INTEGRATION — AT NO COST">PI SDK INTEGRATION — AT NO COST</div>
-        <div class="hl-text" data-fr="Nous vous accompagnons dans l'intégration complète : paiements Pi, authentification, déploiement. Aucune expertise requise." data-en="We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.">We guide you through full Pi SDK integration: payments, authentication, deployment. No prior expertise needed.</div>
-      </div>
-    </div>
-
-    <div class="avantages-grid">
-      <div class="av-card rv d1"><div class="av-icon">📄</div><div class="av-title" data-fr="Page dédiée" data-en="Dedicated page">Dedicated page</div><div class="av-text" data-fr="Une page Steam-like avec screenshots, pitch et profil développeur." data-en="A Steam-like page with screenshots, pitch and developer profile.">A Steam-like page with screenshots, pitch and developer profile.</div></div>
-      <div class="av-card rv d2"><div class="av-icon">🌍</div><div class="av-title" data-fr="Communauté Pi mondiale" data-en="Global Pi community">Global Pi community</div><div class="av-text" data-fr="Des milliers de joueurs Pi Network actifs dans le monde entier." data-en="Thousands of active Pi Network players worldwide.">Thousands of active Pi Network players worldwide.</div></div>
-      <div class="av-card rv d3"><div class="av-icon">🎤</div><div class="av-title" data-fr="Mise en avant" data-en="Spotlight">Spotlight</div><div class="av-text" data-fr="Votre profil développeur mis en avant sur le portail et les réseaux." data-en="Your developer profile featured on the portal and social channels.">Your developer profile featured on the portal and social channels.</div></div>
-      <div class="av-card rv d1"><div class="av-icon">🚀</div><div class="av-title" data-fr="Déploiement 48h" data-en="Live in 48h">Live in 48h</div><div class="av-text" data-fr="Votre jeu en ligne en 48h. Nous gérons l'hébergement et la visibilité." data-en="Your game live in 48h. We handle hosting and visibility.">Your game live in 48h. We handle hosting and visibility.</div></div>
-      <div class="av-card rv d2"><div class="av-icon">💬</div><div class="av-title" data-fr="Feedback joueurs" data-en="Player feedback">Player feedback</div><div class="av-text" data-fr="Les joueurs votent et commentent directement depuis le portail." data-en="Players vote and give you direct feedback from the portal.">Players vote and give you direct feedback from the portal.</div></div>
-      <div class="av-card rv d3"><div class="av-icon">🔎</div><div class="av-title" data-fr="Portail centralisé" data-en="Central hub">Central hub</div><div class="av-text" data-fr="Tous les jeux Pi au même endroit, facilement trouvables." data-en="All Pi games in one place, easy to discover.">All Pi games in one place, easy to discover.</div></div>
-    </div>
-
-    <a class="cta-devs rv" onclick="showSection('contact')" data-fr="INTÉGRER MON JEU — GRATUIT →" data-en="LIST MY GAME — FREE →">LIST MY GAME — FREE →</a>
-  </section>
-
-  <!-- Formulaire -->
-  <section id="contact" style="border:none;padding-top:20px;">
-    <div class="cat-title rv">
-      <span>📬 <span data-fr="Soumettre votre jeu" data-en="Submit your game">Submit your game</span></span>
-    </div>
-
-    <div id="form-ok">
-      <div class="ok-ico">🚀</div>
-      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
-      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue dans l'aventure JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!">We'll reply within 48h. Welcome to the JEUXVIDEO.PI adventure!</div>
-    </div>
-
-    <form id="dev-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleForm(event)">
-      <div class="form-row">
-        <input type="text" name="name" id="fi-name" placeholder="Name / Pi Username" required>
-        <input type="email" name="email" id="fi-email" placeholder="Contact email" required>
-      </div>
-      <input type="text" name="game" id="fi-game" placeholder="Game name" required>
-      <input type="url" name="url" id="fi-url" placeholder="https://your-game.com (optional)">
-      <select name="category" id="fi-cat">
-        <option value="" id="fi-cat-ph">Game category</option>
-        <option id="o1">Strategy</option>
-        <option id="o2">Action / Arcade</option>
-        <option id="o3">Puzzle / Thinking</option>
-        <option id="o4">RPG / Adventure</option>
-        <option id="o5">Casual / Idle</option>
-        <option id="o6">Other</option>
-      </select>
-      <textarea name="message" id="fi-msg" rows="3" placeholder="Describe your game and what you expect from us..."></textarea>
-      <button type="submit" class="btn-send" id="fi-send" data-fr="SOUMETTRE MON JEU →" data-en="SUBMIT MY GAME →">SUBMIT MY GAME →</button>
-    </form>
-    <p class="form-note" data-fr="✔ Réponse sous 48h · 0% de commission · Pi SDK incluse" data-en="✔ Reply within 48h · 0% commission · Pi SDK integration included">✔ Reply within 48h · 0% commission · Pi SDK integration included</p>
-  </section>
-
-
-  <!-- ═══════════════════════════════════════
-       BLOC DÉVELOPPEURS PREMIUM
-  ═══════════════════════════════════════ -->
-  <section style="border:none;padding-top:20px;">
-    <div class="dev-premium rv">
-      <div class="dev-premium-header">
-        <div class="dev-premium-eyebrow" data-fr="REJOIGNEZ LE MOUVEMENT" data-en="JOIN THE MOVEMENT">JOIN THE MOVEMENT</div>
-        <div class="dev-premium-title" data-fr="Publiez votre jeu. Trouvez vos joueurs.<br><span>Gagnez en visibilité.</span>" data-en="Publish your game. Find your players.<br><span>Gain visibility.</span>">Publish your game. Find your players.<br><span>Gain visibility.</span></div>
-        <div class="dev-premium-sub" data-fr="Rejoignez le 1er portail indépendant et bâtissez l'avenir du jeu sur Pi." data-en="Join the 1st independent portal and build the future of gaming on Pi.">Join the 1st independent portal and build the future of gaming on Pi.</div>
-      </div>
-
-      <!-- Badges -->
-      <div class="dev-badges rv d1">
-        <span class="dev-badge or" data-fr="0% FRAIS" data-en="0% FEES">0% FEES</span>
-        <span class="dev-badge cy" data-fr="PI SDK INCLUS" data-en="PI SDK INCLUDED">PI SDK INCLUDED</span>
-        <span class="dev-badge gr" data-fr="VITRINE GRATUITE" data-en="FREE SHOWCASE">FREE SHOWCASE</span>
-      </div>
-
-      <!-- Avantages -->
-      <ul class="dev-perks">
-        <li class="dev-perk rv d1">
-          <span class="dev-perk-icon">👁️</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Visibilité immédiate" data-en="Immediate visibility">Immediate visibility</div>
-            <div class="dev-perk-text" data-fr="Votre jeu présenté à une audience Pi Network déjà connectée et engagée." data-en="Your game presented to an already connected and engaged Pi Network audience.">Your game presented to an already connected and engaged Pi Network audience.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d2">
-          <span class="dev-perk-icon">🌟</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Mise en avant prioritaire" data-en="Priority spotlight">Priority spotlight</div>
-            <div class="dev-perk-text" data-fr="Les premiers développeurs bénéficient d'une mise en avant exclusive sur le portail." data-en="Early developers get exclusive featured placement on the portal.">Early developers get exclusive featured placement on the portal.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d3">
-          <span class="dev-perk-icon">🎮</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Vitrine immersive" data-en="Immersive showcase">Immersive showcase</div>
-            <div class="dev-perk-text" data-fr="Une page dédiée avec screenshots, pitch et profil développeur. Votre identité mise en valeur." data-en="A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.">A dedicated page with screenshots, pitch and developer profile. Your identity highlighted.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d1">
-          <span class="dev-perk-icon">🏆</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="0% frais · 0% commission" data-en="0% fees · 0% commission">0% fees · 0% commission</div>
-            <div class="dev-perk-text" data-fr="Toutes vos recettes Pi vous appartiennent. Sans exception. Sans surprise." data-en="Every Pi you earn is yours. No exceptions. No surprises.">Every Pi you earn is yours. No exceptions. No surprises.</div>
-          </div>
-        </li>
-        <li class="dev-perk rv d2">
-          <span class="dev-perk-icon">🎯</span>
-          <div class="dev-perk-body">
-            <div class="dev-perk-title" data-fr="Concentrez-vous sur votre jeu" data-en="Focus on your game">Focus on your game</div>
-            <div class="dev-perk-text" data-fr="On s'occupe des joueurs, de la visibilité et de l'intégration Pi SDK." data-en="We handle the players, visibility and Pi SDK integration.">We handle the players, visibility and Pi SDK integration.</div>
-          </div>
-        </li>
-      </ul>
-
-      <!-- CTA principal -->
-      <button class="dev-cta-main rv" onclick="openDevModal()">
-        👉 <span data-fr="INTÉGRER MON JEU — GRATUIT" data-en="LIST MY GAME — FREE">LIST MY GAME — FREE</span>
-      </button>
-      <p class="dev-cta-note rv" data-fr="Réponse sous 48h · Intégration accompagnée · Aucun engagement" data-en="Reply within 48h · Guided integration · No commitment">Reply within 48h · Guided integration · No commitment</p>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════
-       BLOC RECRUTEMENT
-  ═══════════════════════════════════════ -->
-  <section style="border:none;padding-top:4px;">
+    <!-- Accroche humaine -->
     <div class="recruit-section rv">
-      <div class="recruit-eyebrow" data-fr="NOUS RECRUTONS" data-en="WE'RE HIRING">WE'RE HIRING</div>
-      <div class="recruit-title" data-fr="Rejoignez l'aventure<br><span>JeuxVideo.Pi</span>" data-en="Join the<br><span>JeuxVideo.Pi</span> adventure">Join the<br><span>JeuxVideo.Pi</span> adventure</div>
-      <div class="recruit-intro" data-fr="Nous recherchons deux passionnés de jeux vidéo et de l'écosystème Pi Network pour structurer et faire vibrer le premier portail indépendant." data-en="We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.">We're looking for two gaming enthusiasts passionate about the Pi Network ecosystem to structure and energize the first independent portal.</div>
+      <div class="recruit-eyebrow" data-fr="JE RECRUTE" data-en="NOW HIRING">NOW HIRING</div>
+      <div class="recruit-title" data-fr="M'aider à faire grandir<br><span>JeuxVideo.Pi</span>" data-en="Help me grow<br><span>JeuxVideo.Pi</span>">
+        Help me grow<br><span>JeuxVideo.Pi</span>
+      </div>
+      <div class="recruit-intro" data-fr="Je gère ce portail seul, avec passion. Si tu aimes les jeux, Pi Network, et que tu veux m'aider à le faire vivre et grandir — je serais ravi de t'avoir à mes côtés. Deux rôles sont ouverts, sans obligation, à ton rythme." data-en="I run this portal alone, with passion. If you love games, Pi Network, and want to help me make it grow — I'd love to have you on board. Two roles are open, no obligation, at your own pace.">
+        I run this portal alone, with passion. If you love games, Pi Network, and want to help me make it grow — I'd love to have you on board. Two roles are open, no obligation, at your own pace.
+      </div>
 
       <div class="recruit-roles">
-        <!-- Rôle 1 -->
         <div class="recruit-role rv d1">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">✍️</span>
-            <div class="recruit-role-title" data-fr="Responsable Éditorial & Veille Stratégique" data-en="Editorial & Strategic Watch Manager">Editorial & Strategic Watch Manager</div>
+            <div class="recruit-role-title" data-fr="Gestion News &amp; Actualités" data-en="News &amp; Content Management">News &amp; Content Management</div>
           </div>
-          <div class="recruit-role-desc" data-fr="Voix officielle du portail, vous pilotez la ligne éditoriale, décryptez l'actualité du réseau Pi et animez les sections Blog/News pour la communauté." data-en="Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.">Official voice of the portal, you drive the editorial line, decode Pi Network news and animate the Blog/News sections for the community.</div>
+          <div class="recruit-role-desc" data-fr="Tu rédiges les actualités du portail, tu fais de la veille sur Pi Network et tu animes la section News. Idéal si tu aimes écrire et rester informé de l'écosystème Pi." data-en="You write portal news, monitor the Pi Network ecosystem and animate the News section. Ideal if you like writing and staying informed about Pi.">
+            You write portal news, monitor the Pi Network ecosystem and animate the News section. Ideal if you like writing and staying informed about Pi.
+          </div>
         </div>
-        <!-- Rôle 2 -->
         <div class="recruit-role rv d2">
           <div class="recruit-role-header">
             <span class="recruit-role-icon">⚙️</span>
-            <div class="recruit-role-title" data-fr="Responsable Opérationnel & Intégration" data-en="Operational & Integration Manager">Operational & Integration Manager</div>
+            <div class="recruit-role-title" data-fr="Gestion Portail &amp; Intégration des jeux" data-en="Portal &amp; Game Integration">Portal &amp; Game Integration</div>
           </div>
-          <div class="recruit-role-desc" data-fr="Garant de la fluidité du portail, vous orchestrez les mises à jour techniques et assurez l'intégration qualitative des nouvelles expériences de jeu." data-en="Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.">Guardian of portal fluidity, you orchestrate technical updates and ensure quality integration of new gaming experiences.</div>
+          <div class="recruit-role-desc" data-fr="Tu m'aides à intégrer les nouveaux jeux, à suivre les retours des joueurs, et à maintenir le portail opérationnel. Idéal si tu as un minimum de sensibilité technique ou de curiosité." data-en="You help me integrate new games, track player feedback and keep the portal running. Ideal if you have some technical interest or curiosity.">
+            You help me integrate new games, track player feedback and keep the portal running. Ideal if you have some technical interest or curiosity.
+          </div>
         </div>
       </div>
-
-      <div class="recruit-avantages rv d3">
-        <div class="recruit-avantages-title" data-fr="Vos avantages" data-en="Your benefits">Your benefits</div>
-        <div class="recruit-av-list">
-          <div class="recruit-av" data-fr="Impact — Participez activement à un projet en pleine croissance dans l'écosystème Pi." data-en="Impact — Actively contribute to a fast-growing project in the Pi ecosystem.">Impact — Actively contribute to a fast-growing project in the Pi ecosystem.</div>
-          <div class="recruit-av" data-fr="Notoriété — Une visibilité unique au sein de l'écosystème Pi Network." data-en="Recognition — Unique visibility within the Pi Network ecosystem.">Recognition — Unique visibility within the Pi Network ecosystem.</div>
-          <div class="recruit-av" data-fr="Vision — Une collaboration de long terme basée sur la passion et l'innovation." data-en="Vision — A long-term collaboration built on passion and innovation.">Vision — A long-term collaboration built on passion and innovation.</div>
-        </div>
-      </div>
-
-      <button class="recruit-cta rv" onclick="openRecruitModal()">
-        👉 <span data-fr="POSTULER MAINTENANT" data-en="APPLY NOW">APPLY NOW</span>
-      </button>
     </div>
+
+    <!-- Formulaire de candidature intégré -->
+    <div class="recruit-section rv" style="margin-top:10px;">
+      <div class="recruit-eyebrow" style="color:var(--cy);" data-fr="POSTULER" data-en="APPLY">APPLY</div>
+
+      <div id="recruit-inline-ok" style="display:none;text-align:center;padding:16px 0;">
+        <div class="ok-ico">⭐</div>
+        <div class="ok-title" data-fr="Candidature reçue !" data-en="Application received!">Application received!</div>
+        <div class="ok-sub" data-fr="Merci ! Je te contacterai très prochainement." data-en="Thank you! I will get back to you very soon.">Thank you! I will get back to you very soon.</div>
+      </div>
+
+      <form id="recruit-inline-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+            onsubmit="handleRecruitInline(event)"
+            style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+        <input type="hidden" name="type" value="recruitment">
+        <div class="form-row">
+          <input type="text"  name="name"  placeholder="Your name or username *" required>
+          <input type="email" name="email" placeholder="Your email *" required>
+        </div>
+        <select name="role" required>
+          <option value="">Position *</option>
+          <option value="news" data-fr="Gestion News / Actualités" data-en="News / Content Management">News / Content Management</option>
+          <option value="portail" data-fr="Gestion Portail / Intégration des jeux" data-en="Portal / Game Integration">Portal / Game Integration</option>
+          <option value="les deux" data-fr="Les deux" data-en="Both">Both</option>
+        </select>
+        <textarea name="motivation" rows="3" placeholder="Tell us about yourself — who you are, why you want to help *" required></textarea>
+        <textarea name="disponibilites" rows="2" placeholder="Your availability (hours/week, timezone, pace...)"></textarea>
+        <button type="submit" class="btn-send" data-fr="ENVOYER MA CANDIDATURE →" data-en="SEND MY APPLICATION →">
+          SEND MY APPLICATION →
+        </button>
+      </form>
+      <p class="form-note" data-fr="✔ Je réponds sous 48h · Bénévolat · Passion · Long terme" data-en="✔ I reply within 48h · Volunteer · Passion · Long term">✔ I reply within 48h · Volunteer · Passion · Long term</p>
+    </div>
+
   </section>
 
 </div><!-- /devs -->
 
+<!-- ══ CONTACT ══ -->
+<div class="view" id="view-contact">
+  <section style="border:none;padding-top:14px;">
+
+    <div class="cat-title rv">
+      <span>📬 <span data-fr="Contact & Questions" data-en="Contact &amp; Questions">Contact &amp; Questions</span></span>
+    </div>
+    <div class="devs-sub rv" style="margin-bottom:16px;"
+         data-fr="Pour toute question, demande ou prise de contact."
+         data-en="For any question, request or message.">
+      For any question or request.
+    </div>
+
+    <div id="contact-form-ok" style="display:none;text-align:center;padding:20px 0;">
+      <div class="ok-ico">✉️</div>
+      <div class="ok-title" data-fr="Message envoyé !" data-en="Message sent!">Message sent!</div>
+      <div class="ok-sub" data-fr="Nous vous répondrons sous 48h." data-en="We'll reply within 48h.">We'll reply within 48h.</div>
+    </div>
+
+    <form id="contact-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+          onsubmit="handleContactForm(event)"
+          style="display:flex;flex-direction:column;gap:10px;">
+      <input type="hidden" name="type" value="contact">
+      <div class="form-row">
+        <input type="text"  name="name"    placeholder="Name / Pi Username *" required>
+        <input type="email" name="email"   placeholder="Email *" required>
+      </div>
+      <input type="text" name="subject" placeholder="Subject *" required>
+      <textarea name="message" rows="4" placeholder="Your message..."></textarea>
+      <button type="submit" class="btn-send"
+              data-fr="ENVOYER →" data-en="SEND →">SEND →</button>
+    </form>
+    <p class="form-note" data-fr="✔ Réponse sous 48h" data-en="✔ Reply within 48h">✔ Reply within 48h</p>
+
+  </section>
+</div><!-- /contact -->
+
+
+<!-- ══ PAGE JEU DÉDIÉE ══ -->
+<div id="view-game">
+
+  <!-- Le contenu est généré dynamiquement par showGame() -->
+  <div id="gp-content"></div>
+
+</div><!-- /view-game -->
+
 <footer>
   © JeuxVideo.Pi &nbsp;|&nbsp;
-  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Règlement &amp; CGU</a>
+  <a onclick="switchTab('contact')" style="cursor:pointer;color:inherit;text-decoration:none;" data-fr="Règlement &amp; CGU" data-en="Terms &amp; Rules">Terms &amp; Rules</a>
   &nbsp;|&nbsp;
-  <a onclick="showSection('contact')" style="cursor:pointer;color:inherit;text-decoration:none;">Support &amp; Contact</a>
+  <a onclick="switchTab('contact')" style="cursor:pointer;color:inherit;text-decoration:none;" data-fr="Support &amp; Contact" data-en="Support &amp; Contact">Support &amp; Contact</a>
   &nbsp;|&nbsp;
   <a href="https://brainstorm.pi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Voter sur Brainstorm</a>
 </footer>
@@ -2322,25 +2871,111 @@ function filterGames(cat,btn){
 /* LANG */
 let lang='en';
 function setLang(l){
-  lang=l;
-  document.documentElement.setAttribute('data-lang',l);
-  /* Sync tous les boutons langue (ancien .lang-btn + nouveau .hdr-lang) */
-  document.querySelectorAll('.lang-btn,.hdr-lang').forEach(b=>b.classList.toggle('on',b.textContent.includes(l.toUpperCase())));
-  document.querySelectorAll('[data-fr][data-en]').forEach(el=>{
-    const val=el.getAttribute('data-'+l);if(!val)return;
-    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=val;
-    else if(el.tagName==='BUTTON'||el.tagName==='A')el.textContent=val;
-    else el.innerHTML=val;
+  lang = l;
+  document.documentElement.setAttribute('data-lang', l);
+
+  /* Sync sélecteur */
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = l;
+
+  /* Traduction de tous les éléments portant data-en.
+     Priorité : data-{lang} si disponible, sinon data-en. */
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + l) || el.getAttribute('data-en');
+    if (!val) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
+    else if (el.tagName === 'BUTTON' || el.tagName === 'A') el.textContent = val;
+    else el.innerHTML = val;
   });
-  const t={
-    fr:{name:'Nom / Pseudo Pi',email:'Email de contact',game:'Nom du jeu',url:'https://votre-jeu.com (optionnel)',msg:'Décrivez votre jeu et vos attentes...',cat:'Catégorie du jeu',o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']},
-    en:{name:'Name / Pi Username',email:'Contact email',game:'Game name',url:'https://your-game.com (optional)',msg:'Describe your game and what you expect from us...',cat:'Game category',o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']}
-  }[l];
-  const g=id=>document.getElementById(id);
-  if(g('fi-name'))g('fi-name').placeholder=t.name;if(g('fi-email'))g('fi-email').placeholder=t.email;
-  if(g('fi-game'))g('fi-game').placeholder=t.game;if(g('fi-url'))g('fi-url').placeholder=t.url;
-  if(g('fi-msg'))g('fi-msg').placeholder=t.msg;if(g('fi-cat-ph'))g('fi-cat-ph').textContent=t.cat;
-  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{const el=g(id);if(el)el.textContent=t.o[i];});
+
+  /* Placeholders formulaires — dictionnaire multi-langues */
+  const DICT = {
+    en: {
+      name:'Name / Pi Username', email:'Contact email',
+      game:'Game name', url:'https://your-game.com (optional)',
+      msg:'Describe your game and what you expect from us...',
+      cat:'Game category', subj:'Subject', yourmsg:'Your message...',
+      devname:'Developer / studio name *', gameType:'Game type *',
+      pitch:'Short pitch (2–3 sentences) *',
+      mediaurl:'Screenshots / media link (drive, imgur...)',
+      addmsg:'Additional message (optional)',
+      appname:'Your name or username *', appmail:'Your email *',
+      apppos:'Position *',
+      appmotiv:'Tell us about yourself — who you are, why you want to help *',
+      appdispo:'Your availability (hours/week, timezone...)',
+      o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']
+    },
+    fr: {
+      name:'Nom / Pseudo Pi', email:'Email de contact',
+      game:'Nom du jeu', url:'https://votre-jeu.com (optionnel)',
+      msg:'Décrivez votre jeu et vos attentes...',
+      cat:'Catégorie du jeu', subj:'Sujet', yourmsg:'Votre message...',
+      devname:'Nom du développeur / studio *', gameType:'Type de jeu *',
+      pitch:'Court pitch (2–3 phrases) *',
+      mediaurl:'Lien captures / médias (drive, imgur...)',
+      addmsg:'Message complémentaire (optionnel)',
+      appname:'Ton nom ou pseudo *', appmail:'Ton email *',
+      apppos:'Poste souhaité *',
+      appmotiv:"Présente-toi brièvement — qui tu es, pourquoi tu veux m'aider *",
+      appdispo:'Tes disponibilités (heures/semaine, timezone...)',
+      o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']
+    }
+  }
+
+  const t = DICT[l] || DICT['en'];
+  const g = id => document.getElementById(id);
+
+  /* Formulaire jeux (ancien fi-*) */
+  if (g('fi-name'))    g('fi-name').placeholder    = t.name;
+  if (g('fi-email'))   g('fi-email').placeholder   = t.email;
+  if (g('fi-game'))    g('fi-game').placeholder    = t.game;
+  if (g('fi-url'))     g('fi-url').placeholder     = t.url;
+  if (g('fi-msg'))     g('fi-msg').placeholder     = t.msg;
+  if (g('fi-cat-ph'))  g('fi-cat-ph').textContent  = t.cat;
+  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{
+    const el = g(id); if (el) el.textContent = t.o[i];
+  });
+
+  /* Formulaire contact */
+  const cf = document.getElementById('contact-form');
+  if (cf) {
+    const n = cf.querySelector('[name="name"]');     if(n)  n.placeholder  = t.name;
+    const em= cf.querySelector('[name="email"]');    if(em) em.placeholder = t.email;
+    const s = cf.querySelector('[name="subject"]');  if(s)  s.placeholder  = t.subj;
+    const m = cf.querySelector('[name="message"]');  if(m)  m.placeholder  = t.yourmsg;
+  }
+
+  /* Modale Proposer un jeu */
+  const df = document.getElementById('dev-modal-form');
+  if (df) {
+    const dn = df.querySelector('[name="dev_name"]');  if(dn) dn.placeholder  = t.devname;
+    const de = df.querySelector('[name="dev_email"]'); if(de) de.placeholder  = t.email;
+    const gn = df.querySelector('[name="game_name"]'); if(gn) gn.placeholder  = t.game;
+    const gt = df.querySelector('[name="game_type"]'); if(gt) gt.options[0] && (gt.options[0].textContent = t.gameType);
+    const pi = df.querySelector('[name="pitch"]');     if(pi) pi.placeholder  = t.pitch;
+    const gu = df.querySelector('[name="game_url"]');  if(gu) gu.placeholder  = 'https://... (optional)';
+    const mu = df.querySelector('[name="media_url"]'); if(mu) mu.placeholder  = t.mediaurl;
+    const am = df.querySelector('[name="message"]');   if(am) am.placeholder  = t.addmsg;
+  }
+
+  /* Formulaire candidature inline */
+  const rf = document.getElementById('recruit-inline-form');
+  if (rf) {
+    const rn = rf.querySelector('[name="name"]');         if(rn) rn.placeholder  = t.appname;
+    const re = rf.querySelector('[name="email"]');        if(re) re.placeholder  = t.appmail;
+    const ro = rf.querySelector('[name="role"]');         if(ro && ro.options[0]) ro.options[0].textContent = t.apppos;
+    const rm = rf.querySelector('[name="motivation"]');   if(rm) rm.placeholder  = t.appmotiv;
+    const rd = rf.querySelector('[name="disponibilites"]');if(rd) rd.placeholder = t.appdispo;
+  }
+
+  /* Formulaire candidature modal recrutement */
+  const rcf = document.getElementById('recruit-modal-form');
+  if (rcf) {
+    const rn = rcf.querySelector('[name="applicant_name"]');  if(rn) rn.placeholder = t.appname;
+    const re = rcf.querySelector('[name="applicant_email"]'); if(re) re.placeholder = t.appmail;
+    const rs = rcf.querySelector('[name="role"]');            if(rs && rs.options[0]) rs.options[0].textContent = t.apppos;
+    const rm = rcf.querySelector('[name="motivation"]');      if(rm) rm.placeholder = t.appmotiv;
+  }
 }
 
 /* DON */
@@ -2504,6 +3139,47 @@ function syncHdrNav(tabName) {
    BARRE DE NAV — switchTab
    Gère à la fois la nav-bar et la syncHdrNav
 ════════════════════════════════════════════════════════ */
+/* ── openGameModal — alias propre vers la modale "Proposer un jeu" ── */
+function openGameModal() {
+  document.getElementById('dev-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+/* ── Formulaire candidature inline (view-devs) ── */
+function handleRecruitInline(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type="submit"]');
+  btn.disabled = true;
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        e.target.style.display = 'none';
+        document.getElementById('recruit-inline-ok').style.display = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Erreur — réessayez', '');
+    });
+}
+
+function handleContactForm(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('[type="submit"]');
+  btn.disabled = true;
+  fetch(e.target.action, { method:'POST', body: new FormData(e.target), headers:{'Accept':'application/json'} })
+    .then(r => {
+      if (r.ok) {
+        e.target.style.display = 'none';
+        document.getElementById('contact-form-ok').style.display = 'block';
+      } else throw new Error();
+    })
+    .catch(() => {
+      btn.disabled = false;
+      toast(lang === 'fr' ? 'Erreur — réessayez' : 'Error — please retry', '');
+    });
+}
+
 function switchTab(name) {
   /* Appeler showTab existant pour changer la vue */
   showTab(name);
@@ -2516,51 +3192,642 @@ function switchTab(name) {
 
 /* Init : synchro au chargement */
 (function initNavBar(){
-  document.querySelectorAll('.nav-bar-btn').forEach(b => {
-    if (b.dataset.tab === 'home') b.classList.add('active');
-  });
+  const homeBtn = document.querySelector('.nav-bar-btn[data-tab="home"]');
+  if (homeBtn) homeBtn.classList.add('active');
 })();
+
+/* Appliquer la langue par défaut (EN) au chargement — traduit tous les data-en */
+window.addEventListener('DOMContentLoaded', function() {
+  setLang('en');
+});
+
+
+/* ════════════════════════════════════════════════════════
+   PAGES JEUX DÉDIÉES — données + rendu
+════════════════════════════════════════════════════════ */
+const GAMES_DATA = {
+  pixelwar: {
+    id:       'pixelwar',
+    name:     'PIXEL WAR',
+    pitch:    'The first collaborative pixel war on Pi Network. Place your pixel, defend your territory, crush your rivals in real time.',
+    pitch_fr: 'La première guerre de pixels collaborative sur Pi Network. Pose ton pixel, défends ton territoire, écrase tes adversaires en temps réel.',
+    tags:     [{label:'War',cls:'or'},{label:'Multiplayer',cls:'cy'},{label:'Live',cls:'gr'}],
+    img:      'Images/Gold_Pixel.png',
+    screenshots: [],
+    playUrl:  '/pixelwar',
+    how: [
+      'Connect with your Pi account to start.',
+      'You start with 10 pixels. Tap any cell on the canvas to place your color.',
+      'Your stock recharges automatically — 1 pixel every 3 minutes.',
+      'Covering another player\u2019s pixel earns you territory.',
+      'Buy extra pixels from the shop using Pi.'
+    ],
+    how_fr: [
+      'Connecte-toi avec ton compte Pi pour commencer.',
+      'Tu démarres avec 10 pixels. Touche une case du canvas pour poser ta couleur.',
+      'Ton stock se recharge automatiquement — 1 pixel toutes les 3 minutes.',
+      "Recouvrir le pixel d'un autre joueur te fait gagner du territoire.",
+      'Achète des pixels supplémentaires dans la boutique en Pi.'
+    ],
+    piRequired: true,
+    piPurchase: true,
+    piNote:     'Pi connection required to play. In-game shop: buy extra pixel packs (1 Pi / 2 Pi).',
+    piNote_fr:  'Connexion Pi requise pour jouer. Boutique in-game : packs de pixels (1 Pi / 2 Pi).',
+    about:     'Pixel War is inspired by Reddit’s r/Place experiment. The canvas is shared in real time with all players. Every pixel placement is permanent until another player covers it. Build patterns, defend them, or go to war.',
+    about_fr:  "Pixel War s'inspire de l'expérience Reddit r/Place. Le canvas est partagé en temps réel avec tous les joueurs. Chaque pixel posé est permanent jusqu'à ce qu'un autre joueur le recouvre.",
+    type:      'Multiplayer · Pixel Art · War',
+    status:    'Live — Season 1',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Multiplayer — real time',
+    availability: 'Available now'
+  },
+  breaker: {
+    id:       'breaker',
+    name:     'BREAKER',
+    pitch:    'Classic neon breakout — 30 levels of glowing bricks, physics ball and powerful power-ups.',
+    pitch_fr: 'Casse-briques néon classique — 30 niveaux de briques lumineuses, balle physique et power-ups.',
+    tags:     [{label:'Arcade',cls:'cy'},{label:'Neon',cls:'cy'},{label:'30 Levels',cls:'or'}],
+    img:      '',
+    svgVisual: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" style="width:100%;height:100%;display:block;">
+  <defs>
+    <radialGradient id="bg_b" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#081422"/>
+      <stop offset="100%" stop-color="#050b14"/>
+    </radialGradient>
+    <filter id="glow_b">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow_soft">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Fond -->
+  <rect width="520" height="260" fill="url(#bg_b)"/>
+  <!-- Scan lines subtiles -->
+  <rect width="520" height="260" fill="url(#scanlines_b)" opacity=".04"/>
+  <!-- Grille de fond -->
+  <g stroke="rgba(0,160,210,.035)" stroke-width="1">
+    <line x1="0" y1="40" x2="520" y2="40"/><line x1="0" y1="80" x2="520" y2="80"/>
+    <line x1="0" y1="120" x2="520" y2="120"/><line x1="0" y1="160" x2="520" y2="160"/>
+    <line x1="0" y1="200" x2="520" y2="200"/>
+    <line x1="65" y1="0" x2="65" y2="260"/><line x1="130" y1="0" x2="130" y2="260"/>
+    <line x1="195" y1="0" x2="195" y2="260"/><line x1="260" y1="0" x2="260" y2="260"/>
+    <line x1="325" y1="0" x2="325" y2="260"/><line x1="390" y1="0" x2="390" y2="260"/>
+    <line x1="455" y1="0" x2="455" y2="260"/>
+  </g>
+  <!-- Briques rangée 1 — rouge -->
+  <g filter="url(#glow_b)">
+    <rect x="20"  y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="80"  y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="140" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="200" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="260" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="320" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="380" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <rect x="440" y="18" width="56" height="16" rx="3" fill="#ff3131" opacity=".9"/>
+    <!-- Reflet sur briques -->
+    <rect x="22"  y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="82"  y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="142" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="202" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="262" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="322" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="382" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+    <rect x="442" y="19" width="52" height="4" rx="2" fill="rgba(255,255,255,.18)"/>
+  </g>
+  <!-- Briques rangée 2 — orange -->
+  <g filter="url(#glow_b)">
+    <rect x="20"  y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="80"  y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="140" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="200" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="260" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="320" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="380" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="440" y="38" width="56" height="16" rx="3" fill="#ff6600" opacity=".88"/>
+    <rect x="22"  y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="82"  y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="142" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="202" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="262" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="322" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="382" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+    <rect x="442" y="39" width="52" height="4" rx="2" fill="rgba(255,255,255,.15)"/>
+  </g>
+  <!-- Briques rangée 3 — or, quelques-unes cassées -->
+  <g filter="url(#glow_b)">
+    <rect x="20"  y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <rect x="80"  y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <!-- trou (brique déjà cassée) -->
+    <rect x="200" y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <rect x="260" y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <rect x="320" y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <!-- trou -->
+    <rect x="440" y="58" width="56" height="16" rx="3" fill="#ffaa00" opacity=".85"/>
+    <rect x="22"  y="59" width="52" height="4" rx="2" fill="rgba(255,255,255,.14)"/>
+    <rect x="82"  y="59" width="52" height="4" rx="2" fill="rgba(255,255,255,.14)"/>
+    <rect x="202" y="59" width="52" height="4" rx="2" fill="rgba(255,255,255,.14)"/>
+  </g>
+  <!-- Briques rangée 4 — vert -->
+  <g filter="url(#glow_b)">
+    <rect x="20"  y="78" width="56" height="16" rx="3" fill="#22dd44" opacity=".8"/>
+    <rect x="140" y="78" width="56" height="16" rx="3" fill="#22dd44" opacity=".8"/>
+    <rect x="260" y="78" width="56" height="16" rx="3" fill="#22dd44" opacity=".8"/>
+    <rect x="380" y="78" width="56" height="16" rx="3" fill="#22dd44" opacity=".8"/>
+    <rect x="440" y="78" width="56" height="16" rx="3" fill="#22dd44" opacity=".8"/>
+  </g>
+  <!-- Briques rangée 5 — bleu -->
+  <g filter="url(#glow_b)">
+    <rect x="80"  y="98" width="56" height="16" rx="3" fill="#00aaff" opacity=".75"/>
+    <rect x="200" y="98" width="56" height="16" rx="3" fill="#00aaff" opacity=".75"/>
+    <rect x="320" y="98" width="56" height="16" rx="3" fill="#00aaff" opacity=".75"/>
+  </g>
+  <!-- Traînée de la balle -->
+  <g opacity=".25">
+    <circle cx="230" cy="178" r="4" fill="#00f3ff"/>
+    <circle cx="222" cy="186" r="3" fill="#00f3ff"/>
+    <circle cx="215" cy="193" r="2" fill="#00f3ff"/>
+  </g>
+  <!-- Balle principale avec glow -->
+  <g filter="url(#glow_soft)">
+    <circle cx="238" cy="170" r="7" fill="#00f3ff"/>
+    <circle cx="238" cy="170" r="4" fill="#fff" opacity=".8"/>
+  </g>
+  <!-- Particules d'explosion (brique cassée) -->
+  <g opacity=".7">
+    <rect x="144" y="72" width="5" height="5" rx="1" fill="#ffaa00" transform="rotate(-20,146,74)"/>
+    <rect x="155" y="66" width="4" height="4" rx="1" fill="#ffaa00" transform="rotate(15,157,68)"/>
+    <rect x="162" y="76" width="3" height="3" rx="1" fill="#fff" opacity=".6"/>
+    <rect x="136" y="62" width="4" height="4" rx="1" fill="#ffaa00" opacity=".8" transform="rotate(30,138,64)"/>
+    <rect x="170" y="60" width="3" height="3" rx="1" fill="#ffaa00" opacity=".5"/>
+  </g>
+  <!-- Raquette -->
+  <g filter="url(#glow_b)">
+    <rect x="175" y="235" width="100" height="12" rx="6" fill="#cc44ff"/>
+    <rect x="177" y="236" width="96" height="4" rx="3" fill="rgba(255,255,255,.22)"/>
+    <!-- Décoration centre raquette -->
+    <rect x="221" y="237" width="18" height="7" rx="3.5" fill="rgba(255,255,255,.15)"/>
+  </g>
+  <!-- HUD en bas: score, vies, niveau -->
+  <text x="20"  y="254" font-family="monospace" font-size="9" fill="rgba(0,243,255,.5)" letter-spacing="1">SCORE</text>
+  <text x="20"  y="260" font-family="monospace" font-size="10" fill="#ffaa00" letter-spacing="1" font-weight="bold">12840</text>
+  <text x="220" y="254" font-family="monospace" font-size="9" fill="rgba(0,243,255,.5)" letter-spacing="1" text-anchor="middle">LEVEL</text>
+  <text x="220" y="260" font-family="monospace" font-size="10" fill="#00f3ff" letter-spacing="1" font-weight="bold" text-anchor="middle">07/30</text>
+  <text x="500" y="254" font-family="monospace" font-size="9" fill="rgba(0,243,255,.5)" letter-spacing="1" text-anchor="end">LIVES</text>
+  <g transform="translate(476,252)">
+    <circle cx="0"  cy="0" r="4" fill="#ff3131"/>
+    <circle cx="12" cy="0" r="4" fill="#ff3131"/>
+    <circle cx="24" cy="0" r="4" fill="#ff3131"/>
+  </g>
+  <!-- Bordure néon du canvas -->
+  <rect x="1" y="1" width="518" height="258" rx="4" fill="none" stroke="rgba(0,243,255,.15)" stroke-width="1.5"/>
+  <rect x="0" y="0" width="14" height="14" fill="none" stroke="#00f3ff" stroke-width="2" opacity=".6"/>
+  <rect x="506" y="246" width="14" height="14" fill="none" stroke="#00f3ff" stroke-width="2" opacity=".6"/>
+</svg>`,
+    screenshots: [],
+    playUrl:  '/breakout',
+    how: [
+      'Move the paddle left and right to bounce the ball.',
+      'Break all the bricks to clear the level and advance.',
+      'Catch power-ups: multi-ball, laser, wide paddle, speed boost.',
+      'You have 3 lives. Reach level 30 to complete the campaign.',
+      'Your progress is saved automatically — resume where you left off.'
+    ],
+    how_fr: [
+      'Déplace la raquette de gauche à droite pour renvoyer la balle.',
+      'Casse toutes les briques pour terminer le niveau et avancer.',
+      'Attrape les power-ups : multi-balle, laser, raquette large, vitesse.',
+      'Tu as 3 vies. Atteins le niveau 30 pour finir la campagne.',
+      'Ta progression est sauvegardée automatiquement.'
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'Breaker is a cyberpunk neon breakout game with 30 levels spread across 6 zones: Initiation, Confrontation, Assault, Cyber Nexus, Pi Core and Singularity. Difficulty increases steadily — bricks get tougher, speed climbs.',
+    about_fr:  'Breaker est un casse-briques néon cyberpunk avec 30 niveaux répartis en 6 zones. La difficulté augmente progressivement — les briques résistent de plus en plus et la vitesse monte.',
+    type:      'Arcade · Breakout',
+    status:    'Live — 30 Levels',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  },
+  stracker: {
+    id:       'stracker',
+    name:     'STRACKER',
+    pitch:    'Cyberpunk falling-block puzzle. Stack neon blocks, clear lines, level up — blocks explode into data particles on combos.',
+    pitch_fr: 'Puzzle de blocs cyberpunk. Empile les blocs néon, élimine les lignes — les blocs explosent en particules de données lors des combos.',
+    tags:     [{label:'Puzzle',cls:'cy'},{label:'Blocks',cls:'cy'},{label:'30 Levels',cls:'or'}],
+    img:      '',
+    svgVisual: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" style="width:100%;height:100%;display:block;">
+  <defs>
+    <radialGradient id="bg_s" cx="40%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a0820"/>
+      <stop offset="100%" stop-color="#050b14"/>
+    </radialGradient>
+    <filter id="glow_s">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow_s2">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Fond -->
+  <rect width="520" height="260" fill="url(#bg_s)"/>
+  <!-- Grille de fond (terrain de jeu) -->
+  <g stroke="rgba(0,100,200,.06)" stroke-width="1">
+    <line x1="80"  y1="0"   x2="80"  y2="260"/>
+    <line x1="106" y1="0"   x2="106" y2="260"/>
+    <line x1="132" y1="0"   x2="132" y2="260"/>
+    <line x1="158" y1="0"   x2="158" y2="260"/>
+    <line x1="184" y1="0"   x2="184" y2="260"/>
+    <line x1="210" y1="0"   x2="210" y2="260"/>
+    <line x1="236" y1="0"   x2="236" y2="260"/>
+    <line x1="262" y1="0"   x2="262" y2="260"/>
+    <line x1="288" y1="0"   x2="288" y2="260"/>
+    <line x1="80" y1="26"  x2="288" y2="26"/>
+    <line x1="80" y1="52"  x2="288" y2="52"/>
+    <line x1="80" y1="78"  x2="288" y2="78"/>
+    <line x1="80" y1="104" x2="288" y2="104"/>
+    <line x1="80" y1="130" x2="288" y2="130"/>
+    <line x1="80" y1="156" x2="288" y2="156"/>
+    <line x1="80" y1="182" x2="288" y2="182"/>
+    <line x1="80" y1="208" x2="288" y2="208"/>
+    <line x1="80" y1="234" x2="288" y2="234"/>
+  </g>
+  <!-- Blocs empilés au sol (rangées complètes) -->
+  <!-- Rangée 10 (bas) — ligne complète cyan → va disparaitre (combo) -->
+  <g filter="url(#glow_s)">
+    <rect x="80"  y="234" width="24" height="24" rx="2" fill="#00f3ff" opacity=".95"/>
+    <rect x="106" y="234" width="24" height="24" rx="2" fill="#ffaa00" opacity=".95"/>
+    <rect x="132" y="234" width="24" height="24" rx="2" fill="#ff3d9a" opacity=".95"/>
+    <rect x="158" y="234" width="24" height="24" rx="2" fill="#44ff88" opacity=".95"/>
+    <rect x="184" y="234" width="24" height="24" rx="2" fill="#cc44ff" opacity=".95"/>
+    <rect x="210" y="234" width="24" height="24" rx="2" fill="#00f3ff" opacity=".95"/>
+    <rect x="236" y="234" width="24" height="24" rx="2" fill="#ff6600" opacity=".95"/>
+    <rect x="262" y="234" width="24" height="24" rx="2" fill="#00ccff" opacity=".95"/>
+    <!-- Reflets -->
+    <rect x="82"  y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="108" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="134" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="160" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="186" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="212" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="238" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+    <rect x="264" y="236" width="20" height="5" rx="1.5" fill="rgba(255,255,255,.2)"/>
+  </g>
+  <!-- Rangée 9 -->
+  <g filter="url(#glow_s)">
+    <rect x="80"  y="208" width="24" height="24" rx="2" fill="#cc44ff" opacity=".88"/>
+    <rect x="106" y="208" width="24" height="24" rx="2" fill="#cc44ff" opacity=".88"/>
+    <rect x="132" y="208" width="24" height="24" rx="2" fill="#ffaa00" opacity=".88"/>
+    <rect x="158" y="208" width="24" height="24" rx="2" fill="#ffaa00" opacity=".88"/>
+    <!-- trou à 184 -->
+    <rect x="210" y="208" width="24" height="24" rx="2" fill="#44ff88" opacity=".88"/>
+    <rect x="236" y="208" width="24" height="24" rx="2" fill="#00f3ff" opacity=".88"/>
+    <rect x="262" y="208" width="24" height="24" rx="2" fill="#00f3ff" opacity=".88"/>
+  </g>
+  <!-- Rangée 8 -->
+  <g filter="url(#glow_s)">
+    <rect x="106" y="182" width="24" height="24" rx="2" fill="#ff6600" opacity=".82"/>
+    <rect x="132" y="182" width="24" height="24" rx="2" fill="#ff6600" opacity=".82"/>
+    <rect x="158" y="182" width="24" height="24" rx="2" fill="#ff3d9a" opacity=".82"/>
+    <rect x="184" y="182" width="24" height="24" rx="2" fill="#ff3d9a" opacity=".82"/>
+    <rect x="210" y="182" width="24" height="24" rx="2" fill="#44ff88" opacity=".82"/>
+    <rect x="262" y="182" width="24" height="24" rx="2" fill="#cc44ff" opacity=".82"/>
+  </g>
+  <!-- Rangée 7 -->
+  <g filter="url(#glow_s)">
+    <rect x="132" y="156" width="24" height="24" rx="2" fill="#00ccff" opacity=".76"/>
+    <rect x="158" y="156" width="24" height="24" rx="2" fill="#00ccff" opacity=".76"/>
+    <rect x="184" y="156" width="24" height="24" rx="2" fill="#ffaa00" opacity=".76"/>
+    <rect x="210" y="156" width="24" height="24" rx="2" fill="#ff3d9a" opacity=".76"/>
+  </g>
+  <!-- Pièce active qui tombe — T-shape (#cc44ff type 7) -->
+  <g filter="url(#glow_s2)">
+    <!-- Corps T (3 en haut, 1 en bas centre) -->
+    <rect x="132" y="104" width="24" height="24" rx="2" fill="#cc44ff" opacity=".95"/>
+    <rect x="158" y="104" width="24" height="24" rx="2" fill="#cc44ff" opacity=".95"/>
+    <rect x="184" y="104" width="24" height="24" rx="2" fill="#cc44ff" opacity=".95"/>
+    <rect x="158" y="130" width="24" height="24" rx="2" fill="#cc44ff" opacity=".95"/>
+    <!-- Reflets pièce active -->
+    <rect x="134" y="106" width="20" height="6" rx="2" fill="rgba(255,255,255,.25)"/>
+    <rect x="160" y="106" width="20" height="6" rx="2" fill="rgba(255,255,255,.25)"/>
+    <rect x="186" y="106" width="20" height="6" rx="2" fill="rgba(255,255,255,.25)"/>
+    <rect x="160" y="132" width="20" height="6" rx="2" fill="rgba(255,255,255,.25)"/>
+  </g>
+  <!-- Ghost (aperçu chute) — même forme mais transparent -->
+  <g opacity=".14">
+    <rect x="132" y="182" width="24" height="24" rx="2" fill="#cc44ff"/>
+    <rect x="158" y="182" width="24" height="24" rx="2" fill="#cc44ff"/>
+    <rect x="184" y="182" width="24" height="24" rx="2" fill="#cc44ff"/>
+    <rect x="158" y="208" width="24" height="24" rx="2" fill="#cc44ff"/>
+  </g>
+  <!-- Particules combo sur la ligne du bas -->
+  <g opacity=".75" filter="url(#glow_s)">
+    <circle cx="92"  cy="246" r="3" fill="#00f3ff"/>
+    <circle cx="118" cy="242" r="2" fill="#ffaa00"/>
+    <circle cx="144" cy="248" r="2.5" fill="#ff3d9a"/>
+    <circle cx="170" cy="240" r="3" fill="#44ff88"/>
+    <circle cx="196" cy="246" r="2" fill="#cc44ff"/>
+    <circle cx="222" cy="244" r="2.5" fill="#00f3ff"/>
+    <circle cx="248" cy="248" r="2" fill="#ff6600"/>
+    <circle cx="274" cy="242" r="3" fill="#00ccff"/>
+    <!-- Particules dispersées -->
+    <circle cx="100" cy="225" r="1.5" fill="#ffaa00" opacity=".6"/>
+    <circle cx="165" cy="220" r="1.5" fill="#44ff88" opacity=".5"/>
+    <circle cx="200" cy="228" r="2" fill="#ff3d9a" opacity=".7"/>
+    <circle cx="240" cy="222" r="1.5" fill="#00f3ff" opacity=".6"/>
+  </g>
+  <!-- Panneau latéral droit : NEXT + SCORE + LEVEL -->
+  <rect x="305" y="10" width="90" height="245" rx="6" fill="rgba(8,18,32,.8)" stroke="rgba(0,243,255,.12)" stroke-width="1"/>
+  <!-- NEXT -->
+  <text x="350" y="30" font-family="monospace" font-size="9" fill="rgba(0,243,255,.5)" text-anchor="middle" letter-spacing="2">NEXT</text>
+  <!-- Pièce NEXT — bâton cyan (#00f3ff type 1) -->
+  <g filter="url(#glow_s)">
+    <rect x="318" y="38" width="18" height="18" rx="2" fill="#00f3ff" opacity=".9"/>
+    <rect x="338" y="38" width="18" height="18" rx="2" fill="#00f3ff" opacity=".9"/>
+    <rect x="358" y="38" width="18" height="18" rx="2" fill="#00f3ff" opacity=".9"/>
+    <rect x="378" y="38" width="18" height="18" rx="2" fill="#00f3ff" opacity=".9"/>
+    <rect x="320" y="40" width="14" height="4" rx="1.5" fill="rgba(255,255,255,.22)"/>
+    <rect x="340" y="40" width="14" height="4" rx="1.5" fill="rgba(255,255,255,.22)"/>
+    <rect x="360" y="40" width="14" height="4" rx="1.5" fill="rgba(255,255,255,.22)"/>
+    <rect x="380" y="40" width="14" height="4" rx="1.5" fill="rgba(255,255,255,.22)"/>
+  </g>
+  <!-- Séparateur -->
+  <line x1="313" y1="72" x2="387" y2="72" stroke="rgba(0,243,255,.1)" stroke-width="1"/>
+  <!-- SCORE -->
+  <text x="350" y="90" font-family="monospace" font-size="8" fill="rgba(0,243,255,.45)" text-anchor="middle" letter-spacing="2">SCORE</text>
+  <text x="350" y="108" font-family="monospace" font-size="13" fill="#ffaa00" text-anchor="middle" font-weight="bold" letter-spacing="1">48520</text>
+  <!-- LEVEL -->
+  <text x="350" y="130" font-family="monospace" font-size="8" fill="rgba(0,243,255,.45)" text-anchor="middle" letter-spacing="2">LEVEL</text>
+  <text x="350" y="148" font-family="monospace" font-size="13" fill="#00f3ff" text-anchor="middle" font-weight="bold">12/30</text>
+  <!-- LINES -->
+  <text x="350" y="168" font-family="monospace" font-size="8" fill="rgba(0,243,255,.45)" text-anchor="middle" letter-spacing="2">LINES</text>
+  <text x="350" y="186" font-family="monospace" font-size="13" fill="#44ff88" text-anchor="middle" font-weight="bold">118</text>
+  <!-- Label PI COMBO -->
+  <rect x="308" y="200" width="84" height="22" rx="4" fill="rgba(255,170,0,.12)" stroke="rgba(255,170,0,.35)" stroke-width="1"/>
+  <text x="350" y="215" font-family="monospace" font-size="9" fill="#ffaa00" text-anchor="middle" letter-spacing="1" font-weight="bold">PI COMBO!</text>
+  <!-- Bordure terrain -->
+  <rect x="79" y="0" width="210" height="260" fill="none" stroke="rgba(0,243,255,.18)" stroke-width="1.5"/>
+  <!-- Coin décos -->
+  <rect x="79" y="0" width="12" height="12" fill="none" stroke="#00f3ff" stroke-width="2" opacity=".5"/>
+  <rect x="277" y="248" width="12" height="12" fill="none" stroke="#00f3ff" stroke-width="2" opacity=".5"/>
+</svg>`,
+    screenshots: [],
+    playUrl:  '/stacker',
+    how: [
+      'Falling blocks drop from the top — rotate and place them.',
+      'Fill a complete horizontal line to clear it and score points.',
+      'Clearing 4 lines at once triggers a PI COMBO for big bonus points.',
+      'Speed increases every 10 lines — level up to reach level 30.',
+      'The game saves your progress: resume from where you stopped.'
+    ],
+    how_fr: [
+      "Les blocs tombent d'en haut — fais-les pivoter et place-les.",
+      "Complète une ligne horizontale pour l'éliminer et marquer des points.",
+      "Effacer 4 lignes d'un coup déclenche un PI COMBO pour des points bonus.",
+      "La vitesse augmente tous les 10 lignes — monte jusqu'au niveau 30.",
+      "Le jeu sauvegarde ta progression : reprends là où tu t'es arrêté."
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'Stracker is a cyberpunk take on the classic falling-block puzzle. When you clear a line, blocks explode into colorful data particles that fly across the screen. Clean gameplay, 30 levels of increasing challenge.',
+    about_fr:  'Stracker revisite le puzzle de blocs classique dans un univers cyberpunk. Quand tu élimine une ligne, les blocs explosent en particules de données colorées. 30 niveaux de difficulté croissante.',
+    type:      'Puzzle · Falling Blocks',
+    status:    'Live — 30 Levels',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  },
+  '2048': {
+    id:       '2048',
+    name:     '2048',
+    pitch:    'Neon merge puzzle. Slide tiles to combine them — reach 2048 to win.',
+    pitch_fr: 'Puzzle de fusion néon. Glisse les tuiles pour les combiner — atteins le 2048 pour gagner.',
+    tags:     [{label:'Puzzle',cls:'cy'},{label:'Neon',cls:'cy'},{label:'Merge',cls:'or'}],
+    img:      '',
+    screenshots: [],
+    playUrl:  '/2048',
+    how: [
+      'Swipe (mobile) or use arrow keys (desktop) to slide all tiles.',
+      'Two tiles with the same number merge into one — their values add up.',
+      'Your goal: create the 2048 tile.',
+      'The game ends when no more moves are possible.',
+      'Try to beat your high score — every game is different.'
+    ],
+    how_fr: [
+      'Glisse (mobile) ou utilise les flèches (bureau) pour déplacer toutes les tuiles.',
+      "Deux tuiles identiques fusionnent en une seule — leurs valeurs s'additionnent.",
+      'Objectif : créer la tuile 2048.',
+      "Le jeu se termine quand aucun mouvement n'est possible.",
+      'Essaie de battre ton meilleur score — chaque partie est différente.'
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'A neon cyberpunk version of the classic 2048 puzzle game. Simple mechanics, deep strategy. Each swipe moves all tiles simultaneously — plan your merges to avoid filling the board too fast.',
+    about_fr:  'Une version néon cyberpunk du célèbre puzzle 2048. Mécanique simple, stratégie profonde. Chaque glissement déplace toutes les tuiles simultanément — planifie tes fusions pour ne pas bloquer la grille.',
+    type:      'Puzzle · Merge',
+    status:    'Live',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  }
+};
+
+function showGame(gameId) {
+  const g = GAMES_DATA[gameId];
+  if (!g) return;
+
+  /* Détermine la langue courante */
+  const isFr = (typeof lang !== 'undefined' && lang === 'fr');
+
+  const pitch    = isFr && g.pitch_fr    ? g.pitch_fr    : g.pitch;
+  const howList  = isFr && g.how_fr      ? g.how_fr      : g.how;
+  const piNote   = isFr && g.piNote_fr   ? g.piNote_fr   : g.piNote;
+  const about    = isFr && g.about_fr    ? g.about_fr    : g.about;
+
+  /* Labels selon langue */
+  const L = isFr ? {
+    play:'▶ JOUER', back:'← Retour aux jeux',
+    screenshots:'Aperçu', howTitle:'Comment jouer',
+    aboutTitle:'À propos', infoTitle:'Infos utiles',
+    type:'Type', status:'Statut', dev:'Développeur',
+    platform:'Plateforme', mode:'Mode', avail:'Disponibilité',
+    piReq:'Connexion Pi', piReqYes:'Requise', piReqNo:'Non requise'
+  } : {
+    play:'▶ PLAY', back:'← Back to Games',
+    screenshots:'Screenshots', howTitle:'How to play',
+    aboutTitle:'About', infoTitle:'Game info',
+    type:'Type', status:'Status', dev:'Developer',
+    platform:'Platform', mode:'Mode', avail:'Availability',
+    piReq:'Pi Connection', piReqYes:'Required', piReqNo:'Not required'
+  };
+
+  /* Construction des tags */
+  const tagsHtml = g.tags.map(t =>
+    `<span class="gp-tag ${t.cls}">${t.label}</span>`
+  ).join('');
+
+  /* Hero image — SVG inline si image absente */
+  let heroImgHtml;
+  if (g.img) {
+    heroImgHtml = `<img class="gp-hero-img" src="${g.img}" alt="${g.name}" onerror="this.style.display='none'">`;
+  } else if (g.svgVisual) {
+    heroImgHtml = `<div class="gp-hero-svg">${g.svgVisual}</div>`;
+  } else {
+    heroImgHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#000818,#001228,#000c20);"></div>`;
+  }
+
+  /* Screenshots */
+  let screenshotsHtml = '';
+  if (g.screenshots && g.screenshots.length > 0) {
+    const imgs = g.screenshots.map((s, i) =>
+      `<img class="gp-screenshot${i === 0 && g.screenshots.length === 1 ? ' wide' : ''}" src="${s}" alt="Screenshot ${i+1}" loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    screenshotsHtml = `
+      <div class="gp-section">
+        <div class="gp-section-title">${L.screenshots}</div>
+        <div class="gp-screenshots">${imgs}</div>
+      </div>`;
+  }
+
+  /* Comment jouer */
+  const howItems = howList.map((step, i) =>
+    `<div class="gp-how-item">
+       <span class="gp-how-num">${i+1}.</span>
+       <span class="gp-how-text">${step}</span>
+     </div>`
+  ).join('');
+
+  const piNoteHtml = piNote
+    ? `<div class="gp-pi-note">
+         <span class="gp-pi-note-icon">π</span>
+         <span>${piNote}</span>
+       </div>` : '';
+
+  /* Infos utiles */
+  const infoItems = [
+    {label: L.platform, val: g.platform},
+    {label: L.mode,     val: g.mode},
+    {label: L.piReq,    val: g.piRequired ? L.piReqYes : L.piReqNo},
+    {label: L.type,     val: g.type},
+    {label: L.status,   val: g.status},
+    {label: L.avail,    val: g.availability},
+  ].map(item =>
+    `<div class="gp-info-item">
+       <div class="gp-info-label">${item.label}</div>
+       <div class="gp-info-val">${item.val}</div>
+     </div>`
+  ).join('');
+
+  const html = `
+    <div class="gp-hero rv">
+      ${heroImgHtml}
+      <div class="gp-hero-overlay">
+        <div class="gp-hero-tags">${tagsHtml}</div>
+        <div class="gp-hero-name">${g.name}</div>
+        <div class="gp-hero-pitch">${pitch}</div>
+      </div>
+      <div class="gp-hero-badge">
+        <div class="gp-hero-badge-dot"></div>
+        LIVE
+      </div>
+    </div>
+
+    <div class="gp-btns">
+      <button class="gp-btn-play" onclick="window.location.href='${g.playUrl}'">${L.play}</button>
+      <button class="gp-btn-back" onclick="switchTab('games')">${L.back}</button>
+    </div>
+
+    ${screenshotsHtml}
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.howTitle}</div>
+      <div class="gp-how-list">${howItems}</div>
+      ${piNoteHtml}
+    </div>
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.aboutTitle}</div>
+      <p class="gp-about-text">${about}</p>
+      ${g.dev ? `<p class="gp-about-text" style="opacity:.6;font-size:.74rem;">${L.dev}: ${g.dev}</p>` : ''}
+    </div>
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.infoTitle}</div>
+      <div class="gp-info-grid">${infoItems}</div>
+    </div>
+  `;
+
+  document.getElementById('gp-content').innerHTML = html;
+
+  /* Activer la vue */
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-game').classList.add('active');
+
+  /* Sync nav — aucun onglet actif (page non listée dans la nav) */
+  document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+
+  window.scrollTo({top:0, behavior:'smooth'});
+  setTimeout(revealVisible, 80);
+}
 
 </script>
 
 <!-- ═══════════════════════════════════════
-     MODAL DÉVELOPPEUR — formulaire
+     MODAL — Proposer un jeu
+     Accessible depuis bloc dev home et slots uniquement
+     N'apparaît PAS dans les onglets de navigation
 ═══════════════════════════════════════ -->
 <div class="dev-modal-overlay" id="dev-modal-overlay" onclick="if(event.target===this)closeDevModal()">
   <div class="dev-modal">
     <div class="dev-modal-handle"></div>
-    <div class="dev-modal-title" data-fr="🎮 INTÉGRER VOTRE JEU" data-en="🎮 LIST YOUR GAME">🎮 LIST YOUR GAME</div>
+    <div class="dev-modal-title" data-fr="🎮 PROPOSER UN JEU" data-en="🎮 LIST YOUR GAME">🎮 LIST YOUR GAME</div>
     <div class="dev-modal-sub" data-fr="Gratuit · 0% commission · Réponse sous 48h" data-en="Free · 0% commission · Reply within 48h">Free · 0% commission · Reply within 48h</div>
 
     <div class="dev-modal-ok" id="dev-modal-ok">
       <div class="ok-ico">🚀</div>
-      <div class="ok-title" data-fr="Candidature envoyée !" data-en="Application sent!">Application sent!</div>
-      <div class="ok-sub" data-fr="Nous vous répondons sous 48h. Bienvenue sur JEUXVIDEO.PI !" data-en="We'll reply within 48h. Welcome to JEUXVIDEO.PI!">We'll reply within 48h. Welcome to JEUXVIDEO.PI!</div>
+      <div class="ok-title" data-fr="Demande envoyée !" data-en="Request sent!">Request sent!</div>
+      <div class="ok-sub" data-fr="Je vous réponds sous 48h. Merci de votre intérêt pour JeuxVideo.Pi !" data-en="I'll reply within 48h. Thank you for your interest in JeuxVideo.Pi!">I'll reply within 48h. Thank you for your interest in JeuxVideo.Pi!</div>
       <button class="dev-modal-close" onclick="closeDevModal()" data-fr="FERMER" data-en="CLOSE">CLOSE</button>
     </div>
 
-    <form id="dev-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST" onsubmit="handleDevModal(event)" style="display:flex;flex-direction:column;gap:9px;">
-      <input type="hidden" name="type" value="developer-integration">
+    <form id="dev-modal-form" action="https://formspree.io/f/xwvoaroz" method="POST"
+          onsubmit="handleDevModal(event)"
+          style="display:flex;flex-direction:column;gap:9px;">
+      <input type="hidden" name="type" value="game-proposal">
       <div class="form-row">
-        <input type="text" name="dev_name" placeholder="Developer name *" required>
+        <input type="text"  name="dev_name"  placeholder="Developer / studio name *" required>
         <input type="email" name="dev_email" placeholder="Email *" required>
       </div>
       <input type="text" name="game_name" placeholder="Game name *" required>
-      <input type="url" name="game_url" placeholder="Game URL (https://...)">
-      <textarea name="game_description" rows="3" placeholder="Describe your game — genre, gameplay, current status..." required></textarea>
-      <select name="game_category">
-        <option value="">Game category</option>
-        <option>Pixel Art</option>
-        <option>Puzzle / Thinking</option>
-        <option>Action / Arcade</option>
+      <select name="game_type">
+        <option value="">Game type *</option>
+        <option>Arcade</option>
+        <option>Puzzle / Strategy</option>
+        <option>Pixel Art / Creative</option>
+        <option>Action / Combat</option>
         <option>RPG / Adventure</option>
         <option>Strategy</option>
         <option>Casual / Idle</option>
         <option>Other</option>
       </select>
-      <textarea name="expectations" rows="2" placeholder="What do you expect from JEUXVIDEO.PI?"></textarea>
+      <textarea name="pitch" rows="2" placeholder="Short pitch (2–3 sentences) *" required></textarea>
+      <input type="url"  name="game_url"   placeholder="Lien du jeu (https://...)">
+      <input type="url"  name="media_url"  placeholder="Screenshots / media link (drive, imgur...)">
+      <textarea name="message" rows="2" placeholder="Additional message (optional)"></textarea>
       <button type="submit" class="btn-send" id="dev-modal-send" style="margin-top:4px;">
-        <span data-fr="ENVOYER MA CANDIDATURE →" data-en="SUBMIT MY APPLICATION →">SUBMIT MY APPLICATION →</span>
+        <span data-fr="ENVOYER MA DEMANDE →" data-en="SEND MY REQUEST →">SEND MY REQUEST →</span>
       </button>
       <button type="button" class="dev-modal-close" onclick="closeDevModal()" data-fr="ANNULER" data-en="CANCEL">CANCEL</button>
     </form>
