@@ -983,15 +983,38 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Espace sous le titre pour ne pas coller au bouton PLAY */
+  padding-bottom: 58px;
   gap: 6px;
   pointer-events: none;
-  /* Dégradé sombre en bas pour lisibilité */
+  /* Dégradé sombre en bas pour lisibilité du titre */
   background: linear-gradient(
     to top,
-    rgba(5,11,20,.85) 0%,
-    rgba(5,11,20,.2) 45%,
-    transparent 70%
+    rgba(5,11,20,.88) 0%,
+    rgba(5,11,20,.3)  50%,
+    transparent       80%
   );
+}
+/* Logo pixels — au-dessus du titre, centré */
+.hero-logo-pixels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  filter:
+    drop-shadow(0 0 8px rgba(255,170,0,.4))
+    drop-shadow(0 0 18px rgba(0,243,255,.25));
+  transition: filter .4s, transform .4s;
+}
+.hero-logo-pixels svg {
+  width:  clamp(52px, 12vw, 80px);
+  height: clamp(52px, 12vw, 80px);
+}
+.hero-card-new:hover .hero-logo-pixels {
+  transform: scale(1.06);
+  filter:
+    drop-shadow(0 0 12px rgba(255,170,0,.6))
+    drop-shadow(0 0 26px rgba(0,243,255,.4));
 }
 /* ── Titre PIXEL [logo] WAR — split ── */
 .hero-title-split {
@@ -1061,25 +1084,12 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   text-transform: uppercase;
 }
 
-/* Badge PIXEL ART (haut gauche) */
-.hero-badge-type {
-  position: absolute;
-  top: 11px; left: 11px;
-  background: rgba(5,11,20,.85);
-  border: 1px solid rgba(255,170,0,.55);
-  border-radius: 100px;
-  font-family: 'Orbitron', monospace;
-  font-size: .46rem;
-  letter-spacing: 1.5px;
-  color: var(--or);
-  padding: 3px 10px;
-  display: flex; align-items: center; gap: 5px;
-}
-
-/* Badge SEASON 1 (haut droit) */
+/* Badge SEASON 1 — centré en haut */
 .hero-badge-season {
   position: absolute;
-  top: 11px; right: 11px;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(5,11,20,.85);
   border: 1px solid rgba(0,243,255,.35);
   border-radius: 100px;
@@ -1088,6 +1098,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   letter-spacing: 1px;
   color: var(--cy);
   padding: 3px 10px;
+  white-space: nowrap;
+  z-index: 3;
 }
 
 /* CTA PLAY NOW sur la carte (bas) */
@@ -1838,36 +1850,188 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 
 /* ── Visuel hero Pixel War ── */
-.hero-pw-visual {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, #000818 0%, #001228 50%, #000c20 100%);
-  overflow: hidden;
-}
-.hero-pw-grid {
+/* Image de fond Pixel War */
+.hero-pw-img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
+  object-position: center;
+  filter: brightness(.75) saturate(1.2);
+  transition: filter .45s, transform .45s;
+  display: block;
 }
-.hero-pw-pi {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Orbitron', monospace;
-  font-size: 3.5rem; font-weight: 900;
-  color: rgba(0,243,255,0.08);
-  letter-spacing: -2px;
-  pointer-events: none;
-  text-shadow: 0 0 40px rgba(0,243,255,0.15);
-  animation: piBreath 4s ease-in-out infinite;
-}
-@keyframes piBreath {
-  0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
-  50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.04); }
+.hero-card-new:hover .hero-pw-img {
+  filter: brightness(.9) saturate(1.4);
+  transform: scale(1.04);
 }
 @keyframes pwPulse {
   0%,100% { opacity: 0.3; transform: scale(1); }
   50%     { opacity: 0.9; transform: scale(1.3); }
 }
+
+/* ════════════════════════════════════════════════════════
+   PAGES JEUX DÉDIÉES — view-game
+════════════════════════════════════════════════════════ */
+#view-game { display:none; width:90%; max-width:var(--max); }
+#view-game.active { display:block; }
+
+/* Hero jeu */
+.gp-hero {
+  position:relative; width:100%; height:200px;
+  border-radius:14px; overflow:hidden;
+  border:1.5px solid rgba(255,170,0,.35);
+  margin:16px 0 0;
+  box-shadow:0 0 24px rgba(255,170,0,.08);
+}
+.gp-hero-img {
+  width:100%; height:100%; object-fit:cover; object-position:center;
+  filter:brightness(.6) saturate(1.2);
+  display:block;
+}
+.gp-hero-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top,rgba(5,11,20,.95) 0%,rgba(5,11,20,.3) 55%,transparent 100%);
+  display:flex; flex-direction:column;
+  align-items:flex-start; justify-content:flex-end;
+  padding:16px;
+}
+.gp-hero-tags {
+  display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px;
+}
+.gp-tag {
+  font-family:'Share Tech Mono',monospace; font-size:.42rem;
+  padding:2px 8px; border-radius:100px; letter-spacing:.5px;
+}
+.gp-tag.or { background:rgba(255,170,0,.12); border:1px solid rgba(255,170,0,.4); color:var(--or); }
+.gp-tag.cy { background:rgba(0,243,255,.08); border:1px solid rgba(0,243,255,.3); color:var(--cy); }
+.gp-tag.gr { background:rgba(68,255,136,.06);border:1px solid rgba(68,255,136,.3);color:#44ff88; }
+.gp-hero-name {
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:clamp(1.4rem,7vw,2rem); color:var(--or);
+  letter-spacing:4px; text-shadow:0 0 20px var(--or);
+  margin-bottom:4px; line-height:1;
+}
+.gp-hero-pitch {
+  font-family:'Rajdhani',sans-serif; font-size:.82rem;
+  color:rgba(200,216,232,.7); line-height:1.5;
+  max-width:90%;
+}
+.gp-hero-badge {
+  position:absolute; top:11px; right:11px;
+  background:rgba(5,11,20,.85); border:1px solid rgba(68,255,136,.4);
+  border-radius:100px; font-family:'Orbitron',monospace;
+  font-size:.4rem; letter-spacing:1px; color:#44ff88;
+  padding:3px 10px; display:flex; align-items:center; gap:4px;
+}
+.gp-hero-badge-dot {
+  width:5px; height:5px; border-radius:50%; background:#44ff88;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+
+/* Boutons hero */
+.gp-btns {
+  display:flex; gap:8px; margin:14px 0 20px; flex-wrap:wrap;
+}
+.gp-btn-play {
+  flex:1; padding:13px 20px;
+  background:linear-gradient(135deg,#bf953f,var(--or),#fcf6ba,var(--or),#bf953f);
+  background-size:200% auto; color:#000;
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:.68rem; letter-spacing:2px; border:none;
+  border-radius:8px; cursor:pointer;
+  transition:background-position .4s,transform .2s,box-shadow .3s;
+  box-shadow:0 4px 20px rgba(255,170,0,.3);
+}
+.gp-btn-play:hover { background-position:right center; transform:translateY(-2px); box-shadow:0 6px 28px rgba(255,170,0,.5); }
+.gp-btn-back {
+  padding:13px 16px;
+  background:transparent; border:1px solid rgba(0,243,255,.3);
+  border-radius:8px; color:var(--cy);
+  font-family:'Orbitron',monospace; font-size:.58rem;
+  letter-spacing:1px; cursor:pointer;
+  transition:all .2s; white-space:nowrap;
+}
+.gp-btn-back:hover { background:rgba(0,243,255,.06); border-color:var(--cy); }
+
+/* Sections */
+.gp-section {
+  padding:16px 0 14px;
+  border-top:1px solid rgba(0,243,255,.08);
+}
+.gp-section-title {
+  font-family:'Orbitron',monospace; font-size:.62rem;
+  color:var(--cy); letter-spacing:2px; text-transform:uppercase;
+  border-left:3px solid var(--or); padding-left:10px;
+  margin-bottom:14px;
+}
+
+/* Screenshots */
+.gp-screenshots {
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:8px; margin-bottom:4px;
+}
+.gp-screenshot {
+  width:100%; aspect-ratio:16/9; object-fit:cover;
+  border-radius:8px; border:1px solid rgba(0,243,255,.12);
+  background:var(--bg2); display:block;
+  transition:transform .25s,border-color .25s;
+}
+.gp-screenshot:hover { transform:scale(1.02); border-color:rgba(0,243,255,.3); }
+.gp-screenshot.wide { grid-column:1/-1; }
+
+/* Comment jouer */
+.gp-how-list {
+  display:flex; flex-direction:column; gap:8px;
+}
+.gp-how-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px; border-radius:8px;
+  background:rgba(0,243,255,.03); border:1px solid rgba(0,243,255,.08);
+}
+.gp-how-num {
+  font-family:'Orbitron',monospace; font-size:.6rem; font-weight:700;
+  color:var(--or); flex-shrink:0; min-width:20px; margin-top:1px;
+}
+.gp-how-text {
+  font-size:.82rem; color:rgba(200,216,232,.75); line-height:1.55;
+}
+.gp-pi-note {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:10px 12px; margin-top:10px; border-radius:8px;
+  background:rgba(255,170,0,.04); border:1px solid rgba(255,170,0,.2);
+  font-size:.76rem; color:rgba(200,216,232,.65); line-height:1.5;
+}
+.gp-pi-note-icon { font-size:.9rem; flex-shrink:0; margin-top:1px; }
+
+/* À propos */
+.gp-about-text {
+  font-size:.82rem; color:rgba(200,216,232,.65); line-height:1.65;
+  margin-bottom:14px;
+}
+/* Infos utiles */
+.gp-info-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.gp-info-item {
+  padding:10px 12px; border-radius:8px;
+  background:rgba(8,18,32,.7); border:1px solid rgba(0,243,255,.1);
+}
+.gp-info-label {
+  font-family:'Orbitron',monospace; font-size:.42rem;
+  color:var(--cy); letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:3px;
+}
+.gp-info-val {
+  font-size:.78rem; color:rgba(200,216,232,.8); line-height:1.4;
+}
+
+/* Responsive desktop */
+@media(min-width:600px){
+  .gp-screenshots { grid-template-columns:repeat(3,1fr); }
+  .gp-info-grid   { grid-template-columns:repeat(3,1fr); }
+}
+
 </style>
 </head>
 <body>
@@ -1955,20 +2119,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- DROITE : sélecteur de langue -->
     <div id="hdr-right">
       <select id="lang-select" onchange="setLang(this.value)" aria-label="Language">
-        <option value="en" selected>🇬🇧 English</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="es">🇪🇸 Español</option>
-        <option value="pt">🇧🇷 Português</option>
-        <option value="de">🇩🇪 Deutsch</option>
-        <option value="zh">🇨🇳 中文</option>
-        <option value="ja">🇯🇵 日本語</option>
-        <option value="ko">🇰🇷 한국어</option>
-        <option value="ar">🇸🇦 العربية</option>
-        <option value="tr">🇹🇷 Türkçe</option>
-        <option value="vi">🇻🇳 Tiếng Việt</option>
-        <option value="id">🇮🇩 Indonesia</option>
-        <option value="ph">🇵🇭 Filipino</option>
-        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="en" selected>🇬🇧 EN</option>
+        <option value="fr">🇫🇷 FR</option>
       </select>
     </div>
 
@@ -2068,111 +2220,31 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
 
     <!-- Carte Pi-xel War redesignée -->
-    <div class="hero-card-new" onclick="window.location.href='/pixelwar'">
-      <!-- Visuel Pixel War — grille animée style arcade, identité Pi subtile -->
-      <div class="hero-pw-visual" aria-hidden="true">
-        <!-- Fond grille pixel guerre -->
-        <svg class="hero-pw-grid" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <pattern id="pgrid" width="12" height="12" patternUnits="userSpaceOnUse">
-              <rect width="11" height="11" fill="none" stroke="rgba(0,243,255,0.08)" stroke-width="0.5"/>
-            </pattern>
-            <radialGradient id="pglow" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stop-color="rgba(0,243,255,0.06)"/>
-              <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-            </radialGradient>
-          </defs>
-          <rect width="400" height="200" fill="url(#pgrid)"/>
-          <rect width="400" height="200" fill="url(#pglow)"/>
-          <!-- Pixels "territoires" colorés — simulation bataille -->
-          <!-- Zone équipe A (cyan) -->
-          <rect x="20" y="20" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
-          <rect x="32" y="20" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
-          <rect x="20" y="32" width="12" height="12" fill="rgba(0,243,255,0.60)" class="px-a"/>
-          <rect x="32" y="32" width="12" height="12" fill="rgba(0,243,255,0.75)" class="px-a"/>
-          <rect x="44" y="20" width="12" height="12" fill="rgba(0,243,255,0.50)" class="px-a"/>
-          <rect x="44" y="32" width="12" height="12" fill="rgba(0,243,255,0.65)" class="px-a"/>
-          <rect x="56" y="20" width="12" height="12" fill="rgba(0,243,255,0.40)" class="px-a px-front"/>
-          <!-- Zone équipe B (orange/or — Pi colors) -->
-          <rect x="340" y="20" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
-          <rect x="352" y="20" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
-          <rect x="340" y="32" width="12" height="12" fill="rgba(255,170,0,0.60)" class="px-b"/>
-          <rect x="352" y="32" width="12" height="12" fill="rgba(255,170,0,0.75)" class="px-b"/>
-          <rect x="328" y="20" width="12" height="12" fill="rgba(255,170,0,0.50)" class="px-b"/>
-          <rect x="328" y="32" width="12" height="12" fill="rgba(255,170,0,0.65)" class="px-b"/>
-          <rect x="316" y="32" width="12" height="12" fill="rgba(255,170,0,0.40)" class="px-b px-front"/>
-          <!-- Zone neutre / combat central -->
-          <rect x="188" y="80" width="12" height="12" fill="rgba(255,70,80,0.7)" class="px-c"/>
-          <rect x="200" y="80" width="12" height="12" fill="rgba(0,243,255,0.7)" class="px-c"/>
-          <rect x="188" y="92" width="12" height="12" fill="rgba(255,170,0,0.7)" class="px-c"/>
-          <rect x="200" y="92" width="12" height="12" fill="rgba(255,70,80,0.5)" class="px-c"/>
-          <rect x="176" y="80" width="12" height="12" fill="rgba(100,180,100,0.6)" class="px-c"/>
-          <rect x="212" y="92" width="12" height="12" fill="rgba(180,100,255,0.6)" class="px-c"/>
-          <!-- Particules / pixels isolés qui "avancent" -->
-          <rect x="100" y="60" width="8" height="8" fill="rgba(0,243,255,0.5)" class="px-solo" style="animation:pwPulse 1.8s ease-in-out infinite"/>
-          <rect x="280" y="60" width="8" height="8" fill="rgba(255,170,0,0.5)" class="px-solo" style="animation:pwPulse 2.1s ease-in-out infinite .4s"/>
-          <rect x="150" y="150" width="8" height="8" fill="rgba(255,70,80,0.5)" class="px-solo" style="animation:pwPulse 1.6s ease-in-out infinite .8s"/>
-          <rect x="240" y="140" width="8" height="8" fill="rgba(100,180,100,0.5)" class="px-solo" style="animation:pwPulse 2.3s ease-in-out infinite 1.1s"/>
-          <!-- Ligne de front animée -->
-          <line x1="180" y1="0" x2="220" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 8" class="front-line"/>
-        </svg>
-        <!-- Logo Pi subtil centré -->
-        <div class="hero-pw-pi">π</div>
-      </div>
+    <div class="hero-card-new" onclick="showGame('pixelwar')">
+      <!-- Image de fond Pixel War -->
+      <img src="Images/Gold Pixel.png" alt="Pixel War" class="hero-pw-img" onerror="this.style.display='none'">
 
-      <!-- Badge type -->
-      <div class="hero-badge-type">
-        <div class="live-dot"></div>
-        PIXEL WAR
-      </div>
-
-      <!-- Badge saison -->
+      <!-- Badge saison — centré en haut -->
       <div class="hero-badge-season"
            data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</div>
 
-      <!-- Overlay nom du jeu — PIXEL [logo pixels] WAR -->
+      <!-- Overlay : titre PIXEL WAR centré -->
       <div class="hero-card-overlay">
-        <div class="hero-card-game-name hero-title-split">
-          <!-- PIXEL -->
-          <span class="hero-title-part">PIXEL</span>
 
-          <!-- Logo central : grille de pixels colorés -->
-          <span class="hero-title-logo" aria-hidden="true">
-            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-              <!-- Rangée 1 -->
-              <rect x="0"  y="0"  width="10" height="10" fill="#3690ea"/>
-              <rect x="13" y="0"  width="10" height="10" fill="#ff4500"/>
-              <rect x="26" y="0"  width="10" height="10" fill="#ffd635"/>
-              <!-- Rangée 2 -->
-              <rect x="0"  y="13" width="10" height="10" fill="#b44ac0"/>
-              <rect x="13" y="13" width="10" height="10" fill="#7eed56"/>
-              <rect x="26" y="13" width="10" height="10" fill="#ff99aa"/>
-              <!-- Rangée 3 -->
-              <rect x="0"  y="26" width="10" height="10" fill="#ffd635"/>
-              <rect x="13" y="26" width="10" height="10" fill="#3690ea"/>
-              <rect x="26" y="26" width="10" height="10" fill="#ff4500"/>
-            </svg>
-          </span>
+        <!-- Titre PIXEL WAR centré -->
+        <div class="hero-card-game-name" style="letter-spacing:8px;text-align:center;">PIXEL WAR</div>
 
-          <!-- WAR -->
-          <span class="hero-title-part">WAR</span>
-        </div>
-        <div class="hero-card-game-tag"
+                <div class="hero-card-game-tag"
              data-fr="Attaquer · Défendre · Conquérir"
              data-en="Attack · Defend · Conquer">Attack · Defend · Conquer</div>
       </div>
 
-      <!-- Barre CTA en bas de la carte -->
+      <!-- Barre CTA en bas de la carte — PLAY seul, pleine largeur -->
       <div class="hero-cta-bar">
         <button class="hero-cta-btn"
                 onclick="event.stopPropagation();window.location.href='/pixelwar'"
                 data-fr="▶ JOUER" data-en="▶ PLAY">
           ▶ PLAY
-        </button>
-        <button class="hero-cta-explore"
-                onclick="event.stopPropagation();switchTab('games')"
-                data-fr="LES JEUX →" data-en="ALL GAMES →">
-          ALL GAMES →
         </button>
       </div>
     </div>
@@ -2198,7 +2270,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="showcase-grid">
 
       <!-- ── BREAKER ── -->
-      <div class="sc-card live rv d1" onclick="window.location.href='/breakout'">
+      <div class="sc-card live rv d1" onclick="showGame('breaker')">
         <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
         <!-- Particules néon déco -->
         <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
@@ -2220,7 +2292,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- ── STRACKER ── -->
-      <div class="sc-card live rv d2" onclick="window.location.href='/stacker'"
+      <div class="sc-card live rv d2" onclick="showGame('stracker')"
            style="border-color:rgba(0,243,255,.38);">
         <div class="sc-badge" style="background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.5);color:var(--cy);top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
           <div class="sc-badge-dot" style="background:var(--cy);box-shadow:0 0 5px var(--cy);"></div>NEW
@@ -2243,7 +2315,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- ── 2048 ── -->
-      <div class="sc-card live rv d3" onclick="window.location.href='/2048'">
+      <div class="sc-card live rv d3" onclick="showGame('2048')">
         <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
         <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
           <div style="position:absolute;width:6px;height:6px;border-radius:2px;background:var(--cy);top:24px;left:35%;opacity:.55;animation:pwFloat 3.2s ease-in-out infinite;"></div>
@@ -2397,7 +2469,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       <button class="nav-tab" onclick="filterGames('arcade',this)">Arcade</button>
     </div>
     <div id="games-list" style="display:flex;flex-direction:column;gap:10px;">
-      <div class="av-card rv" data-cat="pixel" onclick="window.location.href='/pixelwar'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="pixel" onclick="showGame('pixelwar')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;">
           <img src="Images/Gold%20Pixel.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
         </div>
@@ -2412,7 +2484,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="arcade" onclick="window.location.href='/breakout'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="arcade" onclick="showGame('breaker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#001020,#002035);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(0,243,255,.3);">🧱</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:var(--cy);margin-bottom:3px;">BREAKER</div>
@@ -2425,7 +2497,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
 
-      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/2048'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="puzzle" onclick="showGame('2048')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#071422,#0c2240);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 10px rgba(0,243,255,.2);">🧩</div>
         <div style="flex:1;">
           <div class="av-title" style="margin-bottom:3px;">2048</div>
@@ -2437,7 +2509,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/stacker'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="puzzle" onclick="showGame('stracker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a0020,#180040);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(204,68,255,.3);">🔷</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:#cc44ff;margin-bottom:3px;">STRACKER</div>
@@ -2493,7 +2565,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
 
     <!-- Carte featured — Lancement du portail -->
-    <div class="nv-featured rv d1" onclick="window.location.href='/pixelwar'">
+    <div class="nv-featured rv d1" onclick="showGame('pixelwar')">
       <div class="nv-featured-badge live">
         <span class="nv-badge-dot"></span>
         LIVE
@@ -2517,7 +2589,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="nv-list">
 
       <!-- Pi-xel War -->
-      <div class="nv-item live-item clickable rv d1" onclick="window.location.href='/pixelwar'">
+      <div class="nv-item live-item clickable rv d1" onclick="showGame('pixelwar')">
         <div class="nv-item-icon">🟡</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2536,7 +2608,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- Neon Breaker -->
-      <div class="nv-item live-item clickable rv d2" onclick="window.location.href='/breakout'">
+      <div class="nv-item live-item clickable rv d2" onclick="showGame('breaker')">
         <div class="nv-item-icon">🧱</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2555,7 +2627,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- 2048 -->
-      <div class="nv-item new-item clickable rv d3" onclick="window.location.href='/2048'">
+      <div class="nv-item new-item clickable rv d3" onclick="showGame('2048')">
         <div class="nv-item-icon">🧩</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2574,7 +2646,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- Stracker -->
-      <div class="nv-item new-item clickable rv d1" onclick="window.location.href='/stacker'">
+      <div class="nv-item new-item clickable rv d1" onclick="showGame('stracker')">
         <div class="nv-item-icon">🔷</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2729,6 +2801,15 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   </section>
 </div><!-- /contact -->
 
+
+<!-- ══ PAGE JEU DÉDIÉE ══ -->
+<div id="view-game">
+
+  <!-- Le contenu est généré dynamiquement par showGame() -->
+  <div id="gp-content"></div>
+
+</div><!-- /view-game -->
+
 <footer>
   © JeuxVideo.Pi &nbsp;|&nbsp;
   <a onclick="switchTab('contact')" style="cursor:pointer;color:inherit;text-decoration:none;" data-fr="Règlement &amp; CGU" data-en="Terms &amp; Rules">Terms &amp; Rules</a>
@@ -2788,9 +2869,8 @@ function setLang(l){
   const sel = document.getElementById('lang-select');
   if (sel) sel.value = l;
 
-  /* Textes traduits : data-{lang} sur les éléments.
-     Fallback : si data-{lang} absent → data-en (EN = langue de base).
-     Les langues sans traduction complète affichent donc l'anglais. */
+  /* Traduction de tous les éléments portant data-en.
+     Priorité : data-{lang} si disponible, sinon data-en. */
   document.querySelectorAll('[data-en]').forEach(el => {
     const val = el.getAttribute('data-' + l) || el.getAttribute('data-en');
     if (!val) return;
@@ -2805,14 +2885,14 @@ function setLang(l){
       name:'Name / Pi Username', email:'Contact email',
       game:'Game name', url:'https://your-game.com (optional)',
       msg:'Describe your game and what you expect from us...',
-      cat:'Game category',
-      subj:'Subject', yourmsg:'Your message...',
+      cat:'Game category', subj:'Subject', yourmsg:'Your message...',
       devname:'Developer / studio name *', gameType:'Game type *',
       pitch:'Short pitch (2–3 sentences) *',
       mediaurl:'Screenshots / media link (drive, imgur...)',
       addmsg:'Additional message (optional)',
       appname:'Your name or username *', appmail:'Your email *',
-      apppos:'Position *', appmotiv:'Tell us about yourself — who you are, why you want to help *',
+      apppos:'Position *',
+      appmotiv:'Tell us about yourself — who you are, why you want to help *',
       appdispo:'Your availability (hours/week, timezone...)',
       o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']
     },
@@ -2820,50 +2900,18 @@ function setLang(l){
       name:'Nom / Pseudo Pi', email:'Email de contact',
       game:'Nom du jeu', url:'https://votre-jeu.com (optionnel)',
       msg:'Décrivez votre jeu et vos attentes...',
-      cat:'Catégorie du jeu',
-      subj:'Sujet', yourmsg:'Votre message...',
+      cat:'Catégorie du jeu', subj:'Sujet', yourmsg:'Votre message...',
       devname:'Nom du développeur / studio *', gameType:'Type de jeu *',
       pitch:'Court pitch (2–3 phrases) *',
       mediaurl:'Lien captures / médias (drive, imgur...)',
       addmsg:'Message complémentaire (optionnel)',
       appname:'Ton nom ou pseudo *', appmail:'Ton email *',
-      apppos:'Poste souhaité *', appmotiv:"Présente-toi brièvement — qui tu es, pourquoi tu veux m'aider *",
+      apppos:'Poste souhaité *',
+      appmotiv:"Présente-toi brièvement — qui tu es, pourquoi tu veux m'aider *",
       appdispo:'Tes disponibilités (heures/semaine, timezone...)',
       o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']
-    },
-    es: {
-      name:'Nombre / Usuario Pi', email:'Email de contacto',
-      game:'Nombre del juego', url:'https://tu-juego.com (opcional)',
-      msg:'Describe tu juego y lo que esperas...',
-      cat:'Categoría del juego',
-      subj:'Asunto', yourmsg:'Tu mensaje...',
-      devname:'Nombre del desarrollador / estudio *', gameType:'Tipo de juego *',
-      pitch:'Descripción corta (2–3 frases) *',
-      mediaurl:'Enlace capturas / medios',
-      addmsg:'Mensaje adicional (opcional)',
-      appname:'Tu nombre o usuario *', appmail:'Tu email *',
-      apppos:'Puesto deseado *', appmotiv:'Preséntate brevemente *',
-      appdispo:'Tu disponibilidad (horas/semana, zona horaria...)',
-      o:['Estrategia','Acción / Arcade','Puzzle / Pensamiento','RPG / Aventura','Casual / Idle','Otro']
-    },
-    pt: {
-      name:'Nome / Username Pi', email:'Email de contato',
-      game:'Nome do jogo', url:'https://seu-jogo.com (opcional)',
-      msg:'Descreva seu jogo e o que espera...',
-      cat:'Categoria do jogo',
-      subj:'Assunto', yourmsg:'Sua mensagem...',
-      devname:'Nome do desenvolvedor / estúdio *', gameType:'Tipo de jogo *',
-      pitch:'Pitch curto (2–3 frases) *',
-      mediaurl:'Link capturas / mídia',
-      addmsg:'Mensagem adicional (opcional)',
-      appname:'Seu nome ou usuário *', appmail:'Seu email *',
-      apppos:'Cargo desejado *', appmotiv:'Apresente-se brevemente *',
-      appdispo:'Sua disponibilidade (horas/semana, fuso horário...)',
-      o:['Estratégia','Ação / Arcade','Puzzle / Raciocínio','RPG / Aventura','Casual / Idle','Outro']
     }
-    /* Les autres langues (de, zh, ja, ko, ar, tr, vi, id, ph, hi) utilisent
-       le fallback EN automatique via getAttribute('data-en') ci-dessus. */
-  };
+  }
 
   const t = DICT[l] || DICT['en'];
   const g = id => document.getElementById(id);
@@ -3143,6 +3191,287 @@ function switchTab(name) {
 window.addEventListener('DOMContentLoaded', function() {
   setLang('en');
 });
+
+
+/* ════════════════════════════════════════════════════════
+   PAGES JEUX DÉDIÉES — données + rendu
+════════════════════════════════════════════════════════ */
+const GAMES_DATA = {
+  pixelwar: {
+    id:       'pixelwar',
+    name:     'PIXEL WAR',
+    pitch:    'The first collaborative pixel war on Pi Network. Place your pixel, defend your territory, crush your rivals in real time.',
+    pitch_fr: 'La première guerre de pixels collaborative sur Pi Network. Pose ton pixel, défends ton territoire, écrase tes adversaires en temps réel.',
+    tags:     [{label:'War',cls:'or'},{label:'Multiplayer',cls:'cy'},{label:'Live',cls:'gr'}],
+    img:      'Images/Gold Pixel.png',
+    screenshots: [],
+    playUrl:  '/pixelwar',
+    how: [
+      'Connect with your Pi account to start.',
+      'You start with 10 pixels. Tap any cell on the canvas to place your color.',
+      'Your stock recharges automatically — 1 pixel every 3 minutes.',
+      'Covering another player\u2019s pixel earns you territory.',
+      'Buy extra pixels from the shop using Pi.'
+    ],
+    how_fr: [
+      'Connecte-toi avec ton compte Pi pour commencer.',
+      'Tu démarres avec 10 pixels. Touche une case du canvas pour poser ta couleur.',
+      'Ton stock se recharge automatiquement — 1 pixel toutes les 3 minutes.',
+      "Recouvrir le pixel d'un autre joueur te fait gagner du territoire.",
+      'Achète des pixels supplémentaires dans la boutique en Pi.'
+    ],
+    piRequired: true,
+    piPurchase: true,
+    piNote:     'Pi connection required to play. In-game shop: buy extra pixel packs (1 Pi / 2 Pi).',
+    piNote_fr:  'Connexion Pi requise pour jouer. Boutique in-game : packs de pixels (1 Pi / 2 Pi).',
+    about:     'Pixel War is inspired by Reddit’s r/Place experiment. The canvas is shared in real time with all players. Every pixel placement is permanent until another player covers it. Build patterns, defend them, or go to war.',
+    about_fr:  "Pixel War s'inspire de l'expérience Reddit r/Place. Le canvas est partagé en temps réel avec tous les joueurs. Chaque pixel posé est permanent jusqu'à ce qu'un autre joueur le recouvre.",
+    type:      'Multiplayer · Pixel Art · War',
+    status:    'Live — Season 1',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Multiplayer — real time',
+    availability: 'Available now'
+  },
+  breaker: {
+    id:       'breaker',
+    name:     'BREAKER',
+    pitch:    'Classic neon breakout — 30 levels of glowing bricks, physics ball and powerful power-ups.',
+    pitch_fr: 'Casse-briques néon classique — 30 niveaux de briques lumineuses, balle physique et power-ups.',
+    tags:     [{label:'Arcade',cls:'cy'},{label:'Neon',cls:'cy'},{label:'30 Levels',cls:'or'}],
+    img:      '',
+    screenshots: [],
+    playUrl:  '/breakout',
+    how: [
+      'Move the paddle left and right to bounce the ball.',
+      'Break all the bricks to clear the level and advance.',
+      'Catch power-ups: multi-ball, laser, wide paddle, speed boost.',
+      'You have 3 lives. Reach level 30 to complete the campaign.',
+      'Your progress is saved automatically — resume where you left off.'
+    ],
+    how_fr: [
+      'Déplace la raquette de gauche à droite pour renvoyer la balle.',
+      'Casse toutes les briques pour terminer le niveau et avancer.',
+      'Attrape les power-ups : multi-balle, laser, raquette large, vitesse.',
+      'Tu as 3 vies. Atteins le niveau 30 pour finir la campagne.',
+      'Ta progression est sauvegardée automatiquement.'
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'Breaker is a cyberpunk neon breakout game with 30 levels spread across 6 zones: Initiation, Confrontation, Assault, Cyber Nexus, Pi Core and Singularity. Difficulty increases steadily — bricks get tougher, speed climbs.',
+    about_fr:  'Breaker est un casse-briques néon cyberpunk avec 30 niveaux répartis en 6 zones. La difficulté augmente progressivement — les briques résistent de plus en plus et la vitesse monte.',
+    type:      'Arcade · Breakout',
+    status:    'Live — 30 Levels',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  },
+  stracker: {
+    id:       'stracker',
+    name:     'STRACKER',
+    pitch:    'Cyberpunk falling-block puzzle. Stack neon blocks, clear lines, level up — blocks explode into data particles on combos.',
+    pitch_fr: 'Puzzle de blocs cyberpunk. Empile les blocs néon, élimine les lignes — les blocs explosent en particules de données lors des combos.',
+    tags:     [{label:'Puzzle',cls:'cy'},{label:'Blocks',cls:'cy'},{label:'30 Levels',cls:'or'}],
+    img:      '',
+    screenshots: [],
+    playUrl:  '/stacker',
+    how: [
+      'Falling blocks drop from the top — rotate and place them.',
+      'Fill a complete horizontal line to clear it and score points.',
+      'Clearing 4 lines at once triggers a PI COMBO for big bonus points.',
+      'Speed increases every 10 lines — level up to reach level 30.',
+      'The game saves your progress: resume from where you stopped.'
+    ],
+    how_fr: [
+      "Les blocs tombent d'en haut — fais-les pivoter et place-les.",
+      "Complète une ligne horizontale pour l'éliminer et marquer des points.",
+      "Effacer 4 lignes d'un coup déclenche un PI COMBO pour des points bonus.",
+      "La vitesse augmente tous les 10 lignes — monte jusqu'au niveau 30.",
+      "Le jeu sauvegarde ta progression : reprends là où tu t'es arrêté."
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'Stracker is a cyberpunk take on the classic falling-block puzzle. When you clear a line, blocks explode into colorful data particles that fly across the screen. Clean gameplay, 30 levels of increasing challenge.',
+    about_fr:  'Stracker revisite le puzzle de blocs classique dans un univers cyberpunk. Quand tu élimine une ligne, les blocs explosent en particules de données colorées. 30 niveaux de difficulté croissante.',
+    type:      'Puzzle · Falling Blocks',
+    status:    'Live — 30 Levels',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  },
+  '2048': {
+    id:       '2048',
+    name:     '2048',
+    pitch:    'Neon merge puzzle. Slide tiles to combine them — reach 2048 to win.',
+    pitch_fr: 'Puzzle de fusion néon. Glisse les tuiles pour les combiner — atteins le 2048 pour gagner.',
+    tags:     [{label:'Puzzle',cls:'cy'},{label:'Neon',cls:'cy'},{label:'Merge',cls:'or'}],
+    img:      '',
+    screenshots: [],
+    playUrl:  '/2048',
+    how: [
+      'Swipe (mobile) or use arrow keys (desktop) to slide all tiles.',
+      'Two tiles with the same number merge into one — their values add up.',
+      'Your goal: create the 2048 tile.',
+      'The game ends when no more moves are possible.',
+      'Try to beat your high score — every game is different.'
+    ],
+    how_fr: [
+      'Glisse (mobile) ou utilise les flèches (bureau) pour déplacer toutes les tuiles.',
+      "Deux tuiles identiques fusionnent en une seule — leurs valeurs s'additionnent.",
+      'Objectif : créer la tuile 2048.',
+      "Le jeu se termine quand aucun mouvement n'est possible.",
+      'Essaie de battre ton meilleur score — chaque partie est différente.'
+    ],
+    piRequired: false,
+    piPurchase: false,
+    piNote:     null,
+    about:     'A neon cyberpunk version of the classic 2048 puzzle game. Simple mechanics, deep strategy. Each swipe moves all tiles simultaneously — plan your merges to avoid filling the board too fast.',
+    about_fr:  'Une version néon cyberpunk du célèbre puzzle 2048. Mécanique simple, stratégie profonde. Chaque glissement déplace toutes les tuiles simultanément — planifie tes fusions pour ne pas bloquer la grille.',
+    type:      'Puzzle · Merge',
+    status:    'Live',
+    dev:       'JeuxVideo.Pi',
+    platform:  'Mobile & Web (browser)',
+    mode:      'Solo',
+    availability: 'Available now'
+  }
+};
+
+function showGame(gameId) {
+  const g = GAMES_DATA[gameId];
+  if (!g) return;
+
+  /* Détermine la langue courante */
+  const isFr = (typeof lang !== 'undefined' && lang === 'fr');
+
+  const pitch    = isFr && g.pitch_fr    ? g.pitch_fr    : g.pitch;
+  const howList  = isFr && g.how_fr      ? g.how_fr      : g.how;
+  const piNote   = isFr && g.piNote_fr   ? g.piNote_fr   : g.piNote;
+  const about    = isFr && g.about_fr    ? g.about_fr    : g.about;
+
+  /* Labels selon langue */
+  const L = isFr ? {
+    play:'▶ JOUER', back:'← Retour aux jeux',
+    screenshots:'Aperçu', howTitle:'Comment jouer',
+    aboutTitle:'À propos', infoTitle:'Infos utiles',
+    type:'Type', status:'Statut', dev:'Développeur',
+    platform:'Plateforme', mode:'Mode', avail:'Disponibilité',
+    piReq:'Connexion Pi', piReqYes:'Requise', piReqNo:'Non requise'
+  } : {
+    play:'▶ PLAY', back:'← Back to Games',
+    screenshots:'Screenshots', howTitle:'How to play',
+    aboutTitle:'About', infoTitle:'Game info',
+    type:'Type', status:'Status', dev:'Developer',
+    platform:'Platform', mode:'Mode', avail:'Availability',
+    piReq:'Pi Connection', piReqYes:'Required', piReqNo:'Not required'
+  };
+
+  /* Construction des tags */
+  const tagsHtml = g.tags.map(t =>
+    `<span class="gp-tag ${t.cls}">${t.label}</span>`
+  ).join('');
+
+  /* Hero image */
+  const heroImgHtml = g.img
+    ? `<img class="gp-hero-img" src="${g.img}" alt="${g.name}" onerror="this.style.display='none'">`
+    : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#000818,#001228,#000c20);"></div>`;
+
+  /* Screenshots */
+  let screenshotsHtml = '';
+  if (g.screenshots && g.screenshots.length > 0) {
+    const imgs = g.screenshots.map((s, i) =>
+      `<img class="gp-screenshot${i === 0 && g.screenshots.length === 1 ? ' wide' : ''}" src="${s}" alt="Screenshot ${i+1}" loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    screenshotsHtml = `
+      <div class="gp-section">
+        <div class="gp-section-title">${L.screenshots}</div>
+        <div class="gp-screenshots">${imgs}</div>
+      </div>`;
+  }
+
+  /* Comment jouer */
+  const howItems = howList.map((step, i) =>
+    `<div class="gp-how-item">
+       <span class="gp-how-num">${i+1}.</span>
+       <span class="gp-how-text">${step}</span>
+     </div>`
+  ).join('');
+
+  const piNoteHtml = piNote
+    ? `<div class="gp-pi-note">
+         <span class="gp-pi-note-icon">π</span>
+         <span>${piNote}</span>
+       </div>` : '';
+
+  /* Infos utiles */
+  const infoItems = [
+    {label: L.platform, val: g.platform},
+    {label: L.mode,     val: g.mode},
+    {label: L.piReq,    val: g.piRequired ? L.piReqYes : L.piReqNo},
+    {label: L.type,     val: g.type},
+    {label: L.status,   val: g.status},
+    {label: L.avail,    val: g.availability},
+  ].map(item =>
+    `<div class="gp-info-item">
+       <div class="gp-info-label">${item.label}</div>
+       <div class="gp-info-val">${item.val}</div>
+     </div>`
+  ).join('');
+
+  const html = `
+    <div class="gp-hero rv">
+      ${heroImgHtml}
+      <div class="gp-hero-overlay">
+        <div class="gp-hero-tags">${tagsHtml}</div>
+        <div class="gp-hero-name">${g.name}</div>
+        <div class="gp-hero-pitch">${pitch}</div>
+      </div>
+      <div class="gp-hero-badge">
+        <div class="gp-hero-badge-dot"></div>
+        LIVE
+      </div>
+    </div>
+
+    <div class="gp-btns">
+      <button class="gp-btn-play" onclick="window.location.href='${g.playUrl}'">${L.play}</button>
+      <button class="gp-btn-back" onclick="switchTab('games')">${L.back}</button>
+    </div>
+
+    ${screenshotsHtml}
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.howTitle}</div>
+      <div class="gp-how-list">${howItems}</div>
+      ${piNoteHtml}
+    </div>
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.aboutTitle}</div>
+      <p class="gp-about-text">${about}</p>
+      ${g.dev ? `<p class="gp-about-text" style="opacity:.6;font-size:.74rem;">${L.dev}: ${g.dev}</p>` : ''}
+    </div>
+
+    <div class="gp-section">
+      <div class="gp-section-title">${L.infoTitle}</div>
+      <div class="gp-info-grid">${infoItems}</div>
+    </div>
+  `;
+
+  document.getElementById('gp-content').innerHTML = html;
+
+  /* Activer la vue */
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-game').classList.add('active');
+
+  /* Sync nav — aucun onglet actif (page non listée dans la nav) */
+  document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+
+  window.scrollTo({top:0, behavior:'smooth'});
+  setTimeout(revealVisible, 80);
+}
 
 </script>
 
