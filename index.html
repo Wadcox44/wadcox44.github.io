@@ -772,21 +772,40 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 }
 
 /* Boutons langue */
-.hdr-lang {
-  background: transparent;
-  border: 1px solid rgba(0,243,255,.18);
-  color: rgba(200,216,232,.5);
+/* Sélecteur langue */
+#lang-select {
+  background: rgba(5,11,20,.95);
+  border: 1px solid rgba(0,243,255,.22);
+  color: rgba(200,216,232,.7);
   font-family: 'Orbitron', monospace;
   font-size: .42rem;
-  letter-spacing: .8px;
-  padding: 3px 7px;
+  letter-spacing: .5px;
+  padding: 4px 6px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all .2s;
-  white-space: nowrap;
+  border-radius: 4px;
+  transition: border-color .2s, color .2s;
+  appearance: none;
+  -webkit-appearance: none;
+  /* petite flèche discrète */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(0,243,255,.4)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+  max-width: 130px;
 }
-.hdr-lang.on { background: rgba(0,243,255,.1); border-color: var(--cy); color: var(--cy); }
-.hdr-lang:hover { border-color: var(--cy); color: var(--cy); }
+#lang-select:focus,
+#lang-select:hover {
+  border-color: var(--cy);
+  color: var(--cy);
+  outline: none;
+}
+#lang-select option {
+  background: #050b14;
+  color: #c8d8e8;
+  font-size: .8rem;
+}
+/* Conserver .hdr-lang pour compatibilité si référencé ailleurs */
+.hdr-lang { display: none; }
 
 /* ── BOUTON DON ── */
 #btn-don-toggle {
@@ -1823,7 +1842,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
     <!-- Logo image JV manettes -->
     <img
-      src="Images/Logo%20jeuxvideo%20final.jpg"
+      src="Images/Logo_final.png"
       alt="JEUXVIDEO.PI Logo"
       class="landing-img-logo"
       onerror="this.style.display='none';"
@@ -1869,7 +1888,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <a class="hdr-brand" onclick="showTab('home')" href="#">
       <!-- Logo image JV manettes (même chemin que la landing) -->
       <img
-        src="Images/Logo%20jeuxvideo%20final.jpg"
+        src="Images/Logo_final.png"
         alt="JV"
         class="hdr-brand-img"
         onerror="this.style.display='none'"
@@ -1886,12 +1905,24 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       ♥ DON
     </button>
 
-    <!-- DROITE : langues collées au bord droit -->
+    <!-- DROITE : sélecteur de langue -->
     <div id="hdr-right">
-      <!-- Langue EN (priorité) -->
-      <button class="hdr-lang on" onclick="setLang('en')">🇬🇧 EN</button>
-      <!-- Langue FR (secondaire) -->
-      <button class="hdr-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+      <select id="lang-select" onchange="setLang(this.value)" aria-label="Language">
+        <option value="en" selected>🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇧🇷 Português</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="tr">🇹🇷 Türkçe</option>
+        <option value="vi">🇻🇳 Tiếng Việt</option>
+        <option value="id">🇮🇩 Indonesia</option>
+        <option value="ph">🇵🇭 Filipino</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+      </select>
     </div>
 
   </div><!-- /header-top -->
@@ -2677,25 +2708,144 @@ function filterGames(cat,btn){
 /* LANG */
 let lang='en';
 function setLang(l){
-  lang=l;
-  document.documentElement.setAttribute('data-lang',l);
-  /* Sync tous les boutons langue (ancien .lang-btn + nouveau .hdr-lang) */
-  document.querySelectorAll('.lang-btn,.hdr-lang').forEach(b=>b.classList.toggle('on',b.textContent.includes(l.toUpperCase())));
-  document.querySelectorAll('[data-fr][data-en]').forEach(el=>{
-    const val=el.getAttribute('data-'+l);if(!val)return;
-    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=val;
-    else if(el.tagName==='BUTTON'||el.tagName==='A')el.textContent=val;
-    else el.innerHTML=val;
+  lang = l;
+  document.documentElement.setAttribute('data-lang', l);
+
+  /* Sync sélecteur */
+  const sel = document.getElementById('lang-select');
+  if (sel) sel.value = l;
+
+  /* Textes traduits : data-{lang} sur les éléments.
+     Fallback : si data-{lang} absent → data-en (EN = langue de base).
+     Les langues sans traduction complète affichent donc l'anglais. */
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + l) || el.getAttribute('data-en');
+    if (!val) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = val;
+    else if (el.tagName === 'BUTTON' || el.tagName === 'A') el.textContent = val;
+    else el.innerHTML = val;
   });
-  const t={
-    fr:{name:'Nom / Pseudo Pi',email:'Email de contact',game:'Nom du jeu',url:'https://votre-jeu.com (optionnel)',msg:'Décrivez votre jeu et vos attentes...',cat:'Catégorie du jeu',o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']},
-    en:{name:'Name / Pi Username',email:'Contact email',game:'Game name',url:'https://your-game.com (optional)',msg:'Describe your game and what you expect from us...',cat:'Game category',o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']}
-  }[l];
-  const g=id=>document.getElementById(id);
-  if(g('fi-name'))g('fi-name').placeholder=t.name;if(g('fi-email'))g('fi-email').placeholder=t.email;
-  if(g('fi-game'))g('fi-game').placeholder=t.game;if(g('fi-url'))g('fi-url').placeholder=t.url;
-  if(g('fi-msg'))g('fi-msg').placeholder=t.msg;if(g('fi-cat-ph'))g('fi-cat-ph').textContent=t.cat;
-  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{const el=g(id);if(el)el.textContent=t.o[i];});
+
+  /* Placeholders formulaires — dictionnaire multi-langues */
+  const DICT = {
+    en: {
+      name:'Name / Pi Username', email:'Contact email',
+      game:'Game name', url:'https://your-game.com (optional)',
+      msg:'Describe your game and what you expect from us...',
+      cat:'Game category',
+      subj:'Subject', yourmsg:'Your message...',
+      devname:'Developer / studio name *', gameType:'Game type *',
+      pitch:'Short pitch (2–3 sentences) *',
+      mediaurl:'Screenshots / media link (drive, imgur...)',
+      addmsg:'Additional message (optional)',
+      appname:'Your name or username *', appmail:'Your email *',
+      apppos:'Position *', appmotiv:'Tell us about yourself — who you are, why you want to help *',
+      appdispo:'Your availability (hours/week, timezone...)',
+      o:['Strategy','Action / Arcade','Puzzle / Thinking','RPG / Adventure','Casual / Idle','Other']
+    },
+    fr: {
+      name:'Nom / Pseudo Pi', email:'Email de contact',
+      game:'Nom du jeu', url:'https://votre-jeu.com (optionnel)',
+      msg:'Décrivez votre jeu et vos attentes...',
+      cat:'Catégorie du jeu',
+      subj:'Sujet', yourmsg:'Votre message...',
+      devname:'Nom du développeur / studio *', gameType:'Type de jeu *',
+      pitch:'Court pitch (2–3 phrases) *',
+      mediaurl:'Lien captures / médias (drive, imgur...)',
+      addmsg:'Message complémentaire (optionnel)',
+      appname:'Ton nom ou pseudo *', appmail:'Ton email *',
+      apppos:'Poste souhaité *', appmotiv:"Présente-toi brièvement — qui tu es, pourquoi tu veux m'aider *",
+      appdispo:'Tes disponibilités (heures/semaine, timezone...)',
+      o:['Stratégie','Action / Arcade','Puzzle / Réflexion','RPG / Aventure','Casual / Idle','Autre']
+    },
+    es: {
+      name:'Nombre / Usuario Pi', email:'Email de contacto',
+      game:'Nombre del juego', url:'https://tu-juego.com (opcional)',
+      msg:'Describe tu juego y lo que esperas...',
+      cat:'Categoría del juego',
+      subj:'Asunto', yourmsg:'Tu mensaje...',
+      devname:'Nombre del desarrollador / estudio *', gameType:'Tipo de juego *',
+      pitch:'Descripción corta (2–3 frases) *',
+      mediaurl:'Enlace capturas / medios',
+      addmsg:'Mensaje adicional (opcional)',
+      appname:'Tu nombre o usuario *', appmail:'Tu email *',
+      apppos:'Puesto deseado *', appmotiv:'Preséntate brevemente *',
+      appdispo:'Tu disponibilidad (horas/semana, zona horaria...)',
+      o:['Estrategia','Acción / Arcade','Puzzle / Pensamiento','RPG / Aventura','Casual / Idle','Otro']
+    },
+    pt: {
+      name:'Nome / Username Pi', email:'Email de contato',
+      game:'Nome do jogo', url:'https://seu-jogo.com (opcional)',
+      msg:'Descreva seu jogo e o que espera...',
+      cat:'Categoria do jogo',
+      subj:'Assunto', yourmsg:'Sua mensagem...',
+      devname:'Nome do desenvolvedor / estúdio *', gameType:'Tipo de jogo *',
+      pitch:'Pitch curto (2–3 frases) *',
+      mediaurl:'Link capturas / mídia',
+      addmsg:'Mensagem adicional (opcional)',
+      appname:'Seu nome ou usuário *', appmail:'Seu email *',
+      apppos:'Cargo desejado *', appmotiv:'Apresente-se brevemente *',
+      appdispo:'Sua disponibilidade (horas/semana, fuso horário...)',
+      o:['Estratégia','Ação / Arcade','Puzzle / Raciocínio','RPG / Aventura','Casual / Idle','Outro']
+    }
+    /* Les autres langues (de, zh, ja, ko, ar, tr, vi, id, ph, hi) utilisent
+       le fallback EN automatique via getAttribute('data-en') ci-dessus. */
+  };
+
+  const t = DICT[l] || DICT['en'];
+  const g = id => document.getElementById(id);
+
+  /* Formulaire jeux (ancien fi-*) */
+  if (g('fi-name'))    g('fi-name').placeholder    = t.name;
+  if (g('fi-email'))   g('fi-email').placeholder   = t.email;
+  if (g('fi-game'))    g('fi-game').placeholder    = t.game;
+  if (g('fi-url'))     g('fi-url').placeholder     = t.url;
+  if (g('fi-msg'))     g('fi-msg').placeholder     = t.msg;
+  if (g('fi-cat-ph'))  g('fi-cat-ph').textContent  = t.cat;
+  ['o1','o2','o3','o4','o5','o6'].forEach((id,i)=>{
+    const el = g(id); if (el) el.textContent = t.o[i];
+  });
+
+  /* Formulaire contact */
+  const cf = document.getElementById('contact-form');
+  if (cf) {
+    const n = cf.querySelector('[name="name"]');     if(n)  n.placeholder  = t.name;
+    const em= cf.querySelector('[name="email"]');    if(em) em.placeholder = t.email;
+    const s = cf.querySelector('[name="subject"]');  if(s)  s.placeholder  = t.subj;
+    const m = cf.querySelector('[name="message"]');  if(m)  m.placeholder  = t.yourmsg;
+  }
+
+  /* Modale Proposer un jeu */
+  const df = document.getElementById('dev-modal-form');
+  if (df) {
+    const dn = df.querySelector('[name="dev_name"]');  if(dn) dn.placeholder  = t.devname;
+    const de = df.querySelector('[name="dev_email"]'); if(de) de.placeholder  = t.email;
+    const gn = df.querySelector('[name="game_name"]'); if(gn) gn.placeholder  = t.game;
+    const gt = df.querySelector('[name="game_type"]'); if(gt) gt.options[0] && (gt.options[0].textContent = t.gameType);
+    const pi = df.querySelector('[name="pitch"]');     if(pi) pi.placeholder  = t.pitch;
+    const gu = df.querySelector('[name="game_url"]');  if(gu) gu.placeholder  = 'https://... (optional)';
+    const mu = df.querySelector('[name="media_url"]'); if(mu) mu.placeholder  = t.mediaurl;
+    const am = df.querySelector('[name="message"]');   if(am) am.placeholder  = t.addmsg;
+  }
+
+  /* Formulaire candidature inline */
+  const rf = document.getElementById('recruit-inline-form');
+  if (rf) {
+    const rn = rf.querySelector('[name="name"]');         if(rn) rn.placeholder  = t.appname;
+    const re = rf.querySelector('[name="email"]');        if(re) re.placeholder  = t.appmail;
+    const ro = rf.querySelector('[name="role"]');         if(ro && ro.options[0]) ro.options[0].textContent = t.apppos;
+    const rm = rf.querySelector('[name="motivation"]');   if(rm) rm.placeholder  = t.appmotiv;
+    const rd = rf.querySelector('[name="disponibilites"]');if(rd) rd.placeholder = t.appdispo;
+  }
+
+  /* Formulaire candidature modal recrutement */
+  const rcf = document.getElementById('recruit-modal-form');
+  if (rcf) {
+    const rn = rcf.querySelector('[name="applicant_name"]');  if(rn) rn.placeholder = t.appname;
+    const re = rcf.querySelector('[name="applicant_email"]'); if(re) re.placeholder = t.appmail;
+    const rs = rcf.querySelector('[name="role"]');            if(rs && rs.options[0]) rs.options[0].textContent = t.apppos;
+    const rm = rcf.querySelector('[name="motivation"]');      if(rm) rm.placeholder = t.appmotiv;
+  }
 }
 
 /* DON */
