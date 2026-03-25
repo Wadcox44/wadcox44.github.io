@@ -1833,7 +1833,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   color: rgba(200,216,232,.25); letter-spacing: 1px; margin-top: 5px;
 }
 
-/* ── PI PIXEL WAR — carte portail ── */
+/* ── GOLD PIXEL — carte portail ── */
 .pw-pixel {
   position: absolute;
   border-radius: 2px;
@@ -2217,9 +2217,9 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         🎮 Featured game
       </div>
       <div class="hero-headline-title"
-           data-fr="Pixel War.<br><span>Conquiers ta place.</span>"
-           data-en="Pixel War.<br><span>Conquer your place.</span>">
-        Pixel War.<br><span>Conquer your place.</span>
+           data-fr="Gold Pixel.<br><span>Conquiers ta place.</span>"
+           data-en="Gold Pixel.<br><span>Conquer your place.</span>">
+        Gold Pixel.<br><span>Conquer your place.</span>
       </div>
       <div class="hero-headline-sub"
            data-fr="Pose ton pixel, défends ton territoire, écrase tes adversaires."
@@ -2231,17 +2231,17 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <!-- Carte Pi-xel War redesignée -->
     <div class="hero-card-new" onclick="showGame('pixelwar')">
       <!-- Image de fond Pixel War -->
-      <img src="Images/Gold Pixel.png" alt="Pixel War" class="hero-pw-img" onerror="this.style.display='none'">
+      <img src="Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel" class="hero-pw-img" onerror="this.style.display='none'">
 
       <!-- Badge saison — centré en haut -->
       <div class="hero-badge-season"
            data-fr="SAISON 1" data-en="SEASON 1">SEASON 1</div>
 
-      <!-- Overlay : titre PIXEL WAR centré -->
+      <!-- Overlay : titre GOLD PIXEL centré -->
       <div class="hero-card-overlay">
 
-        <!-- Titre PIXEL WAR centré -->
-        <div class="hero-card-game-name" style="letter-spacing:8px;text-align:center;">PIXEL WAR</div>
+        <!-- Titre GOLD PIXEL centré -->
+        <div class="hero-card-game-name" style="letter-spacing:8px;text-align:center;">GOLD PIXEL</div>
 
                 <div class="hero-card-game-tag"
              data-fr="Attaquer · Défendre · Conquérir"
@@ -2254,6 +2254,11 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
                 onclick="event.stopPropagation();window.location.href='/pixelwar'"
                 data-fr="▶ JOUER" data-en="▶ PLAY">
           ▶ PLAY
+        </button>
+        <button class="hero-cta-explore"
+                onclick="event.stopPropagation();showGame('pixelwar')"
+                data-fr="En savoir +" data-en="Learn more">
+          Learn more
         </button>
       </div>
     </div>
@@ -2279,7 +2284,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="showcase-grid">
 
       <!-- ── BREAKER ── -->
-      <div class="sc-card live rv d1" onclick="showGame('breaker')">
+      <div class="sc-card live rv d1" onclick="window.location.href='/breakout'">
         <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
         <!-- Particules néon déco -->
         <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
@@ -2301,7 +2306,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- ── STRACKER ── -->
-      <div class="sc-card live rv d2" onclick="showGame('stracker')"
+      <div class="sc-card live rv d2" onclick="window.location.href='/stacker'"
            style="border-color:rgba(0,243,255,.38);">
         <div class="sc-badge" style="background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.5);color:var(--cy);top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
           <div class="sc-badge-dot" style="background:var(--cy);box-shadow:0 0 5px var(--cy);"></div>NEW
@@ -2480,20 +2485,20 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div id="games-list" style="display:flex;flex-direction:column;gap:10px;">
       <div class="av-card rv" data-cat="pixel" onclick="showGame('pixelwar')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center;">
-          <img src="Images/Gold%20Pixel.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
+          <img src="Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent='🟡'">
         </div>
         <div style="flex:1;min-width:0;">
-          <div class="av-title" style="margin-bottom:3px;">PIXEL WAR</div>
+          <div class="av-title" style="margin-bottom:3px;">GOLD PIXEL</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(255,170,0,.08);color:rgba(255,170,0,.7);border:1px solid rgba(255,170,0,.2);">Pixel Art</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Gallery</span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:.46rem;padding:1px 7px;border-radius:100px;background:rgba(0,243,255,.08);color:rgba(0,243,255,.6);border:1px solid rgba(0,243,255,.15);">Votes</span>
           </div>
-          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="The first collaborative pixel war on Pi Network.">The first collaborative pixel war on Pi Network.</div>
+          <div class="av-text" data-fr="Dessine, partage et vote pour du pixel art 80×45." data-en="The first collaborative pixel grid on Pi Network.">The first collaborative pixel grid on Pi Network.</div>
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="arcade" onclick="showGame('breaker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="arcade" onclick="window.location.href='/breakout'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#001020,#002035);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(0,243,255,.3);">🧱</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:var(--cy);margin-bottom:3px;">BREAKER</div>
@@ -2518,7 +2523,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="puzzle" onclick="showGame('stracker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/stacker'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a0020,#180040);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(204,68,255,.3);">🔷</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:#cc44ff;margin-bottom:3px;">STRACKER</div>
@@ -2585,8 +2590,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         JEUXVIDEO.PI — The portal is <span>live</span>.
       </div>
       <div class="nv-featured-desc"
-           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Pixel War, Breaker, Stracker et 2048 sont disponibles dès maintenant. Attaque, défends, joue — l'aventure commence."
-           data-en="The 1st independent Pi Network gaming portal is officially live. Pixel War, Breaker, Stracker &amp; 2048 are available now. War, defend, play — the adventure starts here.">
+           data-fr="Le 1er portail indépendant de jeux Pi Network est officiellement lancé. Gold Pixel, Breaker, Stracker et 2048 sont disponibles dès maintenant. Attaque, défends, joue — l'aventure commence."
+           data-en="The 1st independent Pi Network gaming portal is officially live. Gold Pixel, Breaker, Stracker &amp; 2048 are available now. Place, conquer, play — the adventure starts here.">
         The 1st independent Pi Network gaming portal is officially live. Pi-xel War, Neon Breaker, 2048 &amp; Stracker are available now. War, defend, play — the adventure starts here.
       </div>
       <div class="nv-featured-meta">
@@ -2604,8 +2609,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
           <div class="nv-item-head">
             <span class="nv-item-badge live">LIVE</span>
             <span class="nv-item-title"
-                  data-fr="Pixel War — Conquiers ta place"
-                  data-en="Pixel War — Conquer your place">Pixel War — Conquer your place</span>
+                  data-fr="Gold Pixel — Conquiers ta place"
+                  data-en="Gold Pixel — Conquer your place">Gold Pixel — Conquer your place</span>
           </div>
           <div class="nv-item-desc"
                data-fr="Crée des œuvres pixel art 80×45, publie dans la galerie, vote pour tes favoris. Chaque dessin raconte une histoire. Le challenge du jour t'attend."
@@ -2617,7 +2622,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- Neon Breaker -->
-      <div class="nv-item live-item clickable rv d2" onclick="showGame('breaker')">
+      <div class="nv-item live-item clickable rv d2" onclick="window.location.href='/breakout'">
         <div class="nv-item-icon">🧱</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2655,7 +2660,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- Stracker -->
-      <div class="nv-item new-item clickable rv d1" onclick="showGame('stracker')">
+      <div class="nv-item new-item clickable rv d1" onclick="window.location.href='/stacker'">
         <div class="nv-item-icon">🔷</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -3208,11 +3213,11 @@ window.addEventListener('DOMContentLoaded', function() {
 const GAMES_DATA = {
   pixelwar: {
     id:       'pixelwar',
-    name:     'PIXEL WAR',
-    pitch:    'The first collaborative pixel war on Pi Network. Place your pixel, defend your territory, crush your rivals in real time.',
+    name:     'GOLD PIXEL',
+    pitch:    'The first collaborative pixel canvas on Pi Network. Place your pixel, defend your territory, crush your rivals in real time.',
     pitch_fr: 'La première guerre de pixels collaborative sur Pi Network. Pose ton pixel, défends ton territoire, écrase tes adversaires en temps réel.',
-    tags:     [{label:'War',cls:'or'},{label:'Multiplayer',cls:'cy'},{label:'Live',cls:'gr'}],
-    img:      'Images/Gold_Pixel.png',
+    tags:     [{label:'Gold',cls:'or'},{label:'Multiplayer',cls:'cy'},{label:'Live',cls:'gr'}],
+    img:      'Images/Logo_Gold_Pixel_Final.jpg',
     screenshots: [],
     playUrl:  '/pixelwar',
     how: [
@@ -3233,7 +3238,7 @@ const GAMES_DATA = {
     piPurchase: true,
     piNote:     'Pi connection required to play. In-game shop: buy extra pixel packs (1 Pi / 2 Pi).',
     piNote_fr:  'Connexion Pi requise pour jouer. Boutique in-game : packs de pixels (1 Pi / 2 Pi).',
-    about:     'Pixel War is inspired by Reddit’s r/Place experiment. The canvas is shared in real time with all players. Every pixel placement is permanent until another player covers it. Build patterns, defend them, or go to war.',
+    about:     'Gold Pixel is inspired by Reddit’s r/Place experiment. The canvas is shared in real time with all players. Every pixel placement is permanent until another player covers it. Build patterns, defend them, or go to war.',
     about_fr:  "Pixel War s'inspire de l'expérience Reddit r/Place. Le canvas est partagé en temps réel avec tous les joueurs. Chaque pixel posé est permanent jusqu'à ce qu'un autre joueur le recouvre.",
     type:      'Multiplayer · Pixel Art · War',
     status:    'Live — Season 1',
