@@ -237,8 +237,10 @@ async function connectDB() {
     await mongoose.connect(process.env.MONGO_URI);
 
     // Injecter db dans le shop
-    ShopRoutes.inject(db, withPiUser, PI_API_KEY);
-    ensurePixelwarIndexes(); // Pi-xel War indexes
+    if (db) {
+  ShopRoutes.inject(db, withPiUser, PI_API_KEY);
+  ensurePixelwarIndexes();
+}
 
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
   } catch (e) {
