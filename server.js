@@ -231,6 +231,11 @@ async function connectDB() {
     await db.collection('inventory').createIndex({ piUsername: 1, status: 1 });
     await db.collection('inventory').createIndex({ piUsername: 1, itemId: 1, status: 1 });
 
+    async function connectDB() {
+  try {
+    // connexion Mongo
+    await mongoose.connect(process.env.MONGO_URI);
+
     // Injecter db dans le shop
     ShopRoutes.inject(db, withPiUser, PI_API_KEY);
     ensurePixelwarIndexes(); // Pi-xel War indexes
@@ -238,11 +243,12 @@ async function connectDB() {
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
   } catch (e) {
     console.error('❌ MongoDB erreur :', e.message);
-    process.exit(1);
+    console.log('⚠️ Le serveur continue sans MongoDB');
+    // ❌ SUPPRIMÉ : process.exit(1);
   }
 }
-connectDB();
 
+connectDB();
 
 // ═══════════════════════════════════════════════════════════════
 //  HELPER — vérification token Pi Network (inchangé)
