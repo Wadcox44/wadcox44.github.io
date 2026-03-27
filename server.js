@@ -2125,9 +2125,19 @@ app.post('/api/admin/season-snapshot/manual', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 //  FICHIERS STATIQUES (inchangés)
 // ═══════════════════════════════════════════════════════════════
-app.get('/validation-key.txt', (req, res) => res.send(PI_API_KEY));
-app.get('/health', (req, res) => { res.header('Access-Control-Allow-Origin', '*'); res.status(200).send('OK'); });
-app.get('/ping',   (req, res) => { res.header('Access-Control-Allow-Origin', '*'); res.status(200).json({ status: 'alive', ts: new Date().toISOString() }); });
+app.get('/validation-key.txt', (req, res) => {
+  res.send(PI_API_KEY);
+});
+
+app.get('/health', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.status(200).send('OK');
+});
+
+app.get('/ping', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.status(200).json({ status: 'alive', ts: new Date().toISOString() });
+});
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2444,39 +2454,53 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
   }
 });
 
-// ── GOLD PIXEL ───────────────────────────────────────────────────────────────
-// Fichier : Games/Goldpixel/goldpixel.html
-// Accès   : https://jeuxvideo.onrender.com/goldpixel
-app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
+// ══════════════════════════════════════════════════════════════════
+//  ROUTES FICHIERS STATIQUES — HTML entry points
+//  Chaque route utilise sendFile avec callback d'erreur explicite.
+//  Les app.use(express.static) par route ont été supprimés pour
+//  éviter les conflits. Le express.static(__dirname) en fin de
+//  fichier sert les assets statiques (CSS, JS, images).
+// ══════════════════════════════════════════════════════════════════
+
+// Gold Pixel — Games/Goldpixel/goldpixel.html
 app.get('/goldpixel', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'),
-    (err) => {
-      if (err) {
-        res.status(404).send('goldpixel.html introuvable — vérifier Games/Goldpixel/');
-      }
-    }
-  );
+  res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), (err) => {
+    if (err) res.status(404).send('File not found: Games/Goldpixel/goldpixel.html');
+  });
 });
 
-app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
-app.get('/breakout', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), err => { if (err) res.status(404).send('breakout.html introuvable'); }));
+app.get('/breakout', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), (err) => {
+    if (err) res.status(404).send('File not found: Games/Breakout/breakout.html');
+  });
+});
 
-app.use('/stacker', express.static(path.join(__dirname, 'Games', 'Stacker')));
-app.get('/stacker', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Stacker', 'index.html'), err => { if (err) res.status(404).send('index.html introuvable'); }));
+app.get('/stacker', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', 'Stacker', 'index.html'), (err) => {
+    if (err) res.status(404).send('File not found: Games/Stacker/index.html');
+  });
+});
 
-app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
-app.get('/2048', (req, res) => res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), err => { if (err) res.status(404).send('index.html introuvable'); }));
+app.get('/2048', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), (err) => {
+    if (err) res.status(404).send('File not found: Games/2048/index.html');
+  });
+});
 
 // ── PI PIXEL WAR ─────────────────────────────────────────────────────────────
 // /pixelwar → redirige vers /goldpixel (renommage du projet)
 app.get('/pixelwar', (req, res) => res.redirect(301, '/goldpixel'));
 
-// Route racine explicite → index.html (portail)
-app.get('/', (req, res) => res.sendFile(
-  path.join(__dirname, 'index.html'),
-  err => { if (err) res.status(404).send('index.html introuvable'); }
-));
+// Route racine — portail (index.html)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+    if (err) res.status(404).send('File not found: index.html');
+  });
+});
+
+// Assets statiques (images, CSS, JS…) servis depuis la racine
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.6 actif sur le port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 JEUXVIDEO.PI v3.6 actif sur le port ${PORT}`);
+});
