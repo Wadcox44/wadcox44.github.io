@@ -2444,8 +2444,14 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
   }
 });
 
+// ── GOLD PIXEL ───────────────────────────────────────────────────────────────
+// Fichier : Games/Goldpixel/goldpixel.html
+// Accès   : https://jeuxvideo.onrender.com/goldpixel
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
-app.get('/goldpixel', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), err => { if (err) res.status(404).send('goldpixel.html introuvable'); }));
+app.get('/goldpixel', (req, res) => res.sendFile(
+  path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'),
+  err => { if (err) res.status(404).send('goldpixel.html introuvable — vérifier Games/Goldpixel/'); }
+));
 
 app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
 app.get('/breakout', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), err => { if (err) res.status(404).send('breakout.html introuvable'); }));
@@ -2457,16 +2463,14 @@ app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
 app.get('/2048', (req, res) => res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), err => { if (err) res.status(404).send('index.html introuvable'); }));
 
 // ── PI PIXEL WAR ─────────────────────────────────────────────────────────────
-// Fichier : Games/PixelWar/pixelwar-pi.html
-// Accès   : https://jeuxvideo.onrender.com/pixelwar
-// Jeu pixel war collaboratif style r/Place, mobile-first, Pi Network
-// ─────────────────────────────────────────────────────────────────────────────
-app.use('/pixelwar', express.static(path.join(__dirname, 'Games', 'PixelWar')));
-app.get('/pixelwar', (req, res) => res.sendFile(
-  path.join(__dirname, 'Games', 'PixelWar', 'pixelwar-pi.html'),
-  err => { if (err) res.status(404).send('pixelwar-pi.html introuvable — vérifier Games/PixelWar/'); }
-));
+// /pixelwar → redirige vers /goldpixel (renommage du projet)
+app.get('/pixelwar', (req, res) => res.redirect(301, '/goldpixel'));
 
+// Route racine explicite → index.html (portail)
+app.get('/', (req, res) => res.sendFile(
+  path.join(__dirname, 'index.html'),
+  err => { if (err) res.status(404).send('index.html introuvable'); }
+));
 app.use(express.static(path.join(__dirname)));
 
 app.listen(PORT, () => console.log(`🚀 JEUXVIDEO.PI v3.6 actif sur le port ${PORT}`));
