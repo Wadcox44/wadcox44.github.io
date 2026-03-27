@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JEUXVIDEO.PI — Pi Network Gaming</title>
+<!-- Pi Network SDK -->
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2986,9 +2988,66 @@ function setLang(l){
 /* DON */
 let selAmt='3';
 function pick(el,v){document.querySelectorAll('.btn-don:not(.envoyer)').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');selAmt=v;}
-function sendDon(){
-  if(selAmt==='?'){const v=prompt(lang==='fr'?'Montant en Pi :':'Amount in Pi:');if(!v||isNaN(v))return;selAmt=v;}
-  toast(lang==='fr'?`Don de ${selAmt} Pi — Merci beaucoup ! 🙏`:`Donation of ${selAmt} Pi — Thank you! 🙏`,'gold');
+/* ── Don Pi — paiement réel via Pi SDK ── */
+let _piConnectedPortal = false;
+let _piUsernamePortal  = '';
+
+function _ensurePiInit() {
+  if (!window.Pi) return false;
+  try { Pi.init({ version: '2.0', sandbox: true }); } catch(e) {}
+  return true;
+}
+
+function sendDon() {
+  if (selAmt === '?') {
+    const v = prompt(lang === 'fr' ? 'Montant en Pi :' : 'Amount in Pi:');
+    if (!v || isNaN(v) || Number(v) <= 0) return;
+    selAmt = v;
+  }
+  if (!_ensurePiInit()) {
+    toast(lang === 'fr' ? 'Pi SDK indisponible' : 'Pi SDK unavailable', '');
+    return;
+  }
+  const amount = parseFloat(selAmt);
+  const label  = lang === 'fr' ? `Don ${amount} Pi — JeuxVideo.Pi` : `Donation ${amount} Pi — JeuxVideo.Pi`;
+
+  /* Si pas encore connecté, authentifier d'abord */
+  if (!_piConnectedPortal) {
+    Pi.authenticate(['username'], auth => {
+      _piConnectedPortal = true;
+      _piUsernamePortal  = auth.user.username;
+      _doPiDon(amount, label);
+    }, err => {
+      toast(lang === 'fr' ? 'Connexion Pi échouée' : 'Pi login failed', '');
+    });
+  } else {
+    _doPiDon(amount, label);
+  }
+}
+
+function _doPiDon(amount, label) {
+  Pi.createPayment(
+    { amount, memo: label, metadata: { type: 'donation', portal: 'jeuxvideo.pi' } },
+    {
+      onReadyForServerApproval: paymentId => {
+        fetch('/api/pixelwar/shop/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId })
+        }).catch(() => {});
+      },
+      onReadyForServerCompletion: (paymentId, txid) => {
+        fetch('/api/pixelwar/shop/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId, txid, type: 'support', username: _piUsernamePortal })
+        }).catch(() => {});
+        toast(lang === 'fr' ? `✅ Don de ${amount} Pi envoyé ! Merci 🙏` : `✅ ${amount} Pi donation sent! Thank you 🙏`, 'gold');
+      },
+      onCancel: () => toast(lang === 'fr' ? 'Don annulé' : 'Donation cancelled', ''),
+      onError:  () => toast(lang === 'fr' ? 'Erreur paiement Pi' : 'Pi payment error', ''),
+    }
+  );
 }
 
 /* FORM */
