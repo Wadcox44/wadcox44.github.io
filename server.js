@@ -2448,10 +2448,16 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
 // Fichier : Games/Goldpixel/goldpixel.html
 // Accès   : https://jeuxvideo.onrender.com/goldpixel
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
-app.get('/goldpixel', (req, res) => res.sendFile(
-  path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'),
-  err => { if (err) res.status(404).send('goldpixel.html introuvable — vérifier Games/Goldpixel/'); }
-) );
+app.get('/goldpixel', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'),
+    (err) => {
+      if (err) {
+        res.status(404).send('goldpixel.html introuvable — vérifier Games/Goldpixel/');
+      }
+    }
+  );
+});
 
 app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
 app.get('/breakout', (req, res) => res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), err => { if (err) res.status(404).send('breakout.html introuvable'); }));
