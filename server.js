@@ -199,6 +199,7 @@ let db, artworks, users;
 async function connectDB() {
   try {
     await client.connect();
+
     db       = client.db('jeuxvideo_db');
     artworks = db.collection('artworks');
     users    = db.collection('users');
@@ -209,49 +210,37 @@ async function connectDB() {
     await artworks.createIndex({ views: -1 });
     await artworks.createIndex({ 'author.name': 1 });
     await users.createIndex({ piUsername: 1 }, { unique: true });
+
     await db.collection('contacts').createIndex({ receivedAt: -1 });
     await db.collection('contacts').createIndex({ type: 1 });
     await db.collection('neonbreaker_scores').createIndex({ score: -1 });
 
-    // ── Index pour les nouveaux systèmes ──
-    // Terrain fatigue : recherche par cellule + timestamp
+    // Nouveaux index
     await db.collection('cell_repaints').createIndex({ cellKey: 1, ts: -1 });
-    // First pixel prot : recherche par joueur
     await db.collection('pixel_protections').createIndex({ piUsername: 1 });
-    // Season logo : recherche par label de saison
     await db.collection('season_state').createIndex({ seasonLabel: 1 }, { unique: true });
 
-    // ── Index pour les systèmes configurables (v3.0) ──
-    // (déjà créés par les services si manquants — pas de risque)
-
-    // ── Index shop (v3.1) ──
     await db.collection('credit_wallets').createIndex({ piUsername: 1 }, { unique: true });
     await db.collection('credit_ledger').createIndex({ piUsername: 1, createdAt: -1 });
     await db.collection('credit_ledger').createIndex({ ref: 1 });
     await db.collection('inventory').createIndex({ piUsername: 1, status: 1 });
     await db.collection('inventory').createIndex({ piUsername: 1, itemId: 1, status: 1 });
 
-    async function connectDB() {
-  try {
-    // connexion Mongo
-    await mongoose.connect(process.env.MONGO_URI);
-
     // Injecter db dans le shop
     if (db) {
-  ShopRoutes.inject(db, withPiUser, PI_API_KEY);
-  ensurePixelwarIndexes();
-}
+      ShopRoutes.inject(db, withPiUser, PI_API_KEY);
+      ensurePixelwarIndexes();
+    }
 
-    console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
+    console.log('✅ JEUXVIDEO.PI — MongoDB connecté');
+
   } catch (e) {
     console.error('❌ MongoDB erreur :', e.message);
     console.log('⚠️ Le serveur continue sans MongoDB');
-    // ❌ SUPPRIMÉ : process.exit(1);
   }
 }
 
 connectDB();
-
 // ═══════════════════════════════════════════════════════════════
 //  HELPER — vérification token Pi Network (inchangé)
 // ═══════════════════════════════════════════════════════════════
