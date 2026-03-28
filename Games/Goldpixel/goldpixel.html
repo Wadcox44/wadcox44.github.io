@@ -352,53 +352,159 @@ html, body {
 .rule-ul li .ic { flex-shrink:0; font-size:.78rem; }
 
 /* ══════════════════════════
-   BOUTIQUE
+   BOUTIQUE — layout landscape no-scroll
+   Modale boutique dédiée, plein écran landscape
 ══════════════════════════ */
-.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
-#shop-active-tank {
-  font-size:.56rem; padding:6px 10px; border-radius:7px; margin-bottom:8px;
-  background:rgba(255,255,255,.04); border:1px solid var(--border);
-  text-align:center; line-height:1.5;
+
+/* Override m-box pour la boutique uniquement */
+#m-shop .m-box {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
+
+/* En-tête boutique */
+#shop-header {
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 14px 6px;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,.2);
+}
+#shop-header .sh-title {
+  font-family:"Space Mono",monospace; font-size:.78rem; font-weight:700;
+  background:linear-gradient(135deg,var(--pi-l),var(--gold));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; letter-spacing:.06em;
+}
+#shop-active-tank {
+  font-size:.48rem; color:var(--dim); line-height:1.4;
+}
+#shop-close-btn {
+  width:32px; height:32px; border-radius:8px; flex-shrink:0;
+  border:1px solid var(--border); background:rgba(255,255,255,.06);
+  color:var(--dim); font-size:.9rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+}
+#shop-close-btn:active { background:rgba(255,255,255,.14); }
+
+/* Corps — 2 colonnes : packs | soutien */
+#shop-body {
+  flex:1; min-height:0;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:0;
+}
+
+/* ─ Colonne gauche : 3 packs en ligne ─ */
+#shop-packs {
+  padding:8px 10px;
+  display:flex; flex-direction:column; gap:6px; justify-content:center;
+}
+.shop-sub-title {
+  font-family:"Chakra Petch",sans-serif; font-size:.42rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
+  margin-bottom:2px;
+}
+/* Note durée */
+.shop-note {
+  font-size:.4rem; color:var(--dim); opacity:.65;
+}
+/* Grille des 3 packs horizontale */
+#shop-packs-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+}
+
+/* Carte pack */
 .shop-card {
   background:rgba(255,255,255,.04); border:1px solid var(--border);
-  border-radius:9px; padding:10px 8px; text-align:center;
-  display:flex; flex-direction:column; align-items:center; gap:5px;
-  position:relative; transition:transform .15s;
+  border-radius:10px; padding:8px 6px; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transition:transform .12s; cursor:pointer;
 }
-.shop-card:active { transform:scale(.97); }
-.shop-card.pack-decouverte { border-color:rgba(50,180,255,.5); background:rgba(50,180,255,.06); }
+.shop-card:active { transform:scale(.95); }
+.shop-ico   { font-size:1.3rem; line-height:1; }
+.shop-name  {
+  font-family:"Chakra Petch",sans-serif; font-size:.58rem; font-weight:700;
+  color:var(--text); line-height:1.1;
+}
+.shop-desc  { font-size:.44rem; color:var(--dim); line-height:1.3; }
+.shop-gold-detail { font-size:.42rem; color:#ffd700; font-weight:600; }
+.shop-duration    { font-size:.4rem;  color:var(--dim); opacity:.7; }
+.shop-price {
+  font-family:"Space Mono",monospace; font-size:.58rem;
+  color:var(--gold); font-weight:700; margin-top:1px;
+}
+
+/* Styles par pack */
+.shop-card.pack-decouverte { border-color:rgba(50,180,255,.45); background:rgba(50,180,255,.06); }
 .shop-card.pack-decouverte .shop-name { color:#32b4ff; }
 .shop-card.pack-decouverte .shop-ico  { animation:pulse-ico 2.2s ease-in-out infinite; }
-.shop-card.pack-middle { border-color:rgba(160,80,255,.5); background:rgba(160,80,255,.07); box-shadow:0 0 10px rgba(160,80,255,.12); }
+.shop-card.pack-middle { border-color:rgba(160,80,255,.45); background:rgba(160,80,255,.07); box-shadow:0 0 8px rgba(160,80,255,.1); }
 .shop-card.pack-middle .shop-name { color:#a050ff; }
-.shop-card.pack-giga { border-color:rgba(232,60,80,.55); background:rgba(232,60,80,.08); animation:giga-glow 2.5s ease-in-out infinite; }
+.shop-card.pack-giga { border-color:rgba(232,60,80,.5); background:rgba(232,60,80,.08); animation:giga-glow 2.5s ease-in-out infinite; }
 .shop-card.pack-giga .shop-name { color:#e83c50; }
-@keyframes giga-glow { 0%,100%{box-shadow:0 0 10px rgba(232,60,80,.15);} 50%{box-shadow:0 0 22px rgba(232,60,80,.35);} }
-@keyframes pulse-ico  { 0%,100%{transform:scale(1);}                     50%{transform:scale(1.14);} }
-.shop-gold-detail { font-size:.44rem; color:#ffd700; margin-top:1px; font-weight:600; }
-.shop-duration    { font-size:.44rem; color:var(--dim); margin-top:1px; }
-.shop-card-wide {
-  background:rgba(255,255,255,.04); border:1px solid var(--border);
-  border-radius:9px; padding:10px 12px; margin-bottom:8px;
-  display:flex; align-items:center; gap:10px; text-align:left;
-}
-.shop-ico   { font-size:1.2rem; }
-.shop-name  { font-family:"Chakra Petch",sans-serif; font-size:.68rem; font-weight:700; color:var(--text); margin-bottom:1px; }
-.shop-desc  { font-size:.52rem; color:var(--dim); }
-.shop-price { font-family:"Space Mono",monospace; font-size:.6rem; color:var(--gold); }
-.shop-info  { flex:1; }
+@keyframes giga-glow { 0%,100%{box-shadow:0 0 8px rgba(232,60,80,.15);} 50%{box-shadow:0 0 18px rgba(232,60,80,.35);} }
+@keyframes pulse-ico  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+
+/* Bouton ACTIVER dans carte */
 .shop-btn {
-  padding:5px 12px; border-radius:7px; border:none;
+  margin-top:2px; padding:4px 10px; border-radius:6px; border:none;
   background:linear-gradient(135deg,#bf953f,var(--gold),#fcf6ba,var(--gold),#bf953f);
   background-size:200% auto; color:#000;
-  font-family:"Chakra Petch",sans-serif; font-size:.54rem; font-weight:700;
+  font-family:"Chakra Petch",sans-serif; font-size:.48rem; font-weight:700;
   cursor:pointer; touch-action:manipulation;
   transition:background-position .3s, transform .1s;
   -webkit-tap-highlight-color:transparent;
-  box-shadow:0 2px 7px rgba(200,148,62,.26);
+  box-shadow:0 1px 5px rgba(200,148,62,.25);
+  width:100%;
 }
-.shop-btn:active { transform:scale(.89); }
+.shop-btn:active { transform:scale(.88); }
+
+/* ─ Séparateur vertical ─ */
+#shop-divider {
+  width:1px; background:var(--border); margin:10px 0; flex-shrink:0;
+}
+
+/* ─ Colonne droite : soutien ─ */
+#shop-support {
+  width:160px; padding:10px 12px;
+  display:flex; flex-direction:column; gap:6px; justify-content:center;
+  border-left:1px solid var(--border);
+  background:rgba(255,170,0,.03);
+}
+#shop-support .sh-sup-title {
+  font-family:"Chakra Petch",sans-serif; font-size:.52rem; font-weight:700;
+  color:#ffaa00; letter-spacing:.05em; text-align:center;
+}
+#shop-support .sh-sup-sub {
+  font-size:.42rem; color:var(--dim); text-align:center; line-height:1.4;
+  margin-bottom:2px;
+}
+/* Boutons de don */
+.don-btn {
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:7px 8px; border-radius:8px; border:1px solid rgba(255,170,0,.35);
+  background:rgba(255,170,0,.08); cursor:pointer;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  transition:background .12s, transform .1s; user-select:none;
+}
+.don-btn:active { background:rgba(255,170,0,.18); transform:scale(.95); }
+.don-ico  { font-size:.9rem; }
+.don-amt  { font-family:"Space Mono",monospace; font-size:.58rem; font-weight:700; color:#ffaa00; }
+.don-lbl  { font-size:.4rem; color:var(--dim); }
+/* Bouton montant libre */
+.don-btn.don-libre {
+  border-color:rgba(240,234,208,.2); background:rgba(240,234,208,.05);
+}
+.don-btn.don-libre .don-amt { color:var(--dim); }
 
 /* ══════════════════════════
    CLASSEMENT
@@ -566,57 +672,93 @@ html, body {
 <!-- Boutique -->
 <div class="m-bg" id="m-shop">
   <div class="m-box">
-    <div class="m-h">🛒 BOUTIQUE</div>
-    <div id="shop-active-tank">Chargement...</div>
-    <p class="m-p" style="font-size:.5rem;margin-bottom:8px;opacity:.7;">5 jours par pack · 1 seul actif à la fois · retour automatique au standard à expiration</p>
-    <div class="shop-grid">
-      <div class="shop-card pack-decouverte">
-        <div class="shop-ico">🔵</div>
-        <div class="shop-name">Pack Découverte</div>
-        <div class="shop-desc">25 standard · plus de liberté</div>
-        <div class="shop-gold-detail">✦ 7 pixels Gold</div>
-        <div class="shop-duration">5 jours</div>
-        <div class="shop-price">1 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('decouverte')">ACTIVER</button>
+
+    <!-- En-tête -->
+    <div id="shop-header">
+      <div>
+        <div class="sh-title">🛒 BOUTIQUE</div>
+        <div id="shop-active-tank">Chargement...</div>
       </div>
-      <div class="shop-card pack-middle">
-        <div class="shop-ico">🟣</div>
-        <div class="shop-name">Middle Pack</div>
-        <div class="shop-desc">40 standard · création étendue</div>
-        <div class="shop-gold-detail">✦ 9 pixels Gold</div>
-        <div class="shop-duration">5 jours</div>
-        <div class="shop-price">2 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('middle')">ACTIVER</button>
-      </div>
-      <div class="shop-card pack-giga">
-        <div class="shop-ico">🔴</div>
-        <div class="shop-name">Giga Pack</div>
-        <div class="shop-desc">55 standard · expérience maximale</div>
-        <div class="shop-gold-detail">✦ 12 pixels Gold</div>
-        <div class="shop-duration">5 jours</div>
-        <div class="shop-price">4 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('giga')">ACTIVER</button>
-      </div>
-      <div class="shop-card" style="border-color:rgba(56,212,138,.35);background:rgba(56,212,138,.05);">
-        <div class="shop-ico">🟢</div>
-        <div class="shop-name" style="color:var(--green);">Pack Gratuit</div>
-        <div class="shop-desc">15 standard · toujours disponible</div>
-        <div class="shop-gold-detail">✦ 5 pixels Gold</div>
-        <div class="shop-duration">Permanent</div>
-        <div class="shop-price" style="color:var(--green);">Gratuit</div>
-        <button class="shop-btn" style="background:rgba(56,212,138,.2);color:var(--green);border:1px solid var(--green);" disabled>ACTIF PAR DÉFAUT</button>
-      </div>
+      <button id="shop-close-btn" onclick="closeModal('m-shop')">✕</button>
     </div>
-    <div class="shop-card-wide">
-      <div class="shop-ico">💛</div>
-      <div class="shop-info">
-        <div class="shop-name">Soutenir le jeu</div>
-        <div class="shop-desc">Soutien au développement de Gold Pixel</div>
-        <div class="shop-price">1 Pi</div>
+
+    <!-- Corps : packs | soutien -->
+    <div id="shop-body">
+
+      <!-- ── Colonne gauche : 3 packs ── -->
+      <div id="shop-packs">
+        <div class="shop-sub-title">Réservoirs — 5 jours · 1 seul actif · retour automatique</div>
+        <div id="shop-packs-grid">
+
+          <div class="shop-card pack-decouverte" onclick="shopBuy('decouverte')">
+            <div class="shop-ico">🔵</div>
+            <div class="shop-name">Découverte</div>
+            <div class="shop-desc">25 std</div>
+            <div class="shop-gold-detail">✦ 7 Gold</div>
+            <div class="shop-price">1 Pi</div>
+            <button class="shop-btn">ACTIVER</button>
+          </div>
+
+          <div class="shop-card pack-middle" onclick="shopBuy('middle')">
+            <div class="shop-ico">🟣</div>
+            <div class="shop-name">Middle</div>
+            <div class="shop-desc">40 std</div>
+            <div class="shop-gold-detail">✦ 9 Gold</div>
+            <div class="shop-price">2 Pi</div>
+            <button class="shop-btn">ACTIVER</button>
+          </div>
+
+          <div class="shop-card pack-giga" onclick="shopBuy('giga')">
+            <div class="shop-ico">🔴</div>
+            <div class="shop-name">Giga</div>
+            <div class="shop-desc">55 std</div>
+            <div class="shop-gold-detail">✦ 12 Gold</div>
+            <div class="shop-price">4 Pi</div>
+            <button class="shop-btn">ACTIVER</button>
+          </div>
+
+        </div>
       </div>
-      <button class="shop-btn" onclick="shopBuy('support')">OFFRIR</button>
-    </div>
-    <button class="btn-close" onclick="closeModal('m-shop')">FERMER</button>
+
+      <!-- ── Colonne droite : soutien ── -->
+      <div id="shop-support">
+        <div class="sh-sup-title">💛 Soutenir le jeu</div>
+        <div class="sh-sup-sub">Aide à financer les serveurs<br>et les mises à jour</div>
+
+        <div class="don-btn" onclick="shopBuy('don_1')">
+          <span class="don-ico">🟡</span>
+          <div>
+            <div class="don-amt">1 Pi</div>
+            <div class="don-lbl">Petit soutien</div>
+          </div>
+        </div>
+
+        <div class="don-btn" onclick="shopBuy('don_3')">
+          <span class="don-ico">🟠</span>
+          <div>
+            <div class="don-amt">3 Pi</div>
+            <div class="don-lbl">Soutien moyen</div>
+          </div>
+        </div>
+
+        <div class="don-btn" onclick="shopBuy('don_5')">
+          <span class="don-ico">🔴</span>
+          <div>
+            <div class="don-amt">5 Pi</div>
+            <div class="don-lbl">Grand soutien</div>
+          </div>
+        </div>
+
+        <div class="don-btn don-libre" onclick="shopBuy('don_libre')">
+          <span class="don-ico">✨</span>
+          <div>
+            <div class="don-amt">Libre</div>
+            <div class="don-lbl">Montant libre</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /shop-body -->
   </div>
 </div>
 
@@ -777,7 +919,7 @@ function _refreshShopStatus() {
   const el = document.getElementById('shop-active-tank');
   if (!el) return;
   if (tankType === 'base') {
-    el.textContent = 'Pack Gratuit actif — 15 standard / 5 gold';
+    el.textContent = 'Réservoir de base actif — 15 standard / 5 gold';
     el.style.color = 'var(--green)';
     return;
   }
@@ -968,13 +1110,16 @@ function shopBuy(type) {
     return;
   }
   const tanks = {
-    decouverte: { price:1, label:'Pack Découverte',   std:25, gold:7  },
-    middle:     { price:2, label:'Middle Pack',        std:40, gold:9  },
-    giga:       { price:4, label:'Giga Pack',          std:55, gold:12 },
-    support:    { price:1, label:'Soutien Gold Pixel', std:0,  gold:0  },
+    decouverte: { price:1, label:'Pack Découverte',   std:25, gold:7,  isPack:true  },
+    middle:     { price:2, label:'Middle Pack',        std:40, gold:9,  isPack:true  },
+    giga:       { price:4, label:'Giga Pack',          std:55, gold:12, isPack:true  },
+    don_1:      { price:1, label:'Don 1 Pi',           std:0,  gold:0,  isPack:false },
+    don_3:      { price:3, label:'Don 3 Pi',           std:0,  gold:0,  isPack:false },
+    don_5:      { price:5, label:'Don 5 Pi',           std:0,  gold:0,  isPack:false },
+    don_libre:  { price:1, label:'Don libre',          std:0,  gold:0,  isPack:false },
   };
   const item = tanks[type]; if (!item) return;
-  if (type !== 'support' && tankType !== 'base') {
+  if (item.isPack && tankType !== 'base') {
     showToast('Un pack est actif — attends son expiration');
     return;
   }
@@ -987,12 +1132,12 @@ function shopBuy(type) {
         apiFetch('/api/pixelwar/shop/complete', 'POST', { paymentId: id, txid, type, username: piUsername })
         .then(d => {
           if (d && d.ok) {
-            if (type !== 'support') {
+            if (item.isPack) {
               setTank(type, Date.now() + TANK_DURATION_MS);
               saveLSState();
               showToast('Pack ' + item.label + ' actif — ' + item.std + ' std / ' + item.gold + ' gold — 5 jours !');
             } else {
-              showToast('Merci pour ton soutien !');
+              showToast('Merci pour ton soutien de ' + item.price + ' Pi !');
             }
             closeModal('m-shop');
           }
