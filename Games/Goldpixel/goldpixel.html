@@ -565,7 +565,7 @@ html, body {
 #shop-body {
   flex:1; min-height:0;
   display:grid;
-  grid-template-columns: 1fr 155px;
+  grid-template-columns: 55fr 45fr;
   gap:0;
 }
 
@@ -652,35 +652,88 @@ html, body {
 
 /* ─ Colonne droite : soutien ─ */
 #shop-support {
-  width:155px; padding:10px 12px;
+  width:auto; padding:10px 14px;
   display:flex; flex-direction:column; gap:7px; justify-content:center;
   border-left:1px solid var(--border);
   background:rgba(255,170,0,.04);
 }
 #shop-support .sh-sup-title {
-  font-family:"Chakra Petch",sans-serif; font-size:.6rem; font-weight:700;
+  font-family:"Chakra Petch",sans-serif; font-size:.72rem; font-weight:700;
   color:#ffaa00; letter-spacing:.05em; text-align:center;
 }
 #shop-support .sh-sup-sub {
-  font-size:.5rem; color:var(--dim); text-align:center; line-height:1.45;
-  margin-bottom:2px;
+  font-size:.58rem; color:var(--dim); text-align:center; line-height:1.5;
+  margin-bottom:4px;
 }
 /* Boutons de don */
 .don-btn {
-  display:flex; align-items:center; gap:8px;
-  padding:8px 10px; border-radius:9px; border:1px solid rgba(255,170,0,.35);
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:9px; border:1px solid rgba(255,170,0,.35);
   background:rgba(255,170,0,.08); cursor:pointer;
   touch-action:manipulation; -webkit-tap-highlight-color:transparent;
   transition:background .12s, transform .1s; user-select:none;
 }
 .don-btn:active { background:rgba(255,170,0,.2); transform:scale(.95); }
-.don-ico  { font-size:1rem; flex-shrink:0; }
-.don-amt  { font-family:"Space Mono",monospace; font-size:.66rem; font-weight:700; color:#ffaa00; line-height:1; }
-.don-lbl  { font-size:.46rem; color:var(--dim); margin-top:1px; }
+.don-ico  { font-size:1.3rem; flex-shrink:0; }
+.don-amt  { font-family:"Space Mono",monospace; font-size:.78rem; font-weight:700; color:#ffaa00; line-height:1; }
+.don-lbl  { font-size:.54rem; color:var(--dim); margin-top:2px; }
 .don-btn.don-libre {
   border-color:rgba(240,234,208,.2); background:rgba(240,234,208,.05);
 }
 .don-btn.don-libre .don-amt { color:var(--dim); }
+
+/* ══════════════════════════
+   BOUTON RÉGLAGES TOPBAR
+══════════════════════════ */
+#tb-btn-settings {
+  height:36px; padding:0 9px; border-radius:8px; cursor:pointer;
+  border:1px solid rgba(240,234,208,.2); background:rgba(240,234,208,.06);
+  color:var(--dim); font-size:.95rem; line-height:1;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  display:flex; align-items:center; transition:background .12s;
+}
+#tb-btn-settings:active { background:rgba(240,234,208,.14); }
+
+/* ══════════════════════════
+   MODALE RÉGLAGES
+══════════════════════════ */
+#m-settings .m-box { max-width:360px; }
+.setting-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px solid rgba(245,200,66,.12);
+}
+.setting-row:last-child { border-bottom:none; }
+.setting-label {
+  font-family:"Chakra Petch",sans-serif; font-size:.68rem; font-weight:600;
+  color:var(--text); line-height:1.3;
+}
+.setting-sub {
+  font-size:.5rem; color:var(--dim); margin-top:2px;
+}
+/* Toggle switch */
+.toggle-wrap { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.toggle-track {
+  width:48px; height:26px; border-radius:13px; position:relative;
+  background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.15);
+  cursor:pointer; transition:background .2s, border-color .2s;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+}
+.toggle-track.on {
+  background:rgba(245,200,66,.25); border-color:var(--gold);
+}
+.toggle-thumb {
+  position:absolute; top:3px; left:3px;
+  width:18px; height:18px; border-radius:50%;
+  background:rgba(255,255,255,.45);
+  transition:transform .2s, background .2s;
+}
+.toggle-track.on .toggle-thumb {
+  transform:translateX(22px); background:var(--gold);
+}
+.toggle-icon {
+  font-size:.75rem; width:22px; text-align:center; flex-shrink:0;
+}
 
 /* ══════════════════════════
    CLASSEMENT
@@ -791,6 +844,9 @@ html, body {
         <div class="btn-ico">👤</div>
         <div class="btn-lbl" id="tb-user-name">PROFIL</div>
       </div>
+
+      <!-- Réglages -->
+      <div id="tb-btn-settings" onclick="openModal('m-settings')" title="Réglages">⚙</div>
 
       <!-- SHOP — bouton principal très visible -->
       <button id="tb-btn-shop" onclick="openModal('m-shop')" title="Boutique">
@@ -983,6 +1039,30 @@ html, body {
     <p class="m-p">Choisis ton pays pour participer au classement par territoire.</p>
     <div class="country-grid" id="country-grid-el"></div>
     <button class="btn-close" onclick="closeModal('m-country')">IGNORER</button>
+  </div>
+</div>
+
+<!-- Réglages -->
+<div class="m-bg" id="m-settings">
+  <div class="m-box" id="m-settings-box">
+    <div class="m-h">⚙ RÉGLAGES</div>
+
+    <!-- Droitier / Gaucher -->
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">🖐 Mode Gaucher</div>
+        <div class="setting-sub">Palette à droite · Navigation à gauche</div>
+      </div>
+      <div class="toggle-wrap">
+        <span class="toggle-icon" id="hand-ico-left">🤜</span>
+        <div class="toggle-track" id="toggle-hand" onclick="toggleHandedness()">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="toggle-icon" id="hand-ico-right">🤛</span>
+      </div>
+    </div>
+
+    <button class="btn-close" onclick="closeModal('m-settings')">FERMER</button>
   </div>
 </div>
 
@@ -1469,6 +1549,35 @@ function pickColor(c) {
 function pickGoldColor() {
   if (goldStock <= 0) { showToast('✦ Stock Gold épuisé !'); return; }
   activeColor = GOLD_COLOR;
+}
+
+/* ════════════════════════════
+   RÉGLAGES — DROITIER / GAUCHER
+   Persiste dans localStorage
+   Switche hud-left ↔ hud-right visuellement
+════════════════════════════ */
+let _leftHanded = localStorage.getItem('gp_lefthanded') === '1';
+
+function _applyHandedness() {
+  const gameArea = document.getElementById('game-area');
+  const toggle   = document.getElementById('toggle-hand');
+  if (!gameArea) return;
+  if (_leftHanded) {
+    /* Gaucher : palette droite, zoom gauche */
+    gameArea.style.flexDirection = 'row-reverse';
+    if (toggle) toggle.classList.add('on');
+  } else {
+    /* Droitier (défaut) : palette gauche, zoom droite */
+    gameArea.style.flexDirection = 'row';
+    if (toggle) toggle.classList.remove('on');
+  }
+}
+
+function toggleHandedness() {
+  _leftHanded = !_leftHanded;
+  localStorage.setItem('gp_lefthanded', _leftHanded ? '1' : '0');
+  _applyHandedness();
+  showToast(_leftHanded ? '🤛 Mode Gaucher activé' : '🤜 Mode Droitier activé');
 }
 
 /* ════════════════════════════
@@ -2090,6 +2199,7 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStockUI();
   const nameEl = document.getElementById('tb-user-name');
   if (nameEl) nameEl.textContent = '@' + piUsername;
+  _applyHandedness(); /* Restaurer droitier/gaucher */
 });
 </script>
 </body>
