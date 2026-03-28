@@ -17,7 +17,7 @@
   import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
   const firebaseConfig = {
-    apiKey: "AIzaSyACIUdD9QS53PX6Cn4jRHU2g5Ld08MQsG0",
+    apiKey: "AIzaSyCrnYa3VYKZlZer1R1H-k7IcTLmGaho3Qs",
     authDomain: "gold-pixel.firebaseapp.com",
     projectId: "gold-pixel",
     storageBucket: "gold-pixel.firebasestorage.app",
@@ -26,66 +26,58 @@
   };
   const VAPID_KEY = "BKGUW6lT2RGM6cxUFRdwELKrf5UAfnf2hIpm39PF29ZpM7qdQJFTFboxSAwVI3tM9ikuWmAxec55mbVfmv2bwCQ";
 
-  let _messaging = null;
-  let _fcmToken  = null;
-
   async function initFCM() {
     try {
-      const app = initializeApp(firebaseConfig);
-      _messaging = getMessaging(app);
-
-      // Écouter les messages foreground
-      onMessage(_messaging, payload => {
-        const title = payload.notification?.title || 'Gold Pixel';
-        const body  = payload.notification?.body  || '';
-        // Fallback toast si le jeu est au premier plan
-        if (typeof showToast === 'function') showToast(body || title);
+      const app       = initializeApp(firebaseConfig);
+      const messaging = getMessaging(app);
+      onMessage(messaging, payload => {
+        const body = payload.notification?.body || payload.notification?.title || '';
+        if (typeof showToast === 'function') showToast(body);
       });
-
-      console.log('[FCM] Firebase Messaging initialisé');
-      window._fcmMessaging = _messaging;
+      window._fcmMessaging = messaging;
       window._fcmVapidKey  = VAPID_KEY;
+      console.log('[FCM] Firebase Messaging initialisé');
     } catch(e) {
       console.warn('[FCM] Init échouée:', e.message);
     }
   }
-
   initFCM();
 </script>
-<!-- Pi SDK (Production URL) -->
+
+<!-- Pi SDK -->
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
 <style>
 /* ══════════════════════════
    VARIABLES
 ══════════════════════════ */
 :root {
-  --pi:       #c8960a;
-  --pi-l:     #f5c842;
-  --gold:     #f5c842;
-  --gold-prem:#ffd700;
-  --bg:       #f5f0e8;
-  --surface:  #1e1e0e;
-  --border:   rgba(200,150,10,0.4);
-  --text:     #f0ead0;
-  --dim:      rgba(240,234,208,0.45);
-  --green:    #38d48a;
-  --red:      #e83c50;
-  --h-top:    44px;
-  --h-pal:    56px;
+  --pi:      #c8960a;
+  --pi-l:    #f5c842;
+  --gold:    #f5c842;
+  --bg:      #0a0612;
+  --surface: #1a1020;
+  --border:  rgba(200,150,10,0.4);
+  --text:    #f0ead0;
+  --dim:     rgba(240,234,208,0.45);
+  --green:   #38d48a;
+  --red:     #e83c50;
+  --h-top:   48px;
 }
 
 /* ══════════════════════════
    RESET
 ══════════════════════════ */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html,body {
-  width:100%; height:100%; overflow:hidden; touch-action:none;
-  background:#f5f0e8; font-family:"Chakra Petch",sans-serif;
+html, body {
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg); font-family:"Chakra Petch",sans-serif;
   color:var(--text); -webkit-font-smoothing:antialiased;
+  touch-action:manipulation;
 }
 
 /* ══════════════════════════
-   APP — flex column
+   APP
 ══════════════════════════ */
 #app {
   width:100dvw; height:100dvh;
@@ -93,204 +85,214 @@ html,body {
 }
 
 /* ══════════════════════════
-   TOPBAR — 40px, tout sur une ligne
+   TOPBAR — mobile landscape
+   Hauteur 52px, 3 zones : logo | ressources | actions
 ══════════════════════════ */
+:root { --h-top: 52px; }
+
 #topbar {
   flex-shrink:0; height:var(--h-top);
   display:flex; align-items:center;
-  padding:0 8px; gap:6px;
-  background:linear-gradient(180deg,#1c1600 0%,#0e0e00 100%);
+  padding:0 10px; gap:10px;
+  background:linear-gradient(180deg,#1a1200 0%,#0c0800 100%);
   border-bottom:2px solid var(--gold);
-  z-index:100; overflow:hidden;
+  z-index:100;
 }
+
+/* ── Gauche : logo ── */
 .tb-logo {
-  font-family:"Space Mono",monospace; font-size:.68rem; font-weight:700;
-  letter-spacing:.06em;
-  color: var(--gold);
-  text-shadow: 0 0 12px rgba(245,200,66,.5), 0 0 24px rgba(245,200,66,.2);
-  white-space:nowrap; flex-shrink:0;
+  font-family:"Space Mono",monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.06em; color:var(--gold); white-space:nowrap; flex-shrink:0;
+  text-shadow:0 0 12px rgba(245,200,66,.5);
+  line-height:1;
 }
-/* Stock + recharge — zone centrale flex */
+.tb-logo span {
+  display:block; font-size:.38rem; font-weight:400;
+  color:var(--dim); letter-spacing:.04em; margin-top:1px;
+}
+
+/* ── Centre : ressources gameplay ── */
 #tb-center {
-  display:flex; align-items:center; gap:5px;
+  display:flex; align-items:center; gap:8px;
   flex:1; justify-content:center; min-width:0;
 }
-/* Pill stock */
-.tb-pill {
-  display:flex; align-items:center; gap:4px;
-  padding:2px 8px; border-radius:20px; white-space:nowrap;
-  font-family:"Space Mono",monospace; font-size:.58rem;
-  flex-shrink:0;
+
+/* Bloc ressource (Standard ou Gold) */
+.tb-res {
+  display:flex; align-items:center; gap:6px;
+  padding:0 10px; height:36px; border-radius:10px;
+  border:1px solid; flex-shrink:0; min-width:80px;
 }
-.tb-pill-stock {
-  background:rgba(245,200,66,.12); border:1px solid rgba(245,200,66,.45);
-  color:var(--gold); font-weight:700;
+/* Icône ressource */
+.tb-res-ico {
+  font-size:1.1rem; line-height:1; flex-shrink:0;
 }
-.tb-pill-stock.low { background:rgba(232,60,80,.1); border-color:rgba(232,60,80,.3); color:var(--red); }
-.tb-pill-stock.full { background:rgba(56,212,138,.1); border-color:rgba(56,212,138,.3); color:var(--green); }
-.tb-pill-recharge {
-  background:rgba(200,150,10,.1); border:1px solid rgba(200,150,10,.3);
+/* Texte ressource */
+.tb-res-info {
+  display:flex; flex-direction:column; justify-content:center; gap:0;
+}
+.tb-res-label {
+  font-family:"Chakra Petch",sans-serif; font-size:.38rem; font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase; opacity:.6; line-height:1;
+}
+.tb-res-values {
+  font-family:"Space Mono",monospace; font-size:.7rem; font-weight:700;
+  line-height:1.1; white-space:nowrap;
+}
+.tb-res-max { opacity:.45; font-size:.58rem; font-weight:400; }
+
+/* Standard — couleur or */
+.tb-res-std {
+  border-color:rgba(245,200,66,.4);
+  background:rgba(245,200,66,.08);
   color:var(--gold);
 }
-.tb-pill-gold {
-  background:rgba(255,215,0,.15); border:1.5px solid #ffd700;
-  color:#ffd700; font-weight:700;
-  box-shadow:0 0 6px rgba(255,215,0,.3);
+.tb-res-std.low  { border-color:rgba(232,60,80,.4);  background:rgba(232,60,80,.08);  color:var(--red);   }
+.tb-res-std.full { border-color:rgba(56,212,138,.4); background:rgba(56,212,138,.08); color:var(--green); }
+
+/* Gold — couleur or brillant */
+.tb-res-gold {
+  border-color:rgba(255,215,0,.5);
+  background:rgba(255,215,0,.1);
+  color:#ffd700;
+  box-shadow:0 0 8px rgba(255,215,0,.15);
   animation:goldPulse 2.5s ease-in-out infinite;
 }
 @keyframes goldPulse {
-  0%,100%{box-shadow:0 0 4px rgba(255,215,0,.25);}
-  50%{box-shadow:0 0 10px rgba(255,215,0,.6),0 0 18px rgba(255,215,0,.2);}
+  0%,100%{ box-shadow:0 0 6px rgba(255,215,0,.15); }
+  50%    { box-shadow:0 0 14px rgba(255,215,0,.4), 0 0 24px rgba(255,215,0,.12); }
 }
+
+/* Pill recharge — gardé pour updateStockUI, masqué visuellement */
+.tb-pill-recharge        { display:none; }
 .tb-pill-recharge.hidden { display:none; }
-/* Boutons droite */
-.tb-right { display:flex; align-items:center; gap:5px; flex-shrink:0; }
-.tb-btn {
-  padding:2px 7px; border-radius:16px; cursor:pointer;
+
+/* ── Droite : boutons action ── */
+.tb-right {
+  display:flex; align-items:center; gap:6px; flex-shrink:0;
+}
+
+/* Bouton SHOP — très visible */
+#tb-btn-shop {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; height:40px; padding:0 14px; border-radius:10px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#bf953f,var(--gold),#fcf6ba,var(--gold),#bf953f);
+  background-size:200% auto;
+  animation:shopGlow 2.5s ease-in-out infinite;
+  color:#000; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  user-select:none; flex-shrink:0;
+}
+#tb-btn-shop:active { transform:scale(.93); }
+#tb-btn-shop .btn-ico  { font-size:1rem; line-height:1; }
+#tb-btn-shop .btn-lbl  { font-family:"Chakra Petch",sans-serif; font-size:.4rem; font-weight:700; letter-spacing:.06em; }
+@keyframes shopGlow {
+  0%,100%{ background-position:0% center;   box-shadow:0 0 8px rgba(245,200,66,.3); }
+  50%    { background-position:100% center; box-shadow:0 0 18px rgba(245,200,66,.6); }
+}
+
+/* Bouton PROFIL */
+#tb-btn-profile {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; height:40px; padding:0 10px; border-radius:10px; cursor:pointer;
+  border:1px solid rgba(240,234,208,.2); background:rgba(240,234,208,.06);
+  color:var(--dim); touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  user-select:none; flex-shrink:0; transition:border-color .15s, background .15s;
+}
+#tb-btn-profile:active { background:rgba(240,234,208,.14); }
+#tb-btn-profile .btn-ico  { font-size:.95rem; line-height:1; }
+#tb-btn-profile .btn-lbl  { font-family:"Chakra Petch",sans-serif; font-size:.38rem; font-weight:600; letter-spacing:.04em; }
+#tb-btn-profile.connected { border-color:rgba(56,212,138,.4); color:var(--green); }
+
+/* Bouton notif — petit, discret */
+#notif-btn {
+  height:36px; padding:0 8px; border-radius:8px; cursor:pointer;
+  border:1px solid rgba(255,170,0,.3); background:rgba(255,170,0,.06);
+  color:rgba(255,170,0,.6); font-size:.8rem; line-height:1;
   touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-  font-size:.5rem; font-weight:600; transition:opacity .12s;
-  border:1px solid; user-select:none; white-space:nowrap;
+  display:flex; align-items:center;
 }
-.tb-btn:active { opacity:.6; }
-.tb-btn-pi   { background:rgba(200,150,10,.15); border-color:var(--gold); color:var(--gold); }
-.tb-btn-shop { background:rgba(245,200,66,.1); border-color:rgba(245,200,66,.3); color:var(--gold); }
-.tb-btn-lb   { background:rgba(56,212,138,.08); border-color:rgba(56,212,138,.28); color:var(--green); }
-.tb-btn-portal { background:rgba(245,200,66,.15); border-color:var(--gold); color:var(--gold); animation:portalGlow 2s ease-in-out infinite; font-size:.65rem; }
-@keyframes portalGlow { 0%,100%{ box-shadow:0 0 4px rgba(245,200,66,.3); } 50%{ box-shadow:0 0 12px rgba(245,200,66,.7), 0 0 20px rgba(245,200,66,.3); } }
-#tb-user-name {
-  font-family:"Space Mono",monospace; font-size:.48rem; color:var(--dim);
-  max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+#notif-btn.active { border-color:rgba(56,212,138,.4); background:rgba(56,212,138,.08); color:var(--green); }
+
+/* tb-user-name — gardé pour updateStockUI / onPiAuthSuccess, invisible */
+#tb-user-name { display:none; }
+
+/* Ancien .tb-btn — gardé pour compatibilité openLB */
+.tb-btn-lb {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; height:40px; padding:0 10px; border-radius:10px; cursor:pointer;
+  border:1px solid rgba(56,212,138,.3); background:rgba(56,212,138,.06);
+  color:var(--green); touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  user-select:none; flex-shrink:0; font-size:.8rem; line-height:1;
 }
+.tb-btn-lb:active { background:rgba(56,212,138,.14); }
 
 /* ══════════════════════════
-   CANVAS ZONE — prend tout l'espace restant
-   La hauteur effective = 100dvh - 40px - 50px = 100dvh - 90px
+   ZONE DE JEU — placeholder
+   Le nouveau moteur sera intégré ici
 ══════════════════════════ */
-#canvas-zone {
+#game-area {
   flex:1 1 0; min-height:0; position:relative;
-  overflow:hidden; background:#1a1600;
-  border-left:  3px solid var(--gold);
-  border-right: 3px solid var(--gold);
-}
-#canvas-viewport { position:absolute; inset:0; overflow:hidden; }
-#canvas-container {
-  position:absolute; top:0; left:0;
-  transform-origin:0 0; cursor:crosshair;
-}
-canvas#main-cv {
-  display:block;
-  image-rendering:pixelated; image-rendering:crisp-edges;
-}
-canvas#hover-cv {
-  position:absolute; top:0; left:0; pointer-events:none;
-  image-rendering:pixelated; image-rendering:crisp-edges;
-}
-#sel-ring {
-  position:absolute; pointer-events:none;
-  border:2px solid rgba(255,255,255,.9);
-  box-shadow:0 0 0 1px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.2);
-  display:none; z-index:5;
-}
-/* Overlays flottants */
-#coords {
-  position:absolute; bottom:6px; left:8px; z-index:10;
-  pointer-events:none; font-family:"Space Mono",monospace;
-  font-size:.42rem; color:var(--dim);
-  background:rgba(0,0,0,.6); padding:2px 5px; border-radius:4px;
-}
-#minimap-wrap {
-  position:absolute; top:6px; right:6px; z-index:10;
-  cursor:pointer; border:1px solid var(--border);
-  border-radius:4px; overflow:hidden; background:rgba(10,6,18,.9);
-}
-canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelated; }
-#zoom-btns {
-  position:absolute; right:6px; bottom:6px;
-  display:flex; flex-direction:column; gap:3px; z-index:10;
-}
-.z-btn {
-  width:28px; height:28px; border-radius:7px;
-  background:rgba(10,6,18,.88); border:1px solid var(--border);
-  color:var(--dim); font-size:.85rem; line-height:1;
   display:flex; align-items:center; justify-content:center;
-  cursor:pointer; touch-action:manipulation;
-  transition:background .1s,color .1s;
-  -webkit-tap-highlight-color:transparent; user-select:none;
+  background:var(--bg); overflow:hidden;
 }
-.z-btn:active { background:rgba(112,40,200,.25); color:var(--text); }
-#activity {
-  position:absolute; left:6px; top:6px;
-  display:flex; flex-direction:column; gap:2px;
-  pointer-events:none; z-index:10; max-width:150px;
-}
-.act-i {
-  font-size:.42rem; color:var(--dim); background:rgba(0,0,0,.62);
-  padding:1px 5px; border-radius:3px; white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis;
-  animation:slideIn .2s ease both;
-}
-@keyframes slideIn { from{opacity:0;transform:translateX(-4px);} to{opacity:1;transform:translateX(0);} }
-#sync-lbl {
-  position:absolute; top:6px; left:50%; transform:translateX(-50%);
-  font-family:"Space Mono",monospace; font-size:.42rem;
-  padding:2px 7px; border-radius:8px;
-  pointer-events:none; z-index:10; opacity:0;
-  transition:opacity .28s; white-space:nowrap;
-}
-#sync-lbl.show { opacity:1; }
-#sync-lbl.ok  { background:rgba(56,212,138,.14); color:var(--green); border:1px solid rgba(56,212,138,.28); }
-#sync-lbl.err { background:rgba(232,60,80,.14);  color:var(--red);   border:1px solid rgba(232,60,80,.28); }
-#sync-lbl.ld  { background:rgba(112,40,200,.14); color:var(--pi-l);  border:1px solid var(--border); }
 
 /* ══════════════════════════
-   PALETTE BAR
+   HAPPY HOUR BAR
 ══════════════════════════ */
-#pal-bar {
-  flex-shrink:0; height:auto; min-height:var(--h-pal);
-  background:#1a1600;
-  border-top:3px solid var(--gold);
-  padding:5px 8px; display:flex; align-items:center; gap:6px;
+#happy-hour-bar {
+  display:none; flex-shrink:0; width:100%; padding:4px 8px; text-align:center;
+  background:linear-gradient(90deg,#ff6b00,#ffaa00,#ff6b00);
+  background-size:200% auto; animation:hhMove 2s linear infinite;
+  font-size:.56rem; font-weight:700; color:#000; border-bottom:2px solid #ff4400;
 }
-#sel-dot {
-  width:28px; height:28px; border-radius:6px; flex-shrink:0;
-  border:2px solid rgba(255,255,255,.5);
-  box-shadow:0 0 5px rgba(255,255,255,.1);
-  transition:background .1s;
+#happy-hour-bar.show { display:block; }
+@keyframes hhMove { 0%{background-position:0% center;} 100%{background-position:200% center;} }
+
+/* ══════════════════════════
+   PORTRAIT LOCK
+══════════════════════════ */
+#portrait-lock {
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(10,10,0,.97);
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; padding:32px; text-align:center;
+  pointer-events:all;
 }
-#swatches {
-  display:flex; flex-wrap:nowrap; gap:3px;
-  overflow-x:auto; flex:1;
-  scrollbar-width:none; -ms-overflow-style:none;
-  padding:1px 0; align-items:center;
+@media(orientation:portrait) {
+  body.game-started #portrait-lock { display:flex; }
 }
-#swatches::-webkit-scrollbar { display:none; }
-.sw {
-  width:24px; height:24px; border-radius:4px; flex-shrink:0;
-  border:2px solid transparent; cursor:pointer;
-  touch-action:manipulation;
-  transition:transform .1s, border-color .1s;
-  -webkit-tap-highlight-color:transparent;
-}
-.sw:active { transform:scale(.84); }
-.sw.on {
-  border-color:rgba(255,255,255,.9); transform:scale(1.16);
-  box-shadow:0 0 6px rgba(255,255,255,.36);
-}
-/* Indicateur stock vide — remplace les swatches */
-#pal-empty {
-  display:none; flex-direction:column; align-items:center;
-  justify-content:center; flex:1; gap:1px;
-}
-#pal-empty.show { display:flex; }
-#pal-empty-title {
-  font-size:.56rem; font-weight:700; color:var(--red);
-}
-#pal-empty-timer {
-  font-family:"Space Mono",monospace; font-size:.5rem; color:var(--dim);
+.rot-ico { font-size:3rem; animation:rot 2s ease-in-out infinite; }
+@keyframes rot { 0%,40%{transform:rotate(0deg);} 60%,100%{transform:rotate(90deg);} }
+#portrait-lock p       { font-size:.68rem; color:var(--gold); line-height:1.7; }
+#portrait-lock strong  { color:#ffd700; display:block; font-size:.8rem; margin-bottom:6px; }
+
+/* Fallback iOS paysage forcé CSS */
+@media(orientation:portrait) {
+  body.force-landscape #app {
+    position:fixed; top:0; left:0;
+    transform-origin:top left;
+    transform:rotate(90deg) translateY(-100%);
+    width:100dvh; height:100dvw; overflow:hidden;
+  }
+  body.force-landscape #portrait-lock { display:none !important; }
 }
 
 /* ══════════════════════════
-   MODALES — base
+   TOAST
+══════════════════════════ */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  padding:7px 16px; border-radius:20px;
+  background:rgba(10,6,18,.94); border:1px solid var(--border);
+  font-size:.58rem; color:var(--text); white-space:nowrap;
+  z-index:700; pointer-events:none;
+  opacity:0; transition:opacity .18s;
+  box-shadow:0 3px 14px rgba(0,0,0,.5);
+}
+#toast.on { opacity:1; }
+
+/* ══════════════════════════
+   MODALES
 ══════════════════════════ */
 .m-bg {
   position:fixed; inset:0; z-index:500;
@@ -303,13 +305,14 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 .m-box {
   background:var(--surface); border:1px solid var(--border);
   border-radius:16px; padding:18px 16px;
-  max-width:min(480px,92vw); max-height:88vh; overflow-y:auto; width:100%; text-align:center;
+  max-width:min(480px,92vw); max-height:88vh;
+  overflow-y:auto; width:100%; text-align:center;
   box-shadow:0 18px 50px rgba(0,0,0,.8);
   animation:popIn .24s cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes popIn {
-  from{transform:translateY(14px) scale(.97);opacity:0;}
-  to{transform:translateY(0) scale(1);opacity:1;}
+  from{ transform:translateY(14px) scale(.97); opacity:0; }
+  to  { transform:translateY(0)    scale(1);   opacity:1; }
 }
 .m-h {
   font-family:"Space Mono",monospace; font-size:.88rem; font-weight:700;
@@ -325,12 +328,11 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
   color:#fff; font-family:"Chakra Petch",sans-serif;
   font-size:.7rem; font-weight:700; letter-spacing:.06em;
   cursor:pointer; touch-action:manipulation;
-  box-shadow:0 4px 16px rgba(112,40,200,.34);
+  box-shadow:0 4px 16px rgba(200,148,10,.3);
   -webkit-tap-highlight-color:transparent;
   margin-bottom:8px; transition:transform .1s;
 }
 .btn-p:active { transform:scale(.96); }
-.btn-p:last-child { margin-bottom:0; }
 .btn-close {
   width:100%; padding:8px; border-radius:9px;
   border:1px solid var(--border); background:rgba(255,255,255,.04);
@@ -341,18 +343,18 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 }
 .btn-close:active { background:rgba(255,255,255,.09); }
 
-/* Règles bienvenue */
-.rule-ul { list-style:none; text-align:left; margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
-.rule-ul li { display:flex; align-items:flex-start; gap:7px; font-size:.6rem; color:var(--dim); line-height:1.4; }
+/* Règles */
+.rule-ul {
+  list-style:none; text-align:left; margin-bottom:14px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.rule-ul li    { display:flex; align-items:flex-start; gap:7px; font-size:.6rem; color:var(--dim); line-height:1.4; }
 .rule-ul li .ic { flex-shrink:0; font-size:.78rem; }
 
 /* ══════════════════════════
-   BOUTIQUE — grille 2 colonnes en paysage
-   Pas de scroll : toute la boutique tient en paysage
+   BOUTIQUE
 ══════════════════════════ */
-.shop-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;
-}
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
 #shop-active-tank {
   font-size:.56rem; padding:6px 10px; border-radius:7px; margin-bottom:8px;
   background:rgba(255,255,255,.04); border:1px solid var(--border);
@@ -365,39 +367,33 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
   position:relative; transition:transform .15s;
 }
 .shop-card:active { transform:scale(.97); }
-.shop-card.tank-middle { border-color:rgba(255,210,0,.4); background:rgba(255,210,0,.05); }
-.shop-card.tank-middle .shop-name { color:#ffd700; }
-.shop-card.tank-big { border-color:rgba(255,140,0,.45); background:rgba(255,140,0,.06); }
-.shop-card.tank-big .shop-name { color:#ff8c00; }
-.shop-card.tank-big .shop-ico { animation:pulse-ico 2s ease-in-out infinite; }
-.shop-card.tank-giga { border-color:rgba(0,200,255,.45); background:rgba(0,200,255,.06); box-shadow:0 0 10px rgba(0,200,255,.1); }
-.shop-card.tank-giga .shop-name { color:#00c8ff; }
-.shop-card.tank-ultra { border-color:rgba(180,80,255,.5); background:rgba(180,80,255,.07); animation:ultra-glow 2.5s ease-in-out infinite; }
-.shop-card.tank-ultra .shop-name { color:#b450ff; }
-@keyframes ultra-glow { 0%,100%{box-shadow:0 0 10px rgba(180,80,255,.15);} 50%{box-shadow:0 0 22px rgba(180,80,255,.35);} }
-@keyframes pulse-ico  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.14);} }
-.shop-duration { font-size:.44rem; color:var(--dim); margin-top:1px; }
+.shop-card.pack-decouverte { border-color:rgba(50,180,255,.5); background:rgba(50,180,255,.06); }
+.shop-card.pack-decouverte .shop-name { color:#32b4ff; }
+.shop-card.pack-decouverte .shop-ico  { animation:pulse-ico 2.2s ease-in-out infinite; }
+.shop-card.pack-middle { border-color:rgba(160,80,255,.5); background:rgba(160,80,255,.07); box-shadow:0 0 10px rgba(160,80,255,.12); }
+.shop-card.pack-middle .shop-name { color:#a050ff; }
+.shop-card.pack-giga { border-color:rgba(232,60,80,.55); background:rgba(232,60,80,.08); animation:giga-glow 2.5s ease-in-out infinite; }
+.shop-card.pack-giga .shop-name { color:#e83c50; }
+@keyframes giga-glow { 0%,100%{box-shadow:0 0 10px rgba(232,60,80,.15);} 50%{box-shadow:0 0 22px rgba(232,60,80,.35);} }
+@keyframes pulse-ico  { 0%,100%{transform:scale(1);}                     50%{transform:scale(1.14);} }
+.shop-gold-detail { font-size:.44rem; color:#ffd700; margin-top:1px; font-weight:600; }
+.shop-duration    { font-size:.44rem; color:var(--dim); margin-top:1px; }
 .shop-card-wide {
   background:rgba(255,255,255,.04); border:1px solid var(--border);
   border-radius:9px; padding:10px 12px; margin-bottom:8px;
   display:flex; align-items:center; gap:10px; text-align:left;
 }
-.shop-ico { font-size:1.2rem; }
-.shop-name {
-  font-family:"Chakra Petch",sans-serif; font-size:.68rem; font-weight:700;
-  color:var(--text); margin-bottom:1px;
-}
-.shop-desc { font-size:.52rem; color:var(--dim); }
-.shop-price {
-  font-family:"Space Mono",monospace; font-size:.6rem; color:var(--gold);
-}
-.shop-info { flex:1; }
+.shop-ico   { font-size:1.2rem; }
+.shop-name  { font-family:"Chakra Petch",sans-serif; font-size:.68rem; font-weight:700; color:var(--text); margin-bottom:1px; }
+.shop-desc  { font-size:.52rem; color:var(--dim); }
+.shop-price { font-family:"Space Mono",monospace; font-size:.6rem; color:var(--gold); }
+.shop-info  { flex:1; }
 .shop-btn {
   padding:5px 12px; border-radius:7px; border:none;
   background:linear-gradient(135deg,#bf953f,var(--gold),#fcf6ba,var(--gold),#bf953f);
   background-size:200% auto; color:#000;
   font-family:"Chakra Petch",sans-serif; font-size:.54rem; font-weight:700;
-  letter-spacing:.03em; cursor:pointer; touch-action:manipulation;
+  cursor:pointer; touch-action:manipulation;
   transition:background-position .3s, transform .1s;
   -webkit-tap-highlight-color:transparent;
   box-shadow:0 2px 7px rgba(200,148,62,.26);
@@ -405,30 +401,23 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 .shop-btn:active { transform:scale(.89); }
 
 /* ══════════════════════════
-   CLASSEMENT — onglets
+   CLASSEMENT
 ══════════════════════════ */
-.lb-tabs {
-  display:flex; gap:5px; margin-bottom:10px;
-  border-bottom:1px solid var(--border); padding-bottom:7px;
-}
+.lb-tabs { display:flex; gap:5px; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:7px; }
 .lb-tab {
   flex:1; padding:5px; border-radius:7px; cursor:pointer;
   font-family:"Chakra Petch",sans-serif; font-size:.58rem; font-weight:600;
   border:1px solid transparent; color:var(--dim);
-  touch-action:manipulation; transition:all .16s;
-  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation; transition:all .16s; -webkit-tap-highlight-color:transparent;
 }
-.lb-tab.on { background:rgba(112,40,200,.18); border-color:var(--border); color:var(--text); }
-.lb-panel { display:none; }
+.lb-tab.on   { background:rgba(112,40,200,.18); border-color:var(--border); color:var(--text); }
+.lb-panel    { display:none; }
 .lb-panel.on { display:block; }
 .lb-list { display:flex; flex-direction:column; gap:3px; margin-bottom:10px; text-align:left; max-height:180px; overflow-y:auto; }
-.lb-r {
-  display:flex; align-items:center; gap:7px; padding:5px 9px;
-  border-radius:6px; background:rgba(255,255,255,.04); font-size:.56rem;
-}
+.lb-r    { display:flex; align-items:center; gap:7px; padding:5px 9px; border-radius:6px; background:rgba(255,255,255,.04); font-size:.56rem; }
 .lb-rank { width:20px; text-align:center; font-weight:700; flex-shrink:0; }
 .lb-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.lb-px { font-family:"Space Mono",monospace; color:var(--dim); font-size:.5rem; white-space:nowrap; }
+.lb-px   { font-family:"Space Mono",monospace; color:var(--dim); font-size:.5rem; white-space:nowrap; }
 
 /* ══════════════════════════
    MODALE PAYS
@@ -442,300 +431,187 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
   padding:6px 3px; border-radius:7px; cursor:pointer;
   background:rgba(255,255,255,.04); border:1px solid var(--border);
   font-size:.52rem; color:var(--text); text-align:center;
-  touch-action:manipulation; transition:background .12s,border-color .12s;
+  touch-action:manipulation; transition:background .12s, border-color .12s;
   -webkit-tap-highlight-color:transparent; line-height:1.4;
 }
 .country-btn:active { background:rgba(112,40,200,.2); border-color:var(--pi-l); }
-.country-btn.on { background:rgba(112,40,200,.2); border-color:var(--pi-l); color:var(--pi-l); }
-
-/* ══════════════════════════
-   TOAST
-══════════════════════════ */
-#toast {
-  position:fixed; bottom:calc(var(--h-pal) + 8px);
-  left:50%; transform:translateX(-50%);
-  padding:6px 14px; border-radius:18px;
-  background:rgba(10,6,18,.94); border:1px solid var(--border);
-  font-size:.58rem; color:var(--text); white-space:nowrap;
-  z-index:700; pointer-events:none;
-  opacity:0; transition:opacity .18s;
-  box-shadow:0 3px 14px rgba(0,0,0,.5);
-}
-#toast.on { opacity:1; }
-
-/* Flash pose pixel */
-#px-flash {
-  position:fixed; inset:0; pointer-events:none; opacity:0; z-index:400;
-  background:radial-gradient(ellipse at center,rgba(112,40,200,.22) 0%,transparent 65%);
-  transition:opacity .05s;
-}
-#px-flash.on { opacity:1; transition:none; }
-
-/* Portrait : bannière douce invitant à tourner (non bloquante) */
-#portrait-lock {
-  position:fixed; top:0; left:0; right:0; z-index:9999;
-  background:rgba(14,14,0,.92);
-  display:none; align-items:center; justify-content:center;
-  gap:10px; padding:8px 16px; text-align:center;
-  border-bottom:1px solid var(--gold);
-  pointer-events:none;  /* ne bloque plus le jeu */
-}
-@media(orientation:portrait) { #portrait-lock { display:flex; } }
-.rot-ico { font-size:1.4rem; animation:rot 2.4s ease-in-out infinite; }
-@keyframes rot { 0%,35%{transform:rotate(0deg);} 55%,100%{transform:rotate(90deg);} }
-#portrait-lock p { font-size:.56rem; color:var(--gold); line-height:1.4; }
-
-
-/* ── Zoom buttons dans la palette ── */
-.z-btn-pal {
-  width:34px; height:22px; border-radius:4px;
-  background:rgba(245,200,66,.12); border:1px solid rgba(245,200,66,.3);
-  color:var(--gold); font-size:.82rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:all .15s; touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
-}
-.z-btn-pal:active { background:rgba(245,200,66,.3); transform:scale(.92); }
-
-/* ── Swatch Gold brillant ── */
-.sw-gold {
-  width:28px; height:28px; border-radius:5px;
-  background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
-  background-size:200% auto;
-  border:2px solid #ffd700; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:.75rem; font-weight:900; color:#000;
-  animation:goldSpin 3s linear infinite, goldGlow 1.8s ease-in-out infinite;
-  flex-shrink:0; user-select:none;
-  touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
-}
-@keyframes goldSpin { 0%{background-position:0% center;} 100%{background-position:200% center;} }
-@keyframes goldGlow {
-  0%,100%{box-shadow:0 0 6px #ffd700,0 0 14px rgba(255,215,0,.5);}
-  50%{box-shadow:0 0 12px #ffd700,0 0 28px rgba(255,215,0,.8),0 0 40px rgba(255,215,0,.3);}
-}
-.sw-gold.on { border-color:#fff; transform:scale(1.2); }
-
-/* ── Bouton Undo ── */
-#undo-btn {
-  width:28px; height:22px; border-radius:4px;
-  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2);
-  color:rgba(255,255,255,.7); font-size:.78rem;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:all .2s; flex-shrink:0;
-  touch-action:manipulation; user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
-#undo-btn.active {
-  background:rgba(232,60,80,.2); border-color:#e83c50; color:#e83c50;
-  animation:undoPulse 0.5s ease-in-out infinite alternate;
-}
-@keyframes undoPulse { to { box-shadow:0 0 8px #e83c50; } }
-#undo-btn:hover { background:rgba(255,255,255,.15); }
-
-
-/* Bouton boutique sous canevas */
-#shop-launch-btn {
-  flex-shrink:0; width:100%;
-  padding:10px; background:linear-gradient(135deg,#bf953f,var(--gold),#fcf6ba,var(--gold),#bf953f);
-  background-size:200% auto; color:#000;
-  font-family:"Chakra Petch",sans-serif; font-size:.75rem; font-weight:700;
-  letter-spacing:.06em; border:none; cursor:pointer;
-  border-top:2px solid #ffd700;
-  animation:shopBtnGlow 2.5s ease-in-out infinite;
-  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-}
-@keyframes shopBtnGlow {
-  0%,100%{background-position:0% center;}
-  50%{background-position:100% center;}
-}
-/* Happy Hour indicator */
-#happy-hour-bar {
-  display:none; width:100%; padding:4px 8px; text-align:center;
-  background:linear-gradient(90deg,#ff6b00,#ffaa00,#ff6b00);
-  background-size:200% auto; animation:hhMove 2s linear infinite;
-  font-size:.56rem; font-weight:700; color:#000; border-bottom:2px solid #ff4400;
-}
-#happy-hour-bar.show { display:block; }
-@keyframes hhMove { 0%{background-position:0% center;} 100%{background-position:200% center;} }
-/* Notif toggle btn */
-#notif-btn {
-  padding:2px 7px; border-radius:16px; cursor:pointer;
-  border:1px solid rgba(255,170,0,.4); background:rgba(255,170,0,.08);
-  color:rgba(255,170,0,.7); font-size:.45rem; white-space:nowrap;
-  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-}
-#notif-btn.active { border-color:var(--green); background:rgba(56,212,138,.1); color:var(--green); }
-/* sw-row dans palette */
-.sw-row {
-  display:flex; gap:2px; flex-wrap:wrap; flex:1;
-}
-#swatches-wrap { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
-/* Animations */
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.country-btn.on     { background:rgba(112,40,200,.2); border-color:var(--pi-l); color:var(--pi-l); }
 </style>
 </head>
 <body>
 
+<!-- Happy Hour -->
 <div id="happy-hour-bar">🔥 HAPPY HOUR — Recharge 2× plus rapide !</div>
 
-<!-- Bannière rotation (non bloquante) -->
+<!-- Portrait lock — bloquant en portrait une fois le jeu lancé -->
 <div id="portrait-lock">
   <div class="rot-ico">📱</div>
-  <p>Tournez votre téléphone pour une meilleure expérience</p>
+  <p>
+    <strong>Tournez votre téléphone</strong>
+    Gold Pixel se joue en mode paysage
+  </p>
 </div>
 
 <!-- App -->
 <div id="app">
 
-  <!-- TOPBAR — 40px -->
+  <!-- TOPBAR — mobile landscape : logo | ressources | actions -->
   <div id="topbar">
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-      <div class="tb-logo">✦ GOLD PIXEL</div>
-    </div>
 
-    <!-- Centre : stock + recharge -->
+    <!-- ── Gauche : logo ── -->
+    <div class="tb-logo">✦ GOLD PIXEL<span>JeuxVideo.Pi</span></div>
+
+    <!-- ── Centre : ressources gameplay ── -->
     <div id="tb-center">
-      <div class="tb-pill tb-pill-stock" id="tb-stock-pill">
-        <span id="tb-stock-ico">📦</span>
-        <span id="tb-stock-val">15</span><span id="tb-stock-max" style="opacity:.5">/15</span>
+
+      <!-- Standard pixels -->
+      <div class="tb-res tb-res-std" id="tb-stock-pill">
+        <div class="tb-res-ico" id="tb-stock-ico">📦</div>
+        <div class="tb-res-info">
+          <div class="tb-res-label">Standard</div>
+          <div class="tb-res-values">
+            <span id="tb-stock-val">15</span><span class="tb-res-max" id="tb-stock-max">/15</span>
+          </div>
+        </div>
       </div>
-      <div class="tb-pill tb-pill-gold" id="tb-gold-pill">
-        <span>✦</span>
-        <span id="tb-gold-val">5</span><span style="opacity:.5">/5</span>
+
+      <!-- Gold pixels -->
+      <div class="tb-res tb-res-gold" id="tb-gold-pill">
+        <div class="tb-res-ico">✦</div>
+        <div class="tb-res-info">
+          <div class="tb-res-label">Gold</div>
+          <div class="tb-res-values">
+            <span id="tb-gold-val">5</span><span class="tb-res-max" id="tb-gold-max">/5</span>
+          </div>
+        </div>
       </div>
-      <div class="tb-pill tb-pill-recharge" id="tb-recharge-pill">
-        <span>⏱</span>
+
+      <!-- Pill recharge — gardée pour updateStockUI (masquée) -->
+      <div class="tb-pill tb-pill-recharge hidden" id="tb-recharge-pill">
         <span id="tb-recharge-val">—</span>
       </div>
+
     </div>
 
-    <!-- Droite : user + actions (sans bouton Pi) -->
+    <!-- ── Droite : actions ── -->
     <div class="tb-right">
-      <span id="tb-user-name">—</span>
+
+      <!-- Notifications -->
       <button id="notif-btn" onclick="toggleNotif()" title="Notifications">🔔</button>
-      <div class="tb-btn tb-btn-portal" onclick="window.location.href='/'">🏠 Portal</div>
-      <div class="tb-btn tb-btn-lb"    onclick="openLB()">🏆</div>
-    </div>
-  </div>
 
-  <!-- CANVAS ZONE -->
-  <div id="canvas-zone">
-    <div id="canvas-viewport">
-      <div id="canvas-container">
-        <canvas id="main-cv"></canvas>
-        <canvas id="hover-cv"></canvas>
-        <div id="sel-ring"></div>
+      <!-- Classement -->
+      <div class="tb-btn-lb" onclick="openLB()" title="Classement">
+        🏆
       </div>
-    </div>
-    <div id="activity"></div>
-    <div id="coords">X:— Y:—</div>
-    <div id="sync-lbl"></div>
-    <div id="minimap-wrap" onclick="resetView()" title="Recentrer">
-      <canvas id="minimap"></canvas>
-    </div>
-    <div id="zoom-btns">
-      <div class="z-btn" onclick="zoomIn()">+</div>
-      <div class="z-btn" onclick="zoomOut()">−</div>
-      <div class="z-btn" style="font-size:.56rem;" onclick="resetView()">⊙</div>
+
+      <!-- Profil / Connexion Pi -->
+      <div id="tb-btn-profile" onclick="openPiAuth()" title="Profil Pi Network">
+        <div class="btn-ico">👤</div>
+        <div class="btn-lbl" id="tb-user-name">PROFIL</div>
+      </div>
+
+      <!-- SHOP — bouton principal très visible -->
+      <button id="tb-btn-shop" onclick="openModal('m-shop')" title="Boutique">
+        <div class="btn-ico">🛒</div>
+        <div class="btn-lbl">SHOP</div>
+      </button>
+
     </div>
   </div>
 
-  <!-- PALETTE BAR — 2 lignes + Gold séparé -->
-  <div id="pal-bar">
-    <div id="sel-dot" title="Couleur active"></div>
-    <div id="swatches-wrap">
-      <div id="swatches-row1" class="sw-row"></div>
-      <div id="swatches-row2" class="sw-row"></div>
-    </div>
-    <div id="gold-zone">
-      <div id="gold-swatch-btn" class="sw-gold" title="✦ Gold (5/jour)" onclick="pickGoldColor()">✦</div>
-      <div id="undo-btn" title="Annuler dernier pixel (30s)" onclick="undoLastPixel()">↩</div>
-    </div>
-    <div id="zoom-zone">
-      <div class="z-btn-pal" onclick="zoomIn()" title="Zoom +">＋</div>
-      <div class="z-btn-pal" onclick="zoomOut()" title="Zoom −">－</div>
-      <div class="z-btn-pal" onclick="resetView()" title="Recentrer">⊙</div>
-    </div>
-    <div id="pal-empty">
-      <div id="pal-empty-title">📦 STOCK VIDE</div>
-      <div id="pal-empty-timer">Recharge dans —</div>
-    </div>
-  </div>
+  <!-- ZONE DE JEU — à reconstruire avec le nouveau moteur -->
+  <div id="game-area"></div>
 
-  <button id="shop-launch-btn" onclick="openModal('m-shop')">🛒 BOUTIQUE — Augmente ton réservoir de pixels</button>
 </div><!-- /app -->
 
-<div id="px-flash"></div>
 <div id="toast"></div>
 
 <!-- ══════════ MODALES ══════════ -->
 
-<!-- Bienvenue -->
+<!-- Bienvenue / Règles -->
 <div class="m-bg open" id="m-welcome">
   <div class="m-box">
     <div class="m-h">✦ GOLD PIXEL</div>
-    <img src="/Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel" style="width:100%;max-width:260px;height:90px;object-fit:cover;border-radius:8px;margin:6px auto;display:block;border:2px solid rgba(245,200,66,.4);" onerror="this.style.display='none'">
+    <img src="/Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel"
+         style="width:100%;max-width:260px;height:90px;object-fit:cover;border-radius:8px;margin:6px auto;display:block;border:2px solid rgba(245,200,66,.4);"
+         onerror="this.style.display='none'">
     <p class="m-p">Le canvas pixel collaboratif de Pi Network.<br>Conquiers le canevas — un pixel à la fois.</p>
-    <ul class="rule-ul">
-      <li><span class="ic">📦</span><span><strong style="color:var(--gold)">10 pixels</strong> normaux en stock — recharge : 1 toutes les 3 min</span></li>
-      <li><span class="ic">✦</span><span><strong style="color:#ffd700">5 pixels Gold</strong> par jour — rares, brillants, spéciaux</span></li>
-      <li><span class="ic">👆</span><span>Touche une case du canevas pour y poser ton pixel</span></li>
-      <li><span class="ic">⚔️</span><span>Recouvre les pixels adverses pour conquérir le territoire</span></li>
-      <li><span class="ic">↩</span><span>30 secondes pour annuler ton dernier pixel posé</span></li>
-      <li><span class="ic">🌐</span><span>Canevas partagé en temps réel — tourne ton téléphone pour jouer</span></li>
-    </ul>
+
+    <div style="text-align:left;margin-bottom:12px;">
+      <div style="font-size:.52rem;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;">📋 Règles du jeu</div>
+      <ul class="rule-ul">
+        <li><span class="ic">📦</span><span><strong style="color:var(--gold)">15 pixels standards</strong> par jour — recharge 1 pixel toutes les <strong style="color:var(--gold)">2 minutes</strong></span></li>
+        <li><span class="ic">✦</span><span><strong style="color:#ffd700">5 pixels Gold</strong> — rares, brillants et distinctifs. Stock séparé.</span></li>
+        <li><span class="ic">👆</span><span>Touche une case du canevas pour y poser ton pixel</span></li>
+        <li><span class="ic">↩</span><span><strong style="color:var(--gold)">30 secondes</strong> pour annuler ton dernier pixel posé</span></li>
+        <li><span class="ic">⚔️</span><span>Recouvre les pixels adverses pour conquérir plus de territoire</span></li>
+        <li><span class="ic">🌐</span><span>Canevas partagé en temps réel avec tous les joueurs</span></li>
+        <li><span class="ic">🛒</span><span>Boutique : augmente ta capacité avec un pack (5 jours)</span></li>
+      </ul>
+      <div style="margin-top:8px;padding:7px 10px;border-radius:8px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);">
+        <div style="font-size:.5rem;font-weight:700;color:#ffd700;margin-bottom:4px;">💎 PACKS DISPONIBLES</div>
+        <div style="font-size:.46rem;color:var(--dim);line-height:1.8;">
+          🟢 Gratuit — 15 std / 5 gold<br>
+          🔵 Découverte — 25 std / 7 gold · <span style="color:var(--gold)">1 Pi</span><br>
+          🟣 Middle — 40 std / 9 gold · <span style="color:var(--gold)">2 Pi</span><br>
+          🔴 Giga — 55 std / 12 gold · <span style="color:var(--gold)">4 Pi</span>
+        </div>
+      </div>
+    </div>
+
     <button class="btn-p" onclick="startGame()">▶ JOUER →</button>
   </div>
 </div>
 
-<!-- Boutique — layout 2 colonnes paysage -->
+<!-- Boutique -->
 <div class="m-bg" id="m-shop">
   <div class="m-box">
     <div class="m-h">🛒 BOUTIQUE</div>
     <div id="shop-active-tank">Chargement...</div>
-    <p class="m-p" style="font-size:.5rem;margin-bottom:8px;opacity:.7;">5 jours par pack · 1 seul actif a la fois · retour automatique au standard a expiration</p>
+    <p class="m-p" style="font-size:.5rem;margin-bottom:8px;opacity:.7;">5 jours par pack · 1 seul actif à la fois · retour automatique au standard à expiration</p>
     <div class="shop-grid">
-      <div class="shop-card tank-middle">
-        <div class="shop-ico">🟡</div>
-        <div class="shop-name">Middle Tank</div>
-        <div class="shop-desc">20 pixels · confort de creation</div>
+      <div class="shop-card pack-decouverte">
+        <div class="shop-ico">🔵</div>
+        <div class="shop-name">Pack Découverte</div>
+        <div class="shop-desc">25 standard · plus de liberté</div>
+        <div class="shop-gold-detail">✦ 7 pixels Gold</div>
         <div class="shop-duration">5 jours</div>
         <div class="shop-price">1 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('middle')">ACTIVER</button>
+        <button class="shop-btn" onclick="shopBuy('decouverte')">ACTIVER</button>
       </div>
-      <div class="shop-card tank-big">
-        <div class="shop-ico">🟠</div>
-        <div class="shop-name">Big Tank</div>
-        <div class="shop-desc">30 pixels · liberte accrue</div>
+      <div class="shop-card pack-middle">
+        <div class="shop-ico">🟣</div>
+        <div class="shop-name">Middle Pack</div>
+        <div class="shop-desc">40 standard · création étendue</div>
+        <div class="shop-gold-detail">✦ 9 pixels Gold</div>
         <div class="shop-duration">5 jours</div>
         <div class="shop-price">2 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('big')">ACTIVER</button>
+        <button class="shop-btn" onclick="shopBuy('middle')">ACTIVER</button>
       </div>
-      <div class="shop-card tank-giga">
-        <div class="shop-ico">🔵</div>
-        <div class="shop-name">Giga Tank</div>
-        <div class="shop-desc">45 pixels · creations ambitieuses</div>
+      <div class="shop-card pack-giga">
+        <div class="shop-ico">🔴</div>
+        <div class="shop-name">Giga Pack</div>
+        <div class="shop-desc">55 standard · expérience maximale</div>
+        <div class="shop-gold-detail">✦ 12 pixels Gold</div>
         <div class="shop-duration">5 jours</div>
-        <div class="shop-price">3 Pi</div>
+        <div class="shop-price">4 Pi</div>
         <button class="shop-btn" onclick="shopBuy('giga')">ACTIVER</button>
       </div>
-      <div class="shop-card tank-ultra">
-        <div class="shop-ico">🟣</div>
-        <div class="shop-name">Ultra Tank</div>
-        <div class="shop-desc">60 pixels · experience maximale</div>
-        <div class="shop-duration">5 jours</div>
-        <div class="shop-price">5 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('ultra')">ACTIVER</button>
+      <div class="shop-card" style="border-color:rgba(56,212,138,.35);background:rgba(56,212,138,.05);">
+        <div class="shop-ico">🟢</div>
+        <div class="shop-name" style="color:var(--green);">Pack Gratuit</div>
+        <div class="shop-desc">15 standard · toujours disponible</div>
+        <div class="shop-gold-detail">✦ 5 pixels Gold</div>
+        <div class="shop-duration">Permanent</div>
+        <div class="shop-price" style="color:var(--green);">Gratuit</div>
+        <button class="shop-btn" style="background:rgba(56,212,138,.2);color:var(--green);border:1px solid var(--green);" disabled>ACTIF PAR DÉFAUT</button>
       </div>
     </div>
     <div class="shop-card-wide">
       <div class="shop-ico">💛</div>
       <div class="shop-info">
         <div class="shop-name">Soutenir le jeu</div>
-        <div class="shop-desc">Soutien au developpement de Gold Pixel</div>
+        <div class="shop-desc">Soutien au développement de Gold Pixel</div>
         <div class="shop-price">1 Pi</div>
       </div>
       <button class="shop-btn" onclick="shopBuy('support')">OFFRIR</button>
@@ -762,11 +638,11 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
   </div>
 </div>
 
-<!-- Sélection pays — grille 5 colonnes en paysage -->
+<!-- Pays -->
 <div class="m-bg" id="m-country">
   <div class="m-box">
     <div class="m-h">🌍 TON PAYS</div>
-    <p class="m-p">Choisis ton pays une seule fois pour participer au classement par territoire.</p>
+    <p class="m-p">Choisis ton pays pour participer au classement par territoire.</p>
     <div class="country-grid" id="country-grid-el"></div>
     <button class="btn-close" onclick="closeModal('m-country')">IGNORER</button>
   </div>
@@ -779,14 +655,92 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 /* ════════════════════════════
    CONFIG
 ════════════════════════════ */
-const API_BASE   = '';       // même domaine Render
-const POLL_MS    = 8000;
-/* Base + packs */
+const API_BASE  = '';
+const POLL_MS   = 8000;
+
+/* Réservoirs */
 const STOCK_BASE       = 15;
-const RECHARGE_S       = 10;    // 10 secondes de cooldown entre pixels
-const DAILY_BONUS_CL   = 2;     // +2 pixels classiques au bonus quotidien
-const DAILY_BONUS_GOLD = 1;     // +1 pixel Gold au bonus quotidien
-// Happy Hour : 12h–14h heure locale → cooldown /2, recharge ×2
+const RECHARGE_S       = 120;   // 1 pixel / 2 minutes
+const DAILY_BONUS_CL   = 2;
+const DAILY_BONUS_GOLD = 1;
+const TANK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
+const TANK_CAPS = {
+  base:       { std:15, gold:5  },
+  decouverte: { std:25, gold:7  },
+  middle:     { std:40, gold:9  },
+  giga:       { std:55, gold:12 },
+};
+const GOLD_MAX   = 5;
+const GOLD_CAP   = 12;
+const GOLD_COLOR = '#ffd700';
+
+/* Palette 32 couleurs */
+const COLORS = [
+  '#6d001a','#be0039','#ff4500','#ffa800','#ffd635','#fff8b8',
+  '#00a368','#00cc78','#7eed56','#00756f','#009eaa','#00ccc0',
+  '#2450a4','#3690ea','#51e9f4','#493ac1','#6a5cff','#94b3ff',
+  '#811e9f','#b44ac0','#e4abff','#de107f','#ff3881','#ff99aa',
+  '#6d482f','#9c6926','#ffb470','#000000','#515252','#898d90',
+  '#d4d7d9','#ffffff','#ffd700',
+];
+
+/* Pays */
+const COUNTRIES = [
+  {code:'FR',flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'France'},
+  {code:'US',flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'USA'},
+  {code:'GB',flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'UK'},
+  {code:'DE',flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'Allemagne'},
+  {code:'ES',flag:'\uD83C\uDDEA\uD83C\uDDF8',name:'Espagne'},
+  {code:'IT',flag:'\uD83C\uDDEE\uD83C\uDDF9',name:'Italie'},
+  {code:'BR',flag:'\uD83C\uDDE7\uD83C\uDDF7',name:'Br\u00e9sil'},
+  {code:'CN',flag:'\uD83C\uDDE8\uD83C\uDDF3',name:'Chine'},
+  {code:'JP',flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Japon'},
+  {code:'KR',flag:'\uD83C\uDDF0\uD83C\uDDF7',name:'Cor\u00e9e'},
+  {code:'IN',flag:'\uD83C\uDDEE\uD83C\uDDF3',name:'Inde'},
+  {code:'NG',flag:'\uD83C\uDDF3\uD83C\uDDEC',name:'Nig\u00e9ria'},
+  {code:'GH',flag:'\uD83C\uDDEC\uD83C\uDDED',name:'Ghana'},
+  {code:'KE',flag:'\uD83C\uDDF0\uD83C\uDDEA',name:'Kenya'},
+  {code:'PH',flag:'\uD83C\uDDF5\uD83C\uDDED',name:'Philippines'},
+  {code:'VN',flag:'\uD83C\uDDFB\uD83C\uDDF3',name:'Vietnam'},
+  {code:'ID',flag:'\uD83C\uDDEE\uD83C\uDDE9',name:'Indon\u00e9sie'},
+  {code:'TR',flag:'\uD83C\uDDF9\uD83C\uDDF7',name:'Turquie'},
+  {code:'MX',flag:'\uD83C\uDDF2\uD83C\uDDFD',name:'Mexique'},
+  {code:'MA',flag:'\uD83C\uDDF2\uD83C\uDDE6',name:'Maroc'},
+  {code:'DZ',flag:'\uD83C\uDDE9\uD83C\uDDFF',name:'Alg\u00e9rie'},
+  {code:'SN',flag:'\uD83C\uDDF8\uD83C\uDDF3',name:'S\u00e9n\u00e9gal'},
+  {code:'CI',flag:'\uD83C\uDDE8\uD83C\uDDEE',name:"C\u00f4te d'Ivoire"},
+  {code:'CM',flag:'\uD83C\uDDE8\uD83C\uDDF2',name:'Cameroun'},
+  {code:'TN',flag:'\uD83C\uDDF9\uD83C\uDDF3',name:'Tunisie'},
+  {code:'PL',flag:'\uD83C\uDDF5\uD83C\uDDF1',name:'Pologne'},
+  {code:'PT',flag:'\uD83C\uDDF5\uD83C\uDDF9',name:'Portugal'},
+  {code:'AR',flag:'\uD83C\uDDE6\uD83C\uDDF7',name:'Argentine'},
+  {code:'CO',flag:'\uD83C\uDDE8\uD83C\uDDF4',name:'Colombie'},
+  {code:'ZA',flag:'\uD83C\uDDFF\uD83C\uDDE6',name:'Afrique du Sud'},
+];
+
+/* ════════════════════════════
+   ÉTAT GLOBAL
+════════════════════════════ */
+let tankType        = 'base';
+let tankExpiry      = null;
+let STOCK_MAX       = STOCK_BASE;
+let STOCK_CAP       = STOCK_BASE;
+let GOLD_MAX_ACTIVE = GOLD_MAX;
+let stock           = STOCK_MAX;
+let goldStock       = GOLD_MAX;
+let rechargeLeft    = RECHARGE_S;
+let activeColor     = '#3690ea';
+let pixelsPlaced    = 0;
+let gameStarted     = false;
+let piUsername      = 'Explorateur';
+let piCountry       = null;
+let piConnected     = false;
+let lastTS          = 0;
+let pollTimer       = null;
+
+/* ════════════════════════════
+   HAPPY HOUR
+════════════════════════════ */
 function isHappyHour() {
   const h = new Date().getHours();
   return h >= 12 && h < 14;
@@ -794,346 +748,19 @@ function isHappyHour() {
 function getRechargeS() {
   return isHappyHour() ? Math.floor(RECHARGE_S / 2) : RECHARGE_S;
 }
-const TANK_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 jours
-const TANK_CAPS = { base:15, middle:20, big:30, giga:45, ultra:60 };
-/* Gold */
-const GOLD_MAX   = 5;
-const GOLD_CAP   = 10;
-const GOLD_COLOR = '#ffd700';
 
 /* ════════════════════════════
-   PALETTE 32 couleurs (r/place 2022)
+   RÉSERVOIRS
 ════════════════════════════ */
-const COLORS = [
-  '#6d001a','#be0039','#ff4500','#ffa800','#ffd635','#fff8b8',
-  '#00a368','#00cc78','#7eed56','#00756f','#009eaa','#00ccc0',
-  '#2450a4','#3690ea','#51e9f4','#493ac1','#6a5cff','#94b3ff',
-  '#811e9f','#b44ac0','#e4abff','#de107f','#ff3881','#ff99aa',
-  '#6d482f','#9c6926','#ffb470','#000000','#515252','#898d90',
-  '#d4d7d9','#ffffff',
-  '#ffd700',  /* GOLD — couleur spéciale */
-];
-
-/* ════════════════════════════
-   LISTE DES PAYS
-════════════════════════════ */
-const COUNTRIES = [
-  {code:'FR',flag:'🇫🇷',name:'France'},
-  {code:'US',flag:'🇺🇸',name:'USA'},
-  {code:'GB',flag:'🇬🇧',name:'UK'},
-  {code:'DE',flag:'🇩🇪',name:'Allemagne'},
-  {code:'ES',flag:'🇪🇸',name:'Espagne'},
-  {code:'IT',flag:'🇮🇹',name:'Italie'},
-  {code:'BR',flag:'🇧🇷',name:'Brésil'},
-  {code:'CN',flag:'🇨🇳',name:'Chine'},
-  {code:'JP',flag:'🇯🇵',name:'Japon'},
-  {code:'KR',flag:'🇰🇷',name:'Corée'},
-  {code:'IN',flag:'🇮🇳',name:'Inde'},
-  {code:'NG',flag:'🇳🇬',name:'Nigéria'},
-  {code:'GH',flag:'🇬🇭',name:'Ghana'},
-  {code:'KE',flag:'🇰🇪',name:'Kenya'},
-  {code:'PH',flag:'🇵🇭',name:'Philippines'},
-  {code:'VN',flag:'🇻🇳',name:'Vietnam'},
-  {code:'ID',flag:'🇮🇩',name:'Indonésie'},
-  {code:'TR',flag:'🇹🇷',name:'Turquie'},
-  {code:'MX',flag:'🇲🇽',name:'Mexique'},
-  {code:'MA',flag:'🇲🇦',name:'Maroc'},
-  {code:'DZ',flag:'🇩🇿',name:'Algérie'},
-  {code:'SN',flag:'🇸🇳',name:'Sénégal'},
-  {code:'CI',flag:'🇨🇮',name:"Côte d'Ivoire"},
-  {code:'CM',flag:'🇨🇲',name:'Cameroun'},
-  {code:'TN',flag:'🇹🇳',name:'Tunisie'},
-  {code:'PL',flag:'🇵🇱',name:'Pologne'},
-  {code:'PT',flag:'🇵🇹',name:'Portugal'},
-  {code:'AR',flag:'🇦🇷',name:'Argentine'},
-  {code:'CO',flag:'🇨🇴',name:'Colombie'},
-  {code:'ZA',flag:'🇿🇦',name:'Afrique du Sud'},
-];
-
-/* ════════════════════════════
-   CANVAS
-   Canvas évolutif — taille de départ : 40×24 = 320×192px
-   TILE = 8px → pixels plus fins, expérience plus authentique
-   Expansion auto à 70% remplissage → doublement progressif
-   Seuils : 70% → 60×36, 70% → 80×48, 70% → 120×72
-════════════════════════════ */
-let COLS = 150;   // départ 150×150 (approx 300×300 en pixels avec TILE=2)
-let ROWS = 150;
-const TILE = 2;   // pixels plus petits → densité pixel war authentique
-let CW   = COLS * TILE;
-let CH   = ROWS * TILE;
-const EXPAND_THRESHOLD = 0.65;   // 65% → expansion
-const EXPAND_STEPS = [
-  {cols:150, rows:150},  // 300×300 départ
-  {cols:250, rows:250},  // 500×500
-  {cols:375, rows:375},  // 750×750
-  {cols:500, rows:500},  // 1000×1000
-];
-let expandStep = 0;
-const BG   = '#f5f0e8';  /* fond crème — pixels visibles immédiatement */
-
-/* ════════════════════════════
-   ÉTAT GLOBAL — une seule déclaration de chaque variable
-════════════════════════════ */
-let activeColor  = '#3690ea';
-let selCol       = -1;
-let selRow       = -1;
-let tankType     = 'base';
-let tankExpiry   = null;
-let STOCK_MAX    = STOCK_BASE;
-let STOCK_CAP    = STOCK_BASE;
-let stock        = STOCK_MAX;
-let goldStock    = GOLD_MAX;
-let rechargeLeft = RECHARGE_S;
-let pixelsPlaced = 0;
-let sessionStart = Date.now();
-let gameStarted  = false;
-let piUsername   = 'Explorateur';
-let piCountry    = null;
-let piConnected  = false;
-let lastTS       = 0;
-let pollTimer    = null;
-
-/* Grille locale : null | {color, user} */
-let pixelGrid = Array.from({length: COLS}, () => new Array(ROWS).fill(null));
-
-/* ════════════════════════════
-   DOM
-════════════════════════════ */
-const mainCv    = document.getElementById('main-cv');
-const mainCtx   = mainCv.getContext('2d');
-const hoverCv   = document.getElementById('hover-cv');
-const hoverCtx  = hoverCv.getContext('2d');
-const minimapCv = document.getElementById('minimap');
-const mmCtx     = minimapCv.getContext('2d');
-const container = document.getElementById('canvas-container');
-const viewport  = document.getElementById('canvas-viewport');
-const selRing   = document.getElementById('sel-ring');
-
-mainCv.width  = hoverCv.width  = CW;
-mainCv.height = hoverCv.height = CH;
-function resizeMinimap() { minimapCv.width = COLS; minimapCv.height = ROWS; }
-resizeMinimap();
-
-/* ════════════════════════════
-   ZOOM & PAN
-   resetView centre le canevas et utilise 95% de la largeur
-   pour qu'il soit visuellement dominant
-════════════════════════════ */
-let scale     = 1;
-let panX      = 0;
-let panY      = 0;
-let isPanning = false;
-let panOX     = 0;
-let panOY     = 0;
-let tStartX   = 0;
-let tStartY   = 0;
-let tMoved    = false;
-let pinchD    = null;
-let pinchS    = 1;
-let mDown     = false;
-let mPan      = false;
-let mPX = 0, mPY = 0, mOX = 0, mOY = 0;
-
-function applyTransform() {
-  container.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
-}
-
-function resetView() {
-  const vw = viewport.clientWidth;
-  const vh = viewport.clientHeight;
-  /* 95% de la largeur OU 95% de la hauteur — on prend le plus grand
-     qui fait que le canevas tient, en priorité sur la largeur */
-  const scaleW = (vw * 0.95) / CW;
-  const scaleH = (vh * 0.95) / CH;
-  scale = Math.min(scaleW, scaleH);
-  /* Centrage parfait */
-  panX = (vw - CW * scale) / 2;
-  panY = (vh - CH * scale) / 2;
-  applyTransform();
-}
-
-function zoomIn()  { applyZoom(1.3); }
-function zoomOut() { applyZoom(0.77); }
-
-function applyZoom(f, cx, cy) {
-  const vw = viewport.clientWidth;
-  const vh = viewport.clientHeight;
-  if (cx === undefined) cx = vw / 2;
-  if (cy === undefined) cy = vh / 2;
-  const ns = Math.min(Math.max(scale * f, 0.2), 30);
-  const r  = ns / scale;
-  panX = cx - (cx - panX) * r;
-  panY = cy - (cy - panY) * r;
-  scale = ns;
-  applyTransform();
-}
-
-/* ════════════════════════════
-   DESSIN
-════════════════════════════ */
-/* ── Annulation dernier pixel (30 secondes) ── */
-function undoLastPixel() {
-  if (!lastPixel) { showToast('Rien \u00e0 annuler'); return; }
-  const {col, row, prevColor, prevUser} = lastPixel;
-  clearTimeout(undoTimer);
-  lastPixel = null;
-  const undoEl = document.getElementById('undo-btn');
-  if (undoEl) undoEl.classList.remove('active');
-  if (prevColor) {
-    pixelGrid[col][row] = {color: prevColor, user: prevUser || 'anon'};
-    paintCell(col, row, prevColor);
-  } else {
-    pixelGrid[col][row] = null;
-    clearCell(col, row);
-  }
-  if (activeColor === GOLD_COLOR) goldStock = Math.min(GOLD_CAP, goldStock + 1);
-  else stock = Math.min(STOCK_CAP, stock + 1);
-  updateStockUI();
-  showToast('\u21a9 Pixel annul\u00e9 !');
-  if (prevColor && piUsername) {
-    apiFetch('/api/pixelwar/place','POST',{col,row,color:prevColor,username:piUsername}).catch(()=>{});
-  }
-}
-
-/* ── Vérification et expansion du canevas ── */
-function checkExpand() {
-  if (expandStep >= EXPAND_STEPS.length - 1) return;
-  let filled = 0;
-  for (let c = 0; c < COLS; c++)
-    for (let r = 0; r < ROWS; r++)
-      if (pixelGrid[c][r]) filled++;
-  const pct = filled / (COLS * ROWS);
-  if (pct >= EXPAND_THRESHOLD) {
-    expandStep++;
-    const next = EXPAND_STEPS[expandStep];
-    const oldCols = COLS, oldRows = ROWS;
-    COLS = next.cols; ROWS = next.rows; CW = COLS*TILE; CH = ROWS*TILE;
-    /* Étendre pixelGrid */
-    const newGrid = Array.from({length:COLS}, (_,c) =>
-      Array.from({length:ROWS}, (_,r) =>
-        (c < oldCols && r < oldRows) ? pixelGrid[c][r] : null
-      )
-    );
-    pixelGrid = newGrid;
-    mainCv.width  = CW; mainCv.height  = CH;
-    hoverCv.width = CW; hoverCv.height = CH;
-    resizeMinimap();
-    drawGrid();
-    for (let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++) if(pixelGrid[c][r]) paintCell(c,r,pixelGrid[c][r].color);
-    resetView();
-    showToast(`📐 Canevas étendu : ${COLS}×${ROWS}`);
-  }
-}
-
-function drawGrid() {
-  mainCtx.fillStyle = BG;
-  mainCtx.fillRect(0, 0, CW, CH);
-  mainCtx.strokeStyle = 'rgba(0,0,0,0.12)';
-  mainCtx.lineWidth = 0.5;
-  for (let c = 0; c <= COLS; c++) {
-    mainCtx.beginPath(); mainCtx.moveTo(c*TILE,0); mainCtx.lineTo(c*TILE,CH); mainCtx.stroke();
-  }
-  for (let r = 0; r <= ROWS; r++) {
-    mainCtx.beginPath(); mainCtx.moveTo(0,r*TILE); mainCtx.lineTo(CW,r*TILE); mainCtx.stroke();
-  }
-  /* Repères 10×10 */
-  mainCtx.strokeStyle = 'rgba(200,150,10,0.25)';
-  mainCtx.lineWidth = 0.8;
-  for (let c = 0; c <= COLS; c += 10) {
-    mainCtx.beginPath(); mainCtx.moveTo(c*TILE,0); mainCtx.lineTo(c*TILE,CH); mainCtx.stroke();
-  }
-  for (let r = 0; r <= ROWS; r += 10) {
-    mainCtx.beginPath(); mainCtx.moveTo(0,r*TILE); mainCtx.lineTo(CW,r*TILE); mainCtx.stroke();
-  }
-}
-
-/* Peint uniquement la cellule demandée — ne touche pas aux voisines */
-function paintCell(col, row, color) {
-  const x = col * TILE, y = row * TILE;
-  mainCtx.fillStyle = color;
-  mainCtx.fillRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
-  mainCtx.strokeStyle = 'rgba(0,0,0,0.15)';
-  mainCtx.lineWidth = 0.5;
-  mainCtx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
-  mmCtx.fillStyle = color;
-  mmCtx.fillRect(col, row, 1, 1);
-}
-
-/* Efface une cellule et redessine la grille locale */
-function clearCell(col, row) {
-  const x = col * TILE, y = row * TILE;
-  mainCtx.fillStyle = BG;
-  mainCtx.fillRect(x, y, TILE, TILE);
-  mainCtx.strokeStyle = 'rgba(0,0,0,0.10)';
-  mainCtx.lineWidth = 0.5;
-  mainCtx.strokeRect(x, y, TILE, TILE);
-  mmCtx.fillStyle = BG;
-  mmCtx.fillRect(col, row, 1, 1);
-}
-
-function drawHover(col, row) {
-  hoverCtx.clearRect(0, 0, CW, CH);
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-  const x = col * TILE, y = row * TILE;
-  const h = activeColor.replace('#', '');
-  const r = parseInt(h.slice(0,2),16);
-  const g = parseInt(h.slice(2,4),16);
-  const b = parseInt(h.slice(4,6),16);
-  hoverCtx.fillStyle = `rgba(${r},${g},${b},0.34)`;
-  hoverCtx.fillRect(x, y, TILE, TILE);
-  hoverCtx.strokeStyle = 'rgba(255,255,255,0.84)';
-  hoverCtx.lineWidth = 1.5;
-  hoverCtx.strokeRect(x + 0.75, y + 0.75, TILE - 1.5, TILE - 1.5);
-}
-
-function redrawAll() {
-  drawGrid();
-  for (let c = 0; c < COLS; c++)
-    for (let r = 0; r < ROWS; r++)
-      if (pixelGrid[c][r]) paintCell(c, r, pixelGrid[c][r].color);
-}
-
-/* ════════════════════════════
-   SÉLECTION DE CASE
-════════════════════════════ */
-function getCell(cx, cy) {
-  const rect = viewport.getBoundingClientRect();
-  return {
-    col: Math.floor((cx - rect.left  - panX) / scale / TILE),
-    row: Math.floor((cy - rect.top   - panY) / scale / TILE),
-  };
-}
-
-function setSelected(col, row) {
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) { clearSel(); return; }
-  selCol = col; selRow = row;
-  selRing.style.display = 'block';
-  selRing.style.left    = col * TILE + 'px';
-  selRing.style.top     = row * TILE + 'px';
-  selRing.style.width   = TILE + 'px';
-  selRing.style.height  = TILE + 'px';
-  document.getElementById('coords').textContent = `X:${col} Y:${row}`;
-}
-
-function clearSel() {
-  selCol = -1; selRow = -1;
-  selRing.style.display = 'none';
-  document.getElementById('coords').textContent = 'X:— Y:—';
-}
-
-/* ════════════════════════════
-   STOCK UI
-════════════════════════════ */
-/* ════════════════════
-   RESERVOIRS — packs
-════════════════════ */
 function setTank(type, expiry) {
-  tankType   = type || 'base';
-  tankExpiry = expiry || null;
-  STOCK_MAX  = TANK_CAPS[tankType] || STOCK_BASE;
-  STOCK_CAP  = STOCK_MAX;
-  if (stock > STOCK_MAX) stock = STOCK_MAX;
+  tankType        = type || 'base';
+  tankExpiry      = expiry || null;
+  const caps      = TANK_CAPS[tankType] || TANK_CAPS.base;
+  STOCK_MAX       = caps.std;
+  STOCK_CAP       = caps.std;
+  GOLD_MAX_ACTIVE = caps.gold;
+  if (stock     > STOCK_MAX)       stock     = STOCK_MAX;
+  if (goldStock > GOLD_MAX_ACTIVE) goldStock = GOLD_MAX_ACTIVE;
   _refreshShopStatus();
 }
 
@@ -1142,7 +769,7 @@ function checkTankExpiry() {
   if (Date.now() >= tankExpiry) {
     setTank('base', null);
     saveLSState();
-    showToast('Pack expire — retour au reservoir standard (15 pixels)');
+    showToast('Pack expiré — retour au réservoir standard (15 pixels)');
   }
 }
 
@@ -1150,15 +777,16 @@ function _refreshShopStatus() {
   const el = document.getElementById('shop-active-tank');
   if (!el) return;
   if (tankType === 'base') {
-    el.textContent = 'Reservoir actif : Base — 15 pixels';
+    el.textContent = 'Pack Gratuit actif — 15 standard / 5 gold';
     el.style.color = 'var(--green)';
     return;
   }
-  const names = { middle:'Middle Tank', big:'Big Tank', giga:'Giga Tank', ultra:'Ultra Tank' };
-  const msLeft = Math.max(0, tankExpiry - Date.now());
-  const d = Math.ceil(msLeft / 86400000);
-  const h = Math.ceil((msLeft % 86400000) / 3600000);
-  el.textContent = (names[tankType] || tankType) + ' — ' + STOCK_MAX + ' pixels — expire dans ' + d + 'j ' + h + 'h';
+  const names = { decouverte:'Pack Découverte', middle:'Middle Pack', giga:'Giga Pack' };
+  const caps  = TANK_CAPS[tankType] || TANK_CAPS.base;
+  const ms    = Math.max(0, tankExpiry - Date.now());
+  const d     = Math.ceil(ms / 86400000);
+  const h     = Math.ceil((ms % 86400000) / 3600000);
+  el.textContent = (names[tankType] || tankType) + ' — ' + caps.std + ' std / ' + caps.gold + ' gold — expire dans ' + d + 'j ' + h + 'h';
   el.style.color = 'var(--gold)';
 }
 
@@ -1167,156 +795,54 @@ function applyDailyBonus() {
   const key   = 'gp_daily_' + (piUsername || 'anon');
   if (localStorage.getItem(key) === today) return;
   localStorage.setItem(key, today);
-  // +2 classiques + 1 Gold, peuvent dépasser le réservoir, expirent à minuit
   stock     = Math.min(STOCK_MAX + DAILY_BONUS_CL,   stock     + DAILY_BONUS_CL);
   goldStock = Math.min(GOLD_MAX  + DAILY_BONUS_GOLD, goldStock + DAILY_BONUS_GOLD);
-  const midnight = new Date(); midnight.setHours(24,0,0,0);
-  const msLeft = midnight - Date.now();
-  setTimeout(function() {
-    if (stock     > STOCK_MAX) { stock     = STOCK_MAX; }
-    if (goldStock > GOLD_MAX)  { goldStock = GOLD_MAX; }
+  const midnight = new Date(); midnight.setHours(24, 0, 0, 0);
+  setTimeout(() => {
+    if (stock     > STOCK_MAX) stock     = STOCK_MAX;
+    if (goldStock > GOLD_MAX)  goldStock = GOLD_MAX;
     updateStockUI(); saveLSState();
-  }, msLeft);
+  }, midnight - Date.now());
   updateStockUI(); saveLSState();
   showToast('+' + DAILY_BONUS_CL + ' pixels + ' + DAILY_BONUS_GOLD + ' Gold ! Bonus quotidien');
 }
 
-function updateStockUI() {
-  const stockPill     = document.getElementById('tb-stock-pill');
-  const stockVal      = document.getElementById('tb-stock-val');
-  const rechargeEl    = document.getElementById('tb-recharge-val');
-  const rechargePill  = document.getElementById('tb-recharge-pill');
-  const emptyEl       = document.getElementById('pal-empty');
-  const swatchesEl    = document.getElementById('swatches');
-  const emptyTimerEl  = document.getElementById('pal-empty-timer');
-
-  stockVal.textContent = stock;
-  const smxEl = document.getElementById('tb-stock-max'); if (smxEl) smxEl.textContent = '/' + STOCK_MAX;
-  const goldValEl = document.getElementById('tb-gold-val');
-  if (goldValEl) goldValEl.textContent = goldStock;
-
-  /* Couleur pill stock */
-  stockPill.className = 'tb-pill tb-pill-stock' +
-    (stock <= 0 ? ' low' : stock >= STOCK_MAX ? ' full' : '');
-
-  /* Icône */
-  document.getElementById('tb-stock-ico').textContent =
-    stock <= 0 ? '🔴' : stock <= 3 ? '🟡' : '📦';
-
-  /* Recharge */
-  if (stock >= STOCK_MAX) {
-    rechargeEl.textContent = 'PLEIN';
-    rechargePill.className = 'tb-pill tb-pill-recharge hidden';
-  } else {
-    const m = Math.floor(rechargeLeft / 60);
-    const s = rechargeLeft % 60;
-    const txt = `+1 dans ${m}:${String(s).padStart(2,'0')}`;
-    rechargeEl.textContent = txt;
-    rechargePill.className = 'tb-pill tb-pill-recharge';
-    if (emptyTimerEl) emptyTimerEl.textContent = txt;
-  }
-
-  /* Zone palette */
-  if (stock <= 0) {
-    emptyEl.classList.add('show');
-    swatchesEl.style.display = 'none';
-  } else {
-    emptyEl.classList.remove('show');
-    swatchesEl.style.display = '';
-  }
-}
-
 /* ════════════════════════════
-   POSE DU PIXEL — tap direct
-   Pas de bouton intermédiaire
-   Rollback si le serveur refuse
+   HUD — stock UI
 ════════════════════════════ */
-function placePixelAt(col, row) {
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-  if (stock <= 0) {
-    showToast('📦 Stock vide — ' + formatTime(rechargeLeft));
-    return;
+function updateStockUI() {
+  const stockPill    = document.getElementById('tb-stock-pill');
+  const stockVal     = document.getElementById('tb-stock-val');
+  const stockMaxEl   = document.getElementById('tb-stock-max');
+  const rechargeEl   = document.getElementById('tb-recharge-val');
+  const rechargePill = document.getElementById('tb-recharge-pill');
+  const goldValEl    = document.getElementById('tb-gold-val');
+  const goldMaxEl    = document.getElementById('tb-gold-max');
+  const stockIco     = document.getElementById('tb-stock-ico');
+
+  if (stockVal)   stockVal.textContent   = stock;
+  if (stockMaxEl) stockMaxEl.textContent = '/' + STOCK_MAX;
+  if (goldValEl)  goldValEl.textContent  = goldStock;
+  if (goldMaxEl)  goldMaxEl.textContent  = '/' + GOLD_MAX_ACTIVE;
+
+  if (stockPill) {
+    stockPill.className = 'tb-res tb-res-std' +
+      (stock <= 0 ? ' low' : stock >= STOCK_MAX ? ' full' : '');
+  }
+  if (stockIco) {
+    stockIco.textContent = stock <= 0 ? '🔴' : stock <= 3 ? '🟡' : '📦';
   }
 
-  const color = activeColor;
-  const user  = '@' + piUsername;
-
-  /* Sauvegarder l'état précédent pour rollback éventuel */
-  const prev = pixelGrid[col][row] ? Object.assign({}, pixelGrid[col][row]) : null;
-
-  /* Enregistrer pour annulation (30s) */
-  clearTimeout(undoTimer);
-  lastPixel = { col, row, prevColor: prev ? prev.color : null, prevUser: prev ? prev.user : null, time: Date.now() };
-  const undoEl = document.getElementById('undo-btn');
-  if (undoEl) { undoEl.classList.add('active'); }
-  undoTimer = setTimeout(() => {
-    lastPixel = null;
-    if (undoEl) undoEl.classList.remove('active');
-  }, 30000);
-
-  /* Mise à jour optimiste — immédiate côté client */
-  pixelGrid[col][row] = { color, user };
-  paintCell(col, row, color);
-
-  /* Décrémenter stock normal ou gold selon la couleur active */
-  if (color === GOLD_COLOR) {
-    goldStock = Math.max(0, goldStock - 1);
+  if (stock >= STOCK_MAX) {
+    if (rechargeEl)   rechargeEl.textContent  = 'PLEIN';
+    if (rechargePill) rechargePill.className   = 'tb-pill tb-pill-recharge hidden';
   } else {
-    stock--;
-    if (stock === STOCK_MAX - 1 || rechargeLeft <= 0) {
-      rechargeLeft = getRechargeS();
-    }
+    const m   = Math.floor(rechargeLeft / 60);
+    const s   = rechargeLeft % 60;
+    const txt = '+1 dans ' + m + ':' + String(s).padStart(2, '0');
+    if (rechargeEl)   rechargeEl.textContent  = txt;
+    if (rechargePill) rechargePill.className   = 'tb-pill tb-pill-recharge';
   }
-  pixelsPlaced++;
-  updateStockUI();
-  checkExpand();
-
-  /* Flash visuel */
-  const fl = document.getElementById('px-flash');
-  fl.classList.add('on');
-  setTimeout(() => fl.classList.remove('on'), 75);
-
-  addActivity(`${user} → ${col},${row}`);
-  showToast(`✅ ${col},${row} · stock: ${stock}`);
-  saveLSState();
-
-  /* Envoi serveur (asynchrone) */
-  apiFetch('/api/pixelwar/place', 'POST', { col, row, color, username: piUsername })
-    .then(data => {
-      if (data && data.ok) {
-        /* Serveur confirme → synchroniser le stock avec la valeur serveur */
-        if (typeof data.stock === 'number') {
-          stock = data.stock;
-          if (typeof data.rechargeLeft === 'number') rechargeLeft = data.rechargeLeft;
-          updateStockUI();
-        }
-        showSync('ok', '✓ Sync');
-        saveLSState();
-      } else {
-        /* Serveur refuse → rollback */
-        pixelGrid[col][row] = prev;
-        if (prev) paintCell(col, row, prev.color);
-        else      clearCell(col, row);
-        stock = Math.min(STOCK_CAP, stock + 1);
-        pixelsPlaced = Math.max(0, pixelsPlaced - 1);
-        updateStockUI();
-        showToast('❌ ' + (data && data.error ? data.error : 'Refus serveur'));
-        showSync('err', '✗ Refusé');
-        saveLSState();
-      }
-    })
-    .catch(() => {
-      /* Réseau indisponible → conserver l'optimiste */
-      showSync('err', '⚠ Hors-ligne');
-      saveLSState();
-    });
-
-  clearSel();
-  hoverCtx.clearRect(0, 0, CW, CH);
-}
-
-function formatTime(s) {
-  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 
 /* ════════════════════════════
@@ -1326,16 +852,18 @@ let _happyHourNotified = false;
 setInterval(() => {
   checkTankExpiry();
   if (!gameStarted) return;
-  // Notifier Happy Hour au début
+
   const hhBar = document.getElementById('happy-hour-bar');
   if (hhBar) hhBar.classList.toggle('show', isHappyHour());
+
   if (isHappyHour() && !_happyHourNotified) {
     _happyHourNotified = true;
-    showToast('🔥 Happy Hour ! Recharge 2x plus rapide (12h–14h)');
+    showToast('🔥 Happy Hour ! Recharge 2× plus rapide (12h–14h)');
     triggerNotification('happy_hour');
   } else if (!isHappyHour()) {
     _happyHourNotified = false;
   }
+
   if (stock < STOCK_MAX) {
     rechargeLeft = Math.max(0, rechargeLeft - 1);
     if (rechargeLeft <= 0) {
@@ -1358,55 +886,18 @@ setInterval(() => {
 ════════════════════════════ */
 async function apiFetch(path, method, body) {
   try {
-    const opts = {
-      method: method || 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
+    const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(API_BASE + path, opts);
     return await res.json();
   } catch (_) { return null; }
 }
 
-async function loadGrid() {
-  showSync('ld', '⟳ Chargement…');
-  const data = await apiFetch('/api/pixelwar/grid', 'GET');
-  if (data && Array.isArray(data.pixels)) {
-    data.pixels.forEach(({ col, row, color, user }) => {
-      if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-        pixelGrid[col][row] = { color, user: user || '?' };
-        paintCell(col, row, color);
-      }
-    });
-    lastTS = data.ts || 0;
-    showSync('ok', '✓ Connecté');
-  } else {
-    loadLSState();
-    showSync('err', '⚠ Mode hors-ligne');
-  }
-}
-
-async function pollGrid() {
-  const data = await apiFetch(`/api/pixelwar/grid?since=${lastTS}`, 'GET');
-  if (!data || !Array.isArray(data.pixels)) return;
-  data.pixels.forEach(({ col, row, color, user }) => {
-    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-    if (user === '@' + piUsername) return;   /* ignorer ses propres pixels */
-    pixelGrid[col][row] = { color, user: user || '?' };
-    paintCell(col, row, color);
-    addActivity(`${user || '?'} → ${col},${row}`);
-  });
-  if (data.ts) lastTS = data.ts;
-}
-
 async function loadPlayerState() {
-  const data = await apiFetch(
-    `/api/pixelwar/player?username=${encodeURIComponent(piUsername)}`,
-    'GET'
-  );
+  const data = await apiFetch('/api/pixelwar/player?username=' + encodeURIComponent(piUsername), 'GET');
   if (data && data.ok) {
-    stock        = typeof data.stock === 'number' ? Math.min(STOCK_CAP, data.stock) : STOCK_MAX;
-    rechargeLeft = typeof data.rechargeLeft === 'number' ? data.rechargeLeft : RECHARGE_S;
+    stock        = typeof data.stock        === 'number' ? Math.min(STOCK_CAP, data.stock) : STOCK_MAX;
+    rechargeLeft = typeof data.rechargeLeft === 'number' ? data.rechargeLeft                : RECHARGE_S;
     updateStockUI();
   }
 }
@@ -1419,38 +910,26 @@ async function saveCountry(code) {
 
 /* ════════════════════════════
    PI SDK AUTH
-   Sandbox: true → développement
-   Sandbox: false → production
-   À brancher avec vos vraies clés Pi
 ════════════════════════════ */
 function openPiAuth() {
-  if (piConnected) {
-    showToast(`Connecté : @${piUsername}`);
-    return;
-  }
-  if (!window.Pi) {
-    showToast('Pi SDK indisponible — vérifiez la connexion');
-    return;
-  }
-  Pi.init({ version: '2.0', sandbox: true }); /* PROD: passer sandbox:false */
+  if (piConnected) { showToast('Connecté : @' + piUsername); return; }
+  if (!window.Pi)  { showToast('Pi SDK indisponible'); return; }
+  Pi.init({ version: '2.0', sandbox: true });
   Pi.authenticate(['username'], onPiAuthSuccess, onPiAuthError);
 }
 
 function onPiAuthSuccess(authResult) {
   piConnected = true;
   piUsername  = authResult.user.username;
-  document.getElementById('tb-user-name').textContent = '@' + piUsername;
-  const piBtn = document.getElementById('tb-pi-btn'); if (piBtn) piBtn.textContent = '✓ Pi';
-  showToast(`✅ @${piUsername}`);
+  const nameEl = document.getElementById('tb-user-name');
+  if (nameEl) nameEl.textContent = '@' + piUsername;
+  const profileBtn = document.getElementById('tb-btn-profile');
+  if (profileBtn) profileBtn.classList.add('connected');
+  showToast('✅ @' + piUsername);
   loadPlayerState();
   applyDailyBonus();
-  /* Pays : si déjà sauvegardé localement, on l'utilise directement */
-  const savedCountry = localStorage.getItem('pw_country');
-  if (savedCountry) {
-    piCountry = savedCountry;
-  } else {
-    openCountryModal();
-  }
+  const saved = localStorage.getItem('pw_country');
+  if (saved) { piCountry = saved; } else { openCountryModal(); }
 }
 
 function onPiAuthError(err) {
@@ -1460,22 +939,21 @@ function onPiAuthError(err) {
 
 /* ════════════════════════════
    SÉLECTION PAYS
-   Note : "countryGridEl" pour ne pas entrer en
-   conflit avec la variable globale "pixelGrid"
 ════════════════════════════ */
 function openCountryModal() {
-  const countryGridEl = document.getElementById('country-grid-el');
-  countryGridEl.innerHTML = '';
+  const grid = document.getElementById('country-grid-el');
+  if (!grid) return;
+  grid.innerHTML = '';
   COUNTRIES.forEach(c => {
     const btn = document.createElement('div');
-    btn.className = 'country-btn' + (c.code === piCountry ? ' on' : '');
-    btn.textContent = `${c.flag} ${c.name}`;
+    btn.className   = 'country-btn' + (c.code === piCountry ? ' on' : '');
+    btn.textContent = c.flag + ' ' + c.name;
     btn.addEventListener('click', () => {
       saveCountry(c.code);
       closeModal('m-country');
-      showToast(`🌍 ${c.flag} ${c.name}`);
+      showToast('🌍 ' + c.flag + ' ' + c.name);
     });
-    countryGridEl.appendChild(btn);
+    grid.appendChild(btn);
   });
   openModal('m-country');
 }
@@ -1485,52 +963,41 @@ function openCountryModal() {
 ════════════════════════════ */
 function shopBuy(type) {
   if (!window.Pi || !piConnected) {
-    showToast('Connecte-toi a Pi pour acheter');
+    showToast('Connecte-toi à Pi pour acheter');
     openPiAuth();
     return;
   }
   const tanks = {
-    middle:  { price:1, label:'Middle Tank',  cap:20 },
-    big:     { price:2, label:'Big Tank',     cap:30 },
-    giga:    { price:3, label:'Giga Tank',    cap:45 },
-    ultra:   { price:5, label:'Ultra Tank',   cap:60 },
-    support: { price:1, label:'Soutien Gold Pixel', cap:0 },
+    decouverte: { price:1, label:'Pack Découverte',   std:25, gold:7  },
+    middle:     { price:2, label:'Middle Pack',        std:40, gold:9  },
+    giga:       { price:4, label:'Giga Pack',          std:55, gold:12 },
+    support:    { price:1, label:'Soutien Gold Pixel', std:0,  gold:0  },
   };
-  const item = tanks[type];
-  if (!item) return;
-
-  /* Empecher le cumul de packs */
+  const item = tanks[type]; if (!item) return;
   if (type !== 'support' && tankType !== 'base') {
-    showToast('Un pack est actif — attend son expiration avant d\'en acheter un autre');
+    showToast('Un pack est actif — attends son expiration');
     return;
   }
-
   Pi.createPayment(
-    {
-      amount: item.price,
-      memo: 'Gold Pixel — ' + item.label,
-      metadata: { type, username: piUsername },
-    },
+    { amount: item.price, memo: 'Gold Pixel — ' + item.label, metadata: { type, username: piUsername } },
     {
       onReadyForServerApproval: id =>
         apiFetch('/api/pixelwar/shop/approve', 'POST', { paymentId: id }),
       onReadyForServerCompletion: (id, txid) =>
-        apiFetch('/api/pixelwar/shop/complete', 'POST', {
-          paymentId: id, txid, type, username: piUsername,
-        }).then(d => {
+        apiFetch('/api/pixelwar/shop/complete', 'POST', { paymentId: id, txid, type, username: piUsername })
+        .then(d => {
           if (d && d.ok) {
             if (type !== 'support') {
-              const expiry = Date.now() + TANK_DURATION_MS;
-              setTank(type, expiry);
+              setTank(type, Date.now() + TANK_DURATION_MS);
               saveLSState();
-              showToast('Pack ' + item.label + ' active — ' + item.cap + ' pixels pendant 5 jours !');
+              showToast('Pack ' + item.label + ' actif — ' + item.std + ' std / ' + item.gold + ' gold — 5 jours !');
             } else {
               showToast('Merci pour ton soutien !');
             }
             closeModal('m-shop');
           }
         }),
-      onCancel: () => showToast('Achat annule'),
+      onCancel: () => showToast('Achat annulé'),
       onError:  () => showToast('Erreur paiement Pi'),
     }
   );
@@ -1540,38 +1007,35 @@ function shopBuy(type) {
    CLASSEMENT
 ════════════════════════════ */
 let _lbTab = 'players';
-
 function switchLbTab(tab) {
   _lbTab = tab;
-  document.getElementById('lb-tab-players').classList.toggle('on', tab === 'players');
-  document.getElementById('lb-tab-countries').classList.toggle('on', tab === 'countries');
-  document.getElementById('lb-panel-players').classList.toggle('on', tab === 'players');
-  document.getElementById('lb-panel-countries').classList.toggle('on', tab === 'countries');
+  ['players','countries'].forEach(t => {
+    document.getElementById('lb-tab-'   + t).classList.toggle('on', t === tab);
+    document.getElementById('lb-panel-' + t).classList.toggle('on', t === tab);
+  });
 }
 
 async function openLB() {
   openModal('m-lb');
-  const medals = ['🥇','🥈','🥉'];
-
+  const medals   = ['🥇','🥈','🥉'];
   const [pData, cData] = await Promise.all([
-    apiFetch('/api/pixelwar/leaderboard', 'GET'),
+    apiFetch('/api/pixelwar/leaderboard',           'GET'),
     apiFetch('/api/pixelwar/leaderboard/countries', 'GET'),
   ]);
 
   /* Joueurs */
   const pList   = document.getElementById('lb-list-players');
   pList.innerHTML = '';
-  const players = (pData && pData.leaderboard) || [
-    { user: '@' + piUsername, pixels: pixelsPlaced, covered: 0 },
-  ];
+  const players = (pData && pData.leaderboard) || [{ user: '@' + piUsername, pixels: pixelsPlaced, covered: 0 }];
   players.forEach((e, i) => {
     const isMe = e.user === '@' + piUsername;
     const div  = document.createElement('div');
     div.className = 'lb-r';
     div.innerHTML =
-      `<span class="lb-rank">${medals[i] || '#'+(i+1)}</span>` +
-      `<span class="lb-name" style="${isMe ? 'color:var(--gold);font-weight:700' : ''}">${e.user||'?'}${isMe?' ★':''}</span>` +
-      `<span class="lb-px">${e.pixels||0}px &middot; ${e.covered||0}⚔</span>`;
+      '<span class="lb-rank">' + (medals[i] || '#' + (i+1)) + '</span>' +
+      '<span class="lb-name" style="' + (isMe ? 'color:var(--gold);font-weight:700' : '') + '">' +
+        (e.user || '?') + (isMe ? ' ★' : '') + '</span>' +
+      '<span class="lb-px">' + (e.pixels || 0) + 'px · ' + (e.covered || 0) + '⚔</span>';
     pList.appendChild(div);
   });
 
@@ -1579,39 +1043,32 @@ async function openLB() {
   const cList     = document.getElementById('lb-list-countries');
   cList.innerHTML = '';
   const countries = (cData && cData.leaderboard) || [];
-  if (countries.length === 0) {
-    cList.innerHTML = `<div style="font-size:.56rem;color:var(--dim);text-align:center;padding:10px 0;">Pas encore de données pays.</div>`;
+  if (!countries.length) {
+    cList.innerHTML = '<div style="font-size:.56rem;color:var(--dim);text-align:center;padding:10px 0;">Pas encore de données pays.</div>';
   } else {
     countries.forEach((e, i) => {
       const found = COUNTRIES.find(c => c.code === e.country);
-      const flag  = found ? found.flag : '🏳';
-      const name  = found ? found.name : (e.country || '?');
       const div   = document.createElement('div');
       div.className = 'lb-r';
       div.innerHTML =
-        `<span class="lb-rank">${medals[i] || '#'+(i+1)}</span>` +
-        `<span class="lb-name">${flag} ${name}</span>` +
-        `<span class="lb-px">${e.pixels||0}px</span>`;
+        '<span class="lb-rank">' + (medals[i] || '#' + (i+1)) + '</span>' +
+        '<span class="lb-name">' + (found ? found.flag : '🏳') + ' ' + (found ? found.name : (e.country || '?')) + '</span>' +
+        '<span class="lb-px">' + (e.pixels || 0) + 'px</span>';
       cList.appendChild(div);
     });
   }
 }
 
 /* ════════════════════════════
-   PERSISTANCE LOCALE (fallback hors-ligne)
-   Clé isolée 'pixelwar_v3' pour ne pas entrer
-   en conflit avec d'autres jeux
+   PERSISTANCE LOCALE
 ════════════════════════════ */
 const LS_KEY = 'pixelwar_v3';
 
 function saveLSState() {
-  const pixels = [];
-  for (let c = 0; c < COLS; c++)
-    for (let r = 0; r < ROWS; r++)
-      if (pixelGrid[c][r]) pixels.push({ col:c, row:r, ...pixelGrid[c][r] });
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      pixels, stock, rechargeLeft, placed: pixelsPlaced, ts: Date.now(), tankType: tankType, tankExpiry: tankExpiry,
+      stock, rechargeLeft, placed: pixelsPlaced,
+      ts: Date.now(), tankType, tankExpiry,
     }));
   } catch (_) {}
 }
@@ -1621,24 +1078,17 @@ function loadLSState() {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return;
     const s = JSON.parse(raw);
-    if (Array.isArray(s.pixels)) {
-      s.pixels.forEach(({ col, row, color, user }) => {
-        if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-          pixelGrid[col][row] = { color, user };
-          paintCell(col, row, color);
-        }
-      });
-    }
     pixelsPlaced = s.placed || 0;
-    /* Calculer les pixels rechargés pendant l'absence */
-    let sStock    = typeof s.stock === 'number' ? s.stock : STOCK_MAX;
+    let sStock    = typeof s.stock        === 'number' ? s.stock        : STOCK_MAX;
     let sRecharge = typeof s.rechargeLeft === 'number' ? s.rechargeLeft : RECHARGE_S;
+    /* Calculer les pixels rechargés pendant l'absence */
     const elapsed = Math.floor((Date.now() - (s.ts || Date.now())) / 1000);
     let rem = elapsed;
     while (sStock < STOCK_MAX && rem > 0) {
       if (rem >= sRecharge) { rem -= sRecharge; sStock++; sRecharge = RECHARGE_S; }
       else { sRecharge -= rem; rem = 0; }
     }
+    /* Restaurer le tank */
     if (s.tankType && s.tankType !== 'base' && s.tankExpiry && Date.now() < s.tankExpiry) {
       setTank(s.tankType, s.tankExpiry);
     } else {
@@ -1651,211 +1101,53 @@ function loadLSState() {
 }
 
 /* ════════════════════════════
-   PALETTE
+   PALETTE — couleurs conservées
+   pour le futur moteur
 ════════════════════════════ */
-function buildPalette() {
-  const row1 = document.getElementById('swatches-row1');
-  const row2 = document.getElementById('swatches-row2');
-  const palColors = COLORS.filter(c => c !== GOLD_COLOR);
-  const half = Math.ceil(palColors.length / 2);
-  [row1, row2].forEach((row, ri) => {
-    if (!row) return;
-    row.innerHTML = '';
-    palColors.slice(ri * half, (ri+1) * half).forEach(c => {
-      const el = document.createElement('div');
-      el.className = 'sw' + (c === activeColor ? ' on' : '');
-      el.style.background = c;
-      el.addEventListener('click', () => pickColor(c));
-      el.addEventListener('touchstart', e => { e.preventDefault(); pickColor(c); }, {passive:false});
-      row.appendChild(el);
-    });
-  });
-  document.getElementById('sel-dot').style.background = activeColor;
-  const gb = document.getElementById('gold-swatch-btn');
-  if (gb) gb.classList.toggle('on', activeColor === GOLD_COLOR);
-}
-
-function pickGoldColor() {
-  if (goldStock <= 0) { showToast('\u2726 Stock Gold \u00e9puis\u00e9 pour aujourd\u2019hui !'); return; }
-  activeColor = GOLD_COLOR;
-  document.getElementById('sel-dot').style.background = GOLD_COLOR;
-  document.querySelectorAll('.sw').forEach(el => el.classList.remove('on'));
-  const gb = document.getElementById('gold-swatch-btn');
-  if (gb) gb.classList.add('on');
-  if (selCol >= 0 && selRow >= 0) drawHover(selCol, selRow);
-}
-
 function pickColor(c) {
   if (c === GOLD_COLOR) { pickGoldColor(); return; }
-  if (stock <= 0) { showToast('\ud83d\udce6 Stock vide — attends la recharge !'); return; }
   activeColor = c;
-  document.getElementById('sel-dot').style.background = c;
-  document.querySelectorAll('.sw').forEach(el => {
-    el.classList.toggle('on', el.style.background === c || el.style.backgroundColor === c);
-  });
-  const gb = document.getElementById('gold-swatch-btn');
-  if (gb) gb.classList.remove('on');
-  if (selCol >= 0 && selRow >= 0) drawHover(selCol, selRow);
+}
+function pickGoldColor() {
+  if (goldStock <= 0) { showToast('✦ Stock Gold épuisé !'); return; }
+  activeColor = GOLD_COLOR;
 }
 
 /* ════════════════════════════
-   FEED ACTIVITÉ
-════════════════════════════ */
-const actFeed = document.getElementById('activity');
-const actQ    = [];
-function addActivity(txt) {
-  const el = document.createElement('div');
-  el.className = 'act-i';
-  el.textContent = txt;
-  actFeed.prepend(el);
-  actQ.push(el);
-  if (actQ.length > 4) actQ.shift().remove();
-}
-
-/* ════════════════════════════
-   TOUCH EVENTS
-   1 doigt court (< seuil 6px) → poser pixel immédiatement
-   1 doigt long glissement     → pan
-   2 doigts                    → pinch zoom
-════════════════════════════ */
-viewport.addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (e.touches.length === 1) {
-    tStartX = e.touches[0].clientX;
-    tStartY = e.touches[0].clientY;
-    tMoved  = false;
-    isPanning = false;
-  } else if (e.touches.length === 2) {
-    pinchD = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    pinchS    = scale;
-    isPanning = false;
-    tMoved    = true; /* empêche le tap sur 2 doigts */
-  }
-}, { passive: false });
-
-viewport.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (e.touches.length === 1) {
-    const dx = e.touches[0].clientX - tStartX;
-    const dy = e.touches[0].clientY - tStartY;
-    if (!isPanning && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-      isPanning = true; tMoved = true; panOX = panX; panOY = panY;
-    }
-    if (isPanning) {
-      panX = panOX + dx; panY = panOY + dy; applyTransform();
-    } else {
-      const { col, row } = getCell(e.touches[0].clientX, e.touches[0].clientY);
-      drawHover(col, row);
-      document.getElementById('coords').textContent = `X:${col} Y:${row}`;
-    }
-  } else if (e.touches.length === 2 && pinchD) {
-    tMoved = true;
-    const d  = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    const ns = Math.min(Math.max(pinchS * (d / pinchD), 0.2), 30);
-    const r  = ns / scale;
-    panX = cx - (cx - panX) * r;
-    panY = cy - (cy - panY) * r;
-    scale = ns;
-    applyTransform();
-  }
-}, { passive: false });
-
-viewport.addEventListener('touchend', e => {
-  e.preventDefault();
-  /* Tap court et unique → poser le pixel */
-  if (e.touches.length === 0 && !tMoved) {
-    const { col, row } = getCell(
-      e.changedTouches[0].clientX,
-      e.changedTouches[0].clientY
-    );
-    setSelected(col, row);
-    drawHover(col, row);
-    placePixelAt(col, row);
-  }
-  if (e.touches.length < 2) pinchD = null;
-}, { passive: false });
-
-/* ════════════════════════════
-   MOUSE — fallback desktop
-   Clic court → poser le pixel
-════════════════════════════ */
-viewport.addEventListener('mousedown', e => {
-  mDown = true; mPan = false;
-  mPX = e.clientX; mPY = e.clientY;
-  mOX = panX;      mOY = panY;
-});
-window.addEventListener('mousemove', e => {
-  if (!mDown) return;
-  const dx = e.clientX - mPX, dy = e.clientY - mPY;
-  if (!mPan && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) mPan = true;
-  if (mPan) { panX = mOX + dx; panY = mOY + dy; applyTransform(); }
-  const { col, row } = getCell(e.clientX, e.clientY);
-  drawHover(col, row);
-  document.getElementById('coords').textContent = `X:${col} Y:${row}`;
-});
-window.addEventListener('mouseup', e => {
-  if (!mPan && mDown) {
-    const { col, row } = getCell(e.clientX, e.clientY);
-    setSelected(col, row);
-    drawHover(col, row);
-    placePixelAt(col, row);
-  }
-  mDown = false; mPan = false;
-});
-viewport.addEventListener('wheel', e => {
-  e.preventDefault();
-  applyZoom(e.deltaY < 0 ? 1.2 : 0.83, e.clientX, e.clientY);
-}, { passive: false });
-
-/* ════════════════════════════
-   TOAST & SYNC STATUS
+   TOAST
 ════════════════════════════ */
 let _tt = null;
 function showToast(msg, ms) {
   const el = document.getElementById('toast');
+  if (!el) return;
   el.textContent = msg; el.classList.add('on');
   clearTimeout(_tt);
-  _tt = setTimeout(() => el.classList.remove('on'), ms || 2100);
-}
-
-let _st = null;
-function showSync(type, msg) {
-  const el = document.getElementById('sync-lbl');
-  el.textContent = msg; el.className = 'show ' + type;
-  clearTimeout(_st);
-  _st = setTimeout(() => el.classList.remove('show'), 3000);
+  _tt = setTimeout(() => el.classList.remove('on'), ms || 2200);
 }
 
 /* ════════════════════════════
    MODALES
 ════════════════════════════ */
-function openModal(id)  { if (id === 'm-shop') { checkTankExpiry(); _refreshShopStatus(); } document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) {
+  if (id === 'm-shop') { checkTankExpiry(); _refreshShopStatus(); }
+  const el = document.getElementById(id);
+  if (el) el.classList.add('open');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
 
 /* ════════════════════════════
-   CANVAS DÉMO INITIAL
-════════════════════════════ */
-/* Canvas vierge — pas de données de démo */
-
-
-/* ════════════════════════════
-   NOTIFICATIONS PUSH / FCM
+   NOTIFICATIONS
 ════════════════════════════ */
 let _notifEnabled = localStorage.getItem('gp_notif') === '1';
 
 function updateNotifBtn() {
   const btn = document.getElementById('notif-btn');
   if (!btn) return;
-  btn.textContent  = _notifEnabled ? '🔔' : '🔕';
-  btn.title        = _notifEnabled ? 'Notifications actives' : 'Notifications désactivées';
+  btn.textContent = _notifEnabled ? '🔔' : '🔕';
+  btn.title       = _notifEnabled ? 'Notifications actives' : 'Notifications désactivées';
   btn.classList.toggle('active', _notifEnabled);
 }
 
@@ -1872,22 +1164,15 @@ async function toggleNotif() {
 
 async function enableNotifications() {
   try {
-    // Demander permission
     const perm = await Notification.requestPermission();
-    if (perm !== 'granted') {
-      showToast('Notifications refusées');
-      return;
-    }
-    // Enregistrer service worker
+    if (perm !== 'granted') { showToast('Notifications refusées'); return; }
     if ('serviceWorker' in navigator) {
       await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     }
-    // Obtenir token FCM
     if (window._fcmMessaging && window._fcmVapidKey) {
-      const token = await (await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'))
-        .getToken(window._fcmMessaging, { vapidKey: window._fcmVapidKey });
+      const { getToken } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js');
+      const token = await getToken(window._fcmMessaging, { vapidKey: window._fcmVapidKey });
       if (token) {
-        _fcmToken = token;
         localStorage.setItem('gp_fcm_token', token);
         console.log('[FCM] Token:', token);
       }
@@ -1903,71 +1188,82 @@ async function enableNotifications() {
 }
 
 function triggerNotification(type) {
-  // Notification native fallback si FCM pas disponible / page au premier plan
   if (!_notifEnabled) return;
+  if (document.visibilityState === 'visible') return;
   const msgs = {
-    happy_hour: { title:'🔥 Happy Hour !', body:'Recharge 2x plus rapide jusqu\'a 14h !' },
-    stock_full: { title:'⚡ Stock plein !', body:'Ton réservoir de pixels est chargé à 100% !' },
+    happy_hour: { title:'🔥 Happy Hour !', body:"Recharge 2\u00d7 plus rapide jusqu'\u00e0 14h !" },
+    stock_full: { title:'⚡ Stock plein !', body:'Ton r\u00e9servoir de pixels est charg\u00e9 \u00e0 100% !' },
   };
   const m = msgs[type]; if (!m) return;
-  if (document.visibilityState === 'visible') return; // jeu au premier plan → toast suffisant
   if (Notification.permission === 'granted') {
     new Notification(m.title, { body: m.body, icon: '/Images/Logo_Gold_Pixel_Final.jpg' });
   }
 }
 
-// Demander notifications à la première visite (après 3s)
+/* Init notifications (après 3s) */
 setTimeout(() => {
   if (!localStorage.getItem('gp_notif') && Notification.permission === 'default') {
     enableNotifications();
   }
   updateNotifBtn();
-  // Restaurer token FCM
-  const savedToken = localStorage.getItem('gp_fcm_token');
-  if (savedToken) console.log('[FCM] Token restauré:', savedToken);
+  const t = localStorage.getItem('gp_fcm_token');
+  if (t) console.log('[FCM] Token restauré:', t);
 }, 3000);
 
 /* ════════════════════════════
-   PLEIN ÉCRAN AUTOMATIQUE
+   PLEIN ÉCRAN + ORIENTATION
 ════════════════════════════ */
-function requestFullscreen() {
-  const el = document.documentElement;
-  const fn = el.requestFullscreen
-    || el.webkitRequestFullscreen
-    || el.mozRequestFullScreen
-    || el.msRequestFullscreen;
-  if (fn) fn.call(el).catch(() => {});
+async function requestFullscreen() {
+  try {
+    const el = document.documentElement;
+    const fn = el.requestFullscreen || el.webkitRequestFullscreen
+             || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (fn) await fn.call(el).catch(() => {});
+  } catch (_) {}
+
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('landscape');
+      document.body.classList.remove('force-landscape');
+      console.log('[Orientation] Verrouillé en paysage via API');
+      return;
+    }
+  } catch(e) {
+    console.log('[Orientation] API refusée:', e.message);
+  }
+
+  document.body.classList.add('force-landscape');
+  console.log('[Orientation] Fallback CSS rotation activé');
 }
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (screen.orientation?.type?.includes('landscape')) {
+      document.body.classList.remove('force-landscape');
+    }
+  }, 250);
+});
 
 /* ════════════════════════════
    DÉMARRAGE
 ════════════════════════════ */
 async function startGame() {
   closeModal('m-welcome');
-  requestFullscreen();
-  gameStarted  = true;
-  sessionStart = Date.now();
-  await loadGrid();
-  await loadPlayerState();
+  await requestFullscreen();
+  document.body.classList.add('game-started');
+  gameStarted = true;
+  loadLSState();
   updateStockUI();
-  pollTimer = setInterval(pollGrid, POLL_MS);
-  showToast('⚔ Bienvenue sur Pi-xel War !');
+  showToast('✦ Bienvenue sur Gold Pixel !');
 }
 
 /* ════════════════════════════
    INIT DOM
 ════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  drawGrid();
-  buildPalette();
-  resetView();
   updateStockUI();
-  document.getElementById('tb-user-name').textContent = '@' + piUsername;
-  /* Recalibrer le canevas à chaque resize / rotation */
-  window.addEventListener('resize', () => {
-    clearTimeout(window._resizeT);
-    window._resizeT = setTimeout(resetView, 60);
-  });
+  const nameEl = document.getElementById('tb-user-name');
+  if (nameEl) nameEl.textContent = '@' + piUsername;
 });
 </script>
 </body>
