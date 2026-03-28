@@ -233,7 +233,7 @@ async function connectDB() {
 
     // Injecter db dans le shop
     ShopRoutes.inject(db, withPiUser, PI_API_KEY);
-    ensurePixelwarIndexes(); // Pi-xel War indexes
+    ensurePixelwarIndexes(); // Gold Pixel indexes
 
     console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
   } catch (e) {
@@ -2141,7 +2141,7 @@ app.get('/ping', (req, res) => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   PI-XEL WAR V1 — Routes API
+   Gold Pixel V1 — Routes API
    Collections MongoDB :
      pixelwar_grid    : { col, row, color, user, ts }
      pixelwar_players : { username, stock, rechargeTs, lastPixelTs }
@@ -2163,9 +2163,9 @@ async function ensurePixelwarIndexes() {
     await db.collection('pixelwar_grid').createIndex({ col: 1, row: 1 }, { unique: true });
     await db.collection('pixelwar_grid').createIndex({ ts: -1 });
     await db.collection('pixelwar_players').createIndex({ username: 1 }, { unique: true });
-    console.log('Pi-xel War : indexes OK');
+    console.log('Gold Pixel : indexes OK');
   } catch (e) {
-    console.error('Pi-xel War index error:', e.message);
+    console.error('Gold Pixel index error:', e.message);
   }
 }
 
