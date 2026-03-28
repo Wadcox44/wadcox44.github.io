@@ -2153,9 +2153,9 @@ app.get('/ping', (req, res) => {
      Pas de cooldown global — c'est le stock qui limite
 ═══════════════════════════════════════════════════════════════ */
 
-const PW_STOCK_DEFAULT = 10;
-const PW_STOCK_CAP     = 20;
-const PW_RECHARGE_MS   = 3 * 60 * 1000; // 3 minutes
+const PW_STOCK_DEFAULT = 15;    // réservoir de base
+const PW_STOCK_CAP     = 60;    // plafond max (Ultra Tank)
+const PW_RECHARGE_MS   = 10 * 1000; // 10 secondes (cooldown client)
 
 /* ── Init indexes ── */
 async function ensurePixelwarIndexes() {
@@ -2229,7 +2229,7 @@ app.post('/api/pixelwar/place', async (req, res) => {
     const { col, row, color, username } = req.body;
     if (typeof col !== 'number' || typeof row !== 'number')
       return res.status(400).json({ ok: false, error: 'col et row requis (number)' });
-    if (col < 0 || col >= 80 || row < 0 || row >= 50)
+    if (col < 0 || col >= 500 || row < 0 || row >= 500)
       return res.status(400).json({ ok: false, error: 'Coordonnées hors-limites' });
     if (!color || !/^#[0-9a-fA-F]{6}$/.test(color))
       return res.status(400).json({ ok: false, error: 'Couleur invalide' });
