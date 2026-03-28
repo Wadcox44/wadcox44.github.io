@@ -2042,6 +2042,44 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
   .gp-info-grid   { grid-template-columns:repeat(3,1fr); }
 }
 
+
+/* ── Modale choix pays (portail) ── */
+#portal-country-overlay {
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(0,0,0,.82); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center;
+}
+#portal-country-overlay.open { display:flex; }
+#portal-country-box {
+  background:#050f1e; border:1px solid var(--cy);
+  border-radius:12px; padding:22px 20px;
+  width:min(480px,92vw); max-height:90vh; overflow-y:auto;
+  box-shadow:0 0 40px rgba(0,243,255,.15);
+  text-align:center;
+}
+#portal-country-box h3 {
+  font-family:'Orbitron',monospace; font-size:.82rem;
+  color:var(--cy); letter-spacing:.08em; margin-bottom:6px;
+}
+#portal-country-box p {
+  font-size:.56rem; color:rgba(240,234,208,.5); margin-bottom:14px; line-height:1.5;
+}
+#portal-country-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-bottom:14px;
+}
+.pcb {
+  padding:6px 3px; border-radius:6px; cursor:pointer;
+  background:rgba(255,255,255,.04); border:1px solid rgba(0,243,255,.15);
+  font-size:.5rem; color:rgba(240,234,208,.8); text-align:center; line-height:1.5;
+  transition:background .12s, border-color .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.pcb:hover { background:rgba(0,243,255,.1); border-color:rgba(0,243,255,.4); }
+.pcb.on    { background:rgba(0,243,255,.15); border-color:var(--cy); color:var(--cy); }
+#portal-country-skip {
+  font-size:.5rem; color:rgba(240,234,208,.35); cursor:pointer;
+  text-decoration:underline; background:none; border:none; padding:4px;
+}
 </style>
 </head>
 <body>
@@ -3015,6 +3053,7 @@ function sendDon() {
     Pi.authenticate(['username'], auth => {
       _piConnectedPortal = true;
       _piUsernamePortal  = auth.user.username;
+      portalAskCountry(_piUsernamePortal);
       _doPiDon(amount, label);
     }, err => {
       toast(lang === 'fr' ? 'Connexion Pi échouée' : 'Pi login failed', '');
@@ -3886,6 +3925,104 @@ function showGame(gameId) {
   setTimeout(revealVisible, 80);
 }
 
+
+
+/* ════════════════════════════════════════════
+   PORTAIL — GESTION DU PAYS JOUEUR
+   Clé partagée : gp_country_<username>
+   Lue par tous les jeux du portail
+════════════════════════════════════════════ */
+const PORTAL_COUNTRIES = [
+  {code:'FR',flag:'🇫🇷',name:'France'},
+  {code:'US',flag:'🇺🇸',name:'USA'},
+  {code:'GB',flag:'🇬🇧',name:'UK'},
+  {code:'DE',flag:'🇩🇪',name:'Allemagne'},
+  {code:'ES',flag:'🇪🇸',name:'Espagne'},
+  {code:'IT',flag:'🇮🇹',name:'Italie'},
+  {code:'BR',flag:'🇧🇷',name:'Brésil'},
+  {code:'CN',flag:'🇨🇳',name:'Chine'},
+  {code:'JP',flag:'🇯🇵',name:'Japon'},
+  {code:'KR',flag:'🇰🇷',name:'Corée'},
+  {code:'IN',flag:'🇮🇳',name:'Inde'},
+  {code:'NG',flag:'🇳🇬',name:'Nigéria'},
+  {code:'GH',flag:'🇬🇭',name:'Ghana'},
+  {code:'KE',flag:'🇰🇪',name:'Kenya'},
+  {code:'PH',flag:'🇵🇭',name:'Philippines'},
+  {code:'VN',flag:'🇻🇳',name:'Vietnam'},
+  {code:'ID',flag:'🇮🇩',name:'Indonésie'},
+  {code:'TR',flag:'🇹🇷',name:'Turquie'},
+  {code:'MX',flag:'🇲🇽',name:'Mexique'},
+  {code:'MA',flag:'🇲🇦',name:'Maroc'},
+  {code:'DZ',flag:'🇩🇿',name:'Algérie'},
+  {code:'SN',flag:'🇸🇳',name:'Sénégal'},
+  {code:'CI',flag:'🇨🇮',name:"Côte d'Ivoire"},
+  {code:'CM',flag:'🇨🇲',name:'Cameroun'},
+  {code:'TN',flag:'🇹🇳',name:'Tunisie'},
+  {code:'PL',flag:'🇵🇱',name:'Pologne'},
+  {code:'PT',flag:'🇵🇹',name:'Portugal'},
+  {code:'AR',flag:'🇦🇷',name:'Argentine'},
+  {code:'CO',flag:'🇨🇴',name:'Colombie'},
+  {code:'ZA',flag:'🇿🇦',name:'Afrique du Sud'},
+];
+
+/* Clé localStorage partagée entre portail et jeux */
+function _portalCountryKey(username) {
+  return 'gp_country_' + (username || 'anon');
+}
+
+/* Lire le pays enregistré pour un joueur */
+function getPortalCountry(username) {
+  return localStorage.getItem(_portalCountryKey(username)) || null;
+}
+
+/* Construire la grille de sélection */
+function _buildPortalCountryGrid(username) {
+  const grid = document.getElementById('portal-country-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const current = getPortalCountry(username);
+  PORTAL_COUNTRIES.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'pcb' + (c.code === current ? ' on' : '');
+    btn.innerHTML = c.flag + '<br>' + c.name;
+    btn.addEventListener('click', () => portalSaveCountry(c.code, username));
+    grid.appendChild(btn);
+  });
+}
+
+/* Sauvegarder le pays — localStorage + backend */
+function portalSaveCountry(code, username) {
+  localStorage.setItem(_portalCountryKey(username), code);
+  /* Envoyer au backend */
+  fetch('/api/pixelwar/player/country', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username, country: code }),
+  }).catch(() => {});
+  /* Fermer la modale */
+  const overlay = document.getElementById('portal-country-overlay');
+  if (overlay) overlay.classList.remove('open');
+  const found = PORTAL_COUNTRIES.find(c => c.code === code);
+  toast((found ? found.flag + ' ' + found.name : code) + ' enregistré !', 'gold');
+}
+
+/* Ignorer — ne plus demander pendant 7 jours */
+function portalSkipCountry() {
+  localStorage.setItem('gp_country_skip', Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const overlay = document.getElementById('portal-country-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+/* Ouvrir la modale si pas encore de pays (appelé après auth Pi) */
+function portalAskCountry(username) {
+  if (!username) return;
+  if (getPortalCountry(username)) return; // déjà défini
+  const skip = localStorage.getItem('gp_country_skip');
+  if (skip && Date.now() < parseInt(skip)) return; // ignoré récemment
+  _buildPortalCountryGrid(username);
+  const overlay = document.getElementById('portal-country-overlay');
+  if (overlay) overlay.classList.add('open');
+}
 </script>
 
 <!-- ═══════════════════════════════════════
@@ -3975,6 +4112,17 @@ function showGame(gameId) {
     </form>
   </div>
 </div>
+
+<!-- Modale choix pays — portail -->
+<div id="portal-country-overlay">
+  <div id="portal-country-box">
+    <h3>🌍 TON PAYS</h3>
+    <p>Choisis ton pays une seule fois.<br>Il sera utilisé pour le classement par territoire sur tous les jeux.</p>
+    <div id="portal-country-grid"></div>
+    <button id="portal-country-skip" onclick="portalSkipCountry()">Ignorer pour l'instant</button>
+  </div>
+</div>
+
 
 </body>
 </html>
