@@ -199,7 +199,6 @@ let db, artworks, users;
 async function connectDB() {
   try {
     await client.connect();
-
     db       = client.db('jeuxvideo_db');
     artworks = db.collection('artworks');
     users    = db.collection('users');
@@ -210,16 +209,22 @@ async function connectDB() {
     await artworks.createIndex({ views: -1 });
     await artworks.createIndex({ 'author.name': 1 });
     await users.createIndex({ piUsername: 1 }, { unique: true });
-
     await db.collection('contacts').createIndex({ receivedAt: -1 });
     await db.collection('contacts').createIndex({ type: 1 });
     await db.collection('neonbreaker_scores').createIndex({ score: -1 });
 
-    // Nouveaux index
+    // ── Index pour les nouveaux systèmes ──
+    // Terrain fatigue : recherche par cellule + timestamp
     await db.collection('cell_repaints').createIndex({ cellKey: 1, ts: -1 });
+    // First pixel prot : recherche par joueur
     await db.collection('pixel_protections').createIndex({ piUsername: 1 });
+    // Season logo : recherche par label de saison
     await db.collection('season_state').createIndex({ seasonLabel: 1 }, { unique: true });
 
+    // ── Index pour les systèmes configurables (v3.0) ──
+    // (déjà créés par les services si manquants — pas de risque)
+
+    // ── Index shop (v3.1) ──
     await db.collection('credit_wallets').createIndex({ piUsername: 1 }, { unique: true });
     await db.collection('credit_ledger').createIndex({ piUsername: 1, createdAt: -1 });
     await db.collection('credit_ledger').createIndex({ ref: 1 });
@@ -227,20 +232,18 @@ async function connectDB() {
     await db.collection('inventory').createIndex({ piUsername: 1, itemId: 1, status: 1 });
 
     // Injecter db dans le shop
-    if (db) {
-      ShopRoutes.inject(db, withPiUser, PI_API_KEY);
-      ensurePixelwarIndexes();
-    }
+    ShopRoutes.inject(db, withPiUser, PI_API_KEY);
+    ensurePixelwarIndexes(); // Pi-xel War indexes
 
-    console.log('✅ JEUXVIDEO.PI — MongoDB connecté');
-
+    console.log('✅ JEUXVIDEO.PI — MongoDB connecté (v3.1)');
   } catch (e) {
     console.error('❌ MongoDB erreur :', e.message);
-    console.log('⚠️ Le serveur continue sans MongoDB');
+    process.exit(1);
   }
 }
-
 connectDB();
+
+
 // ═══════════════════════════════════════════════════════════════
 //  HELPER — vérification token Pi Network (inchangé)
 // ═══════════════════════════════════════════════════════════════
@@ -2452,32 +2455,40 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-//  ROUTES FICHIERS STATIQUES — HTML entry points
-//  Chaque route utilise sendFile avec callback d'erreur explicite.
-//  Les app.use(express.static) par route ont été supprimés pour
-//  éviter les conflits. Le express.static(__dirname) en fin de
-//  fichier sert les assets statiques (CSS, JS, images).
+//  ROUTES JEUX — assets statiques + HTML entry point
+//  app.use sert les assets du dossier (CSS, JS, images, sons…)
+//  app.get sert le fichier HTML principal sur la route exacte
+//  Les deux coexistent sans conflit : app.use intercepte les
+//  sous-chemins (/2048/style.css), app.get intercepte la route
+//  racine exacte (/2048).
 // ══════════════════════════════════════════════════════════════════
 
-// Gold Pixel — Games/Goldpixel/goldpixel.html
+// Gold Pixel — Games/Goldpixel/
+app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
 app.get('/goldpixel', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), (err) => {
     if (err) res.status(404).send('File not found: Games/Goldpixel/goldpixel.html');
   });
 });
 
+// Breaker — Games/Breakout/
+app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
 app.get('/breakout', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'index.html'), (err) => {
     if (err) res.status(404).send('File not found: Games/Breakout/index.html');
   });
 });
 
+// Stacker — Games/Stacker/
+app.use('/stacker', express.static(path.join(__dirname, 'Games', 'Stacker')));
 app.get('/stacker', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', 'Stacker', 'index.html'), (err) => {
     if (err) res.status(404).send('File not found: Games/Stacker/index.html');
   });
 });
 
+// 2048 — Games/2048/
+app.use('/2048', express.static(path.join(__dirname, 'Games', '2048')));
 app.get('/2048', (req, res) => {
   res.sendFile(path.join(__dirname, 'Games', '2048', 'index.html'), (err) => {
     if (err) res.status(404).send('File not found: Games/2048/index.html');
