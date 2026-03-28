@@ -345,11 +345,42 @@ html, body {
 
 /* Règles */
 .rule-ul {
-  list-style:none; text-align:left; margin-bottom:14px;
-  display:flex; flex-direction:column; gap:6px;
+  list-style:none; text-align:left; margin-bottom:0;
+  display:flex; flex-direction:column; gap:10px;
 }
-.rule-ul li    { display:flex; align-items:flex-start; gap:7px; font-size:.6rem; color:var(--dim); line-height:1.4; }
-.rule-ul li .ic { flex-shrink:0; font-size:.78rem; }
+.rule-ul li    { display:flex; align-items:center; gap:10px; font-size:.82rem; color:var(--text); line-height:1.45; }
+.rule-ul li .ic { flex-shrink:0; font-size:1.1rem; }
+
+/* Modale bienvenue — plein écran landscape, no-scroll */
+#m-welcome .m-box {
+  max-width:100%; max-height:100%;
+  width:100%; height:100%;
+  border-radius:0; padding:0;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  justify-content:center;
+}
+#welcome-inner {
+  display:flex; flex-direction:column;
+  justify-content:center;
+  padding:16px 24px; gap:12px;
+  height:100%;
+}
+#welcome-inner .m-h  { font-size:1rem; margin-bottom:0; }
+#welcome-inner .m-p  { font-size:.72rem; margin-bottom:0; line-height:1.5; }
+#welcome-inner .rules-title {
+  font-family:"Chakra Petch",sans-serif; font-size:.62rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold);
+  margin-bottom:8px;
+}
+/* Encadrement doré autour des règles */
+#rules-block {
+  border:1.5px solid rgba(245,200,66,.35);
+  border-radius:12px;
+  background:rgba(245,200,66,.05);
+  padding:12px 14px;
+}
+#welcome-inner .btn-p { font-size:.78rem; padding:12px; margin-bottom:0; flex-shrink:0; }
 
 /* ══════════════════════════
    BOUTIQUE — layout landscape no-scroll
@@ -637,35 +668,29 @@ html, body {
 <!-- Bienvenue / Règles -->
 <div class="m-bg open" id="m-welcome">
   <div class="m-box">
-    <div class="m-h">✦ GOLD PIXEL</div>
-    <img src="/Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel"
-         style="width:100%;max-width:260px;height:90px;object-fit:cover;border-radius:8px;margin:6px auto;display:block;border:2px solid rgba(245,200,66,.4);"
-         onerror="this.style.display='none'">
-    <p class="m-p">Le canvas pixel collaboratif de Pi Network.<br>Conquiers le canevas — un pixel à la fois.</p>
+    <div id="welcome-inner">
 
-    <div style="text-align:left;margin-bottom:12px;">
-      <div style="font-size:.52rem;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;">📋 Règles du jeu</div>
-      <ul class="rule-ul">
-        <li><span class="ic">📦</span><span><strong style="color:var(--gold)">15 pixels standards</strong> par jour — recharge 1 pixel toutes les <strong style="color:var(--gold)">2 minutes</strong></span></li>
-        <li><span class="ic">✦</span><span><strong style="color:#ffd700">5 pixels Gold</strong> — rares, brillants et distinctifs. Stock séparé.</span></li>
-        <li><span class="ic">👆</span><span>Touche une case du canevas pour y poser ton pixel</span></li>
-        <li><span class="ic">↩</span><span><strong style="color:var(--gold)">30 secondes</strong> pour annuler ton dernier pixel posé</span></li>
-        <li><span class="ic">⚔️</span><span>Recouvre les pixels adverses pour conquérir plus de territoire</span></li>
-        <li><span class="ic">🌐</span><span>Canevas partagé en temps réel avec tous les joueurs</span></li>
-        <li><span class="ic">🛒</span><span>Boutique : augmente ta capacité avec un pack (5 jours)</span></li>
-      </ul>
-      <div style="margin-top:8px;padding:7px 10px;border-radius:8px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);">
-        <div style="font-size:.5rem;font-weight:700;color:#ffd700;margin-bottom:4px;">💎 PACKS DISPONIBLES</div>
-        <div style="font-size:.46rem;color:var(--dim);line-height:1.8;">
-          🟢 Gratuit — 15 std / 5 gold<br>
-          🔵 Découverte — 25 std / 7 gold · <span style="color:var(--gold)">1 Pi</span><br>
-          🟣 Middle — 40 std / 9 gold · <span style="color:var(--gold)">2 Pi</span><br>
-          🔴 Giga — 55 std / 12 gold · <span style="color:var(--gold)">4 Pi</span>
-        </div>
+      <div class="m-h">✦ GOLD PIXEL</div>
+      <img src="/Images/Logo_Gold_Pixel_Final.jpg" alt="Gold Pixel"
+           style="width:100%;max-width:280px;height:80px;object-fit:cover;border-radius:8px;margin:0 auto;display:block;border:2px solid rgba(245,200,66,.4);"
+           onerror="this.style.display='none'">
+      <p class="m-p">Canvas pixel collaboratif Pi Network — Conquiers le canevas, un pixel à la fois.</p>
+
+      <div id="rules-block">
+        <div class="rules-title">📋 Règles du jeu</div>
+        <ul class="rule-ul">
+          <li><span class="ic">📦</span><span><strong style="color:var(--gold)">15 pixels standards</strong> — recharge 1 pixel toutes les <strong style="color:var(--gold)">2 minutes</strong></span></li>
+          <li><span class="ic">✦</span><span><strong style="color:#ffd700">5 pixels Gold</strong> — rares, brillants, stock séparé</span></li>
+          <li><span class="ic">👆</span><span>Touche une case du canevas pour poser ton pixel</span></li>
+          <li><span class="ic">↩</span><span><strong style="color:var(--gold)">30 secondes</strong> pour annuler ton dernier pixel</span></li>
+          <li><span class="ic">⚔️</span><span>Recouvre les pixels adverses pour conquérir du territoire</span></li>
+          <li><span class="ic">🌐</span><span>Canevas partagé en temps réel avec tous les joueurs</span></li>
+          <li><span class="ic">🛒</span><span>Boutique : augmente ta capacité avec un pack</span></li>
+        </ul>
       </div>
-    </div>
 
-    <button class="btn-p" onclick="startGame()">▶ JOUER →</button>
+      <button class="btn-p" onclick="startGame()">▶ JOUER →</button>
+    </div>
   </div>
 </div>
 
@@ -687,7 +712,7 @@ html, body {
 
       <!-- ── Colonne gauche : 3 packs ── -->
       <div id="shop-packs">
-        <div class="shop-sub-title">Réservoirs — 5 jours · 1 seul actif · retour automatique</div>
+        <div class="shop-sub-title">Réservoirs — 7 jours · 1 seul actif · retour automatique</div>
         <div id="shop-packs-grid">
 
           <div class="shop-card pack-decouverte" onclick="shopBuy('decouverte')">
@@ -805,7 +830,7 @@ const STOCK_BASE       = 15;
 const RECHARGE_S       = 120;   // 1 pixel / 2 minutes
 const DAILY_BONUS_CL   = 2;
 const DAILY_BONUS_GOLD = 1;
-const TANK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
+const TANK_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const TANK_CAPS = {
   base:       { std:15, gold:5  },
   decouverte: { std:25, gold:7  },
@@ -1135,7 +1160,7 @@ function shopBuy(type) {
             if (item.isPack) {
               setTank(type, Date.now() + TANK_DURATION_MS);
               saveLSState();
-              showToast('Pack ' + item.label + ' actif — ' + item.std + ' std / ' + item.gold + ' gold — 5 jours !');
+              showToast('Pack ' + item.label + ' actif — ' + item.std + ' std / ' + item.gold + ' gold — 7 jours !');
             } else {
               showToast('Merci pour ton soutien de ' + item.price + ' Pi !');
             }
