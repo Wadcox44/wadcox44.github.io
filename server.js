@@ -2467,8 +2467,8 @@ app.get('/goldpixel', (req, res) => {
 });
 
 app.get('/breakout', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'breakout.html'), (err) => {
-    if (err) res.status(404).send('File not found: Games/Breakout/breakout.html');
+  res.sendFile(path.join(__dirname, 'Games', 'Breakout', 'index.html'), (err) => {
+    if (err) res.status(404).send('File not found: Games/Breakout/index.html');
   });
 });
 
