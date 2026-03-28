@@ -228,14 +228,147 @@ html, body {
 .tb-btn-lb:active { background:rgba(56,212,138,.14); }
 
 /* ══════════════════════════
-   ZONE DE JEU — placeholder
-   Le nouveau moteur sera intégré ici
+   ZONE DE JEU — HUD + Canvas
+   Layout : palette gauche | canvas centre | zoom droite
 ══════════════════════════ */
 #game-area {
   flex:1 1 0; min-height:0; position:relative;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--bg); overflow:hidden;
+  display:flex; flex-direction:row; overflow:hidden;
+  background:#0a0612;
 }
+
+/* ── Colonne gauche : palette + or + undo ── */
+#hud-left {
+  flex-shrink:0; width:52px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:4px; padding:4px 3px;
+  background:rgba(0,0,0,.35);
+  border-right:1px solid rgba(245,200,66,.18);
+  overflow:hidden;
+}
+
+/* Grille palette 4×8 */
+#palette-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:2px;
+  width:100%;
+}
+.px-swatch {
+  width:100%; aspect-ratio:1;
+  min-width:11px; min-height:11px;
+  border-radius:3px; cursor:pointer;
+  border:1.5px solid transparent;
+  transition:transform .1s, border-color .1s;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+}
+.px-swatch:active { transform:scale(.85); }
+.px-swatch.active {
+  border-color:#fff;
+  transform:scale(1.18);
+  box-shadow:0 0 5px rgba(255,255,255,.5);
+}
+
+/* Séparateur */
+.hud-sep {
+  width:80%; height:1px; background:rgba(245,200,66,.2); flex-shrink:0; margin:2px 0;
+}
+
+/* Bouton Gold */
+#btn-gold {
+  width:44px; height:44px; border-radius:6px; flex-shrink:0;
+  background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
+  background-size:200% auto;
+  border:2px solid #ffd700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; font-weight:900; color:#000;
+  animation:goldSpin 3s linear infinite, goldGlow 1.8s ease-in-out infinite;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+@keyframes goldSpin { 0%{background-position:0% center;} 100%{background-position:200% center;} }
+@keyframes goldGlow {
+  0%,100%{box-shadow:0 0 6px #ffd700, 0 0 12px rgba(255,215,0,.4);}
+  50%    {box-shadow:0 0 12px #ffd700, 0 0 24px rgba(255,215,0,.7);}
+}
+#btn-gold.active { border-color:#fff; box-shadow:0 0 18px #ffd700; }
+#btn-gold.empty  { opacity:.35; animation:none; }
+
+/* Bouton Undo */
+#btn-undo {
+  width:44px; height:48px; border-radius:6px; flex-shrink:0;
+  background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.65); font-size:1.1rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; touch-action:manipulation; user-select:none;
+  -webkit-tap-highlight-color:transparent; transition:all .15s;
+}
+#btn-undo.active {
+  background:rgba(232,60,80,.2); border-color:#e83c50; color:#e83c50;
+  animation:undoPulse .5s ease-in-out infinite alternate;
+}
+@keyframes undoPulse { to { box-shadow:0 0 10px #e83c50; } }
+#btn-undo:active { transform:scale(.9); }
+
+/* ── Zone centrale : viewport canvas ── */
+#canvas-viewport {
+  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
+}
+#canvas-frame {
+  position:absolute;
+  border:2px solid var(--gold);
+  box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1), inset 0 0 0 1px rgba(245,200,66,.08);
+  transform-origin:0 0;
+  cursor:crosshair;
+  /* Animation expand */
+  transition:box-shadow .3s;
+}
+#canvas-frame.expanding {
+  animation:frameExpand .8s ease-out;
+}
+@keyframes frameExpand {
+  0%  { box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1); }
+  40% { box-shadow:0 0 60px rgba(245,200,66,.9), 0 0 120px rgba(245,200,66,.5), 0 0 200px rgba(245,200,66,.2); }
+  100%{ box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1); }
+}
+#main-canvas {
+  display:block;
+  image-rendering:pixelated; image-rendering:crisp-edges;
+}
+
+/* ── Colonne droite : zoom ── */
+#hud-right {
+  flex-shrink:0; width:52px;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:8px; padding:6px 4px;
+  background:rgba(0,0,0,.35);
+  border-left:1px solid rgba(245,200,66,.18);
+}
+.zoom-btn {
+  width:44px; height:48px; border-radius:8px;
+  background:rgba(245,200,66,.1); border:1.5px solid rgba(245,200,66,.3);
+  color:var(--gold); font-size:1.3rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; touch-action:manipulation; user-select:none;
+  -webkit-tap-highlight-color:transparent; transition:background .12s, transform .1s;
+  flex-shrink:0;
+}
+.zoom-btn:active { background:rgba(245,200,66,.25); transform:scale(.92); }
+
+/* Coords overlay */
+#px-coords {
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  font-family:"Space Mono",monospace; font-size:.42rem; color:rgba(245,200,66,.4);
+  pointer-events:none; white-space:nowrap; z-index:5;
+  background:rgba(0,0,0,.5); padding:1px 5px; border-radius:3px;
+}
+
+/* Flash pose pixel */
+#px-flash {
+  position:fixed; inset:0; pointer-events:none; opacity:0; z-index:400;
+  background:radial-gradient(ellipse at center,rgba(245,200,66,.18) 0%,transparent 65%);
+  transition:opacity .06s;
+}
+#px-flash.on { opacity:1; transition:none; }
 
 /* ══════════════════════════
    HAPPY HOUR BAR
@@ -667,8 +800,36 @@ html, body {
     </div>
   </div>
 
-  <!-- ZONE DE JEU — à reconstruire avec le nouveau moteur -->
-  <div id="game-area"></div>
+  <!-- ZONE DE JEU -->
+  <div id="game-area">
+
+    <!-- ── Gauche : palette + gold + undo ── -->
+    <div id="hud-left">
+      <div id="palette-grid"></div>
+      <div class="hud-sep"></div>
+      <div id="btn-gold" title="Pixel Gold (✦)" onclick="GP.pickGold()">✦</div>
+      <div class="hud-sep"></div>
+      <div id="btn-undo" title="Annuler (30s)" onclick="GP.undo()">↩</div>
+    </div>
+
+    <!-- ── Centre : canvas ── -->
+    <div id="canvas-viewport">
+      <div id="canvas-frame">
+        <canvas id="main-canvas"></canvas>
+      </div>
+      <div id="px-coords">—</div>
+    </div>
+
+    <!-- ── Droite : zoom ── -->
+    <div id="hud-right">
+      <div class="zoom-btn" onclick="GP.zoomIn()"  title="Zoom +">＋</div>
+      <div class="zoom-btn" onclick="GP.zoomOut()" title="Zoom −">－</div>
+      <div class="zoom-btn" style="font-size:.9rem;" onclick="GP.resetView()" title="Centrer">⊙</div>
+    </div>
+
+  </div>
+
+  <div id="px-flash"></div>
 
 </div><!-- /app -->
 
@@ -1440,6 +1601,473 @@ window.addEventListener('orientationchange', () => {
   }, 250);
 });
 
+/* ════════════════════════════════════════════════════════
+   MOTEUR GOLD PIXEL — Canvas + HUD
+   - Canvas 3000×3000 px (1 px DOM = 1 cellule)
+   - Expansion +50% surface à 65% remplissage
+   - HUD : palette gauche, zoom droite, undo, gold
+   - Tap = pose pixel (décrément stock)
+   - Poll backend toutes les POLL_MS ms
+════════════════════════════════════════════════════════ */
+const GP = (() => {
+
+  /* ── Config canvas ── */
+  const PIXEL_SIZE = 1;        // 1px DOM par cellule — rendu net
+  let   CANVAS_W   = 3000;
+  let   CANVAS_H   = 3000;
+  const EXPAND_THRESHOLD = 0.65;
+  const EXPAND_FACTOR    = 1.5; // +50% de surface → multiply each dim by sqrt(1.5)
+
+  /* ── État pan/zoom ── */
+  let scale = 1, panX = 0, panY = 0;
+  let isPanning = false, panSX = 0, panSY = 0, panOX = 0, panOY = 0;
+  let tStart = {x:0, y:0}, tMoved = false;
+  let pinchD = null, pinchS = 1;
+  let mDown = false, mPan = false, mSX = 0, mSY = 0, mOX = 0, mOY = 0;
+
+  /* ── État jeu ── */
+  let lastPixelData = null; // { col, row, prevColor } pour undo
+  let undoTimeout   = null;
+  let pixelGrid     = {};   // clé "col,row" → { color, type }
+  let filledCount   = 0;
+  let pollTimer     = null;
+
+  /* ── DOM ── */
+  let cv, ctx, frame, viewport;
+
+  /* ── Init ── */
+  function init() {
+    cv       = document.getElementById('main-canvas');
+    ctx      = cv.getContext('2d');
+    frame    = document.getElementById('canvas-frame');
+    viewport = document.getElementById('canvas-viewport');
+
+    cv.width  = CANVAS_W;
+    cv.height = CANVAS_H;
+    frame.style.width  = CANVAS_W + 'px';
+    frame.style.height = CANVAS_H + 'px';
+
+    drawBackground();
+    buildPaletteUI();
+    resetView();
+    bindEvents();
+  }
+
+  /* ── Background ── */
+  function drawBackground() {
+    ctx.fillStyle = '#f5f0e8';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    // Grille légère
+    ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x <= CANVAS_W; x += 10) {
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CANVAS_H); ctx.stroke();
+    }
+    for (let y = 0; y <= CANVAS_H; y += 10) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_W,y); ctx.stroke();
+    }
+  }
+
+  /* ── Palette UI ── */
+  function buildPaletteUI() {
+    const grid = document.getElementById('palette-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const palColors = COLORS.filter(c => c !== GOLD_COLOR);
+    palColors.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'px-swatch' + (c === activeColor ? ' active' : '');
+      el.style.background = c;
+      el.addEventListener('click', () => pick(c));
+      el.addEventListener('touchstart', e => { e.preventDefault(); pick(c); }, {passive:false});
+      grid.appendChild(el);
+    });
+    _syncGoldBtn();
+  }
+
+  function pick(c) {
+    if (c === GOLD_COLOR) { pickGold(); return; }
+    if (stock <= 0) { showToast('📦 Stock vide !'); return; }
+    activeColor = c;
+    document.querySelectorAll('.px-swatch').forEach(el =>
+      el.classList.toggle('active', el.style.background === c || el.style.backgroundColor === c)
+    );
+    const gb = document.getElementById('btn-gold');
+    if (gb) gb.classList.remove('active');
+  }
+
+  function pickGold() {
+    if (goldStock <= 0) { showToast('✦ Stock Gold épuisé !'); return; }
+    activeColor = GOLD_COLOR;
+    document.querySelectorAll('.px-swatch').forEach(el => el.classList.remove('active'));
+    _syncGoldBtn();
+  }
+
+  function _syncGoldBtn() {
+    const gb = document.getElementById('btn-gold');
+    if (!gb) return;
+    gb.classList.toggle('active', activeColor === GOLD_COLOR);
+    gb.classList.toggle('empty',  goldStock <= 0);
+  }
+
+  /* ── resetView : centre le canvas dans le viewport ── */
+  function resetView() {
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+    const s  = Math.min((vw * 0.95) / CANVAS_W, (vh * 0.95) / CANVAS_H);
+    scale = s;
+    panX  = (vw - CANVAS_W * s) / 2;
+    panY  = (vh - CANVAS_H * s) / 2;
+    _applyTransform();
+  }
+
+  function zoomIn()  { _zoom(1.35); }
+  function zoomOut() { _zoom(0.75); }
+
+  function _zoom(f, cx, cy) {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    if (cx === undefined) cx = vw / 2;
+    if (cy === undefined) cy = vh / 2;
+    const ns = Math.min(Math.max(scale * f, 0.05), 50);
+    const r  = ns / scale;
+    panX = cx - (cx - panX) * r;
+    panY = cy - (cy - panY) * r;
+    scale = ns;
+    _applyTransform();
+  }
+
+  function _applyTransform() {
+    frame.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + scale + ')';
+  }
+
+  /* ── Conversion coordonnées écran → cellule canvas ── */
+  function _screenToCell(sx, sy) {
+    const rect = viewport.getBoundingClientRect();
+    const col  = Math.floor((sx - rect.left  - panX) / scale);
+    const row  = Math.floor((sy - rect.top   - panY) / scale);
+    return { col, row };
+  }
+
+  /* ── Pose d'un pixel ── */
+  function placePixel(col, row) {
+    if (col < 0 || col >= CANVAS_W || row < 0 || row >= CANVAS_H) return;
+    const isGold = (activeColor === GOLD_COLOR);
+    if (isGold && goldStock <= 0) { showToast('✦ Stock Gold épuisé !'); return; }
+    if (!isGold && stock <= 0)    { showToast('📦 Stock vide !'); return; }
+
+    // Sauvegarder pour undo
+    const key     = col + ',' + row;
+    const prevPx  = pixelGrid[key] || null;
+    lastPixelData = { col, row, prevColor: prevPx ? prevPx.color : null, prevType: prevPx ? prevPx.type : null };
+    _startUndoTimer();
+
+    // Dessiner
+    const color = activeColor;
+    const type  = isGold ? 'gold' : 'standard';
+    _paintCell(col, row, color, type, true);
+
+    // Décrémenter stock
+    if (isGold) { goldStock = Math.max(0, goldStock - 1); }
+    else        { stock--;
+      if (rechargeLeft <= 0) rechargeLeft = getRechargeS();
+    }
+    pixelsPlaced++;
+    updateStockUI();
+    _syncGoldBtn();
+    saveLSState();
+
+    // Flash
+    const fl = document.getElementById('px-flash');
+    if (fl) { fl.classList.add('on'); setTimeout(() => fl.classList.remove('on'), 80); }
+
+    // Sync backend
+    if (piConnected) {
+      apiFetch('/api/pixelwar/place', 'POST', {
+        col, row, color, username: piUsername
+      }).then(d => {
+        if (d && !d.ok) {
+          // Rollback
+          if (prevPx) _paintCell(col, row, prevPx.color, prevPx.type, false);
+          else        _eraseCell(col, row);
+          if (isGold) goldStock = Math.min(GOLD_MAX_ACTIVE, goldStock + 1);
+          else        stock = Math.min(STOCK_CAP, stock + 1);
+          updateStockUI();
+          showToast('❌ ' + (d.error || 'Refus serveur'));
+        }
+      }).catch(() => {});
+    }
+
+    // Vérifier expansion
+    _checkExpand();
+  }
+
+  /* ── Dessiner une cellule avec animation pop-in ── */
+  function _paintCell(col, row, color, type, animate) {
+    const key = col + ',' + row;
+    const wasEmpty = !pixelGrid[key];
+    pixelGrid[key] = { color, type };
+    if (wasEmpty) filledCount++;
+
+    if (animate) {
+      // Pop-in via requestAnimationFrame — scale simulé par opacity fade
+      let progress = 0;
+      const steps  = 8; // ~8 frames @ 60fps = 133ms
+      const step   = () => {
+        progress++;
+        const t = progress / steps;
+        // Dessine avec alpha croissant
+        ctx.clearRect(col, row, 1, 1);
+        ctx.fillStyle = '#f5f0e8';
+        ctx.fillRect(col, row, 1, 1);
+        ctx.globalAlpha = t;
+        ctx.fillStyle = color;
+        ctx.fillRect(col, row, 1, 1);
+        ctx.globalAlpha = 1;
+        if (type === 'gold') _drawGoldOverlay(col, row, t);
+        if (progress < steps) requestAnimationFrame(step);
+        else _drawFinalCell(col, row, color, type);
+      };
+      requestAnimationFrame(step);
+    } else {
+      _drawFinalCell(col, row, color, type);
+    }
+    _paintMinimap(col, row, color);
+  }
+
+  function _drawFinalCell(col, row, color, type) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = color;
+    ctx.fillRect(col, row, 1, 1);
+    if (type === 'gold') _drawGoldOverlay(col, row, 1);
+  }
+
+  function _drawGoldOverlay(col, row, alpha) {
+    ctx.globalAlpha = 0.55 * alpha;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(col + 0.1, row + 0.1, 0.35, 0.35);
+    ctx.globalAlpha = 1;
+  }
+
+  /* ── Effacer une cellule ── */
+  function _eraseCell(col, row) {
+    const key = col + ',' + row;
+    if (pixelGrid[key]) { delete pixelGrid[key]; filledCount = Math.max(0, filledCount - 1); }
+    // Fade-out
+    let progress = 0;
+    const steps = 6;
+    const step  = () => {
+      progress++;
+      const t = 1 - (progress / steps);
+      ctx.fillStyle = '#f5f0e8';
+      ctx.fillRect(col, row, 1, 1);
+      if (t > 0) {
+        ctx.globalAlpha = t;
+        ctx.fillStyle = '#f5f0e8';
+        ctx.fillRect(col, row, 1, 1);
+        ctx.globalAlpha = 1;
+      }
+      if (progress < steps) requestAnimationFrame(step);
+      else { ctx.fillStyle = '#f5f0e8'; ctx.fillRect(col, row, 1, 1); }
+    };
+    requestAnimationFrame(step);
+    _paintMinimap(col, row, '#f5f0e8');
+  }
+
+  /* ── Undo (30s) ── */
+  function undo() {
+    if (!lastPixelData) { showToast('Rien à annuler'); return; }
+    const { col, row, prevColor, prevType } = lastPixelData;
+    clearTimeout(undoTimeout);
+    lastPixelData = null;
+    const undoBtn = document.getElementById('btn-undo');
+    if (undoBtn) undoBtn.classList.remove('active');
+
+    if (prevColor) {
+      _paintCell(col, row, prevColor, prevType, false);
+    } else {
+      _eraseCell(col, row);
+    }
+    // Rembourser stock
+    if (activeColor === GOLD_COLOR) goldStock = Math.min(GOLD_MAX_ACTIVE, goldStock + 1);
+    else                             stock     = Math.min(STOCK_CAP, stock + 1);
+    updateStockUI();
+    showToast('↩ Pixel annulé !');
+    saveLSState();
+    if (prevColor && piConnected) {
+      apiFetch('/api/pixelwar/place','POST',{col,row,color:prevColor,username:piUsername}).catch(()=>{});
+    }
+  }
+
+  function _startUndoTimer() {
+    clearTimeout(undoTimeout);
+    const btn = document.getElementById('btn-undo');
+    if (btn) btn.classList.add('active');
+    undoTimer = setTimeout(() => {
+      lastPixelData = null;
+      if (btn) btn.classList.remove('active');
+    }, 30000);
+  }
+
+  /* ── Expansion canvas ── */
+  function _checkExpand() {
+    const total = CANVAS_W * CANVAS_H;
+    if (filledCount / total < EXPAND_THRESHOLD) return;
+
+    // Nouvelles dimensions (+50% surface → each dim × sqrt(1.5) ≈ 1.2247)
+    const factor  = Math.sqrt(EXPAND_FACTOR);
+    const newW    = Math.round(CANVAS_W * factor);
+    const newH    = Math.round(CANVAS_H * factor);
+
+    // Copier le contenu actuel
+    const tmpCv  = document.createElement('canvas');
+    tmpCv.width  = CANVAS_W; tmpCv.height = CANVAS_H;
+    tmpCv.getContext('2d').drawImage(cv, 0, 0);
+
+    CANVAS_W = newW; CANVAS_H = newH;
+    cv.width  = newW; cv.height = newH;
+    frame.style.width  = newW + 'px';
+    frame.style.height = newH + 'px';
+
+    // Fond + recopie pixels
+    drawBackground();
+    ctx.drawImage(tmpCv, 0, 0);
+
+    // Animation cadre
+    frame.classList.add('expanding');
+    setTimeout(() => frame.classList.remove('expanding'), 900);
+
+    showToast('📐 Canevas agrandi ! ' + newW + '×' + newH);
+    resetView();
+  }
+
+  /* ── Minimap (placeholder léger) ── */
+  function _paintMinimap(col, row, color) {
+    // Mini représentation dans le futur
+  }
+
+  /* ── Chargement grille depuis backend ── */
+  async function loadGrid() {
+    const data = await apiFetch('/api/pixelwar/grid', 'GET');
+    if (data && Array.isArray(data.pixels)) {
+      data.pixels.forEach(({ col, row, color }) => {
+        if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
+          _paintCell(col, row, color, 'standard', false);
+        }
+      });
+    }
+  }
+
+  /* ── Poll backend ── */
+  async function pollGrid() {
+    const data = await apiFetch('/api/pixelwar/grid?since=' + window._gpLastTS, 'GET');
+    if (!data || !Array.isArray(data.pixels)) return;
+    data.pixels.forEach(({ col, row, color, user }) => {
+      if (col < 0 || col >= CANVAS_W || row < 0 || row >= CANVAS_H) return;
+      if (user === '@' + piUsername) return;
+      _paintCell(col, row, color, 'standard', true);
+    });
+    if (data.ts) window._gpLastTS = data.ts;
+  }
+
+  /* ── Événements touch ── */
+  function bindEvents() {
+    viewport.addEventListener('touchstart', _onTouchStart, {passive:false});
+    viewport.addEventListener('touchmove',  _onTouchMove,  {passive:false});
+    viewport.addEventListener('touchend',   _onTouchEnd,   {passive:false});
+    viewport.addEventListener('mousedown',  _onMouseDown);
+    window.addEventListener  ('mousemove',  _onMouseMove);
+    window.addEventListener  ('mouseup',    _onMouseUp);
+    viewport.addEventListener('wheel',      _onWheel, {passive:false});
+  }
+
+  function _onTouchStart(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      tStart = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      tMoved = false; isPanning = false;
+      panOX = panX; panOY = panY;
+    } else if (e.touches.length === 2) {
+      pinchD = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                          e.touches[0].clientY - e.touches[1].clientY);
+      pinchS = scale; tMoved = true;
+    }
+  }
+
+  function _onTouchMove(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      const dx = e.touches[0].clientX - tStart.x;
+      const dy = e.touches[0].clientY - tStart.y;
+      if (!isPanning && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        isPanning = true; tMoved = true;
+      }
+      if (isPanning) { panX = panOX + dx; panY = panOY + dy; _applyTransform(); }
+      const { col, row } = _screenToCell(e.touches[0].clientX, e.touches[0].clientY);
+      _updateCoords(col, row);
+    } else if (e.touches.length === 2 && pinchD) {
+      tMoved = true;
+      const d  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                             e.touches[0].clientY - e.touches[1].clientY);
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const ns = Math.min(Math.max(pinchS * (d / pinchD), 0.05), 50);
+      const r  = ns / scale;
+      panX = cx - (cx - panX) * r; panY = cy - (cy - panY) * r; scale = ns;
+      _applyTransform();
+    }
+  }
+
+  function _onTouchEnd(e) {
+    e.preventDefault();
+    if (e.touches.length === 0 && !tMoved) {
+      const { col, row } = _screenToCell(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      placePixel(col, row);
+    }
+    if (e.touches.length < 2) pinchD = null;
+  }
+
+  function _onMouseDown(e) {
+    mDown = true; mPan = false;
+    mSX = e.clientX; mSY = e.clientY; mOX = panX; mOY = panY;
+  }
+  function _onMouseMove(e) {
+    if (!mDown) return;
+    const dx = e.clientX - mSX, dy = e.clientY - mSY;
+    if (!mPan && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) mPan = true;
+    if (mPan) { panX = mOX + dx; panY = mOY + dy; _applyTransform(); }
+    const { col, row } = _screenToCell(e.clientX, e.clientY);
+    _updateCoords(col, row);
+  }
+  function _onMouseUp(e) {
+    if (!mPan && mDown) {
+      const { col, row } = _screenToCell(e.clientX, e.clientY);
+      placePixel(col, row);
+    }
+    mDown = false; mPan = false;
+  }
+  function _onWheel(e) {
+    e.preventDefault();
+    _zoom(e.deltaY < 0 ? 1.2 : 0.83, e.clientX, e.clientY);
+  }
+
+  function _updateCoords(col, row) {
+    const el = document.getElementById('px-coords');
+    if (el) el.textContent = 'X:' + col + ' Y:' + row;
+  }
+
+  /* ── startEngine : appelé par startGame() ── */
+  async function startEngine() {
+    init();
+    await loadGrid();
+    window._gpLastTS = 0;
+    pollTimer = setInterval(pollGrid, POLL_MS);
+  }
+
+  /* API publique */
+  return { startEngine, pick, pickGold, zoomIn, zoomOut, resetView, undo };
+
+})();
+
 /* ════════════════════════════
    DÉMARRAGE
 ════════════════════════════ */
@@ -1450,6 +2078,7 @@ async function startGame() {
   gameStarted = true;
   loadLSState();
   updateStockUI();
+  await GP.startEngine();
   showToast('✦ Bienvenue sur Gold Pixel !');
 }
 
