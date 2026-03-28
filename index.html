@@ -1874,8 +1874,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 /* ════════════════════════════════════════════════════════
    PAGES JEUX DÉDIÉES — view-game
 ════════════════════════════════════════════════════════ */
-#view-game { display:none; width:90%; max-width:var(--max); }
-#view-game.active { display:block; }
+#view-game { width:90%; max-width:var(--max); }
 
 /* Hero jeu */
 .gp-hero {
@@ -2253,7 +2252,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       <!-- Barre CTA en bas de la carte — PLAY seul, pleine largeur -->
       <div class="hero-cta-bar">
         <button class="hero-cta-btn"
-                onclick="event.stopPropagation();window.location.href='/pixelwar'"
+                onclick="event.stopPropagation();window.location.href='/goldpixel'"
                 data-fr="▶ JOUER" data-en="▶ PLAY">
           ▶ PLAY
         </button>
@@ -2286,7 +2285,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="showcase-grid">
 
       <!-- ── BREAKER ── -->
-      <div class="sc-card live rv d1" onclick="window.location.href='/breakout'">
+      <div class="sc-card live rv d1" onclick="showGame('breaker')">
         <div class="sc-badge live-badge"><div class="sc-badge-dot"></div>LIVE</div>
         <!-- Particules néon déco -->
         <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
@@ -2308,7 +2307,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- ── STRACKER ── -->
-      <div class="sc-card live rv d2" onclick="window.location.href='/stacker'"
+      <div class="sc-card live rv d2" onclick="showGame('stracker')"
            style="border-color:rgba(0,243,255,.38);">
         <div class="sc-badge" style="background:rgba(0,243,255,.1);border:1px solid rgba(0,243,255,.5);color:var(--cy);top:9px;left:9px;position:absolute;font-family:'Orbitron',monospace;font-size:.42rem;letter-spacing:1px;padding:3px 9px;border-radius:100px;font-weight:700;z-index:2;display:flex;align-items:center;gap:4px;">
           <div class="sc-badge-dot" style="background:var(--cy);box-shadow:0 0 5px var(--cy);"></div>NEW
@@ -2415,8 +2414,8 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <div class="dev-home-sub"
-           data-fr="JeuxVideo.Pi est le premier portail indépendant de jeux Pi Network ouvert aux développeurs. Référencez votre jeu, atteignez une audience Pi déjà active."
-           data-en="JeuxVideo.Pi is the first independant Pi Network gaming portal open to developers. List your game, reach an active Pi audience.">
+           data-fr="JeuxVideo.Pi est le premier portail de jeux Pi Network ouvert aux développeurs. Référencez votre jeu, atteignez une audience Pi déjà active."
+           data-en="JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game, reach an active Pi audience.">
         JeuxVideo.Pi is the first Pi Network gaming portal open to developers. List your game and reach an active Pi audience.
       </div>
 
@@ -2500,7 +2499,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="arcade" onclick="window.location.href='/breakout'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="arcade" onclick="showGame('breaker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#001020,#002035);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(0,243,255,.3);">🧱</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:var(--cy);margin-bottom:3px;">BREAKER</div>
@@ -2525,7 +2524,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:.5rem;color:var(--cy);white-space:nowrap;">PLAY →</div>
       </div>
-      <div class="av-card rv" data-cat="puzzle" onclick="window.location.href='/stacker'" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
+      <div class="av-card rv" data-cat="puzzle" onclick="showGame('stracker')" style="cursor:pointer;flex-direction:row;align-items:center;gap:14px;">
         <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0a0020,#180040);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 12px rgba(204,68,255,.3);">🔷</div>
         <div style="flex:1;min-width:0;">
           <div class="av-title" style="color:#cc44ff;margin-bottom:3px;">STRACKER</div>
@@ -2581,7 +2580,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     </div>
 
     <!-- Carte featured — Lancement du portail -->
-    <div class="nv-featured rv d1" onclick="showGame('pixelwar')">
+    <div class="nv-featured rv d1" onclick="window.location.href='/goldpixel'">
       <div class="nv-featured-badge live">
         <span class="nv-badge-dot"></span>
         LIVE
@@ -2605,7 +2604,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
     <div class="nv-list">
 
       <!-- Pi-xel War -->
-      <div class="nv-item live-item clickable rv d1" onclick="showGame('pixelwar')">
+      <div class="nv-item live-item clickable rv d1" onclick="window.location.href='/goldpixel'">
         <div class="nv-item-icon">🟡</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2643,7 +2642,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
       </div>
 
       <!-- 2048 -->
-      <div class="nv-item new-item clickable rv d3" onclick="showGame('2048')">
+      <div class="nv-item new-item clickable rv d3" onclick="window.location.href='/2048'">
         <div class="nv-item-icon">🧩</div>
         <div class="nv-item-body">
           <div class="nv-item-head">
@@ -2819,7 +2818,7 @@ footer{font-size:.6rem;color:rgba(200,216,232,.7);padding:32px 0 24px;text-align
 
 
 <!-- ══ PAGE JEU DÉDIÉE ══ -->
-<div id="view-game">
+<div id="view-game" class="view">
 
   <!-- Le contenu est généré dynamiquement par showGame() -->
   <div id="gp-content"></div>
@@ -3278,7 +3277,7 @@ const GAMES_DATA = {
     tags:     [{label:'Gold',cls:'or'},{label:'Multiplayer',cls:'cy'},{label:'Live',cls:'gr'}],
     img:      'Images/Logo_Gold_Pixel_Final.jpg',
     screenshots: [],
-    playUrl:  '/pixelwar',
+    playUrl:  '/goldpixel',
     how: [
       'Connect with your Pi account to start.',
       'You start with 10 pixels. Tap any cell on the canvas to place your color.',
