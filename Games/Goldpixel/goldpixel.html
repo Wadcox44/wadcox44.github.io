@@ -101,14 +101,14 @@ html, body {
 
 /* ── Gauche : logo ── */
 .tb-logo {
-  font-family:"Space Mono",monospace; font-size:.7rem; font-weight:700;
+  font-family:"Space Mono",monospace; font-size:.95rem; font-weight:700;
   letter-spacing:.06em; color:var(--gold); white-space:nowrap; flex-shrink:0;
   text-shadow:0 0 12px rgba(245,200,66,.5);
   line-height:1;
 }
 .tb-logo span {
-  display:block; font-size:.38rem; font-weight:400;
-  color:var(--dim); letter-spacing:.04em; margin-top:1px;
+  display:block; font-size:.52rem; font-weight:400;
+  color:var(--dim); letter-spacing:.04em; margin-top:2px;
 }
 
 /* ── Centre : ressources gameplay ── */
@@ -1071,7 +1071,9 @@ async function loadPlayerState() {
 
 async function saveCountry(code) {
   piCountry = code;
-  localStorage.setItem('pw_country', code);
+  /* Clé partagée avec le portail */
+  localStorage.setItem('gp_country_' + piUsername, code);
+  localStorage.setItem('pw_country', code); /* compat ancien */
   await apiFetch('/api/pixelwar/player/country', 'POST', { username: piUsername, country: code });
 }
 
@@ -1095,8 +1097,23 @@ function onPiAuthSuccess(authResult) {
   showToast('✅ @' + piUsername);
   loadPlayerState();
   applyDailyBonus();
-  const saved = localStorage.getItem('pw_country');
-  if (saved) { piCountry = saved; } else { openCountryModal(); }
+  /* Priorité : clé partagée définie par le portail */
+  const sharedKey   = 'gp_country_' + piUsername;
+  const sharedCountry = localStorage.getItem(sharedKey);
+  const legacyCountry = localStorage.getItem('pw_country');
+  const savedCountry  = sharedCountry || legacyCountry;
+  if (savedCountry) {
+    piCountry = savedCountry;
+    /* Synchroniser si on avait l'ancienne clé mais pas la nouvelle */
+    if (!sharedCountry && legacyCountry) {
+      localStorage.setItem(sharedKey, legacyCountry);
+    }
+    /* Envoyer au backend si pas encore fait (synchronisation silencieuse) */
+    apiFetch('/api/pixelwar/player/country', 'POST',
+      { username: piUsername, country: piCountry }).catch(() => {});
+  } else {
+    openCountryModal();
+  }
 }
 
 function onPiAuthError(err) {
