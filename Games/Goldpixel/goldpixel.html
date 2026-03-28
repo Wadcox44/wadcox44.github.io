@@ -413,6 +413,75 @@ html, body {
 }
 
 /* ══════════════════════════
+   SENTINELLE
+══════════════════════════ */
+
+/* Icône Sentinelle dans #hud-right */
+#btn-sentinel {
+  width:44px; height:44px; border-radius:8px; flex-shrink:0;
+  background:rgba(0,229,255,.08); border:1.5px solid rgba(0,229,255,.3);
+  color:rgba(0,229,255,.7); font-size:1.1rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; touch-action:manipulation; user-select:none;
+  -webkit-tap-highlight-color:transparent; transition:all .2s;
+  position:relative;
+}
+#btn-sentinel:active { background:rgba(0,229,255,.2); transform:scale(.92); }
+
+/* État alerte active — pulse cyan */
+#btn-sentinel.alert {
+  border-color:#00e5ff; color:#00e5ff;
+  background:rgba(0,229,255,.15);
+  animation:sentinelPulse .8s ease-in-out infinite;
+}
+@keyframes sentinelPulse {
+  0%,100%{ box-shadow:0 0 6px rgba(0,229,255,.4); }
+  50%    { box-shadow:0 0 18px rgba(0,229,255,.9), 0 0 32px rgba(0,229,255,.3); }
+}
+
+/* Badge compteur d'alertes */
+#sentinel-badge {
+  position:absolute; top:-4px; right:-4px;
+  width:16px; height:16px; border-radius:50%;
+  background:#e83c50; color:#fff;
+  font-family:"Space Mono",monospace; font-size:.42rem; font-weight:700;
+  display:none; align-items:center; justify-content:center;
+  border:1.5px solid var(--bg);
+}
+#sentinel-badge.show { display:flex; }
+
+/* Toast Sentinelle — distinct du toast normal */
+#sentinel-toast {
+  position:fixed; top:calc(var(--h-top) + 8px); left:50%;
+  transform:translateX(-50%) translateY(-10px);
+  padding:10px 18px; border-radius:12px;
+  background:rgba(0,20,30,.95); border:1.5px solid #00e5ff;
+  font-size:.62rem; color:#00e5ff; white-space:nowrap;
+  z-index:750; pointer-events:none;
+  opacity:0; transition:opacity .22s, transform .22s;
+  box-shadow:0 0 20px rgba(0,229,255,.3);
+  max-width:90vw; text-align:center;
+  cursor:pointer; pointer-events:all;
+}
+#sentinel-toast.on {
+  opacity:1; transform:translateX(-50%) translateY(0);
+}
+
+/* Highlight pixels sous alerte */
+.sentinel-highlight {
+  position:absolute; pointer-events:none; z-index:6;
+  border:2px solid #00e5ff;
+  box-shadow:0 0 8px rgba(0,229,255,.7);
+  border-radius:1px;
+  animation:hlFade 3s ease-out forwards;
+}
+@keyframes hlFade {
+  0%  { opacity:1; }
+  70% { opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* ══════════════════════════
    TOAST
 ══════════════════════════ */
 #toast {
@@ -877,11 +946,15 @@ html, body {
       <div id="px-coords">—</div>
     </div>
 
-    <!-- ── Droite : zoom ── -->
+    <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
       <div class="zoom-btn" onclick="GP.zoomIn()"  title="Zoom +">＋</div>
       <div class="zoom-btn" onclick="GP.zoomOut()" title="Zoom −">－</div>
       <div class="zoom-btn" style="font-size:.9rem;" onclick="GP.resetView()" title="Centrer">⊙</div>
+      <div id="btn-sentinel" onclick="SENTINEL.openLog()" title="Sentinelle">
+        👁️
+        <div id="sentinel-badge"></div>
+      </div>
     </div>
 
   </div>
@@ -889,6 +962,9 @@ html, body {
   <div id="px-flash"></div>
 
 </div><!-- /app -->
+
+<!-- Toast Sentinelle (cliquable → zoom sur zone) -->
+<div id="sentinel-toast" onclick="SENTINEL.onToastClick()"></div>
 
 <div id="toast"></div>
 
@@ -915,6 +991,7 @@ html, body {
           <li><span class="ic">⚔️</span><span>Recouvre les pixels adverses pour conquérir du territoire</span></li>
           <li><span class="ic">🌐</span><span>Canevas partagé en temps réel avec tous les joueurs</span></li>
           <li><span class="ic">🛒</span><span>Boutique : augmente ta capacité avec un pack</span></li>
+          <li><span class="ic">👁️</span><span><strong style="color:#00e5ff">La Sentinelle</strong> protège tes œuvres en temps réel et t'avertit si un ennemi s'approche ou t'attaque</span></li>
         </ul>
       </div>
 
@@ -1063,6 +1140,16 @@ html, body {
     </div>
 
     <button class="btn-close" onclick="closeModal('m-settings')">FERMER</button>
+  </div>
+</div>
+
+<!-- Modale log Sentinelle -->
+<div class="m-bg" id="m-sentinel">
+  <div class="m-box" style="max-width:400px;">
+    <div class="m-h" style="color:#00e5ff;">👁️ SENTINELLE</div>
+    <p class="m-p" style="font-size:.56rem;">Historique des alertes sur tes pixels.</p>
+    <div id="sentinel-log" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-bottom:12px;"></div>
+    <button class="btn-close" onclick="closeModal('m-sentinel')">FERMER</button>
   </div>
 </div>
 
@@ -1657,6 +1744,14 @@ async function enableNotifications() {
 function triggerNotification(type) {
   if (!_notifEnabled) return;
   if (document.visibilityState === 'visible') return;
+  /* Sentinelle : msg dynamique passé en 2ème argument */
+  if (type === 'sentinel_alert') {
+    const body = arguments[1] || "Un ennemi s'approche de tes pixels !";
+    if (Notification.permission === 'granted') {
+      new Notification('👁️ Sentinelle Gold Pixel', { body, icon: '/Images/Logo_Gold_Pixel_Final.jpg' });
+    }
+    return;
+  }
   const msgs = {
     happy_hour: { title:'🔥 Happy Hour !', body:"Recharge 2\u00d7 plus rapide jusqu'\u00e0 14h !" },
     stock_full: { title:'⚡ Stock plein !', body:'Ton r\u00e9servoir de pixels est charg\u00e9 \u00e0 100% !' },
@@ -1710,6 +1805,208 @@ window.addEventListener('orientationchange', () => {
     }
   }, 250);
 });
+
+/* ════════════════════════════════════════════════════════
+   SENTINELLE — Système de protection des œuvres
+   Détection en temps réel via pollGrid :
+   - pixel posé SUR un pixel existant du joueur → ATTAQUE
+   - pixel posé ADJACENT (8 directions) → APPROCHE
+   Agrégation : 1 alerte par zone sur fenêtre 10s
+   Cooldown par zone : 45s
+════════════════════════════════════════════════════════ */
+const SENTINEL = (() => {
+  const AGGREGATE_MS  = 10000;  // fenêtre d'agrégation 10s
+  const COOLDOWN_MS   = 45000;  // cooldown par zone 45s
+  const ZONE_RADIUS   = 12;     // rayon de regroupement en cellules
+
+  let _enabled       = true;
+  let _log           = [];          // historique alertes
+  let _zoneCooldowns = {};          // clé zone → timestamp dernier envoi
+  let _pendingAlerts = {};          // clé zone → { events[], timer }
+  let _lastAlertPos  = null;        // { col, row } de la dernière alerte
+
+  /* ── Pixels du joueur courant — index spatial ── */
+  /* Alimenté par GP._paintCell et GP._eraseCell via callbacks */
+  let _myPixels = {};  // clé "col,row" → true
+
+  /* ── API publique pour GP ── */
+  function registerMyPixel(col, row) {
+    _myPixels[col + ',' + row] = true;
+  }
+  function unregisterMyPixel(col, row) {
+    delete _myPixels[col + ',' + row];
+  }
+
+  /* ── Vérifier un pixel entrant (appelé depuis pollGrid) ── */
+  function checkIncoming(col, row, attackerUser) {
+    if (!_enabled) return;
+    if (!piConnected) return;        // pas de sentinelle sans compte Pi
+
+    const key      = col + ',' + row;
+    const isHit    = !!_myPixels[key];   // pixel direct
+    let   isNear   = false;
+
+    if (!isHit) {
+      // Vérifier les 8 voisins
+      for (let dc = -1; dc <= 1; dc++) {
+        for (let dr = -1; dr <= 1; dr++) {
+          if (dc === 0 && dr === 0) continue;
+          if (_myPixels[(col+dc) + ',' + (row+dr)]) { isNear = true; break; }
+        }
+        if (isNear) break;
+      }
+    }
+
+    if (!isHit && !isNear) return;
+
+    const type     = isHit ? 'attack' : 'approach';
+    const zoneKey  = _zoneKey(col, row);
+
+    // Cooldown par zone
+    const now = Date.now();
+    if (_zoneCooldowns[zoneKey] && now - _zoneCooldowns[zoneKey] < COOLDOWN_MS) return;
+
+    // Agréger dans la fenêtre
+    if (!_pendingAlerts[zoneKey]) {
+      _pendingAlerts[zoneKey] = { events: [], timer: null, col, row };
+    }
+    _pendingAlerts[zoneKey].events.push({ col, row, type, attackerUser });
+    // La première event d'attaque directe l'emporte
+    if (type === 'attack') _pendingAlerts[zoneKey].isAttack = true;
+
+    clearTimeout(_pendingAlerts[zoneKey].timer);
+    _pendingAlerts[zoneKey].timer = setTimeout(() => _flush(zoneKey), AGGREGATE_MS);
+  }
+
+  /* ── Émettre l'alerte agrégée ── */
+  function _flush(zoneKey) {
+    const pending = _pendingAlerts[zoneKey];
+    if (!pending) return;
+    delete _pendingAlerts[zoneKey];
+
+    _zoneCooldowns[zoneKey] = Date.now();
+
+    const isAttack = !!pending.isAttack;
+    const count    = pending.events.length;
+    const col      = pending.col;
+    const row      = pending.row;
+    const attacker = pending.events[0].attackerUser || '?';
+
+    const msg = isAttack
+      ? '🛡️ ATTAQUE ! ' + attacker + ' écrase ' + (count > 1 ? count + ' pixels' : 'ton pixel') + ' !'
+      : '👁️ ' + attacker + ' s\'approche de ton œuvre !';
+
+    _lastAlertPos = { col, row };
+    _addToLog({ msg, col, row, ts: Date.now(), isAttack });
+    _showSentinelToast(msg);
+    _showBadge();
+    _highlightZone(col, row);
+
+    // Notif push si jeu en arrière-plan
+    if (document.visibilityState !== 'visible') {
+      triggerNotification('sentinel_alert', msg);
+    }
+  }
+
+  /* ── Zone key : quantifie en blocs de ZONE_RADIUS ── */
+  function _zoneKey(col, row) {
+    const zc = Math.floor(col / ZONE_RADIUS);
+    const zr = Math.floor(row / ZONE_RADIUS);
+    return zc + ':' + zr;
+  }
+
+  /* ── Toast Sentinelle ── */
+  function _showSentinelToast(msg) {
+    const el = document.getElementById('sentinel-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('on');
+    clearTimeout(_showSentinelToast._t);
+    _showSentinelToast._t = setTimeout(() => el.classList.remove('on'), 6000);
+  }
+
+  /* ── Badge compteur ── */
+  function _showBadge() {
+    const btn   = document.getElementById('btn-sentinel');
+    const badge = document.getElementById('sentinel-badge');
+    if (btn)   btn.classList.add('alert');
+    if (badge) {
+      const n = _log.filter(e => !e.read).length;
+      badge.textContent = n > 9 ? '9+' : String(n);
+      badge.classList.add('show');
+    }
+  }
+
+  /* ── Highlight zone sur canvas ── */
+  function _highlightZone(col, row) {
+    const vp = document.getElementById('canvas-viewport');
+    if (!vp) return;
+    // Supprimer anciens highlights
+    vp.querySelectorAll('.sentinel-highlight').forEach(el => el.remove());
+    // Créer un overlay sur la cellule
+    const hl = document.createElement('div');
+    hl.className = 'sentinel-highlight';
+    // Position relative au canvas-frame (dépend du scale)
+    hl.style.cssText = 'left:0;top:0;width:0;height:0;'; // positionné par JS GP
+    vp.appendChild(hl);
+    // Demander au moteur GP de positionner le highlight
+    if (window.GP && typeof GP.positionHighlight === 'function') {
+      GP.positionHighlight(hl, col, row);
+    }
+    setTimeout(() => hl.remove(), 3200);
+  }
+
+  /* ── Log ── */
+  function _addToLog(entry) {
+    _log.unshift(entry);
+    if (_log.length > 50) _log.pop();
+  }
+
+  /* ── Clic toast → zoom sur zone ── */
+  function onToastClick() {
+    if (!_lastAlertPos) return;
+    const el = document.getElementById('sentinel-toast');
+    if (el) el.classList.remove('on');
+    if (window.GP && typeof GP.zoomToCell === 'function') {
+      GP.zoomToCell(_lastAlertPos.col, _lastAlertPos.row);
+    }
+  }
+
+  /* ── Ouvrir log ── */
+  function openLog() {
+    const btn   = document.getElementById('btn-sentinel');
+    const badge = document.getElementById('sentinel-badge');
+    if (btn)   btn.classList.remove('alert');
+    if (badge) badge.classList.remove('show');
+    _log.forEach(e => e.read = true);
+
+    const logEl = document.getElementById('sentinel-log');
+    if (logEl) {
+      logEl.innerHTML = '';
+      if (_log.length === 0) {
+        logEl.innerHTML = '<div style="font-size:.56rem;color:var(--dim);text-align:center;padding:12px 0;">Aucune alerte pour l\'instant.</div>';
+      } else {
+        _log.forEach(e => {
+          const d   = document.createElement('div');
+          const ago = Math.round((Date.now() - e.ts) / 1000);
+          const t   = ago < 60 ? ago + 's' : Math.round(ago/60) + 'min';
+          d.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);cursor:pointer;';
+          d.innerHTML = '<span style="font-size:.9rem">' + (e.isAttack ? '⚔️' : '👁️') + '</span>'
+            + '<span style="flex:1;font-size:.52rem;color:var(--text);line-height:1.4">' + e.msg + '</span>'
+            + '<span style="font-size:.44rem;color:var(--dim);flex-shrink:0">' + t + '</span>';
+          d.addEventListener('click', () => {
+            closeModal('m-sentinel');
+            if (window.GP && typeof GP.zoomToCell === 'function') GP.zoomToCell(e.col, e.row);
+          });
+          logEl.appendChild(d);
+        });
+      }
+    }
+    openModal('m-sentinel');
+  }
+
+  return { checkIncoming, registerMyPixel, unregisterMyPixel, openLog, onToastClick };
+})();
 
 /* ════════════════════════════════════════════════════════
    MOTEUR GOLD PIXEL — Canvas + HUD
@@ -1907,6 +2204,11 @@ const GP = (() => {
       }).catch(() => {});
     }
 
+    // Sentinelle — indexer ce pixel comme pixel du joueur
+    if (piConnected && typeof SENTINEL !== 'undefined') {
+      SENTINEL.registerMyPixel(col, row);
+    }
+
     // Vérifier expansion
     _checkExpand();
   }
@@ -1962,6 +2264,7 @@ const GP = (() => {
   function _eraseCell(col, row) {
     const key = col + ',' + row;
     if (pixelGrid[key]) { delete pixelGrid[key]; filledCount = Math.max(0, filledCount - 1); }
+    if (typeof SENTINEL !== 'undefined') SENTINEL.unregisterMyPixel(col, row);
     // Fade-out
     let progress = 0;
     const steps = 6;
@@ -2059,9 +2362,13 @@ const GP = (() => {
   async function loadGrid() {
     const data = await apiFetch('/api/pixelwar/grid', 'GET');
     if (data && Array.isArray(data.pixels)) {
-      data.pixels.forEach(({ col, row, color }) => {
+      data.pixels.forEach(({ col, row, color, user }) => {
         if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
           _paintCell(col, row, color, 'standard', false);
+          /* Sentinelle : indexer les pixels du joueur courant */
+          if (user && user === '@' + piUsername && typeof SENTINEL !== 'undefined') {
+            SENTINEL.registerMyPixel(col, row);
+          }
         }
       });
     }
@@ -2074,6 +2381,10 @@ const GP = (() => {
     data.pixels.forEach(({ col, row, color, user }) => {
       if (col < 0 || col >= CANVAS_W || row < 0 || row >= CANVAS_H) return;
       if (user === '@' + piUsername) return;
+      /* Sentinelle : détecter avant de dessiner */
+      if (typeof SENTINEL !== 'undefined') {
+        SENTINEL.checkIncoming(col, row, user || '?');
+      }
       _paintCell(col, row, color, 'standard', true);
     });
     if (data.ts) window._gpLastTS = data.ts;
@@ -2173,8 +2484,35 @@ const GP = (() => {
     pollTimer = setInterval(pollGrid, POLL_MS);
   }
 
+  /* ── Zoom sur une cellule (pour Sentinelle) ── */
+  function zoomToCell(col, row) {
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const targetScale = Math.min(Math.max(scale, 4), 12); // zoom confortable
+    const r = targetScale / scale;
+    panX = vw / 2 - col * targetScale;
+    panY = vh / 2 - row * targetScale;
+    scale = targetScale;
+    _applyTransform();
+    // Flash highlight sur la cellule
+    const hl = document.createElement('div');
+    hl.className = 'sentinel-highlight';
+    positionHighlight(hl, col, row);
+    viewport.appendChild(hl);
+    setTimeout(() => hl.remove(), 3200);
+  }
+
+  /* ── Positionner un overlay sur une cellule (px dans le viewport) ── */
+  function positionHighlight(el, col, row) {
+    const size = Math.max(scale, 1);
+    el.style.left   = (panX + col   * scale) + 'px';
+    el.style.top    = (panY + row   * scale) + 'px';
+    el.style.width  = (size * 3) + 'px';
+    el.style.height = (size * 3) + 'px';
+    el.style.position = 'absolute';
+  }
+
   /* API publique */
-  return { startEngine, pick, pickGold, zoomIn, zoomOut, resetView, undo };
+  return { startEngine, pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, positionHighlight };
 
 })();
 
