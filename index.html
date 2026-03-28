@@ -3251,12 +3251,50 @@ function switchTab(name) {
   document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
   const match = document.querySelector(`.nav-bar-btn[data-tab="${name}"]`);
   if (match) match.classList.add('active');
+
+  /* History API — permet au bouton retour de naviguer entre onglets */
+  const state = { tab: name };
+  const url   = name === 'home' ? '/' : ('/#' + name);
+  if (!history.state || history.state.tab !== name) {
+    history.pushState(state, '', url);
+  }
 }
 
 /* Init : synchro au chargement */
 (function initNavBar(){
   const homeBtn = document.querySelector('.nav-bar-btn[data-tab="home"]');
   if (homeBtn) homeBtn.classList.add('active');
+})();
+
+/* ── History API — bouton retour mobile ──
+   Pousse un état initial pour que le premier "retour" revienne
+   sur l'accueil au lieu de fermer l'app.
+   Intercepte popstate pour rejouer la navigation en JS. */
+(function initHistory() {
+  /* État initial : on est sur home */
+  history.replaceState({ tab: 'home' }, '', '/');
+
+  window.addEventListener('popstate', function(e) {
+    const state = e.state;
+    if (!state) {
+      /* Pas d'état = on remonte au-delà du portail → rester sur home */
+      switchTab('home');
+      history.replaceState({ tab: 'home' }, '', '/');
+      return;
+    }
+    if (state.game) {
+      /* Retour sur une page jeu — afficher la page jeu sans repousser l'historique */
+      showGame(state.game);
+      return;
+    }
+    if (state.tab) {
+      /* Retour sur un onglet — afficher l'onglet sans repousser l'historique */
+      showTab(state.tab);
+      document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+      const match = document.querySelector(`.nav-bar-btn[data-tab="${state.tab}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
 })();
 
 /* Appliquer la langue par défaut (EN) au chargement — traduit tous les data-en */
@@ -3840,6 +3878,9 @@ function showGame(gameId) {
 
   /* Sync nav — aucun onglet actif (page non listée dans la nav) */
   document.querySelectorAll('.nav-bar-btn').forEach(b => b.classList.remove('active'));
+
+  /* History API — le bouton retour ramènera à l'onglet précédent */
+  history.pushState({ game: gameId }, '', '/#game-' + gameId);
 
   window.scrollTo({top:0, behavior:'smooth'});
   setTimeout(revealVisible, 80);
