@@ -10,6 +10,48 @@
 <title>Gold Pixel — JeuxVideo.Pi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrnYa3VYKZlZer1R1H-k7IcTLmGaho3Qs",
+    authDomain: "gold-pixel.firebaseapp.com",
+    projectId: "gold-pixel",
+    storageBucket: "gold-pixel.firebasestorage.app",
+    messagingSenderId: "483082801795",
+    appId: "1:483082801795:web:96e6ba329bab67e53841b6"
+  };
+  const VAPID_KEY = "BKGUW6lT2RGM6cxUFRdwELKrf5UAfnf2hIpm39PF29ZpM7qdQJFTFboxSAwVI3tM9ikuWmAxec55mbVfmv2bwCQ";
+
+  let _messaging = null;
+  let _fcmToken  = null;
+
+  async function initFCM() {
+    try {
+      const app = initializeApp(firebaseConfig);
+      _messaging = getMessaging(app);
+
+      // Écouter les messages foreground
+      onMessage(_messaging, payload => {
+        const title = payload.notification?.title || 'Gold Pixel';
+        const body  = payload.notification?.body  || '';
+        // Fallback toast si le jeu est au premier plan
+        if (typeof showToast === 'function') showToast(body || title);
+      });
+
+      console.log('[FCM] Firebase Messaging initialisé');
+      window._fcmMessaging = _messaging;
+      window._fcmVapidKey  = VAPID_KEY;
+    } catch(e) {
+      console.warn('[FCM] Init échouée:', e.message);
+    }
+  }
+
+  initFCM();
+</script>
 <!-- Pi SDK (Production URL) -->
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <style>
@@ -21,8 +63,8 @@
   --pi-l:     #f5c842;
   --gold:     #f5c842;
   --gold-prem:#ffd700;
-  --bg:       #0e0e0e;
-  --surface:  #1a1a1a;
+  --bg:       #f5f0e8;
+  --surface:  #1e1e0e;
   --border:   rgba(200,150,10,0.4);
   --text:     #f0ead0;
   --dim:      rgba(240,234,208,0.45);
@@ -38,7 +80,7 @@
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 html,body {
   width:100%; height:100%; overflow:hidden; touch-action:none;
-  background:var(--bg); font-family:"Chakra Petch",sans-serif;
+  background:#f5f0e8; font-family:"Chakra Petch",sans-serif;
   color:var(--text); -webkit-font-smoothing:antialiased;
 }
 
@@ -201,14 +243,13 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 #sync-lbl.ld  { background:rgba(112,40,200,.14); color:var(--pi-l);  border:1px solid var(--border); }
 
 /* ══════════════════════════
-   PALETTE BAR — 50px, couleurs uniquement
-   (plus de bouton PLACER — tap direct)
+   PALETTE BAR
 ══════════════════════════ */
 #pal-bar {
-  flex-shrink:0; height:var(--h-pal);
-  background:linear-gradient(0deg,#0e0e00 0%,#1c1600 100%);
-  border-top:2px solid var(--gold);
-  padding:6px 8px; display:flex; align-items:center; gap:6px;
+  flex-shrink:0; height:auto; min-height:var(--h-pal);
+  background:#1a1600;
+  border-top:3px solid var(--gold);
+  padding:5px 8px; display:flex; align-items:center; gap:6px;
 }
 #sel-dot {
   width:28px; height:28px; border-radius:6px; flex-shrink:0;
@@ -312,11 +353,30 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 .shop-grid {
   display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;
 }
+#shop-active-tank {
+  font-size:.56rem; padding:6px 10px; border-radius:7px; margin-bottom:8px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  text-align:center; line-height:1.5;
+}
 .shop-card {
   background:rgba(255,255,255,.04); border:1px solid var(--border);
   border-radius:9px; padding:10px 8px; text-align:center;
   display:flex; flex-direction:column; align-items:center; gap:5px;
+  position:relative; transition:transform .15s;
 }
+.shop-card:active { transform:scale(.97); }
+.shop-card.tank-middle { border-color:rgba(255,210,0,.4); background:rgba(255,210,0,.05); }
+.shop-card.tank-middle .shop-name { color:#ffd700; }
+.shop-card.tank-big { border-color:rgba(255,140,0,.45); background:rgba(255,140,0,.06); }
+.shop-card.tank-big .shop-name { color:#ff8c00; }
+.shop-card.tank-big .shop-ico { animation:pulse-ico 2s ease-in-out infinite; }
+.shop-card.tank-giga { border-color:rgba(0,200,255,.45); background:rgba(0,200,255,.06); box-shadow:0 0 10px rgba(0,200,255,.1); }
+.shop-card.tank-giga .shop-name { color:#00c8ff; }
+.shop-card.tank-ultra { border-color:rgba(180,80,255,.5); background:rgba(180,80,255,.07); animation:ultra-glow 2.5s ease-in-out infinite; }
+.shop-card.tank-ultra .shop-name { color:#b450ff; }
+@keyframes ultra-glow { 0%,100%{box-shadow:0 0 10px rgba(180,80,255,.15);} 50%{box-shadow:0 0 22px rgba(180,80,255,.35);} }
+@keyframes pulse-ico  { 0%,100%{transform:scale(1);} 50%{transform:scale(1.14);} }
+.shop-duration { font-size:.44rem; color:var(--dim); margin-top:1px; }
 .shop-card-wide {
   background:rgba(255,255,255,.04); border:1px solid var(--border);
   border-radius:9px; padding:10px 12px; margin-bottom:8px;
@@ -475,11 +535,51 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 @keyframes undoPulse { to { box-shadow:0 0 8px #e83c50; } }
 #undo-btn:hover { background:rgba(255,255,255,.15); }
 
+
+/* Bouton boutique sous canevas */
+#shop-launch-btn {
+  flex-shrink:0; width:100%;
+  padding:10px; background:linear-gradient(135deg,#bf953f,var(--gold),#fcf6ba,var(--gold),#bf953f);
+  background-size:200% auto; color:#000;
+  font-family:"Chakra Petch",sans-serif; font-size:.75rem; font-weight:700;
+  letter-spacing:.06em; border:none; cursor:pointer;
+  border-top:2px solid #ffd700;
+  animation:shopBtnGlow 2.5s ease-in-out infinite;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+}
+@keyframes shopBtnGlow {
+  0%,100%{background-position:0% center;}
+  50%{background-position:100% center;}
+}
+/* Happy Hour indicator */
+#happy-hour-bar {
+  display:none; width:100%; padding:4px 8px; text-align:center;
+  background:linear-gradient(90deg,#ff6b00,#ffaa00,#ff6b00);
+  background-size:200% auto; animation:hhMove 2s linear infinite;
+  font-size:.56rem; font-weight:700; color:#000; border-bottom:2px solid #ff4400;
+}
+#happy-hour-bar.show { display:block; }
+@keyframes hhMove { 0%{background-position:0% center;} 100%{background-position:200% center;} }
+/* Notif toggle btn */
+#notif-btn {
+  padding:2px 7px; border-radius:16px; cursor:pointer;
+  border:1px solid rgba(255,170,0,.4); background:rgba(255,170,0,.08);
+  color:rgba(255,170,0,.7); font-size:.45rem; white-space:nowrap;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+}
+#notif-btn.active { border-color:var(--green); background:rgba(56,212,138,.1); color:var(--green); }
+/* sw-row dans palette */
+.sw-row {
+  display:flex; gap:2px; flex-wrap:wrap; flex:1;
+}
+#swatches-wrap { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
 /* Animations */
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 </style>
 </head>
 <body>
+
+<div id="happy-hour-bar">🔥 HAPPY HOUR — Recharge 2× plus rapide !</div>
 
 <!-- Bannière rotation (non bloquante) -->
 <div id="portrait-lock">
@@ -494,14 +594,13 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
   <div id="topbar">
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
       <div class="tb-logo">✦ GOLD PIXEL</div>
-      <div class="tb-btn tb-btn-shop-big" onclick="openModal('m-shop')" title="Boutique">🛒 Shop</div>
     </div>
 
     <!-- Centre : stock + recharge -->
     <div id="tb-center">
       <div class="tb-pill tb-pill-stock" id="tb-stock-pill">
         <span id="tb-stock-ico">📦</span>
-        <span id="tb-stock-val">10</span><span style="opacity:.5">/10</span>
+        <span id="tb-stock-val">15</span><span id="tb-stock-max" style="opacity:.5">/15</span>
       </div>
       <div class="tb-pill tb-pill-gold" id="tb-gold-pill">
         <span>✦</span>
@@ -516,6 +615,7 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
     <!-- Droite : user + actions (sans bouton Pi) -->
     <div class="tb-right">
       <span id="tb-user-name">—</span>
+      <button id="notif-btn" onclick="toggleNotif()" title="Notifications">🔔</button>
       <div class="tb-btn tb-btn-portal" onclick="window.location.href='/'">🏠 Portal</div>
       <div class="tb-btn tb-btn-lb"    onclick="openLB()">🏆</div>
     </div>
@@ -565,6 +665,7 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
     </div>
   </div>
 
+  <button id="shop-launch-btn" onclick="openModal('m-shop')">🛒 BOUTIQUE — Augmente ton réservoir de pixels</button>
 </div><!-- /app -->
 
 <div id="px-flash"></div>
@@ -594,29 +695,48 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 <div class="m-bg" id="m-shop">
   <div class="m-box">
     <div class="m-h">🛒 BOUTIQUE</div>
-    <p class="m-p">Recharge ton stock de pixels.</p>
+    <div id="shop-active-tank">Chargement...</div>
+    <p class="m-p" style="font-size:.5rem;margin-bottom:8px;opacity:.7;">5 jours par pack · 1 seul actif a la fois · retour automatique au standard a expiration</p>
     <div class="shop-grid">
-      <div class="shop-card">
-        <div class="shop-ico">⚡</div>
-        <div class="shop-name">Chargeur Moyen</div>
-        <div class="shop-desc">+5 pixels (max 20)</div>
+      <div class="shop-card tank-middle">
+        <div class="shop-ico">🟡</div>
+        <div class="shop-name">Middle Tank</div>
+        <div class="shop-desc">20 pixels · confort de creation</div>
+        <div class="shop-duration">5 jours</div>
         <div class="shop-price">1 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('medium')">ACHETER</button>
+        <button class="shop-btn" onclick="shopBuy('middle')">ACTIVER</button>
       </div>
-      <div class="shop-card">
-        <div class="shop-ico">⚡⚡</div>
-        <div class="shop-name">Grand Chargeur</div>
-        <div class="shop-desc">+10 pixels (max 20)</div>
+      <div class="shop-card tank-big">
+        <div class="shop-ico">🟠</div>
+        <div class="shop-name">Big Tank</div>
+        <div class="shop-desc">30 pixels · liberte accrue</div>
+        <div class="shop-duration">5 jours</div>
         <div class="shop-price">2 Pi</div>
-        <button class="shop-btn" onclick="shopBuy('large')">ACHETER</button>
+        <button class="shop-btn" onclick="shopBuy('big')">ACTIVER</button>
+      </div>
+      <div class="shop-card tank-giga">
+        <div class="shop-ico">🔵</div>
+        <div class="shop-name">Giga Tank</div>
+        <div class="shop-desc">45 pixels · creations ambitieuses</div>
+        <div class="shop-duration">5 jours</div>
+        <div class="shop-price">3 Pi</div>
+        <button class="shop-btn" onclick="shopBuy('giga')">ACTIVER</button>
+      </div>
+      <div class="shop-card tank-ultra">
+        <div class="shop-ico">🟣</div>
+        <div class="shop-name">Ultra Tank</div>
+        <div class="shop-desc">60 pixels · experience maximale</div>
+        <div class="shop-duration">5 jours</div>
+        <div class="shop-price">5 Pi</div>
+        <button class="shop-btn" onclick="shopBuy('ultra')">ACTIVER</button>
       </div>
     </div>
     <div class="shop-card-wide">
       <div class="shop-ico">💛</div>
       <div class="shop-info">
         <div class="shop-name">Soutenir le jeu</div>
-        <div class="shop-desc">Don libre pour le développement de Pi-xel War</div>
-        <div class="shop-price">montant libre</div>
+        <div class="shop-desc">Soutien au developpement de Gold Pixel</div>
+        <div class="shop-price">1 Pi</div>
       </div>
       <button class="shop-btn" onclick="shopBuy('support')">OFFRIR</button>
     </div>
@@ -661,9 +781,22 @@ canvas#minimap { display:block; width:72px; height:40px; image-rendering:pixelat
 ════════════════════════════ */
 const API_BASE   = '';       // même domaine Render
 const POLL_MS    = 8000;
-const STOCK_MAX  = 10;
-const STOCK_CAP  = 20;
-const RECHARGE_S = 180;      // 3 min
+/* Base + packs */
+const STOCK_BASE       = 15;
+const RECHARGE_S       = 10;    // 10 secondes de cooldown entre pixels
+const DAILY_BONUS_CL   = 2;     // +2 pixels classiques au bonus quotidien
+const DAILY_BONUS_GOLD = 1;     // +1 pixel Gold au bonus quotidien
+// Happy Hour : 12h–14h heure locale → cooldown /2, recharge ×2
+function isHappyHour() {
+  const h = new Date().getHours();
+  return h >= 12 && h < 14;
+}
+function getRechargeS() {
+  return isHappyHour() ? Math.floor(RECHARGE_S / 2) : RECHARGE_S;
+}
+const TANK_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 jours
+const TANK_CAPS = { base:15, middle:20, big:30, giga:45, ultra:60 };
+/* Gold */
 const GOLD_MAX   = 5;
 const GOLD_CAP   = 10;
 const GOLD_COLOR = '#ffd700';
@@ -724,17 +857,17 @@ const COUNTRIES = [
    Expansion auto à 70% remplissage → doublement progressif
    Seuils : 70% → 60×36, 70% → 80×48, 70% → 120×72
 ════════════════════════════ */
-let COLS = 40;
-let ROWS = 24;
-const TILE = 8;
-let CW   = COLS * TILE;   // 320px départ
-let CH   = ROWS * TILE;   // 192px départ
-const EXPAND_THRESHOLD = 0.70;  /* 70% rempli → expansion */
+let COLS = 150;   // départ 150×150 (approx 300×300 en pixels avec TILE=2)
+let ROWS = 150;
+const TILE = 2;   // pixels plus petits → densité pixel war authentique
+let CW   = COLS * TILE;
+let CH   = ROWS * TILE;
+const EXPAND_THRESHOLD = 0.65;   // 65% → expansion
 const EXPAND_STEPS = [
-  {cols:40,  rows:24},  /* départ */
-  {cols:60,  rows:36},  /* ~50+ joueurs */
-  {cols:80,  rows:48},  /* ~150+ joueurs */
-  {cols:120, rows:72},  /* ~500+ joueurs */
+  {cols:150, rows:150},  // 300×300 départ
+  {cols:250, rows:250},  // 500×500
+  {cols:375, rows:375},  // 750×750
+  {cols:500, rows:500},  // 1000×1000
 ];
 let expandStep = 0;
 const BG   = '#f5f0e8';  /* fond crème — pixels visibles immédiatement */
@@ -745,9 +878,13 @@ const BG   = '#f5f0e8';  /* fond crème — pixels visibles immédiatement */
 let activeColor  = '#3690ea';
 let selCol       = -1;
 let selRow       = -1;
+let tankType     = 'base';
+let tankExpiry   = null;
+let STOCK_MAX    = STOCK_BASE;
+let STOCK_CAP    = STOCK_BASE;
 let stock        = STOCK_MAX;
 let goldStock    = GOLD_MAX;
-let rechargeLeft = RECHARGE_S;  /* secondes avant prochain +1 */
+let rechargeLeft = RECHARGE_S;
 let pixelsPlaced = 0;
 let sessionStart = Date.now();
 let gameStarted  = false;
@@ -988,6 +1125,62 @@ function clearSel() {
 /* ════════════════════════════
    STOCK UI
 ════════════════════════════ */
+/* ════════════════════
+   RESERVOIRS — packs
+════════════════════ */
+function setTank(type, expiry) {
+  tankType   = type || 'base';
+  tankExpiry = expiry || null;
+  STOCK_MAX  = TANK_CAPS[tankType] || STOCK_BASE;
+  STOCK_CAP  = STOCK_MAX;
+  if (stock > STOCK_MAX) stock = STOCK_MAX;
+  _refreshShopStatus();
+}
+
+function checkTankExpiry() {
+  if (tankType === 'base' || !tankExpiry) return;
+  if (Date.now() >= tankExpiry) {
+    setTank('base', null);
+    saveLSState();
+    showToast('Pack expire — retour au reservoir standard (15 pixels)');
+  }
+}
+
+function _refreshShopStatus() {
+  const el = document.getElementById('shop-active-tank');
+  if (!el) return;
+  if (tankType === 'base') {
+    el.textContent = 'Reservoir actif : Base — 15 pixels';
+    el.style.color = 'var(--green)';
+    return;
+  }
+  const names = { middle:'Middle Tank', big:'Big Tank', giga:'Giga Tank', ultra:'Ultra Tank' };
+  const msLeft = Math.max(0, tankExpiry - Date.now());
+  const d = Math.ceil(msLeft / 86400000);
+  const h = Math.ceil((msLeft % 86400000) / 3600000);
+  el.textContent = (names[tankType] || tankType) + ' — ' + STOCK_MAX + ' pixels — expire dans ' + d + 'j ' + h + 'h';
+  el.style.color = 'var(--gold)';
+}
+
+function applyDailyBonus() {
+  const today = new Date().toDateString();
+  const key   = 'gp_daily_' + (piUsername || 'anon');
+  if (localStorage.getItem(key) === today) return;
+  localStorage.setItem(key, today);
+  // +2 classiques + 1 Gold, peuvent dépasser le réservoir, expirent à minuit
+  stock     = Math.min(STOCK_MAX + DAILY_BONUS_CL,   stock     + DAILY_BONUS_CL);
+  goldStock = Math.min(GOLD_MAX  + DAILY_BONUS_GOLD, goldStock + DAILY_BONUS_GOLD);
+  const midnight = new Date(); midnight.setHours(24,0,0,0);
+  const msLeft = midnight - Date.now();
+  setTimeout(function() {
+    if (stock     > STOCK_MAX) { stock     = STOCK_MAX; }
+    if (goldStock > GOLD_MAX)  { goldStock = GOLD_MAX; }
+    updateStockUI(); saveLSState();
+  }, msLeft);
+  updateStockUI(); saveLSState();
+  showToast('+' + DAILY_BONUS_CL + ' pixels + ' + DAILY_BONUS_GOLD + ' Gold ! Bonus quotidien');
+}
+
 function updateStockUI() {
   const stockPill     = document.getElementById('tb-stock-pill');
   const stockVal      = document.getElementById('tb-stock-val');
@@ -998,6 +1191,7 @@ function updateStockUI() {
   const emptyTimerEl  = document.getElementById('pal-empty-timer');
 
   stockVal.textContent = stock;
+  const smxEl = document.getElementById('tb-stock-max'); if (smxEl) smxEl.textContent = '/' + STOCK_MAX;
   const goldValEl = document.getElementById('tb-gold-val');
   if (goldValEl) goldValEl.textContent = goldStock;
 
@@ -1070,7 +1264,7 @@ function placePixelAt(col, row) {
   } else {
     stock--;
     if (stock === STOCK_MAX - 1 || rechargeLeft <= 0) {
-      rechargeLeft = RECHARGE_S;
+      rechargeLeft = getRechargeS();
     }
   }
   pixelsPlaced++;
@@ -1128,15 +1322,31 @@ function formatTime(s) {
 /* ════════════════════════════
    TIMER RECHARGE — tick 1s
 ════════════════════════════ */
+let _happyHourNotified = false;
 setInterval(() => {
+  checkTankExpiry();
   if (!gameStarted) return;
+  // Notifier Happy Hour au début
+  const hhBar = document.getElementById('happy-hour-bar');
+  if (hhBar) hhBar.classList.toggle('show', isHappyHour());
+  if (isHappyHour() && !_happyHourNotified) {
+    _happyHourNotified = true;
+    showToast('🔥 Happy Hour ! Recharge 2x plus rapide (12h–14h)');
+    triggerNotification('happy_hour');
+  } else if (!isHappyHour()) {
+    _happyHourNotified = false;
+  }
   if (stock < STOCK_MAX) {
     rechargeLeft = Math.max(0, rechargeLeft - 1);
     if (rechargeLeft <= 0) {
       stock = Math.min(STOCK_MAX, stock + 1);
-      /* Si pas encore plein : relancer le timer */
-      rechargeLeft = stock < STOCK_MAX ? RECHARGE_S : 0;
-      showToast(`📦 +1 pixel ! Stock : ${stock}`);
+      rechargeLeft = stock < STOCK_MAX ? getRechargeS() : 0;
+      if (stock >= STOCK_MAX) {
+        showToast('⚡ Stock plein !');
+        triggerNotification('stock_full');
+      } else {
+        showToast('+1 pixel ! Stock : ' + stock);
+      }
       saveLSState();
     }
     updateStockUI();
@@ -1230,9 +1440,10 @@ function onPiAuthSuccess(authResult) {
   piConnected = true;
   piUsername  = authResult.user.username;
   document.getElementById('tb-user-name').textContent = '@' + piUsername;
-  document.getElementById('tb-pi-btn').textContent    = '✓ Pi';
+  const piBtn = document.getElementById('tb-pi-btn'); if (piBtn) piBtn.textContent = '✓ Pi';
   showToast(`✅ @${piUsername}`);
   loadPlayerState();
+  applyDailyBonus();
   /* Pays : si déjà sauvegardé localement, on l'utilise directement */
   const savedCountry = localStorage.getItem('pw_country');
   if (savedCountry) {
@@ -1274,21 +1485,26 @@ function openCountryModal() {
 ════════════════════════════ */
 function shopBuy(type) {
   if (!window.Pi || !piConnected) {
-    showToast('Connecte-toi à Pi pour acheter');
+    showToast('Connecte-toi a Pi pour acheter');
     openPiAuth();
     return;
   }
-  const items = {
-    medium:  { price: 1, label: 'Chargeur Moyen',       pixels: 5  },
-    large:   { price: 2, label: 'Grand Chargeur',        pixels: 10 },
-    support: { price: 1, label: 'Soutien Gold Pixel',    pixels: 0  },
+  const tanks = {
+    middle:  { price:1, label:'Middle Tank',  cap:20 },
+    big:     { price:2, label:'Big Tank',     cap:30 },
+    giga:    { price:3, label:'Giga Tank',    cap:45 },
+    ultra:   { price:5, label:'Ultra Tank',   cap:60 },
+    support: { price:1, label:'Soutien Gold Pixel', cap:0 },
   };
-  const item = items[type];
+  const item = tanks[type];
   if (!item) return;
-  if (type !== 'support' && stock + item.pixels > STOCK_CAP) {
-    showToast(`⚠ Stock max (${STOCK_CAP}) — pose d'abord des pixels !`);
+
+  /* Empecher le cumul de packs */
+  if (type !== 'support' && tankType !== 'base') {
+    showToast('Un pack est actif — attend son expiration avant d\'en acheter un autre');
     return;
   }
+
   Pi.createPayment(
     {
       amount: item.price,
@@ -1303,17 +1519,18 @@ function shopBuy(type) {
           paymentId: id, txid, type, username: piUsername,
         }).then(d => {
           if (d && d.ok) {
-            if (typeof d.stock === 'number') {
-              stock = d.stock;
-              rechargeLeft = stock < STOCK_MAX ? RECHARGE_S : 0;
-              updateStockUI();
+            if (type !== 'support') {
+              const expiry = Date.now() + TANK_DURATION_MS;
+              setTank(type, expiry);
+              saveLSState();
+              showToast('Pack ' + item.label + ' active — ' + item.cap + ' pixels pendant 5 jours !');
+            } else {
+              showToast('Merci pour ton soutien !');
             }
-            showToast('✅ Achat confirmé !');
             closeModal('m-shop');
-            saveLSState();
           }
         }),
-      onCancel: () => showToast('Achat annulé'),
+      onCancel: () => showToast('Achat annule'),
       onError:  () => showToast('Erreur paiement Pi'),
     }
   );
@@ -1394,7 +1611,7 @@ function saveLSState() {
       if (pixelGrid[c][r]) pixels.push({ col:c, row:r, ...pixelGrid[c][r] });
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      pixels, stock, rechargeLeft, placed: pixelsPlaced, ts: Date.now(),
+      pixels, stock, rechargeLeft, placed: pixelsPlaced, ts: Date.now(), tankType: tankType, tankExpiry: tankExpiry,
     }));
   } catch (_) {}
 }
@@ -1421,6 +1638,11 @@ function loadLSState() {
     while (sStock < STOCK_MAX && rem > 0) {
       if (rem >= sRecharge) { rem -= sRecharge; sStock++; sRecharge = RECHARGE_S; }
       else { sRecharge -= rem; rem = 0; }
+    }
+    if (s.tankType && s.tankType !== 'base' && s.tankExpiry && Date.now() < s.tankExpiry) {
+      setTank(s.tankType, s.tankExpiry);
+    } else {
+      setTank('base', null);
     }
     stock        = Math.min(STOCK_MAX, sStock);
     rechargeLeft = sStock >= STOCK_MAX ? 0 : sRecharge;
@@ -1615,13 +1837,95 @@ function showSync(type, msg) {
 /* ════════════════════════════
    MODALES
 ════════════════════════════ */
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function openModal(id)  { if (id === 'm-shop') { checkTankExpiry(); _refreshShopStatus(); } document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 /* ════════════════════════════
    CANVAS DÉMO INITIAL
 ════════════════════════════ */
 /* Canvas vierge — pas de données de démo */
+
+
+/* ════════════════════════════
+   NOTIFICATIONS PUSH / FCM
+════════════════════════════ */
+let _notifEnabled = localStorage.getItem('gp_notif') === '1';
+
+function updateNotifBtn() {
+  const btn = document.getElementById('notif-btn');
+  if (!btn) return;
+  btn.textContent  = _notifEnabled ? '🔔' : '🔕';
+  btn.title        = _notifEnabled ? 'Notifications actives' : 'Notifications désactivées';
+  btn.classList.toggle('active', _notifEnabled);
+}
+
+async function toggleNotif() {
+  if (!_notifEnabled) {
+    await enableNotifications();
+  } else {
+    _notifEnabled = false;
+    localStorage.setItem('gp_notif', '0');
+    updateNotifBtn();
+    showToast('🔕 Notifications désactivées');
+  }
+}
+
+async function enableNotifications() {
+  try {
+    // Demander permission
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+      showToast('Notifications refusées');
+      return;
+    }
+    // Enregistrer service worker
+    if ('serviceWorker' in navigator) {
+      await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    }
+    // Obtenir token FCM
+    if (window._fcmMessaging && window._fcmVapidKey) {
+      const token = await (await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js'))
+        .getToken(window._fcmMessaging, { vapidKey: window._fcmVapidKey });
+      if (token) {
+        _fcmToken = token;
+        localStorage.setItem('gp_fcm_token', token);
+        console.log('[FCM] Token:', token);
+      }
+    }
+    _notifEnabled = true;
+    localStorage.setItem('gp_notif', '1');
+    updateNotifBtn();
+    showToast('🔔 Notifications activées !');
+  } catch(e) {
+    console.warn('[Notif]', e.message);
+    showToast('Notifications non disponibles');
+  }
+}
+
+function triggerNotification(type) {
+  // Notification native fallback si FCM pas disponible / page au premier plan
+  if (!_notifEnabled) return;
+  const msgs = {
+    happy_hour: { title:'🔥 Happy Hour !', body:'Recharge 2x plus rapide jusqu\'a 14h !' },
+    stock_full: { title:'⚡ Stock plein !', body:'Ton réservoir de pixels est chargé à 100% !' },
+  };
+  const m = msgs[type]; if (!m) return;
+  if (document.visibilityState === 'visible') return; // jeu au premier plan → toast suffisant
+  if (Notification.permission === 'granted') {
+    new Notification(m.title, { body: m.body, icon: '/Images/Logo_Gold_Pixel_Final.jpg' });
+  }
+}
+
+// Demander notifications à la première visite (après 3s)
+setTimeout(() => {
+  if (!localStorage.getItem('gp_notif') && Notification.permission === 'default') {
+    enableNotifications();
+  }
+  updateNotifBtn();
+  // Restaurer token FCM
+  const savedToken = localStorage.getItem('gp_fcm_token');
+  if (savedToken) console.log('[FCM] Token restauré:', savedToken);
+}, 3000);
 
 /* ════════════════════════════
    PLEIN ÉCRAN AUTOMATIQUE
