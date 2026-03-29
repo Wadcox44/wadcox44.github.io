@@ -2465,11 +2465,6 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
 
 // Gold Pixel — Games/Goldpixel/
 app.use('/goldpixel', express.static(path.join(__dirname, 'Games', 'Goldpixel')));
-app.get('/goldpixel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Games', 'Goldpixel', 'goldpixel.html'), (err) => {
-    if (err) res.status(404).send('File not found: Games/Goldpixel/goldpixel.html');
-  });
-});
 
 // Breaker — Games/Breakout/
 app.use('/breakout', express.static(path.join(__dirname, 'Games', 'Breakout')));
