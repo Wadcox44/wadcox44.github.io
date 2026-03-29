@@ -329,39 +329,6 @@ html, body {
 }
 .zoom-btn:active { background:rgba(245,200,66,.25); transform:scale(.92); }
 
-/* ── Zone canvas centrale ── */
-#canvasContainer {
-  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
-  background:#0a0612;
-}
-#gameCanvas {
-  display:block;
-  box-sizing:border-box;
-  border:2px solid var(--gold);
-  box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1);
-  image-rendering:pixelated; image-rendering:crisp-edges;
-  transform-origin:0 0;
-  cursor:crosshair;
-}
-#gameCanvas.expanding {
-  animation:frameExpand .8s ease-out;
-}
-/* Coords overlay */
-#px-coords {
-  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
-  font-family:"Space Mono",monospace; font-size:.42rem; color:rgba(245,200,66,.4);
-  pointer-events:none; white-space:nowrap; z-index:5;
-  background:rgba(0,0,0,.5); padding:1px 5px; border-radius:3px;
-}
-
-/* Flash pose pixel */
-#px-flash {
-  position:fixed; inset:0; pointer-events:none; opacity:0; z-index:400;
-  background:radial-gradient(ellipse at center,rgba(245,200,66,.18) 0%,transparent 65%);
-  transition:opacity .06s;
-}
-#px-flash.on { opacity:1; transition:none; }
 
 /* ══════════════════════════
    HAPPY HOUR BAR
@@ -459,19 +426,6 @@ html, body {
   opacity:1; transform:translateX(-50%) translateY(0);
 }
 
-/* Highlight pixels sous alerte */
-.sentinel-highlight {
-  position:absolute; pointer-events:none; z-index:6;
-  border:2px solid #00e5ff;
-  box-shadow:0 0 8px rgba(0,229,255,.7);
-  border-radius:1px;
-  animation:hlFade 3s ease-out forwards;
-}
-@keyframes hlFade {
-  0%  { opacity:1; }
-  70% { opacity:1; }
-  100%{ opacity:0; }
-}
 
 /* ══════════════════════════
    TOAST
@@ -930,11 +884,8 @@ html, body {
       <div id="btn-undo" title="Annuler (30s)" onclick="GP.undo()">↩</div>
     </div>
 
-    <!-- ── Centre : canvas ── -->
-    <div id="canvasContainer">
-      <canvas id="gameCanvas"></canvas>
-      <div id="px-coords">—</div>
-    </div>
+    <!-- ── Centre : zone de jeu ── -->
+    <div id="canvasContainer"></div>
     
     <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
@@ -949,7 +900,6 @@ html, body {
 
   </div>
 
-  <div id="px-flash"></div>
 
 </div><!-- /app -->
 
@@ -1927,22 +1877,8 @@ const SENTINEL = (() => {
     }
   }
 
-  /* ── Highlight zone sur canvas ── */
-  function _highlightZone(col, row) {
-    const vp = document.getElementById('canvasContainer');
-    if (!vp) return;
-    // Supprimer anciens highlights
-    vp.querySelectorAll('.sentinel-highlight').forEach(el => el.remove());
-    // Créer un overlay sur la cellule
-    const hl = document.createElement('div');
-    hl.className = 'sentinel-highlight';
-    vp.appendChild(hl);
-    // Demander au moteur GP de positionner le highlight
-    if (window.GP && typeof GP.positionHighlight === 'function') {
-      GP.positionHighlight(hl, col, row);
-    }
-    setTimeout(() => hl.remove(), 3200);
-  }
+  /* ── Highlight zone — sera réactivé avec le nouveau moteur canvas ── */
+  function _highlightZone(col, row) { /* stub — canvas à reconstruire */ }
 
   /* ── Log ── */
   function _addToLog(entry) {
@@ -1955,9 +1891,7 @@ const SENTINEL = (() => {
     if (!_lastAlertPos) return;
     const el = document.getElementById('sentinel-toast');
     if (el) el.classList.remove('on');
-    if (window.GP && typeof GP.zoomToCell === 'function') {
-      GP.zoomToCell(_lastAlertPos.col, _lastAlertPos.row);
-    }
+    /* GP.zoomToCell sera rebranché avec le nouveau moteur */
   }
 
   /* ── Ouvrir log ── */
@@ -1984,7 +1918,7 @@ const SENTINEL = (() => {
             + '<span style="font-size:.44rem;color:var(--dim);flex-shrink:0">' + t + '</span>';
           d.addEventListener('click', () => {
             closeModal('m-sentinel');
-            if (window.GP && typeof GP.zoomToCell === 'function') GP.zoomToCell(e.col, e.row);
+            /* GP.zoomToCell sera rebranché avec le nouveau moteur */
           });
           logEl.appendChild(d);
         });
@@ -1996,16 +1930,6 @@ const SENTINEL = (() => {
   return { checkIncoming, registerMyPixel, unregisterMyPixel, openLog, onToastClick };
 })();
 
-/* ════════════════════════════════════════════════════════
-   MOTEUR GOLD PIXEL — Canvas + HUD
-   - Canvas 3000×3000 px (1 px DOM = 1 cellule)
-   - Expansion +50% surface à 65% remplissage
-   - HUD : palette gauche, zoom droite, undo, gold
-   - Tap = pose pixel (décrément stock)
-   - Poll backend toutes les POLL_MS ms
-════════════════════════════════════════════════════════ */
-
-
 /* ════════════════════════════
    DÉMARRAGE
 ════════════════════════════ */
@@ -2016,7 +1940,6 @@ async function startGame() {
   gameStarted = true;
   loadLSState();
   updateStockUI();
-  await GP.startEngine();
   showToast('✦ Bienvenue sur Gold Pixel !');
 }
 
