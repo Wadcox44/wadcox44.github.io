@@ -47,6 +47,12 @@
 <!-- Pi SDK -->
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
+<!-- Socket.io client (servi par le serveur Node) -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- GP Canvas Engine -->
+<script src="/goldpixel/gp-engine.js"></script>
+
 <style>
 /* ══════════════════════════
    VARIABLES
@@ -329,6 +335,53 @@ html, body {
 }
 .zoom-btn:active { background:rgba(245,200,66,.25); transform:scale(.92); }
 
+
+/* ── Zone canvas centrale ── */
+#canvasContainer {
+  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:#0a0612;
+}
+#gameCanvas {
+  display:block;
+  box-sizing:border-box;
+  border:2px solid var(--gold);
+  box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1);
+  image-rendering:pixelated; image-rendering:crisp-edges;
+  transform-origin:0 0;
+  cursor:crosshair;
+}
+#gameCanvas.expanding {
+  animation:frameExpand .8s ease-out;
+}
+@keyframes frameExpand {
+  0%  { box-shadow:0 0 18px rgba(245,200,66,.35); }
+  40% { box-shadow:0 0 60px rgba(245,200,66,.9), 0 0 120px rgba(245,200,66,.5); }
+  100%{ box-shadow:0 0 18px rgba(245,200,66,.35); }
+}
+/* Coords overlay */
+#px-coords {
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  font-family:"Space Mono",monospace; font-size:.42rem; color:rgba(245,200,66,.4);
+  pointer-events:none; white-space:nowrap; z-index:5;
+  background:rgba(0,0,0,.5); padding:1px 5px; border-radius:3px;
+}
+/* Flash pose pixel */
+#px-flash {
+  position:fixed; inset:0; pointer-events:none; opacity:0; z-index:400;
+  background:radial-gradient(ellipse at center,rgba(245,200,66,.18) 0%,transparent 65%);
+  transition:opacity .06s;
+}
+#px-flash.on { opacity:1; transition:none; }
+/* Highlight Sentinelle */
+.sentinel-highlight {
+  position:absolute; pointer-events:none; z-index:6;
+  border:2px solid #00e5ff;
+  box-shadow:0 0 8px rgba(0,229,255,.7);
+  border-radius:1px;
+  animation:hlFade 3s ease-out forwards;
+}
+@keyframes hlFade { 0%,70%{opacity:1;} 100%{opacity:0;} }
 
 /* ══════════════════════════
    HAPPY HOUR BAR
@@ -885,7 +938,11 @@ html, body {
     </div>
 
     <!-- ── Centre : zone de jeu ── -->
-    <div id="canvasContainer"></div>
+    <!-- ── Centre : canvas Gold Pixel ── -->
+    <div id="canvasContainer">
+      <canvas id="gameCanvas"></canvas>
+      <div id="px-coords">—</div>
+    </div>
     
     <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
@@ -900,6 +957,8 @@ html, body {
 
   </div>
 
+
+  <div id="px-flash"></div>
 
 </div><!-- /app -->
 
@@ -1877,8 +1936,34 @@ const SENTINEL = (() => {
     }
   }
 
-  /* ── Highlight zone — sera réactivé avec le nouveau moteur canvas ── */
-  function _highlightZone(col, row) { /* stub — canvas à reconstruire */ }
+  /* ── Highlight zone sur canvas ── */
+  function _highlightZone(col, row) {
+    const vp = document.getElementById('canvasContainer');
+    if (!vp) return;
+    vp.querySelectorAll('.sentinel-highlight').forEach(el => el.remove());
+    const hl = document.createElement('div');
+    hl.className = 'sentinel-highlight';
+    // Positionner en px dans le viewport
+    if (window.GP && typeof GP.zoomToCell === 'function') {
+      const cv = document.getElementById('gameCanvas');
+      if (cv) {
+        const rect = vp.getBoundingClientRect();
+        const cvRect = cv.getBoundingClientRect();
+        const cellSize = cvRect.width / (cv.width || 3000);
+        hl.style.cssText = [
+          'position:absolute',
+          'pointer-events:none',
+          'z-index:6',
+          `left:${(cvRect.left - rect.left) + col * cellSize - 2}px`,
+          `top:${(cvRect.top  - rect.top)  + row * cellSize - 2}px`,
+          `width:${cellSize + 4}px`,
+          `height:${cellSize + 4}px`,
+        ].join(';');
+      }
+    }
+    vp.appendChild(hl);
+    setTimeout(() => hl.remove(), 3200);
+  }
 
   /* ── Log ── */
   function _addToLog(entry) {
@@ -1891,7 +1976,9 @@ const SENTINEL = (() => {
     if (!_lastAlertPos) return;
     const el = document.getElementById('sentinel-toast');
     if (el) el.classList.remove('on');
-    /* GP.zoomToCell sera rebranché avec le nouveau moteur */
+    if (window.GP && typeof GP.zoomToCell === 'function') {
+      GP.zoomToCell(_lastAlertPos.col, _lastAlertPos.row);
+    }
   }
 
   /* ── Ouvrir log ── */
@@ -1918,7 +2005,7 @@ const SENTINEL = (() => {
             + '<span style="font-size:.44rem;color:var(--dim);flex-shrink:0">' + t + '</span>';
           d.addEventListener('click', () => {
             closeModal('m-sentinel');
-            /* GP.zoomToCell sera rebranché avec le nouveau moteur */
+            if (window.GP && typeof GP.zoomToCell === 'function') GP.zoomToCell(e.col, e.row);
           });
           logEl.appendChild(d);
         });
@@ -1940,6 +2027,7 @@ async function startGame() {
   gameStarted = true;
   loadLSState();
   updateStockUI();
+  await GP.startEngine();
   showToast('✦ Bienvenue sur Gold Pixel !');
 }
 
