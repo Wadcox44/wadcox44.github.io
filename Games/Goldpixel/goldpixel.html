@@ -310,10 +310,6 @@ html, body {
 #btn-undo:active { transform:scale(.9); }
 
 /* ── Zone centrale : viewport canvas ── */
-<div id="canvasContainer">
-  <canvas id="gameCanvas"></canvas>
-</div>
-
 /* ── Colonne droite : zoom ── */
 #hud-right {
   flex-shrink:0; width:64px;
@@ -333,6 +329,24 @@ html, body {
 }
 .zoom-btn:active { background:rgba(245,200,66,.25); transform:scale(.92); }
 
+/* ── Zone canvas centrale ── */
+#canvasContainer {
+  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:#0a0612;
+}
+#gameCanvas {
+  display:block;
+  box-sizing:border-box;
+  border:2px solid var(--gold);
+  box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1);
+  image-rendering:pixelated; image-rendering:crisp-edges;
+  transform-origin:0 0;
+  cursor:crosshair;
+}
+#gameCanvas.expanding {
+  animation:frameExpand .8s ease-out;
+}
 /* Coords overlay */
 #px-coords {
   position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
@@ -917,10 +931,10 @@ html, body {
     </div>
 
     <!-- ── Centre : canvas ── -->
-   <!-- ── Centre : canvas propre ── -->
-<div id="canvasContainer">
-  <canvas id="gameCanvas"></canvas>
-</div>
+    <div id="canvasContainer">
+      <canvas id="gameCanvas"></canvas>
+      <div id="px-coords">—</div>
+    </div>
     
     <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
@@ -1915,15 +1929,13 @@ const SENTINEL = (() => {
 
   /* ── Highlight zone sur canvas ── */
   function _highlightZone(col, row) {
-    const vp = document.getElementById('canvas-viewport');
+    const vp = document.getElementById('canvasContainer');
     if (!vp) return;
     // Supprimer anciens highlights
     vp.querySelectorAll('.sentinel-highlight').forEach(el => el.remove());
     // Créer un overlay sur la cellule
     const hl = document.createElement('div');
     hl.className = 'sentinel-highlight';
-    // Position relative au canvas-frame (dépend du scale)
-    hl.style.cssText = 'left:0;top:0;width:0;height:0;'; // positionné par JS GP
     vp.appendChild(hl);
     // Demander au moteur GP de positionner le highlight
     if (window.GP && typeof GP.positionHighlight === 'function') {
@@ -2016,19 +2028,16 @@ const GP = (() => {
   let pollTimer     = null;
 
   /* ── DOM ── */
-  let cv, ctx, frame, viewport;
+  let cv, ctx, container;
 
   /* ── Init ── */
   function init() {
-    cv       = document.getElementById('main-canvas');
-    ctx      = cv.getContext('2d');
-    frame    = document.getElementById('canvas-frame');
-    viewport = document.getElementById('canvas-viewport');
+    cv        = document.getElementById('gameCanvas');
+    ctx       = cv.getContext('2d');
+    container = document.getElementById('canvasContainer');
 
     cv.width  = CANVAS_W;
     cv.height = CANVAS_H;
-    frame.style.width  = CANVAS_W + 'px';
-    frame.style.height = CANVAS_H + 'px';
 
     drawBackground();
     buildPaletteUI();
@@ -2095,8 +2104,8 @@ const GP = (() => {
 
   /* ── resetView : centre le canvas dans le viewport ── */
   function resetView() {
-    const vw = viewport.clientWidth;
-    const vh = viewport.clientHeight;
+    const vw = container.clientWidth;
+    const vh = container.clientHeight;
     const s  = Math.min((vw * 0.95) / CANVAS_W, (vh * 0.95) / CANVAS_H);
     scale = s;
     panX  = (vw - CANVAS_W * s) / 2;
@@ -2108,7 +2117,7 @@ const GP = (() => {
   function zoomOut() { _zoom(0.75); }
 
   function _zoom(f, cx, cy) {
-    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const vw = container.clientWidth, vh = container.clientHeight;
     if (cx === undefined) cx = vw / 2;
     if (cy === undefined) cy = vh / 2;
     const ns = Math.min(Math.max(scale * f, 0.05), 50);
@@ -2120,12 +2129,12 @@ const GP = (() => {
   }
 
   function _applyTransform() {
-    frame.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + scale + ')';
+    cv.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + scale + ')';
   }
 
   /* ── Conversion coordonnées écran → cellule canvas ── */
   function _screenToCell(sx, sy) {
-    const rect = viewport.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     const col  = Math.floor((sx - rect.left  - panX) / scale);
     const row  = Math.floor((sy - rect.top   - panY) / scale);
     return { col, row };
@@ -2314,16 +2323,14 @@ const GP = (() => {
 
     CANVAS_W = newW; CANVAS_H = newH;
     cv.width  = newW; cv.height = newH;
-    frame.style.width  = newW + 'px';
-    frame.style.height = newH + 'px';
 
     // Fond + recopie pixels
     drawBackground();
     ctx.drawImage(tmpCv, 0, 0);
 
     // Animation cadre
-    frame.classList.add('expanding');
-    setTimeout(() => frame.classList.remove('expanding'), 900);
+    cv.classList.add('expanding');
+    setTimeout(() => cv.classList.remove('expanding'), 900);
 
     showToast('📐 Canevas agrandi ! ' + newW + '×' + newH);
     resetView();
@@ -2368,13 +2375,13 @@ const GP = (() => {
 
   /* ── Événements touch ── */
   function bindEvents() {
-    viewport.addEventListener('touchstart', _onTouchStart, {passive:false});
-    viewport.addEventListener('touchmove',  _onTouchMove,  {passive:false});
-    viewport.addEventListener('touchend',   _onTouchEnd,   {passive:false});
-    viewport.addEventListener('mousedown',  _onMouseDown);
+    container.addEventListener('touchstart', _onTouchStart, {passive:false});
+    container.addEventListener('touchmove',  _onTouchMove,  {passive:false});
+    container.addEventListener('touchend',   _onTouchEnd,   {passive:false});
+    container.addEventListener('mousedown',  _onMouseDown);
     window.addEventListener  ('mousemove',  _onMouseMove);
     window.addEventListener  ('mouseup',    _onMouseUp);
-    viewport.addEventListener('wheel',      _onWheel, {passive:false});
+    container.addEventListener('wheel',      _onWheel, {passive:false});
   }
 
   function _onTouchStart(e) {
@@ -2462,7 +2469,7 @@ const GP = (() => {
 
   /* ── Zoom sur une cellule (pour Sentinelle) ── */
   function zoomToCell(col, row) {
-    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const vw = container.clientWidth, vh = container.clientHeight;
     const targetScale = Math.min(Math.max(scale, 4), 12); // zoom confortable
     const r = targetScale / scale;
     panX = vw / 2 - col * targetScale;
@@ -2473,7 +2480,7 @@ const GP = (() => {
     const hl = document.createElement('div');
     hl.className = 'sentinel-highlight';
     positionHighlight(hl, col, row);
-    viewport.appendChild(hl);
+    container.appendChild(hl);
     setTimeout(() => hl.remove(), 3200);
   }
 
