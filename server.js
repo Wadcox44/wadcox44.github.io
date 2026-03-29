@@ -22,12 +22,27 @@
 // ═══════════════════════════════════════════════════════════════
 
 const express  = require('express');
+const http     = require('http');
+const { Server: SocketIO } = require('socket.io');
 const path     = require('path');
 const cors     = require('cors');
 const { MongoClient, ObjectId } = require('mongodb');
 const { v4: uuid } = require('uuid');
 
-const app  = express();
+const app    = express();
+const server = http.createServer(app);
+const io     = new SocketIO(server, {
+  cors: {
+    origin: [
+      'https://app-cdn.minepi.com',
+      'https://minepi.com',
+      'https://jeuxvideo.onrender.com'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+  transports: ['websocket', 'polling'],
+});
 const PORT = process.env.PORT || 10000;
 
 // ── ENV ──────────────────────────────────────────────────────────
@@ -54,6 +69,10 @@ const ShopRoutes = require('./goldpixel-backend/shop/routes');
 // ║                                             des réponses neutres/vides
 // ║    GAME_CONFIG.<SYSTEM>.enabled = true    → système actif et opérationnel
 // ╚═══════════════════════════════════════════════════════════════
+/* Canvas Gold Pixel — dimensions courantes (modifiées au runtime via Socket.io) */
+let _gpCanvasW = 3000;
+let _gpCanvasH = 3000;
+
 const GAME_CONFIG = {
 
   // ─────────────────────────────────────────────────────────────
@@ -2213,7 +2232,7 @@ app.get('/api/pixelwar/grid', async (req, res) => {
     const fiveMin = Date.now() - 5 * 60 * 1000;
     const online = await db.collection('pixelwar_grid')
       .distinct('user', { ts: { $gt: fiveMin } });
-    res.json({ ok: true, pixels, ts: Date.now(), online: online.length });
+    res.json({ ok: true, pixels, ts: Date.now(), online: online.length, canvasW: _gpCanvasW || 3000, canvasH: _gpCanvasH || 3000 });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
@@ -2508,6 +2527,141 @@ app.get('/', (req, res) => {
 // Assets statiques (images, CSS, JS…) servis depuis la racine
 app.use(express.static(path.join(__dirname)));
 
-app.listen(PORT, () => {
-  console.log(`🚀 JEUXVIDEO.PI v3.6 actif sur le port ${PORT}`);
+// ══════════════════════════════════════════════════════════════
+//  SOCKET.IO — GOLD PIXEL CANVAS TEMPS RÉEL
+// ══════════════════════════════════════════════════════════════
+
+/* Dimensions courantes du canvas — déclarées en haut du fichier */
+const EXPAND_THRESHOLD = 0.65;
+const EXPAND_FACTOR    = 1.5;  // +50% surface
+
+/* Cooldown d'expansion : évite les déclenchements en boucle */
+let _gpLastExpand = 0;
+const EXPAND_COOLDOWN_MS = 60000; // 60s entre deux expansions
+
+io.on('connection', (socket) => {
+  console.log(`[GP Socket] Client connecté : ${socket.id}`);
+
+  /* ── Envoi de l'état initial au nouveau client ── */
+  (async () => {
+    try {
+      const pixels = await db.collection('pixelwar_grid')
+        .find({}, { projection: { _id:0, col:1, row:1, color:1, user:1, ts:1 } })
+        .toArray();
+      socket.emit('canvas:state', {
+        pixels,
+        canvasW: _gpCanvasW,
+        canvasH: _gpCanvasH,
+        ts: Date.now(),
+      });
+    } catch (e) {
+      console.error('[GP Socket] canvas:state error:', e.message);
+    }
+  })();
+
+  /* ── Pose d'un pixel ── */
+  socket.on('pixel:place', async ({ col, row, color, username, ts }) => {
+    try {
+      // Validation
+      if (typeof col !== 'number' || typeof row !== 'number') return;
+      if (col < 0 || col >= _gpCanvasW || row < 0 || row >= _gpCanvasH) {
+        socket.emit('pixel:ack', { col, row, ok: false, error: 'Hors limites' });
+        return;
+      }
+      if (!color || !/^#[0-9a-fA-F]{6}$/.test(color)) {
+        socket.emit('pixel:ack', { col, row, ok: false, error: 'Couleur invalide' });
+        return;
+      }
+
+      const user = pwNormalizeUser(username);
+      const now  = Date.now();
+
+      // Vérifier et décrémenter le stock
+      let player = await db.collection('pixelwar_players').findOne({ username: user });
+      if (!player) {
+        player = { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0 };
+        await db.collection('pixelwar_players').insertOne(player);
+      }
+
+      const { stock, rechargeLeft, rechargeTs } = pwCalcStock(player);
+
+      if (stock <= 0) {
+        socket.emit('pixel:ack', { col, row, ok: false, error: `Stock vide — +1 dans ${rechargeLeft}s`, stock: 0 });
+        return;
+      }
+
+      // Pixel recouvert ?
+      const existing = await db.collection('pixelwar_grid').findOne({ col, row }, { projection: { user:1 } });
+      const coveredUser = (existing && existing.user && existing.user !== '@' + user) ? existing.user : null;
+
+      // Stocker le pixel
+      await db.collection('pixelwar_grid').updateOne(
+        { col, row },
+        { $set: { col, row, color, user: '@' + user, ts: now } },
+        { upsert: true }
+      );
+
+      // Mettre à jour le stock
+      const newStock      = stock - 1;
+      const newRechargeTs = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
+      await db.collection('pixelwar_players').updateOne(
+        { username: user },
+        {
+          $set: { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now },
+          $inc: { totalPlaced: 1, ...(coveredUser ? { covered: 1 } : {}) },
+        }
+      );
+
+      const newRechargeLeft = newStock >= PW_STOCK_DEFAULT
+        ? 0
+        : Math.max(0, Math.ceil((newRechargeTs + PW_RECHARGE_MS - now) / 1000));
+
+      // ACK au poseur
+      socket.emit('pixel:ack', { col, row, ok: true, stock: newStock, rechargeLeft: newRechargeLeft });
+
+      // Broadcast à TOUS les autres clients
+      socket.broadcast.emit('pixel:update', {
+        col, row, color,
+        user: '@' + user,
+        ts: now,
+      });
+
+      // Vérifier si expansion nécessaire
+      const totalPixels = await db.collection('pixelwar_grid').countDocuments();
+      const totalCells  = _gpCanvasW * _gpCanvasH;
+      const ratio       = totalPixels / totalCells;
+      const cooldownOk  = Date.now() - _gpLastExpand > EXPAND_COOLDOWN_MS;
+
+      if (ratio >= EXPAND_THRESHOLD && cooldownOk) {
+        _gpLastExpand = Date.now();
+        const factor = Math.sqrt(EXPAND_FACTOR);
+        const newW   = Math.round(_gpCanvasW * factor);
+        const newH   = Math.round(_gpCanvasH * factor);
+        _gpCanvasW   = newW;
+        _gpCanvasH   = newH;
+        // Broadcaster l'expansion à TOUS les clients (y compris le poseur)
+        io.emit('canvas:expanded', { newW, newH, ts: Date.now() });
+        console.log(`[GP] Canvas étendu : ${newW}×${newH}`);
+      }
+
+    } catch (e) {
+      console.error('[GP Socket] pixel:place error:', e.message);
+      socket.emit('pixel:ack', { col, row, ok: false, error: 'Erreur serveur' });
+    }
+  });
+
+  /* ── Demande d'expansion manuelle (depuis client) ── */
+  socket.on('canvas:expand', async ({ currentW, currentH }) => {
+    // Le serveur recalcule lui-même — ignorer la demande si déjà géré côté serveur
+    // (sécurité : l'expansion est décidée par le serveur, pas le client)
+    console.log(`[GP Socket] canvas:expand demandé par ${socket.id} (ignoré — côté serveur)`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`[GP Socket] Client déconnecté : ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`🚀 JEUXVIDEO.PI v3.6 + Socket.io actif sur le port ${PORT}`);
 });
