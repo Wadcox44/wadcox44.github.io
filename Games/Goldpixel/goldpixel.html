@@ -2031,22 +2031,20 @@ const GP = (() => {
   let cv, ctx, container;
 
   /* ── Init ── */
-  function init() {
-    cv        = document.getElementById('gameCanvas');
-    ctx       = cv.getContext('2d');
-    container = document.getElementById('canvasContainer');
+  /* ── Init ── */
+function init() {
+  cv = document.getElementById('gameCanvas');
+  ctx = cv.getContext('2d');
+  container = document.getElementById('canvasContainer');
 
-    const cv = document.getElementById('gameCanvas');
-const ctx = cv.getContext('2d');
-    
-    cv.width  = CANVAS_W;
-    cv.height = CANVAS_H;
+  cv.width  = CANVAS_W;
+  cv.height = CANVAS_H;
 
-    drawBackground();
-    buildPaletteUI();
-    resetView();
-    bindEvents();
-  }
+  drawBackground();
+  buildPaletteUI();
+  resetView();
+  bindEvents();
+}
 
   /* ── Background ── */
   function drawBackground() {
