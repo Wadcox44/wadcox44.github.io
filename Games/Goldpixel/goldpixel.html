@@ -939,13 +939,11 @@ html, body {
     </div>
 
     <!-- ── Centre : canvas ── -->
-    <div id="canvas-viewport">
-      <div id="canvas-frame">
-        <canvas id="main-canvas"></canvas>
-      </div>
-      <div id="px-coords">—</div>
-    </div>
-
+   <!-- ── Centre : canvas propre ── -->
+<div id="canvasContainer">
+  <canvas id="gameCanvas"></canvas>
+</div>
+    
     <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
       <div class="zoom-btn" onclick="GP.zoomIn()"  title="Zoom +">＋</div>
