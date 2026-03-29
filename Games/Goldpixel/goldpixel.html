@@ -338,18 +338,20 @@ html, body {
 
 /* ── Zone canvas centrale ── */
 #canvasContainer {
-  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
+  flex:1 1 0; min-width:0; min-height:0;
+  position:relative; overflow:hidden;
   background:#0a0612;
 }
 #gameCanvas {
   display:block;
-  box-sizing:border-box;
+  position:absolute;           /* indispensable pour translate+scale libre */
+  top:0; left:0;
   border:2px solid var(--gold);
   box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1);
   image-rendering:pixelated; image-rendering:crisp-edges;
-  transform-origin:0 0;
+  transform-origin:0 0;        /* zoom depuis coin haut-gauche */
   cursor:crosshair;
+  /* box-sizing retiré : n'affecte pas le buffer canvas */
 }
 #gameCanvas.expanding {
   animation:frameExpand .8s ease-out;
@@ -2039,6 +2041,38 @@ window.addEventListener('DOMContentLoaded', () => {
   const nameEl = document.getElementById('tb-user-name');
   if (nameEl) nameEl.textContent = '@' + piUsername;
   _applyHandedness(); /* Restaurer droitier/gaucher */
+
+  /* ── Exposition sur window pour gp-engine.js ──────────────────
+     gp-engine.js est un fichier externe chargé dans <head>.
+     Les variables déclarées avec let/const dans ce <script> ne sont
+     pas sur window automatiquement — on les expose explicitement.
+  ─────────────────────────────────────────────────────────────── */
+
+  // Constantes palette
+  window.COLORS     = COLORS;
+  window.GOLD_COLOR = GOLD_COLOR;
+
+  // État gameplay (références via getters/setters pour synchronisation)
+  Object.defineProperties(window, {
+    activeColor:    { get: () => activeColor,    set: v => { activeColor    = v; }, configurable: true },
+    stock:          { get: () => stock,          set: v => { stock          = v; }, configurable: true },
+    goldStock:      { get: () => goldStock,      set: v => { goldStock      = v; }, configurable: true },
+    rechargeLeft:   { get: () => rechargeLeft,   set: v => { rechargeLeft   = v; }, configurable: true },
+    pixelsPlaced:   { get: () => pixelsPlaced,   set: v => { pixelsPlaced   = v; }, configurable: true },
+    piUsername:     { get: () => piUsername,     set: v => { piUsername     = v; }, configurable: true },
+    piConnected:    { get: () => piConnected,    set: v => { piConnected    = v; }, configurable: true },
+    STOCK_MAX:      { get: () => STOCK_MAX,      set: v => { STOCK_MAX      = v; }, configurable: true },
+    STOCK_CAP:      { get: () => STOCK_CAP,      set: v => { STOCK_CAP      = v; }, configurable: true },
+    GOLD_MAX_ACTIVE:{ get: () => GOLD_MAX_ACTIVE,set: v => { GOLD_MAX_ACTIVE= v; }, configurable: true },
+  });
+
+  // Fonctions utilitaires
+  window.apiFetch       = apiFetch;
+  window.showToast      = showToast;
+  window.updateStockUI  = updateStockUI;
+  window.saveLSState    = saveLSState;
+  window.getRechargeS   = getRechargeS;
+  window.SENTINEL       = typeof SENTINEL !== 'undefined' ? SENTINEL : null;
 });
 </script>
 </body>
