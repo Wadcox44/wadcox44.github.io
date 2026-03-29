@@ -310,31 +310,9 @@ html, body {
 #btn-undo:active { transform:scale(.9); }
 
 /* ── Zone centrale : viewport canvas ── */
-#canvas-viewport {
-  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
-}
-#canvas-frame {
-  position:absolute;
-  box-sizing:border-box;   /* border INCLUS dans width/height → cadre = canvas exact */
-  border:2px solid var(--gold);
-  box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1), inset 0 0 0 1px rgba(245,200,66,.08);
-  transform-origin:0 0;
-  cursor:crosshair;
-  /* Animation expand */
-  transition:box-shadow .3s;
-}
-#canvas-frame.expanding {
-  animation:frameExpand .8s ease-out;
-}
-@keyframes frameExpand {
-  0%  { box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1); }
-  40% { box-shadow:0 0 60px rgba(245,200,66,.9), 0 0 120px rgba(245,200,66,.5), 0 0 200px rgba(245,200,66,.2); }
-  100%{ box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1); }
-}
-#main-canvas {
-  display:block;
-  image-rendering:pixelated; image-rendering:crisp-edges;
-}
+<div id="canvasContainer">
+  <canvas id="gameCanvas"></canvas>
+</div>
 
 /* ── Colonne droite : zoom ── */
 #hud-right {
