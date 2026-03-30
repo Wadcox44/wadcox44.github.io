@@ -92,45 +92,42 @@
   <!-- TOPBAR -->
   <header id="topbar">
 
-    <!-- Logo -->
-    <div class="tb-logo">✦ GOLD PIXEL<span>JeuxVideo.Pi</span></div>
+    <!-- Gauche : titre + profil -->
+    <div class="tb-left">
+      <div class="tb-logo">
+        <span class="tb-logo-main">GOLD PIXEL</span>
+        <span class="tb-logo-sub">JeuxVideo.Pi</span>
+      </div>
+      <button class="tb-profile-btn" id="btn-profile" onclick="openPiAuth()" title="Connexion Pi">👤</button>
+    </div>
 
-    <!-- Centre : ressources -->
+    <!-- Centre : barres de stock -->
     <div id="tb-center">
 
-      <!-- Stock standard -->
-      <div class="tb-res tb-res-std" id="tb-stock-pill">
-        <div class="tb-res-ico" id="tb-stock-ico">📦</div>
-        <div class="tb-res-info">
-          <div class="tb-res-label">Pixels</div>
-          <div class="tb-res-val">
-            <span id="tb-stock-val">5</span><span class="tb-res-max">/5</span>
-          </div>
+      <!-- Barre pixels standard -->
+      <div class="tb-bar-wrap">
+        <div class="tb-bar-track tb-bar-std" id="tb-bar-std-track">
+          <div class="tb-bar-fill" id="tb-bar-std-fill"></div>
+          <span class="tb-bar-label" id="tb-bar-std-label">5 / 5 pixels</span>
         </div>
+        <div class="tb-bar-sub" id="tb-cooldown">✓ Prêt</div>
       </div>
 
-      <!-- Cooldown -->
-      <div id="tb-cooldown" class="ready">✓</div>
-
-      <!-- Stock Gold -->
-      <div class="tb-res tb-res-gold" id="tb-gold-pill">
-        <div class="tb-res-ico">✦</div>
-        <div class="tb-res-info">
-          <div class="tb-res-label">Gold</div>
-          <div class="tb-res-val">
-            <span id="tb-gold-val">5</span><span class="tb-res-max" id="tb-gold-max">/5</span>
-          </div>
+      <!-- Barre Gold -->
+      <div class="tb-bar-wrap">
+        <div class="tb-bar-track tb-bar-gold" id="tb-bar-gold-track">
+          <div class="tb-bar-fill" id="tb-bar-gold-fill"></div>
+          <span class="tb-bar-label" id="tb-bar-gold-label">✦ 5 / 5</span>
         </div>
+        <div class="tb-bar-sub" id="tb-gold-sub">✓ Gold prêt</div>
       </div>
 
     </div><!-- /tb-center -->
 
     <!-- Droite : actions -->
     <div class="tb-right">
-      <a class="tb-action-btn tb-portal" href="https://jeuxvideo.onrender.com/" title="Retour portail">◀</a>
-      <button class="tb-action-btn" id="btn-notif" onclick="toggleNotif()" title="Notifications">🔔</button>
+      <a class="tb-action-btn tb-portal" href="https://jeuxvideo.onrender.com/" title="Retour portail">🏠</a>
       <button class="tb-action-btn" onclick="openLB()" title="Classement">🏆</button>
-      <button class="tb-action-btn" id="btn-profile" onclick="openPiAuth()" title="Connexion Pi">👤</button>
       <button class="tb-action-btn tb-shop-btn" onclick="openModal('modal-shop')" title="Boutique">🛒</button>
       <button class="tb-action-btn" onclick="openModal('modal-settings')" title="Réglages">⚙</button>
     </div>
@@ -147,8 +144,10 @@
       <div class="hud-sep"></div>
       <div id="gold-undo-row">
         <button id="btn-gold" title="Pixel Gold ✦" onclick="GP.pickGold()">✦</button>
-        <button id="btn-undo" title="Annuler (30s)" onclick="GP.undo()">↩</button>
       </div>
+      <button id="btn-undo" title="Annuler dernier pixel (30s)" onclick="GP.undo()">
+        <span class="undo-ico">✕</span><span class="undo-lbl">Annuler</span>
+      </button>
     </aside>
 
     <!-- CANVAS CENTRAL -->
@@ -159,18 +158,22 @@
 
     <!-- HUD DROITE : sentinelle + navigation -->
     <aside id="hud-right">
-      <!-- Sentinelle — en haut, séparée -->
-      <button id="btn-sentinel" class="sentinel-idle" onclick="SENTINEL.openLog()" title="Sentinelle">
-        👁️
-        <div id="sentinel-badge"></div>
-      </button>
+      <!-- Sentinelle — espace top pour que l'anneau radar soit visible -->
+      <div class="sentinel-wrap">
+        <button id="btn-sentinel" class="sentinel-idle" onclick="SENTINEL.openLog()" title="Sentinelle">
+          👁️
+          <div id="sentinel-badge"></div>
+        </button>
+      </div>
 
       <div class="hud-sep-v"></div>
 
-      <!-- Navigation -->
-      <button class="nav-btn" onclick="GP.zoomIn()"   title="Zoom +">＋</button>
-      <button class="nav-btn" onclick="GP.zoomOut()"  title="Zoom −">－</button>
-      <button class="nav-btn" style="font-size:.88rem;" onclick="GP.resetView()" title="Centrer">⊙</button>
+      <!-- Navigation — légèrement centrée vers le bas -->
+      <div class="nav-group">
+        <button class="nav-btn" onclick="GP.zoomIn()"   title="Zoom +">＋</button>
+        <button class="nav-btn" onclick="GP.zoomOut()"  title="Zoom −">－</button>
+        <button class="nav-btn nav-btn-sm" onclick="GP.resetView()" title="Centrer">⊙</button>
+      </div>
     </aside>
 
   </main><!-- /game-area -->
@@ -222,6 +225,17 @@
         </div>
       </div>
     </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">🔔 Notifications</div>
+        <div class="setting-sub">Alertes pixel en temps réel</div>
+      </div>
+      <div class="toggle-wrap">
+        <div class="toggle-track" id="toggle-notif" onclick="toggleNotif()">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>
     <button class="btn-modal-close" onclick="closeModal('modal-settings')">FERMER</button>
   </div>
 </div>
@@ -247,180 +261,117 @@
 </div>
 
 
-<!-- ══════════ MODAL BOUTIQUE ══════════ -->
+<!-- ══════════ MODAL BOUTIQUE — 2 colonnes, pas de scroll ══════════ -->
 <div class="modal-bg" id="modal-shop">
-  <div class="modal-box shop-box">
+  <div class="shop2-box">
 
-    <!-- En-tête -->
-    <div class="shop-header">
-      <div class="modal-title">🛒 BOUTIQUE</div>
-      <p class="modal-p shop-tagline">Soutiens le projet et personnalise ton expérience.<br>
-        <strong style="color:var(--gold)">Aucun avantage gameplay.</strong> Tout est cosmétique.</p>
+    <!-- Header compact -->
+    <div class="shop2-header">
+      <span class="shop2-title">🛒 BOUTIQUE</span>
+      <span class="shop2-subtitle">Aucun avantage gameplay · Tout cosmétique</span>
+      <button class="shop2-close" onclick="closeModal('modal-shop')">✕</button>
     </div>
 
-    <!-- Onglets -->
-    <div class="shop-tabs">
-      <button class="shop-tab on" data-tab="don"        onclick="shopTab('don')">❤️ Soutien</button>
-      <button class="shop-tab"    data-tab="cosmetique" onclick="shopTab('cosmetique')">🎨 Styles</button>
-      <button class="shop-tab"    data-tab="confort"    onclick="shopTab('confort')">🧠 Confort</button>
-      <button class="shop-tab"    data-tab="social"     onclick="shopTab('social')">🏴 Social</button>
-    </div>
+    <!-- Corps 2 colonnes -->
+    <div class="shop2-body">
 
-    <!-- ── ONGLET DON ── -->
-    <div class="shop-panel on" id="shop-panel-don">
-      <div class="shop-section-title">❤️ Soutenir Gold Pixel</div>
-      <p class="shop-desc">Ton soutien finance les serveurs et le développement. Tu reçois un badge <strong style="color:#ffd700">Supporter ★</strong> et un léger halo doré sur ton pseudo.</p>
+      <!-- ── COL GAUCHE : Identité & Styles ── -->
+      <div class="shop2-col shop2-col-left">
+        <div class="shop2-col-title">🎨 Identité & Styles</div>
 
-      <div class="don-grid">
-        <button class="don-card" onclick="shopBuy('don_0_5')">
-          <div class="don-ico">💛</div>
-          <div class="don-amount">0.5 Pi</div>
-          <div class="don-label">Coup de pouce</div>
-        </button>
-        <button class="don-card" onclick="shopBuy('don_1')">
-          <div class="don-ico">🟡</div>
-          <div class="don-amount">1 Pi</div>
-          <div class="don-label">Soutien</div>
-        </button>
-        <button class="don-card featured" onclick="shopBuy('don_2')">
-          <div class="don-badge-top">⭐ POPULAIRE</div>
-          <div class="don-ico">🔶</div>
-          <div class="don-amount">2 Pi</div>
-          <div class="don-label">Grand soutien</div>
-        </button>
-        <button class="don-card don-libre-card" onclick="shopBuy('don_libre')">
-          <div class="don-ico">✨</div>
-          <div class="don-amount-input">
-            <input id="don-libre-amount" type="number" min="0.1" step="0.1" value="1"
-              placeholder="Pi" onclick="event.stopPropagation()">
-            <span>Pi</span>
+        <!-- Signature -->
+        <div class="shop2-item" id="style-signature" onclick="buyCosmetique('signature')">
+          <div class="shop2-item-left">
+            <span class="shop2-item-ico">✍️</span>
+            <div>
+              <div class="shop2-item-name">Signature d'œuvre</div>
+              <div class="shop2-item-desc">Ton pseudo visible au zoom sur tes pixels</div>
+            </div>
           </div>
-          <div class="don-label">Montant libre</div>
-        </button>
-      </div>
+          <div class="shop2-price-tag">0.5 Pi<div class="cos-lock" id="sig-lock">🔒</div></div>
+        </div>
 
-      <!-- Supporters list -->
-      <div class="supporters-wrap">
-        <div class="supporters-title">🌟 Supporters récents</div>
-        <div id="supporters-list" class="supporters-list"></div>
-      </div>
-    </div>
+        <div class="shop2-divider"></div>
+        <div class="shop2-col-label">Palettes premium</div>
 
-    <!-- ── ONGLET COSMÉTIQUES ── -->
-    <div class="shop-panel" id="shop-panel-cosmetique">
-      <div class="shop-section-title">🎨 Styles de pixels</div>
-      <p class="shop-desc">Change l'apparence de TES pixels sur le canvas. Purement visuel, aucun avantage.</p>
-
-      <div class="cosmetique-grid">
-        <div class="cosmetique-card" id="style-default" onclick="applyPixelStyle('default')">
-          <div class="cos-preview cos-default">■</div>
-          <div class="cos-name">Standard</div>
-          <div class="cos-price free-badge">GRATUIT</div>
-        </div>
-        <div class="cosmetique-card locked" id="style-neon" onclick="buyCosmetique('neon')">
-          <div class="cos-preview cos-neon">■</div>
-          <div class="cos-name">Néon</div>
-          <div class="cos-price">0.5 Pi</div>
-          <div class="cos-lock">🔒</div>
-        </div>
-        <div class="cosmetique-card locked" id="style-pastel" onclick="buyCosmetique('pastel')">
-          <div class="cos-preview cos-pastel">■</div>
-          <div class="cos-name">Pastel</div>
-          <div class="cos-price">0.5 Pi</div>
-          <div class="cos-lock">🔒</div>
-        </div>
-        <div class="cosmetique-card locked" id="style-metal" onclick="buyCosmetique('metal')">
-          <div class="cos-preview cos-metal">■</div>
-          <div class="cos-name">Métal</div>
-          <div class="cos-price">1 Pi</div>
-          <div class="cos-lock">🔒</div>
-        </div>
-        <div class="cosmetique-card locked" id="style-glitch" onclick="buyCosmetique('glitch')">
-          <div class="cos-preview cos-glitch">■</div>
-          <div class="cos-name">Glitch</div>
-          <div class="cos-price">1 Pi</div>
-          <div class="cos-lock">🔒</div>
-        </div>
-        <div class="cosmetique-card locked" id="style-ink" onclick="buyCosmetique('ink')">
-          <div class="cos-preview cos-ink">■</div>
-          <div class="cos-name">Ink</div>
-          <div class="cos-price">1 Pi</div>
-          <div class="cos-lock">🔒</div>
-        </div>
-      </div>
-
-      <div class="shop-section-title" style="margin-top:14px;">✍️ Signature</div>
-      <p class="shop-desc">Ton pseudo apparaît au zoom ou au clic sur tes pixels.</p>
-      <div class="signature-row">
-        <div class="cosmetique-card locked" id="style-signature" onclick="buyCosmetique('signature')" style="width:100%;flex-direction:row;gap:12px;padding:12px;">
-          <div class="cos-preview" style="font-size:1.2rem;">✍️</div>
-          <div>
-            <div class="cos-name">Signature pixel</div>
-            <div class="cos-price">1 Pi</div>
+        <!-- Neon Pulse -->
+        <div class="shop2-item" id="style-neon" onclick="buyCosmetique('neon')">
+          <div class="shop2-item-left">
+            <span class="shop2-item-ico cos-neon shop2-ico-large">■</span>
+            <div>
+              <div class="shop2-item-name">🌌 Neon Pulse</div>
+              <div class="shop2-item-desc">Couleurs vibrantes · Glow animé</div>
+            </div>
           </div>
-          <div class="cos-lock" style="margin-left:auto;">🔒</div>
+          <div class="shop2-price-tag">1.5 Pi<div class="cos-lock" id="neon-lock">🔒</div></div>
         </div>
-      </div>
-    </div>
 
-    <!-- ── ONGLET CONFORT ── -->
-    <div class="shop-panel" id="shop-panel-confort">
-      <div class="shop-section-title">📌 Zones favorites</div>
-      <p class="shop-desc">Sauvegarde jusqu'à <strong>5 zones</strong> et téléporte-toi instantanément vers tes œuvres préférées.</p>
-
-      <div class="fav-zones-list" id="fav-zones-list"></div>
-
-      <button class="btn-fav-add" onclick="saveFavZone()" id="btn-fav-add">
-        📌 Sauvegarder la vue actuelle
-      </button>
-
-      <div class="shop-section-title" style="margin-top:16px;">🛡️ Sentinelle Premium</div>
-      <p class="shop-desc">Accès à l'historique complet de tes zones et à l'activité autour de TES pixels (pas de protection, purement informatif).</p>
-      <div class="cosmetique-card locked" id="sentinel-premium" onclick="buyCosmetique('sentinel_premium')" style="width:100%;flex-direction:row;gap:12px;padding:12px;">
-        <div class="cos-preview" style="font-size:1.2rem;">👁️</div>
-        <div>
-          <div class="cos-name">Sentinelle Premium</div>
-          <div style="font-size:.48rem;color:var(--dim);margin-top:2px;">Historique · Activité · Stats</div>
-          <div class="cos-price">2 Pi</div>
+        <!-- Ink Stone -->
+        <div class="shop2-item" id="style-ink" onclick="buyCosmetique('ink')">
+          <div class="shop2-item-left">
+            <span class="shop2-item-ico cos-ink shop2-ico-large">■</span>
+            <div>
+              <div class="shop2-item-name">🪨 Ink / Stone Pro</div>
+              <div class="shop2-item-desc">Style gravé · Rendu premium</div>
+            </div>
+          </div>
+          <div class="shop2-price-tag">1.5 Pi<div class="cos-lock" id="ink-lock">🔒</div></div>
         </div>
-        <div class="cos-lock" style="margin-left:auto;">🔒</div>
-      </div>
-    </div>
 
-    <!-- ── ONGLET SOCIAL ── -->
-    <div class="shop-panel" id="shop-panel-social">
-      <div class="shop-section-title">🏴 Badges</div>
-      <div class="badges-grid">
-        <div class="badge-card" id="badge-supporter">
-          <div class="badge-ico">★</div>
-          <div class="badge-name">Supporter</div>
-          <div class="badge-desc">Obtenu par un don</div>
-          <div class="badge-status locked-badge" id="badge-supporter-status">Non obtenu</div>
-        </div>
-        <div class="badge-card" id="badge-early">
-          <div class="badge-ico">🌱</div>
-          <div class="badge-name">Early Player</div>
-          <div class="badge-desc">Parmi les 1000 premiers</div>
-          <div class="badge-status locked-badge" id="badge-early-status">Non obtenu</div>
-        </div>
-        <div class="badge-card" id="badge-builder">
-          <div class="badge-ico">🏗️</div>
-          <div class="badge-name">Builder</div>
-          <div class="badge-desc">100 pixels posés</div>
-          <div class="badge-status locked-badge" id="badge-builder-status">Non obtenu</div>
+        <!-- Pack -->
+        <button class="shop2-pack-btn" onclick="shopBuy('pack_styles')">
+          <span>⭐ Pack 2 palettes</span>
+          <span class="shop2-pack-price"><s style="opacity:.4;font-size:.6em">3 Pi</s> 2.5 Pi</span>
+        </button>
+
+        <!-- Style actif -->
+        <div class="shop2-active-style">
+          Style actif :
+          <button class="shop2-style-chip" id="chip-default"  onclick="applyPixelStyle('default')">Standard</button>
+          <button class="shop2-style-chip" id="chip-neon"     onclick="applyPixelStyle('neon')">Neon</button>
+          <button class="shop2-style-chip" id="chip-ink"      onclick="applyPixelStyle('ink')">Ink</button>
         </div>
       </div>
 
-      <div class="shop-section-title" style="margin-top:14px;">✏️ Pseudo personnalisé</div>
-      <p class="shop-desc">Ajoute un titre ou une couleur à ton pseudo visible dans le classement.</p>
-      <div class="pseudo-custom-row">
-        <input id="pseudo-title-input" class="pseudo-input" type="text" maxlength="20" placeholder="Ton titre (ex: 🎨 Artiste)">
-        <button class="btn-pseudo-apply" onclick="applyPseudoTitle()">Appliquer</button>
-      </div>
-    </div>
+      <!-- ── COL DROITE : Dons ── -->
+      <div class="shop2-col shop2-col-right">
+        <div class="shop2-col-title">❤️ Soutenir Gold Pixel</div>
+        <p class="shop2-don-msg">Soutenez l'hébergement et l'évolution du jeu. 💎<br>
+          <span class="shop2-don-reward">Badge <strong>Supporter ★</strong> + halo doré offerts</span>
+        </p>
 
-    <button class="btn-modal-close" onclick="closeModal('modal-shop')">FERMER</button>
-  </div>
+        <div class="shop2-don-grid">
+          <button class="shop2-don-btn" onclick="shopBuy('don_1')">
+            <div class="shop2-don-amt">1 Pi</div>
+            <div class="shop2-don-lbl">Coup de pouce</div>
+          </button>
+          <button class="shop2-don-btn" onclick="shopBuy('don_2')">
+            <div class="shop2-don-amt">2 Pi</div>
+            <div class="shop2-don-lbl">Soutien</div>
+          </button>
+          <button class="shop2-don-btn shop2-don-featured" onclick="shopBuy('don_5')">
+            <div class="shop2-don-badge">⭐</div>
+            <div class="shop2-don-amt">5 Pi</div>
+            <div class="shop2-don-lbl">Grand soutien</div>
+          </button>
+        </div>
+
+        <!-- Montant libre -->
+        <div class="shop2-libre-row">
+          <input id="don-libre-amount" type="number" min="0.5" step="0.5" value="1"
+            class="shop2-libre-input" placeholder="Pi">
+          <button class="shop2-libre-btn" onclick="shopBuy('don_libre')">Donner librement</button>
+        </div>
+
+        <div class="shop2-divider"></div>
+
+        <!-- Supporters -->
+        <div class="shop2-sup-title">🌟 Supporters récents</div>
+        <div id="supporters-list" class="shop2-sup-list"></div>
+      </div>
+
+    </div><!-- /shop2-body -->
+  </div><!-- /shop2-box -->
 </div>
 
 
@@ -496,10 +447,25 @@ setInterval(() => {
    HUD — updateStockUI
 ════════════════════════════════════════════════════════ */
 function updateStockUI() {
-  const goldEl  = document.getElementById('tb-gold-val');
-  const goldMax = document.getElementById('tb-gold-max');
-  if (goldEl)  goldEl.textContent  = goldStock;
-  if (goldMax) goldMax.textContent = '/' + GOLD_MAX_ACTIVE;
+  /* ── Barres stock standard ── */
+  const localStock = typeof _localStock !== 'undefined' ? _localStock : 5;
+  const maxStock   = 5;
+  const stdFill    = document.getElementById('tb-bar-std-fill');
+  const stdLabel   = document.getElementById('tb-bar-std-label');
+  const stdTrack   = document.getElementById('tb-bar-std-track');
+  if (stdFill) stdFill.style.width  = Math.round((localStock / maxStock) * 100) + '%';
+  if (stdLabel) stdLabel.textContent = localStock + ' / ' + maxStock + ' pixels';
+  if (stdTrack) {
+    stdTrack.classList.toggle('bar-empty', localStock === 0);
+    stdTrack.classList.toggle('bar-full',  localStock === maxStock);
+  }
+
+  /* ── Barre Gold ── */
+  const maxGold  = GOLD_MAX_ACTIVE || 5;
+  const goldFill  = document.getElementById('tb-bar-gold-fill');
+  const goldLabel = document.getElementById('tb-bar-gold-label');
+  if (goldFill)  goldFill.style.width   = Math.round((goldStock / maxGold) * 100) + '%';
+  if (goldLabel) goldLabel.textContent  = '✦ ' + goldStock + ' / ' + maxGold;
 }
 
 /* ════════════════════════════════════════════════════════
@@ -662,9 +628,10 @@ let _notifOn = localStorage.getItem('gp_notif') === '1';
 
 function updateNotifBtn() {
   const btn = document.getElementById('btn-notif');
-  if (!btn) return;
-  btn.textContent = _notifOn ? '🔔' : '🔕';
-  btn.classList.toggle('connected', _notifOn);
+  if (btn) { btn.textContent = _notifOn ? '🔔' : '🔕'; btn.classList.toggle('connected', _notifOn); }
+  /* Toggle dans Settings */
+  const tr = document.getElementById('toggle-notif');
+  if (tr) tr.classList.toggle('on', _notifOn);
 }
 
 async function toggleNotif() {
@@ -906,10 +873,11 @@ async function shopBuy(type) {
     showToast('Connecte-toi à Pi pour acheter'); openPiAuth(); return;
   }
   const ITEMS = {
-    don_0_5:  { price: 0.5, label: 'Don 0.5 Pi',  isDon: true  },
     don_1:    { price: 1,   label: 'Don 1 Pi',     isDon: true  },
     don_2:    { price: 2,   label: 'Don 2 Pi',     isDon: true  },
+    don_5:    { price: 5,   label: 'Don 5 Pi',     isDon: true  },
     don_libre:{ price: parseFloat(document.getElementById('don-libre-amount')?.value || '1'), label: 'Don libre', isDon: true },
+    pack_styles: { price: 2.5, label: 'Pack 2 palettes', isDon: false, isBundle: true },
     neon:          { price: 0.5, label: 'Style Néon',          isDon: false },
     pastel:        { price: 0.5, label: 'Style Pastel',        isDon: false },
     metal:         { price: 1,   label: 'Style Métal',         isDon: false },
@@ -932,13 +900,16 @@ async function shopBuy(type) {
           if (!d?.ok) return;
           if (item.isDon) {
             _shopUnlocked.supporter = true;
-            _saveShop();
-            _applyBadgeSupporter();
+            _saveShop(); _applyBadgeSupporter();
             showToast('❤️ Merci pour ton soutien ! Badge Supporter activé ★');
+          } else if (item.isBundle) {
+            _shopUnlocked.neon = true; _shopUnlocked.ink = true;
+            _saveShop(); _applyCosmetique('neon');
+            showToast('⭐ Pack 2 palettes déverrouillé !');
+            _refreshShopChips();
           } else {
             _shopUnlocked[type] = true;
-            _saveShop();
-            _applyCosmetique(type);
+            _saveShop(); _applyCosmetique(type);
             showToast('✅ ' + item.label + ' déverrouillé !');
           }
           closeModal('modal-shop');
@@ -981,15 +952,29 @@ function _initShopUI() {
   // Déverrouiller les items déjà achetés
   Object.keys(_shopUnlocked).forEach(k => {
     if (!_shopUnlocked[k]) return;
+    const lockId = k + '-lock';
+    const lockEl = document.getElementById(lockId);
+    if (lockEl) lockEl.remove();
     const card = document.getElementById('style-' + k);
-    if (card) { card.classList.remove('locked'); card.querySelector('.cos-lock')?.remove(); }
+    if (card) card.classList.remove('locked');
   });
-  // Style actif
-  document.getElementById('style-' + _pixelStyle)?.classList.add('active-style');
+  // Chips style actif
+  _refreshShopChips();
   // Badge supporter
   if (_shopUnlocked.supporter) _applyBadgeSupporter();
   // Titre pseudo
-  if (_pseudoTitle) document.getElementById('pseudo-title-input').value = _pseudoTitle;
+  const ti = document.getElementById('pseudo-title-input');
+  if (ti && _pseudoTitle) ti.value = _pseudoTitle;
+}
+
+function _refreshShopChips() {
+  ['default','neon','ink'].forEach(s => {
+    const el = document.getElementById('chip-' + s);
+    if (!el) return;
+    const isUnlocked = s === 'default' || !!_shopUnlocked[s];
+    el.classList.toggle('chip-locked',   !isUnlocked);
+    el.classList.toggle('chip-active',    s === _pixelStyle);
+  });
 }
 
 /* ── Badge Supporter ── */
