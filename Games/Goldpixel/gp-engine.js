@@ -24,8 +24,8 @@ const GP = (() => {
   'use strict';
 
   /* ── Config ─────────────────────────────────────────────── */
-  let CANVAS_W = 3000;
-  let CANVAS_H = 3000;
+  let CANVAS_W = 500;
+  let CANVAS_H = 500;
   const BG     = '#f5f0e8';
   const EXPAND_THRESHOLD = 0.65;
   const EXPAND_FACTOR    = 1.5;    // +50% surface → dim × √1.5
@@ -241,8 +241,8 @@ const GP = (() => {
     const key    = `${col},${row}`;
     const prevPx = pixelMap.get(key) || null;
 
-    /* Sauvegarder pour undo */
-    _lastPixel = { col, row, prevColor: prevPx?.color || null, prevUser: prevPx?.user || null };
+    /* Sauvegarder pour undo — wasGold capturé au moment du placement */
+    _lastPixel = { col, row, prevColor: prevPx?.color || null, prevUser: prevPx?.user || null, wasGold: isGold };
     _startUndoTimer();
 
     /* Mise à jour optimiste */
@@ -302,7 +302,7 @@ const GP = (() => {
   ═══════════════════════════════════════════════════════════ */
   function undo() {
     if (!_lastPixel) { window.showToast('Rien à annuler'); return; }
-    const { col, row, prevColor, prevUser } = _lastPixel;
+    const { col, row, prevColor, prevUser, wasGold } = _lastPixel;
     clearTimeout(_undoTimer);
     _lastPixel = null;
     document.getElementById('btn-undo')?.classList.remove('active');
@@ -321,7 +321,7 @@ const GP = (() => {
       _erasePixel(col, row);
     }
 
-    const wasGold = window.activeColor === window.GOLD_COLOR;
+    /* wasGold = couleur du pixel posé, pas la couleur active actuelle */
     if (wasGold) window.goldStock = Math.min(window.GOLD_MAX_ACTIVE || 12, (window.goldStock || 0) + 1);
     else         window.stock     = Math.min(window.STOCK_CAP        || 60, (window.stock     || 0) + 1);
     if (window.updateStockUI) window.updateStockUI();
@@ -380,6 +380,8 @@ const GP = (() => {
   /* ═══════════════════════════════════════════════════════════
      SOCKET.IO CLIENT
   ═══════════════════════════════════════════════════════════ */
+  let _gridLoaded = false; // true après _loadGrid() HTTP → évite double dessin
+
   function _initSocket() {
     if (typeof io === 'undefined') {
       console.warn('[GP] Socket.io indisponible — fallback HTTP');
@@ -400,6 +402,13 @@ const GP = (() => {
 
     /* État initial envoyé par le serveur à la connexion */
     _socket.on('canvas:state', ({ pixels, canvasW, canvasH }) => {
+      /* Si HTTP a déjà chargé la grille, ne pas redessiner tous les pixels
+         (évite le flash et le double filledCount++) */
+      if (_gridLoaded) {
+        /* Appliquer quand même l'expansion canvas si nécessaire */
+        if (canvasW && canvasH && (canvasW > CANVAS_W || canvasH > CANVAS_H)) _doExpand(canvasW, canvasH);
+        return;
+      }
       if (canvasW && canvasH && (canvasW > CANVAS_W || canvasH > CANVAS_H)) {
         _doExpand(canvasW, canvasH);
       }
@@ -407,7 +416,6 @@ const GP = (() => {
       pixels.forEach(({ col, row, color, user }) => {
         if (_inBounds(col, row)) _applyPixel(col, row, color, user, false);
       });
-      /* Indexer ses propres pixels pour la Sentinelle */
       if (window.SENTINEL && window.piUsername) {
         pixels
           .filter(p => p.user === '@' + window.piUsername)
@@ -457,6 +465,7 @@ const GP = (() => {
           .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
       }
       /* Recalculer le zoom après chargement */
+      _gridLoaded = true;
       resetView();
     } catch (e) {
       console.error('[GP] loadGrid:', e);
