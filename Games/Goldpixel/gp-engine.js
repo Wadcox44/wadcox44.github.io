@@ -1,58 +1,82 @@
-/* ═══════════════════════════════════════════════════════════════
-   GP ENGINE v2 — Gold Pixel Canvas
-   Fichier : Games/Goldpixel/gp-engine.js
+/* ═══════════════════════════════════════════════════════════════════
+   GP ENGINE v3 — Gold Pixel
+   Games/Goldpixel/gp-engine.js
 
-   RÈGLES STRICTES :
-   ─ canvas 3000×3000, 1 cellule = 1 px réel
-   ─ fillRect(col, row, 1, 1) exclusivement
-   ─ AUCUNE grille, AUCUN redraw global en live
-   ─ Zoom CSS transform uniquement
-   ─ Un seul jeu d'event listeners (bindEvents appelé 1 fois)
-   ─ Zoom adaptatif au remplissage (fillRatio)
+   Architecture :
+   ─ Canvas 3000×3000 px, 1 cellule = 1 px réel (fillRect col,row,1,1)
+   ─ Zoom CSS transform uniquement, transform-origin:0 0
+   ─ Coordonnées via cv.getBoundingClientRect() → aucun décalage
+   ─ Polling HTTP /api/pixelwar/grid toutes les 3s (delta depuis lastTs)
+   ─ Socket.io pour broadcast instantané (si disponible)
+   ─ Sentinelle : détection adjacente + écrasement, radar CSS
+   ─ Un seul jeu d'event listeners
 
-   Dépendances (exposées sur window par goldpixel.html) :
-     window.COLORS, window.GOLD_COLOR, window.activeColor
-     window.stock, window.goldStock, window.rechargeLeft
-     window.pixelsPlaced, window.piUsername, window.piConnected
-     window.STOCK_CAP, window.GOLD_MAX_ACTIVE
-     window.updateStockUI(), window.saveLSState()
-     window.showToast(), window.apiFetch(), window.getRechargeS()
-     window.SENTINEL
-═══════════════════════════════════════════════════════════════ */
+   Dépendances window (injectées par goldpixel.html) :
+     COLORS, GOLD_COLOR, activeColor, stock, goldStock
+     rechargeLeft, pixelsPlaced, piUsername, piConnected
+     STOCK_CAP, GOLD_MAX_ACTIVE, updateStockUI, saveLSState
+     showToast, apiFetch, getRechargeS, SENTINEL
+═══════════════════════════════════════════════════════════════════ */
 
 const GP = (() => {
   'use strict';
 
-  /* ── Config ─────────────────────────────────────────────── */
-  let CANVAS_W = 3000;
-  let CANVAS_H = 3000;
-  const BG     = '#f5f0e8';
-  const EXPAND_THRESHOLD = 0.65;
-  const EXPAND_FACTOR    = 1.5;    // +50% surface → dim × √1.5
+  /* ─────────────────────────────────────────────────────────────
+     CONFIG
+  ───────────────────────────────────────────────────────────── */
+  const CANVAS_W_INIT    = 3000;
+  const CANVAS_H_INIT    = 3000;
+  const BG               = '#f5f0e8';
+  const BORDER_PX        = 2;      // border CSS du canvas (doit correspondre au CSS)
+  const POLL_MS          = 3000;   // polling delta toutes les 3s
+  const UNDO_TIMEOUT_MS  = 30000;  // 30s pour annuler
 
-  /* ── DOM ─────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────────────────────
+     ÉTAT INTERNE
+  ───────────────────────────────────────────────────────────── */
+  let CANVAS_W = CANVAS_W_INIT;
+  let CANVAS_H = CANVAS_H_INIT;
+
+  // DOM
   let cv, ctx, container;
 
-  /* ── Pan / Zoom ──────────────────────────────────────────── */
-  let scale = 1, panX = 0, panY = 0;
-  let _panOX = 0, _panOY = 0;
-  let _tStart = { x: 0, y: 0 }, _tMoved = false, _isPanning = false;
-  let _pinchD0 = null, _pinchS0 = 1;
-  let _mDown = false, _mPan = false, _mSX = 0, _mSY = 0, _mOX = 0, _mOY = 0;
+  // Pan / Zoom
+  let scale = 1;
+  let panX  = 0;
+  let panY  = 0;
 
-  /* ── État ────────────────────────────────────────────────── */
-  const pixelMap = new Map();   // "col,row" → { color, user }
-  let filledCount = 0;
-  let _lastPixel  = null;       // pour undo
-  let _undoTimer  = null;
+  // Touch
+  let _touch1    = null;   // { x, y, panX, panY } — 1 doigt
+  let _tMoved    = false;
+  let _isPanning = false;
+  let _pinch0    = null;   // distance initiale pinch
+  let _pinchS0   = 1;      // scale au début du pinch
 
-  /* ── Socket.io ───────────────────────────────────────────── */
-  let _socket     = null;
-  let _socketReady = false;
+  // Mouse
+  let _mDown = false;
+  let _mPan  = false;
+  let _mX0 = 0, _mY0 = 0, _mPanX0 = 0, _mPanY0 = 0;
 
-  /* ═══════════════════════════════════════════════════════════
+  // Pixels
+  const _pixMap = new Map();  // "col,row" → { color, user }
+  let _filledCount = 0;
+
+  // Undo
+  let _undo     = null;   // { col, row, prevColor, prevUser, wasGold }
+  let _undoT    = null;
+
+  // Polling
+  let _pollTimer  = null;
+  let _lastTs     = 0;
+  let _gridLoaded = false;
+
+  // Socket.io (optionnel)
+  let _sock      = null;
+  let _sockReady = false;
+
+  /* ─────────────────────────────────────────────────────────────
      INIT
-  ═══════════════════════════════════════════════════════════ */
+  ───────────────────────────────────────────────────────────── */
   function init() {
     cv        = document.getElementById('gameCanvas');
     ctx       = cv.getContext('2d');
@@ -61,67 +85,92 @@ const GP = (() => {
     cv.width  = CANVAS_W;
     cv.height = CANVAS_H;
 
-    /* Fond uni — SEUL fillRect plein canvas, jamais en live */
-    ctx.fillStyle = BG;
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    // Fond initial — seul redraw complet autorisé
+    _drawBg(0, 0, CANVAS_W, CANVAS_H);
 
-    _buildPaletteUI();
-    resetView();
+    _buildPalette();
     _bindEvents();
+    requestAnimationFrame(resetView);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     RESET VIEW — zoom adaptatif au remplissage
-  ═══════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────────
+     BACKGROUND — appelé uniquement dans init() et _expand()
+  ───────────────────────────────────────────────────────────── */
+  function _drawBg(x, y, w, h) {
+    ctx.fillStyle = BG;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     RESET VIEW — fit canvas dans le container, via rAF
+  ───────────────────────────────────────────────────────────── */
   function resetView() {
     if (!container) return;
-    /* Attendre que le container ait une taille réelle */
-    const vw = container.clientWidth  || container.offsetWidth;
-    const vh = container.clientHeight || container.offsetHeight;
-    if (!vw || !vh) return;
+    const vw = container.clientWidth  || container.offsetWidth  || 1;
+    const vh = container.clientHeight || container.offsetHeight || 1;
 
-    /* Scale "fit" : le canvas occupe exactement le container dans sa plus grande dimension
-       On laisse une marge de 4px côté pour que le cadre (border) soit visible */
-    const margin = 4;
-    const fitScale = Math.min(
-      (vw - margin * 2) / CANVAS_W,
-      (vh - margin * 2) / CANVAS_H
-    );
-    scale = Math.max(fitScale, 0.02);
+    // Scale "fit" avec marge pour que la border soit visible
+    const m  = BORDER_PX + 2;
+    const s  = Math.min((vw - m * 2) / CANVAS_W, (vh - m * 2) / CANVAS_H);
+    scale    = Math.max(s, 0.01);
 
-    /* Centrer dans le container */
+    // Centrer
     panX = Math.round((vw - CANVAS_W * scale) / 2);
     panY = Math.round((vh - CANVAS_H * scale) / 2);
 
     _applyTransform();
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     ZOOM
-  ═══════════════════════════════════════════════════════════ */
-  function zoomIn()  { _zoom(1.35); }
-  function zoomOut() { _zoom(0.75); }
-
-  function _zoom(f, cx, cy) {
-    if (!container) return;
-    const vw = container.clientWidth, vh = container.clientHeight;
-    if (cx === undefined) cx = vw / 2;
-    if (cy === undefined) cy = vh / 2;
-    const ns = Math.min(Math.max(scale * f, 0.015), 80);
-    const r  = ns / scale;
-    panX  = cx - (cx - panX) * r;
-    panY  = cy - (cy - panY) * r;
-    scale = ns;
-    _applyTransform();
-  }
-
+  /* ─────────────────────────────────────────────────────────────
+     TRANSFORM — applique panX/panY/scale au canvas CSS
+  ───────────────────────────────────────────────────────────── */
   function _applyTransform() {
     if (cv) cv.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     DESSIN — pixel perfect, 1 cellule = 1 px
-  ═══════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────────
+     ZOOM
+  ───────────────────────────────────────────────────────────── */
+  function zoomIn()  { _zoom(1.35); }
+  function zoomOut() { _zoom(0.75); }
+
+  function _zoom(factor, pivotX, pivotY) {
+    if (!container) return;
+    const vw = container.clientWidth;
+    const vh = container.clientHeight;
+    if (pivotX === undefined) pivotX = vw / 2;
+    if (pivotY === undefined) pivotY = vh / 2;
+
+    const newScale = Math.min(Math.max(scale * factor, 0.01), 80);
+    const r        = newScale / scale;
+    panX  = pivotX - (pivotX - panX) * r;
+    panY  = pivotY - (pivotY - panY) * r;
+    scale = newScale;
+    _applyTransform();
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     COORDONNÉES — écran → cellule canvas
+     Utilise getBoundingClientRect() du canvas (après transform CSS)
+     pour une précision pixel-perfect quelle que soit la transformation.
+  ───────────────────────────────────────────────────────────── */
+  function _screenToCell(sx, sy) {
+    const r     = cv.getBoundingClientRect();
+    const ratioX = (r.width  - BORDER_PX * 2) / CANVAS_W;
+    const ratioY = (r.height - BORDER_PX * 2) / CANVAS_H;
+    return {
+      col: Math.floor((sx - r.left - BORDER_PX) / ratioX),
+      row: Math.floor((sy - r.top  - BORDER_PX) / ratioY),
+    };
+  }
+
+  function _inBounds(col, row) {
+    return col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     DESSIN PIXEL — fillRect(col, row, 1, 1) exclusivement
+  ───────────────────────────────────────────────────────────── */
   function _drawPixel(col, row, color) {
     ctx.fillStyle = color;
     ctx.fillRect(col, row, 1, 1);
@@ -132,111 +181,85 @@ const GP = (() => {
     ctx.fillRect(col, row, 1, 1);
   }
 
-  /* Pop-in : alpha 0 → 1 en ~8 frames rAF */
+  /* Pop-in : alpha 0→1 en 6 frames rAF */
   function _drawPixelAnimated(col, row, color) {
     let step = 0;
-    const totalSteps = 8;
-    const tick = () => {
+    const run = () => {
       step++;
-      ctx.globalAlpha = step / totalSteps;
+      ctx.globalAlpha = step / 6;
       ctx.fillStyle   = color;
       ctx.fillRect(col, row, 1, 1);
       ctx.globalAlpha = 1;
-      if (step < totalSteps) requestAnimationFrame(tick);
+      if (step < 6) requestAnimationFrame(run);
     };
-    requestAnimationFrame(tick);
+    requestAnimationFrame(run);
   }
 
-  /* Appliquer un pixel dans la Map + sur le canvas */
+  /* Appliquer un pixel dans la Map + canvas */
   function _applyPixel(col, row, color, user, animate) {
-    const key    = `${col},${row}`;
-    const isNew  = !pixelMap.has(key);
-    pixelMap.set(key, { color, user });
-    if (isNew) filledCount++;
+    const key   = `${col},${row}`;
+    const isNew = !_pixMap.has(key);
+    _pixMap.set(key, { color, user });
+    if (isNew) _filledCount++;
     if (animate) _drawPixelAnimated(col, row, color);
     else         _drawPixel(col, row, color);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     PALETTE UI
-  ═══════════════════════════════════════════════════════════ */
-  function _buildPaletteUI() {
+  /* ─────────────────────────────────────────────────────────────
+     PALETTE UI — construite à partir de window.COLORS
+  ───────────────────────────────────────────────────────────── */
+  function _buildPalette() {
     const grid = document.getElementById('palette-grid');
     if (!grid) return;
     grid.innerHTML = '';
     const colors = (window.COLORS || []).filter(c => c !== window.GOLD_COLOR);
     colors.forEach(c => {
       const el = document.createElement('div');
-      el.className = 'px-swatch' + (c === window.activeColor ? ' active' : '');
+      el.className        = 'px-swatch' + (c === window.activeColor ? ' active' : '');
       el.style.background = c;
-      el.addEventListener('click', () => _selectColor(c));
-      el.addEventListener('touchstart', e => {
-        e.preventDefault();
-        _selectColor(c);
-      }, { passive: false });
+      el.addEventListener('click', () => _pick(c));
+      el.addEventListener('touchstart', e => { e.preventDefault(); _pick(c); }, { passive: false });
       grid.appendChild(el);
     });
-    _syncGoldBtn();
-    _updateColorPreview(window.activeColor);
+    _syncGold();
+    _updatePreview(window.activeColor);
   }
 
-  function _selectColor(c) {
+  function _pick(c) {
     if (c === window.GOLD_COLOR) { pickGold(); return; }
     if ((window.stock || 0) <= 0) { window.showToast('📦 Stock vide !'); return; }
     window.activeColor = c;
     document.querySelectorAll('.px-swatch').forEach(el =>
-      el.classList.toggle('active', el.style.backgroundColor === c || el.style.background === c)
+      el.classList.toggle('active',
+        el.style.backgroundColor === c || el.style.background === c)
     );
-    const gb = document.getElementById('btn-gold');
-    if (gb) gb.classList.remove('active');
-    _updateColorPreview(c);
+    document.getElementById('btn-gold')?.classList.remove('active');
+    _updatePreview(c);
   }
 
   function pickGold() {
     if ((window.goldStock || 0) <= 0) { window.showToast('✦ Stock Gold épuisé !'); return; }
     window.activeColor = window.GOLD_COLOR;
     document.querySelectorAll('.px-swatch').forEach(el => el.classList.remove('active'));
-    _syncGoldBtn();
-    _updateColorPreview(window.GOLD_COLOR);
+    _syncGold();
+    _updatePreview(window.GOLD_COLOR);
   }
 
-  function _updateColorPreview(color) {
-    const el = document.getElementById('color-preview');
-    if (el) el.style.background = color || window.activeColor || '#3690ea';
-  }
-
-  function _syncGoldBtn() {
+  function _syncGold() {
     const gb = document.getElementById('btn-gold');
     if (!gb) return;
     gb.classList.toggle('active', window.activeColor === window.GOLD_COLOR);
     gb.classList.toggle('empty',  (window.goldStock || 0) <= 0);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     COORDONNÉES écran → cellule canvas
-  ═══════════════════════════════════════════════════════════ */
-  function _screenToCell(sx, sy) {
-    /* Utiliser la rect réelle du canvas (après transform CSS appliqué)
-       pour une conversion pixel-perfect sans décalage.
-       La border (2px) est incluse dans getBoundingClientRect → compenser */
-    const BORDER = 2; // doit correspondre à la border CSS du canvas
-    const rect   = cv.getBoundingClientRect();
-    /* ratio = taille visuelle / taille buffer (= scale, mais recalculé proprement) */
-    const ratioX = (rect.width  - BORDER * 2) / CANVAS_W;
-    const ratioY = (rect.height - BORDER * 2) / CANVAS_H;
-    return {
-      col: Math.floor((sx - rect.left - BORDER) / ratioX),
-      row: Math.floor((sy - rect.top  - BORDER) / ratioY),
-    };
+  function _updatePreview(color) {
+    const el = document.getElementById('color-preview');
+    if (el) el.style.background = color || '#3690ea';
   }
 
-  function _inBounds(col, row) {
-    return col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H;
-  }
-
-  /* ═══════════════════════════════════════════════════════════
+  /* ─────────────────────────────────────────────────────────────
      PLACE PIXEL
-  ═══════════════════════════════════════════════════════════ */
+  ───────────────────────────────────────────────────────────── */
   function placePixel(col, row) {
     if (!_inBounds(col, row)) return;
 
@@ -244,18 +267,18 @@ const GP = (() => {
     if (isGold  && (window.goldStock || 0) <= 0) { window.showToast('✦ Stock Gold épuisé !'); return; }
     if (!isGold && (window.stock     || 0) <= 0) { window.showToast('📦 Stock vide !');       return; }
 
-    const color  = window.activeColor;
-    const key    = `${col},${row}`;
-    const prevPx = pixelMap.get(key) || null;
+    const color = window.activeColor;
+    const key   = `${col},${row}`;
+    const prev  = _pixMap.get(key) || null;
 
-    /* Sauvegarder pour undo — wasGold capturé au moment du placement */
-    _lastPixel = { col, row, prevColor: prevPx?.color || null, prevUser: prevPx?.user || null, wasGold: isGold };
+    // Sauvegarder pour undo — capturer isGold au moment du clic
+    _undo = { col, row, prevColor: prev?.color || null, prevUser: prev?.user || null, wasGold: isGold };
     _startUndoTimer();
 
-    /* Mise à jour optimiste */
+    // Mise à jour optimiste
     _applyPixel(col, row, color, '@' + (window.piUsername || 'anon'), true);
 
-    /* Décrémenter stock */
+    // Décrémenter stock
     if (isGold) {
       window.goldStock = Math.max(0, (window.goldStock || 0) - 1);
     } else {
@@ -264,20 +287,24 @@ const GP = (() => {
         window.rechargeLeft = window.getRechargeS();
     }
     window.pixelsPlaced = (window.pixelsPlaced || 0) + 1;
-    if (window.updateStockUI) window.updateStockUI();
-    _syncGoldBtn();
-    if (window.saveLSState) window.saveLSState();
+    window.updateStockUI?.();
+    _syncGold();
+    window.saveLSState?.();
 
-    /* Flash */
+    // Flash visuel
     const fl = document.getElementById('px-flash');
     if (fl) { fl.classList.add('on'); setTimeout(() => fl.classList.remove('on'), 80); }
 
-    /* Envoi Socket (prioritaire) ou fallback HTTP */
-    if (_socketReady && _socket) {
-      _socket.emit('pixel:place', {
-        col, row, color,
-        username: window.piUsername || 'anonyme',
-      });
+    // Envoi
+    _sendPixel(col, row, color, isGold, prev);
+
+    // Vérifier expansion
+    _checkExpand();
+  }
+
+  function _sendPixel(col, row, color, isGold, prevPx) {
+    if (_sockReady && _sock) {
+      _sock.emit('pixel:place', { col, row, color, username: window.piUsername || 'anonyme' });
     } else if (window.apiFetch) {
       window.apiFetch('/api/pixelwar/place', 'POST', {
         col, row, color, username: window.piUsername,
@@ -285,80 +312,76 @@ const GP = (() => {
         if (d && !d.ok) _rollback(col, row, prevPx, isGold);
       }).catch(() => {});
     }
-
-    /* Vérifier expansion */
-    _checkExpand();
   }
 
   function _rollback(col, row, prevPx, wasGold) {
     if (prevPx) {
       _applyPixel(col, row, prevPx.color, prevPx.user, false);
     } else {
-      pixelMap.delete(`${col},${row}`);
-      filledCount = Math.max(0, filledCount - 1);
+      _pixMap.delete(`${col},${row}`);
+      _filledCount = Math.max(0, _filledCount - 1);
       _erasePixel(col, row);
     }
     if (wasGold) window.goldStock = Math.min(window.GOLD_MAX_ACTIVE || 12, (window.goldStock || 0) + 1);
     else         window.stock     = Math.min(window.STOCK_CAP        || 60, (window.stock     || 0) + 1);
-    if (window.updateStockUI) window.updateStockUI();
+    window.updateStockUI?.();
     window.showToast('❌ Pixel refusé');
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     UNDO (30 secondes)
-  ═══════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────────
+     UNDO
+  ───────────────────────────────────────────────────────────── */
   function undo() {
-    if (!_lastPixel) { window.showToast('Rien à annuler'); return; }
-    const { col, row, prevColor, prevUser, wasGold } = _lastPixel;
-    clearTimeout(_undoTimer);
-    _lastPixel = null;
+    if (!_undo) { window.showToast('Rien à annuler'); return; }
+    const { col, row, prevColor, prevUser, wasGold } = _undo;
+    clearTimeout(_undoT);
+    _undo = null;
     document.getElementById('btn-undo')?.classList.remove('active');
 
     if (prevColor) {
       _applyPixel(col, row, prevColor, prevUser, false);
-      /* Resynchroniser avec le serveur */
-      if (_socketReady && _socket) {
-        _socket.emit('pixel:place', { col, row, color: prevColor, username: window.piUsername || 'anonyme' });
+      if (_sockReady && _sock) {
+        _sock.emit('pixel:place', { col, row, color: prevColor, username: window.piUsername || 'anonyme' });
       } else if (window.apiFetch) {
-        window.apiFetch('/api/pixelwar/place', 'POST', { col, row, color: prevColor, username: window.piUsername }).catch(() => {});
+        window.apiFetch('/api/pixelwar/place', 'POST',
+          { col, row, color: prevColor, username: window.piUsername }).catch(() => {});
       }
     } else {
-      pixelMap.delete(`${col},${row}`);
-      filledCount = Math.max(0, filledCount - 1);
+      _pixMap.delete(`${col},${row}`);
+      _filledCount = Math.max(0, _filledCount - 1);
       _erasePixel(col, row);
     }
 
-    /* wasGold = couleur du pixel posé, pas la couleur active actuelle */
     if (wasGold) window.goldStock = Math.min(window.GOLD_MAX_ACTIVE || 12, (window.goldStock || 0) + 1);
     else         window.stock     = Math.min(window.STOCK_CAP        || 60, (window.stock     || 0) + 1);
-    if (window.updateStockUI) window.updateStockUI();
+    window.updateStockUI?.();
     window.showToast('↩ Pixel annulé !');
-    if (window.saveLSState) window.saveLSState();
+    window.saveLSState?.();
   }
 
   function _startUndoTimer() {
-    clearTimeout(_undoTimer);
+    clearTimeout(_undoT);
     document.getElementById('btn-undo')?.classList.add('active');
-    _undoTimer = setTimeout(() => {
-      _lastPixel = null;
+    _undoT = setTimeout(() => {
+      _undo = null;
       document.getElementById('btn-undo')?.classList.remove('active');
-    }, 30000);
+    }, UNDO_TIMEOUT_MS);
   }
 
-  /* ═══════════════════════════════════════════════════════════
+  /* ─────────────────────────────────────────────────────────────
      EXPANSION CANVAS
-  ═══════════════════════════════════════════════════════════ */
+  ───────────────────────────────────────────────────────────── */
   function _checkExpand() {
-    if (filledCount / (CANVAS_W * CANVAS_H) < EXPAND_THRESHOLD) return;
-    if (_socketReady && _socket) {
-      _socket.emit('canvas:expand', { currentW: CANVAS_W, currentH: CANVAS_H });
+    if (_filledCount / (CANVAS_W * CANVAS_H) < 0.65) return;
+    if (_sockReady && _sock) {
+      _sock.emit('canvas:expand', { currentW: CANVAS_W, currentH: CANVAS_H });
     }
   }
 
-  function _doExpand(newW, newH) {
+  function _expand(newW, newH) {
     if (newW <= CANVAS_W || newH <= CANVAS_H) return;
 
-    /* Copier le contenu existant */
+    // Sauvegarder le contenu
     const tmp = document.createElement('canvas');
     tmp.width  = CANVAS_W;
     tmp.height = CANVAS_H;
@@ -369,168 +392,188 @@ const GP = (() => {
     cv.width  = newW;
     cv.height = newH;
 
-    /* Fond du nouveau canvas */
-    ctx.fillStyle = BG;
-    ctx.fillRect(0, 0, newW, newH);
-
-    /* Recopier les pixels existants */
+    _drawBg(0, 0, newW, newH);
     ctx.drawImage(tmp, 0, 0);
 
-    /* Animation glow */
-    cv.classList.add('expanding');
-    setTimeout(() => cv.classList.remove('expanding'), 900);
-
-    window.showToast(`📐 Canvas agrandi : ${newW}×${newH} !`);
-
-    /* Zoom intelligent : conserver l'échelle actuelle (pas de resetView brutal)
-       mais recalculer les limites min/max avec la nouvelle taille
-       → le joueur reste centré sur ce qu'il regardait */
-    const vw = container.clientWidth  || container.offsetWidth;
-    const vh = container.clientHeight || container.offsetHeight;
-    const margin  = 4;
-    const fitScale = Math.max(
-      Math.min((vw - margin * 2) / newW, (vh - margin * 2) / newH),
-      0.02
-    );
-    /* Si le scale actuel est encore raisonnable, le conserver — sinon, fit */
-    if (scale < fitScale * 0.5 || scale > fitScale * 8) {
+    // Garder le centre visuel
+    const vw = container.clientWidth;
+    const vh = container.clientHeight;
+    const m  = BORDER_PX + 2;
+    const fitScale = Math.min((vw - m * 2) / newW, (vh - m * 2) / newH);
+    if (scale < fitScale * 0.3) {
       scale = fitScale;
-      panX = Math.round((vw - newW * scale) / 2);
-      panY = Math.round((vh - newH * scale) / 2);
-    } else {
-      /* Garder le centre visible — recentrer légèrement */
-      const oldCenterX = (vw / 2 - panX) / (scale * (newW / CANVAS_W)) * (newW / CANVAS_W);
-      panX = Math.round(vw / 2 - oldCenterX * scale);
-      panY = Math.round(vh / 2 - (vh / 2 - panY) * (newH / CANVAS_H));
+      panX  = Math.round((vw - newW * scale) / 2);
+      panY  = Math.round((vh - newH * scale) / 2);
     }
     _applyTransform();
+
+    cv.classList.add('expanding');
+    setTimeout(() => cv.classList.remove('expanding'), 900);
+    window.showToast(`📐 Canvas agrandi : ${newW}×${newH}`);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     SOCKET.IO CLIENT
-  ═══════════════════════════════════════════════════════════ */
-  let _gridLoaded = false; // true après _loadGrid() HTTP → évite double dessin
-
-  function _initSocket() {
-    if (typeof io === 'undefined') {
-      console.warn('[GP] Socket.io indisponible — fallback HTTP');
-      return;
-    }
-
-    _socket = io({ transports: ['websocket', 'polling'], reconnectionAttempts: 10 });
-
-    _socket.on('connect', () => {
-      _socketReady = true;
-      console.log('[GP] Socket connecté :', _socket.id);
-    });
-
-    _socket.on('disconnect', () => {
-      _socketReady = false;
-      console.warn('[GP] Socket déconnecté');
-    });
-
-    /* État initial envoyé par le serveur à la connexion */
-    _socket.on('canvas:state', ({ pixels, canvasW, canvasH }) => {
-      /* Si HTTP a déjà chargé la grille, ne pas redessiner tous les pixels
-         (évite le flash et le double filledCount++) */
-      if (_gridLoaded) {
-        /* Appliquer quand même l'expansion canvas si nécessaire */
-        if (canvasW && canvasH && (canvasW > CANVAS_W || canvasH > CANVAS_H)) _doExpand(canvasW, canvasH);
-        return;
-      }
-      if (canvasW && canvasH && (canvasW > CANVAS_W || canvasH > CANVAS_H)) {
-        _doExpand(canvasW, canvasH);
-      }
-      if (!Array.isArray(pixels)) return;
-      pixels.forEach(({ col, row, color, user }) => {
-        if (_inBounds(col, row)) _applyPixel(col, row, color, user, false);
-      });
-      if (window.SENTINEL && window.piUsername) {
-        pixels
-          .filter(p => p.user === '@' + window.piUsername)
-          .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
-      }
-    });
-
-    /* Pixel entrant d'un autre joueur */
-    _socket.on('pixel:update', ({ col, row, color, user }) => {
-      if (!_inBounds(col, row)) return;
-      if (user === '@' + window.piUsername) return;   // déjà appliqué en optimiste
-      if (window.SENTINEL) window.SENTINEL.checkIncoming(col, row, user || '?');
-      _applyPixel(col, row, color, user, true);
-    });
-
-    /* ACK du serveur pour le pixel posé */
-    _socket.on('pixel:ack', ({ col, row, ok, error, stock }) => {
-      if (!ok) {
-        const wasGold = window.activeColor === window.GOLD_COLOR;
-        _rollback(col, row, _lastPixel ? { color: _lastPixel.prevColor, user: _lastPixel.prevUser } : null, wasGold);
-        window.showToast('❌ ' + (error || 'Refusé'));
-      } else if (typeof stock === 'number') {
-        window.stock = stock;
-        if (window.updateStockUI) window.updateStockUI();
-      }
-    });
-
-    /* Expansion reçue */
-    _socket.on('canvas:expanded', ({ newW, newH }) => _doExpand(newW, newH));
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     CHARGEMENT INITIAL (HTTP — avant que socket soit prêt)
-  ═══════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────────
+     POLLING HTTP — delta toutes les 3s
+  ───────────────────────────────────────────────────────────── */
   async function _loadGrid() {
     if (!window.apiFetch) return;
     try {
       const data = await window.apiFetch('/api/pixelwar/grid', 'GET');
-      if (!data || !Array.isArray(data.pixels)) return;
-      if (data.canvasW && data.canvasH) _doExpand(data.canvasW, data.canvasH);
+      if (!data?.pixels) return;
+      if (data.canvasW && data.canvasH) _expand(data.canvasW, data.canvasH);
       data.pixels.forEach(({ col, row, color, user }) => {
         if (_inBounds(col, row)) _applyPixel(col, row, color, user, false);
       });
+      // Indexer les pixels du joueur pour la Sentinelle
       if (window.SENTINEL && window.piUsername) {
         data.pixels
           .filter(p => p.user === '@' + window.piUsername)
           .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
       }
-      /* Recalculer le zoom après chargement */
+      if (data.ts) _lastTs = data.ts;
       _gridLoaded = true;
       resetView();
     } catch (e) {
       console.error('[GP] loadGrid:', e);
-      window.showToast('⚠ Mode hors-ligne');
+      window.showToast('⚠ Hors-ligne — tentative...');
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     EVENT LISTENERS — UN SEUL jeu, appelé 1 fois dans init()
-  ═══════════════════════════════════════════════════════════ */
+  async function _poll() {
+    if (!window.apiFetch || !_lastTs) return;
+    try {
+      const data = await window.apiFetch(`/api/pixelwar/grid?since=${_lastTs}`, 'GET');
+      if (!data?.pixels?.length) {
+        if (data?.ts) _lastTs = data.ts;
+        return;
+      }
+      data.pixels.forEach(({ col, row, color, user }) => {
+        if (!_inBounds(col, row)) return;
+        if (user === '@' + window.piUsername) return; // déjà appliqué en optimiste
+        // Sentinelle
+        if (window.SENTINEL) window.SENTINEL.checkIncoming(col, row, user || '?');
+        _applyPixel(col, row, color, user, true);
+      });
+      if (data.ts) _lastTs = data.ts;
+    } catch (_) {}
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     SOCKET.IO — broadcast instantané (complète le polling)
+  ───────────────────────────────────────────────────────────── */
+  function _initSocket() {
+    if (typeof io === 'undefined') return;
+
+    _sock = io({ transports: ['websocket', 'polling'], reconnectionAttempts: 8 });
+
+    _sock.on('connect',    () => { _sockReady = true; });
+    _sock.on('disconnect', () => { _sockReady = false; });
+
+    // État initial via socket (ignoré si HTTP déjà fait)
+    _sock.on('canvas:state', ({ pixels, canvasW, canvasH }) => {
+      if (_gridLoaded) {
+        if (canvasW > CANVAS_W || canvasH > CANVAS_H) _expand(canvasW, canvasH);
+        return;
+      }
+      if (canvasW && canvasH) _expand(canvasW, canvasH);
+      if (!Array.isArray(pixels)) return;
+      pixels.forEach(({ col, row, color, user }) => {
+        if (_inBounds(col, row)) _applyPixel(col, row, color, user, false);
+      });
+      if (window.SENTINEL && window.piUsername) {
+        pixels.filter(p => p.user === '@' + window.piUsername)
+              .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
+      }
+      _gridLoaded = true;
+      resetView();
+    });
+
+    // Pixel entrant en temps réel
+    _sock.on('pixel:update', ({ col, row, color, user }) => {
+      if (!_inBounds(col, row)) return;
+      if (user === '@' + window.piUsername) return;
+      if (window.SENTINEL) window.SENTINEL.checkIncoming(col, row, user || '?');
+      _applyPixel(col, row, color, user, true);
+    });
+
+    // ACK pixel posé
+    _sock.on('pixel:ack', ({ col, row, ok, error, stock }) => {
+      if (!ok) {
+        const wasGold = _undo?.wasGold ?? (window.activeColor === window.GOLD_COLOR);
+        const prev    = _undo ? { color: _undo.prevColor, user: _undo.prevUser } : null;
+        _rollback(col, row, prev, wasGold);
+        window.showToast('❌ ' + (error || 'Refusé'));
+      } else if (typeof stock === 'number') {
+        window.stock = stock;
+        window.updateStockUI?.();
+      }
+    });
+
+    // Expansion
+    _sock.on('canvas:expanded', ({ newW, newH }) => _expand(newW, newH));
+
+    // Reset mensuel — vider le canvas local et recharger
+    _sock.on('canvas:reset', ({ msg }) => {
+      // Vider la Map locale
+      _pixMap.clear();
+      _filledCount = 0;
+      // Redessiner le fond
+      CANVAS_W = CANVAS_W_INIT;
+      CANVAS_H = CANVAS_H_INIT;
+      cv.width  = CANVAS_W;
+      cv.height = CANVAS_H;
+      _drawBg(0, 0, CANVAS_W, CANVAS_H);
+      _lastTs = 0;
+      _gridLoaded = false;
+      requestAnimationFrame(resetView);
+      if (window.showToast) window.showToast(msg || '🔄 Canvas réinitialisé !');
+    });
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     ZOOM TO CELL — Sentinelle
+  ───────────────────────────────────────────────────────────── */
+  function zoomToCell(col, row) {
+    if (!container) return;
+    const vw = container.clientWidth;
+    const vh = container.clientHeight;
+    const targetScale = Math.min(Math.max(scale * 2, 6), 20);
+    panX  = Math.round(vw / 2 - col * targetScale);
+    panY  = Math.round(vh / 2 - row * targetScale);
+    scale = targetScale;
+    _applyTransform();
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     EVENT LISTENERS — UN seul jeu, posé dans init()
+  ───────────────────────────────────────────────────────────── */
   function _bindEvents() {
-    /* Touch */
+    // Touch
     container.addEventListener('touchstart', _onTouchStart, { passive: false });
     container.addEventListener('touchmove',  _onTouchMove,  { passive: false });
     container.addEventListener('touchend',   _onTouchEnd,   { passive: false });
-    /* Mouse */
+    // Mouse
     container.addEventListener('mousedown', _onMouseDown);
     window.addEventListener('mousemove',    _onMouseMove);
     window.addEventListener('mouseup',      _onMouseUp);
-    /* Wheel */
+    // Wheel
     container.addEventListener('wheel', _onWheel, { passive: false });
-    /* Resize */
-    window.addEventListener('resize', _onResize);
+    // Resize
+    window.addEventListener('resize', () => {
+      clearTimeout(window._gpResizeT);
+      window._gpResizeT = setTimeout(resetView, 80);
+    });
   }
 
-  /* ── Touch handlers ── */
+  /* ── Touch ── */
   function _onTouchStart(e) {
     e.preventDefault();
     if (e.touches.length === 1) {
-      _tStart  = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      _tMoved  = false;
+      _touch1    = { x: e.touches[0].clientX, y: e.touches[0].clientY, panX, panY };
+      _tMoved    = false;
       _isPanning = false;
-      _panOX   = panX;
-      _panOY   = panY;
     } else if (e.touches.length === 2) {
-      _pinchD0 = Math.hypot(
+      _pinch0  = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
@@ -541,49 +584,58 @@ const GP = (() => {
 
   function _onTouchMove(e) {
     e.preventDefault();
-    if (e.touches.length === 1) {
-      const dx = e.touches[0].clientX - _tStart.x;
-      const dy = e.touches[0].clientY - _tStart.y;
+    if (e.touches.length === 1 && _touch1) {
+      const dx = e.touches[0].clientX - _touch1.x;
+      const dy = e.touches[0].clientY - _touch1.y;
       if (!_isPanning && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
         _isPanning = true; _tMoved = true;
       }
-      if (_isPanning) { panX = _panOX + dx; panY = _panOY + dy; _applyTransform(); }
+      if (_isPanning) {
+        panX = _touch1.panX + dx;
+        panY = _touch1.panY + dy;
+        _applyTransform();
+      }
       _updateCoords(e.touches[0].clientX, e.touches[0].clientY);
-    } else if (e.touches.length === 2 && _pinchD0) {
+    } else if (e.touches.length === 2 && _pinch0 !== null) {
       _tMoved = true;
-      const d  = Math.hypot(
+      const d   = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      _zoom(d / _pinchD0 * _pinchS0 / scale, cx, cy);
-      _pinchD0 = d;
-      _pinchS0 = scale;
+      const cx  = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy  = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const ns  = Math.min(Math.max(_pinchS0 * (d / _pinch0), 0.01), 80);
+      const r   = ns / scale;
+      panX  = cx - (cx - panX) * r;
+      panY  = cy - (cy - panY) * r;
+      scale = ns;
+      _applyTransform();
     }
   }
 
   function _onTouchEnd(e) {
     e.preventDefault();
-    if (e.touches.length === 0 && !_tMoved) {
+    if (e.touches.length === 0 && !_tMoved && _touch1) {
       const t = e.changedTouches[0];
       const { col, row } = _screenToCell(t.clientX, t.clientY);
       placePixel(col, row);
     }
-    if (e.touches.length < 2) _pinchD0 = null;
+    if (e.touches.length < 2) _pinch0 = null;
+    if (e.touches.length === 0) _touch1 = null;
   }
 
-  /* ── Mouse handlers ── */
+  /* ── Mouse ── */
   function _onMouseDown(e) {
     _mDown = true; _mPan = false;
-    _mSX = e.clientX; _mSY = e.clientY;
-    _mOX = panX;      _mOY = panY;
+    _mX0 = e.clientX; _mY0 = e.clientY;
+    _mPanX0 = panX;   _mPanY0 = panY;
   }
   function _onMouseMove(e) {
     if (!_mDown) return;
-    const dx = e.clientX - _mSX, dy = e.clientY - _mSY;
+    const dx = e.clientX - _mX0;
+    const dy = e.clientY - _mY0;
     if (!_mPan && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) _mPan = true;
-    if (_mPan) { panX = _mOX + dx; panY = _mOY + dy; _applyTransform(); }
+    if (_mPan) { panX = _mPanX0 + dx; panY = _mPanY0 + dy; _applyTransform(); }
     _updateCoords(e.clientX, e.clientY);
   }
   function _onMouseUp(e) {
@@ -593,13 +645,11 @@ const GP = (() => {
     }
     _mDown = false; _mPan = false;
   }
+
+  /* ── Wheel ── */
   function _onWheel(e) {
     e.preventDefault();
     _zoom(e.deltaY < 0 ? 1.2 : 0.83, e.clientX, e.clientY);
-  }
-  function _onResize() {
-    clearTimeout(window._gpResizeT);
-    window._gpResizeT = setTimeout(resetView, 80);
   }
 
   /* ── Coords overlay ── */
@@ -610,34 +660,22 @@ const GP = (() => {
     el.textContent = _inBounds(col, row) ? `X:${col} Y:${row}` : '—';
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     ZOOM TO CELL — pour la Sentinelle
-  ═══════════════════════════════════════════════════════════ */
-  function zoomToCell(col, row) {
-    if (!container) return;
-    const vw = container.clientWidth, vh = container.clientHeight;
-    const targetScale = Math.min(Math.max(scale * 2, 6), 20);
-    panX  = vw / 2 - col * targetScale;
-    panY  = vh / 2 - row * targetScale;
-    scale = targetScale;
-    _applyTransform();
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     START ENGINE — appelé par startGame() dans goldpixel.html
-  ═══════════════════════════════════════════════════════════ */
+  /* ─────────────────────────────────────────────────────────────
+     START ENGINE
+  ───────────────────────────────────────────────────────────── */
   async function startEngine() {
-    init();            // canvas + palette + events (1 seul appel)
-    _initSocket();     // socket.io
-    await _loadGrid(); // chargement initial HTTP
+    init();
+    _initSocket();
+    await _loadGrid();
+    _pollTimer = setInterval(_poll, POLL_MS);
   }
 
-  /* ═══════════════════════════════════════════════════════════
+  /* ─────────────────────────────────────────────────────────────
      API PUBLIQUE
-  ═══════════════════════════════════════════════════════════ */
+  ───────────────────────────────────────────────────────────── */
   return {
     startEngine,
-    pick:       _selectColor,
+    pick:              _pick,
     pickGold,
     zoomIn,
     zoomOut,
