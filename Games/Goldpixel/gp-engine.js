@@ -24,8 +24,8 @@ const GP = (() => {
   'use strict';
 
   /* ── Config ─────────────────────────────────────────────── */
-  let CANVAS_W = 500;
-  let CANVAS_H = 500;
+  let CANVAS_W = 3000;
+  let CANVAS_H = 3000;
   const BG     = '#f5f0e8';
   const EXPAND_THRESHOLD = 0.65;
   const EXPAND_FACTOR    = 1.5;    // +50% surface → dim × √1.5
@@ -75,23 +75,23 @@ const GP = (() => {
   ═══════════════════════════════════════════════════════════ */
   function resetView() {
     if (!container) return;
-    const vw = container.clientWidth;
-    const vh = container.clientHeight;
+    /* Attendre que le container ait une taille réelle */
+    const vw = container.clientWidth  || container.offsetWidth;
+    const vh = container.clientHeight || container.offsetHeight;
+    if (!vw || !vh) return;
 
-    /* Zoom adaptatif selon le taux de remplissage */
-    const fillRatio = filledCount / (CANVAS_W * CANVAS_H);
-    let zoomFactor = 0.85;
-    if (fillRatio > 0.1) zoomFactor = 0.7;
-    if (fillRatio > 0.3) zoomFactor = 0.6;
-    if (fillRatio > 0.6) zoomFactor = 0.4;
+    /* Scale "fit" : le canvas occupe exactement le container dans sa plus grande dimension
+       On laisse une marge de 4px côté pour que le cadre (border) soit visible */
+    const margin = 4;
+    const fitScale = Math.min(
+      (vw - margin * 2) / CANVAS_W,
+      (vh - margin * 2) / CANVAS_H
+    );
+    scale = Math.max(fitScale, 0.02);
 
-    /* Scale = canvas tient dans le viewport × zoomFactor */
-    scale = Math.min(vw / CANVAS_W, vh / CANVAS_H) * zoomFactor;
-    scale = Math.max(scale, 0.02);
-
-    /* Centrer */
-    panX = (vw - CANVAS_W * scale) / 2;
-    panY = (vh - CANVAS_H * scale) / 2;
+    /* Centrer dans le container */
+    panX = Math.round((vw - CANVAS_W * scale) / 2);
+    panY = Math.round((vh - CANVAS_H * scale) / 2);
 
     _applyTransform();
   }
@@ -216,10 +216,17 @@ const GP = (() => {
      COORDONNÉES écran → cellule canvas
   ═══════════════════════════════════════════════════════════ */
   function _screenToCell(sx, sy) {
-    const rect = container.getBoundingClientRect();
+    /* Utiliser la rect réelle du canvas (après transform CSS appliqué)
+       pour une conversion pixel-perfect sans décalage.
+       La border (2px) est incluse dans getBoundingClientRect → compenser */
+    const BORDER = 2; // doit correspondre à la border CSS du canvas
+    const rect   = cv.getBoundingClientRect();
+    /* ratio = taille visuelle / taille buffer (= scale, mais recalculé proprement) */
+    const ratioX = (rect.width  - BORDER * 2) / CANVAS_W;
+    const ratioY = (rect.height - BORDER * 2) / CANVAS_H;
     return {
-      col: Math.floor((sx - rect.left  - panX) / scale),
-      row: Math.floor((sy - rect.top   - panY) / scale),
+      col: Math.floor((sx - rect.left - BORDER) / ratioX),
+      row: Math.floor((sy - rect.top  - BORDER) / ratioY),
     };
   }
 
@@ -374,7 +381,29 @@ const GP = (() => {
     setTimeout(() => cv.classList.remove('expanding'), 900);
 
     window.showToast(`📐 Canvas agrandi : ${newW}×${newH} !`);
-    resetView();
+
+    /* Zoom intelligent : conserver l'échelle actuelle (pas de resetView brutal)
+       mais recalculer les limites min/max avec la nouvelle taille
+       → le joueur reste centré sur ce qu'il regardait */
+    const vw = container.clientWidth  || container.offsetWidth;
+    const vh = container.clientHeight || container.offsetHeight;
+    const margin  = 4;
+    const fitScale = Math.max(
+      Math.min((vw - margin * 2) / newW, (vh - margin * 2) / newH),
+      0.02
+    );
+    /* Si le scale actuel est encore raisonnable, le conserver — sinon, fit */
+    if (scale < fitScale * 0.5 || scale > fitScale * 8) {
+      scale = fitScale;
+      panX = Math.round((vw - newW * scale) / 2);
+      panY = Math.round((vh - newH * scale) / 2);
+    } else {
+      /* Garder le centre visible — recentrer légèrement */
+      const oldCenterX = (vw / 2 - panX) / (scale * (newW / CANVAS_W)) * (newW / CANVAS_W);
+      panX = Math.round(vw / 2 - oldCenterX * scale);
+      panY = Math.round(vh / 2 - (vh / 2 - panY) * (newH / CANVAS_H));
+    }
+    _applyTransform();
   }
 
   /* ═══════════════════════════════════════════════════════════
