@@ -177,6 +177,7 @@ const GP = (() => {
       grid.appendChild(el);
     });
     _syncGoldBtn();
+    _updateColorPreview(window.activeColor);
   }
 
   function _selectColor(c) {
@@ -188,6 +189,7 @@ const GP = (() => {
     );
     const gb = document.getElementById('btn-gold');
     if (gb) gb.classList.remove('active');
+    _updateColorPreview(c);
   }
 
   function pickGold() {
@@ -195,6 +197,12 @@ const GP = (() => {
     window.activeColor = window.GOLD_COLOR;
     document.querySelectorAll('.px-swatch').forEach(el => el.classList.remove('active'));
     _syncGoldBtn();
+    _updateColorPreview(window.GOLD_COLOR);
+  }
+
+  function _updateColorPreview(color) {
+    const el = document.getElementById('color-preview');
+    if (el) el.style.background = color || window.activeColor || '#3690ea';
   }
 
   function _syncGoldBtn() {
