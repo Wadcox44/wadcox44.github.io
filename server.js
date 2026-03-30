@@ -70,8 +70,8 @@ const ShopRoutes = require('./goldpixel-backend/shop/routes');
 // ║    GAME_CONFIG.<SYSTEM>.enabled = true    → système actif et opérationnel
 // ╚═══════════════════════════════════════════════════════════════
 /* Canvas Gold Pixel — dimensions courantes (modifiées au runtime via Socket.io) */
-let _gpCanvasW = 3000;
-let _gpCanvasH = 3000;
+let _gpCanvasW = 500;
+let _gpCanvasH = 500;
 
 const GAME_CONFIG = {
 
@@ -2182,7 +2182,9 @@ async function ensurePixelwarIndexes() {
     await db.collection('pixelwar_grid').createIndex({ col: 1, row: 1 }, { unique: true });
     await db.collection('pixelwar_grid').createIndex({ ts: -1 });
     await db.collection('pixelwar_players').createIndex({ username: 1 }, { unique: true });
-    console.log('Gold Pixel : indexes OK');
+    /* Initialiser le compteur en mémoire depuis MongoDB */
+    _gpPixelCount = await db.collection('pixelwar_grid').countDocuments();
+    console.log(`Gold Pixel : indexes OK — ${_gpPixelCount} pixels en base`);
   } catch (e) {
     console.error('Gold Pixel index error:', e.message);
   }
@@ -2194,28 +2196,41 @@ function pwNormalizeUser(username) {
   return u;
 }
 
-/* Calculer le stock actuel d'un joueur en tenant compte de la recharge */
+/* Calculer le stock actuel d'un joueur (recharge + plafond tank) */
 function pwCalcStock(player) {
-  if (!player) return { stock: PW_STOCK_DEFAULT, rechargeLeft: PW_RECHARGE_MS / 1000 };
-  const now       = Date.now();
-  let stock       = player.stock;
-  let rechargeTs  = player.rechargeTs || now;
+  if (!player) return { stock: PW_STOCK_DEFAULT, rechargeLeft: PW_RECHARGE_MS / 1000, rechargeTs: Date.now() };
+  const now = Date.now();
+
+  /* ── Plafond actif selon le tank (vérifié côté serveur) ── */
+  const PW_TANK_CAPS = {
+    decouverte: { std: 25, gold: 7  },
+    middle:     { std: 40, gold: 9  },
+    giga:       { std: 55, gold: 12 },
+    base:       { std: PW_STOCK_DEFAULT, gold: 5 },
+  };
+  const tankExpired = player.tankType && player.tankType !== 'base'
+    && player.tankExpiry && now > player.tankExpiry;
+  const activeTank  = (!tankExpired && player.tankType) ? player.tankType : 'base';
+  const stockCap    = (PW_TANK_CAPS[activeTank] || PW_TANK_CAPS.base).std;
+
+  let stock      = Math.min(player.stock ?? PW_STOCK_DEFAULT, stockCap);
+  let rechargeTs = player.rechargeTs || now;
 
   /* Créditer les pixels rechargés depuis la dernière mise à jour */
-  if (stock < PW_STOCK_DEFAULT) {
+  if (stock < stockCap) {
     const elapsed = now - rechargeTs;
     const gained  = Math.floor(elapsed / PW_RECHARGE_MS);
     if (gained > 0) {
-      stock      = Math.min(PW_STOCK_DEFAULT, stock + gained);
+      stock      = Math.min(stockCap, stock + gained);
       rechargeTs = rechargeTs + gained * PW_RECHARGE_MS;
     }
   }
 
-  const rechargeLeft = stock >= PW_STOCK_DEFAULT
+  const rechargeLeft = stock >= stockCap
     ? 0
     : Math.max(0, Math.ceil((rechargeTs + PW_RECHARGE_MS - now) / 1000));
 
-  return { stock, rechargeLeft, rechargeTs };
+  return { stock, rechargeLeft, rechargeTs, stockCap, tankExpired };
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -2248,7 +2263,7 @@ app.post('/api/pixelwar/place', async (req, res) => {
     const { col, row, color, username } = req.body;
     if (typeof col !== 'number' || typeof row !== 'number')
       return res.status(400).json({ ok: false, error: 'col et row requis (number)' });
-    if (col < 0 || col >= 500 || row < 0 || row >= 500)
+    if (col < 0 || col >= _gpCanvasW || row < 0 || row >= _gpCanvasH)
       return res.status(400).json({ ok: false, error: 'Coordonnées hors-limites' });
     if (!color || !/^#[0-9a-fA-F]{6}$/.test(color))
       return res.status(400).json({ ok: false, error: 'Couleur invalide' });
@@ -2256,51 +2271,53 @@ app.post('/api/pixelwar/place', async (req, res) => {
     const user = pwNormalizeUser(username);
     const now  = Date.now();
 
-    /* Lire ou créer le profil joueur */
-    let player = await db.collection('pixelwar_players').findOne({ username: user });
-    if (!player) {
-      player = { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0 };
-      await db.collection('pixelwar_players').insertOne(player);
-    }
-
-    /* Calculer le stock actuel */
-    const { stock, rechargeLeft, rechargeTs } = pwCalcStock(player);
-
-    if (stock <= 0) {
-      return res.status(429).json({
-        ok: false,
-        error: `Stock vide — +1 pixel dans ${rechargeLeft}s`,
-        stock: 0,
-        rechargeLeft,
-      });
-    }
-
-    /* Vérifier si la case était déjà occupée par quelqu'un d'autre (pixel recouvert) */
-    const existing = await db.collection('pixelwar_grid').findOne(
-      { col, row }, { projection: { user: 1 } }
+    /* Créer joueur si nécessaire */
+    await db.collection('pixelwar_players').updateOne(
+      { username: user },
+      { $setOnInsert: { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0, totalPlaced: 0, covered: 0 } },
+      { upsert: true }
     );
-    const coveredUser = (existing && existing.user && existing.user !== '@' + user)
-      ? existing.user : null;
+
+    /* Recalculer le stock avec recharge écoulée */
+    const player = await db.collection('pixelwar_players').findOne({ username: user });
+    const { stock: currentStock, rechargeLeft, rechargeTs } = pwCalcStock(player);
+    if (currentStock !== player.stock) {
+      await db.collection('pixelwar_players').updateOne({ username: user }, { $set: { stock: currentStock, rechargeTs } });
+    }
+    if (currentStock <= 0) {
+      return res.status(429).json({ ok: false, error: `Stock vide — +1 pixel dans ${rechargeLeft}s`, stock: 0, rechargeLeft });
+    }
+
+    /* Décrémentation atomique */
+    const decResult = await db.collection('pixelwar_players').findOneAndUpdate(
+      { username: user, stock: { $gt: 0 } },
+      { $inc: { stock: -1, totalPlaced: 1 }, $set: { lastPixelTs: now } },
+      { returnDocument: 'after' }
+    );
+    if (!decResult) {
+      return res.status(429).json({ ok: false, error: 'Stock vide', stock: 0, rechargeLeft: 0 });
+    }
+    const newStock = decResult.stock;
+
+    /* Pixel recouvert ? */
+    const existing = await db.collection('pixelwar_grid').findOne({ col, row }, { projection: { user: 1 } });
+    const coveredUser = (existing && existing.user && existing.user !== '@' + user) ? existing.user : null;
+    if (coveredUser) {
+      await db.collection('pixelwar_players').updateOne({ username: user }, { $inc: { covered: 1 } });
+    }
 
     /* Poser le pixel */
+    const isNewHTTP = !existing;
     await db.collection('pixelwar_grid').updateOne(
       { col, row },
       { $set: { col, row, color, user: '@' + user, ts: now } },
       { upsert: true }
     );
+    if (isNewHTTP) _gpPixelCount++;
 
-    /* Incrémenter le compteur 'covered' du joueur attaquant si recouvrement */
-    const newStock      = stock - 1;
-    const newRechargeTs = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
-    const updateFields  = { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now };
-    await db.collection('pixelwar_players').updateOne(
-      { username: user },
-      { $set: updateFields, $inc: { totalPlaced: 1, ...(coveredUser ? { covered: 1 } : {}) } }
-    );
-
+    const newRechargeTs   = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
     const newRechargeLeft = newStock >= PW_STOCK_DEFAULT
-      ? 0
-      : Math.max(0, Math.ceil((newRechargeTs + PW_RECHARGE_MS - now) / 1000));
+      ? 0 : Math.max(0, Math.ceil((newRechargeTs + PW_RECHARGE_MS - now) / 1000));
 
     res.json({ ok: true, col, row, color, ts: now, stock: newStock, rechargeLeft: newRechargeLeft });
   } catch (e) {
@@ -2424,22 +2441,32 @@ app.post('/api/pixelwar/shop/complete', async (req, res) => {
     });
     if (!r.ok) return res.status(400).json({ ok: false, error: 'Echec finalisation Pi' });
 
-    /* Créditer les pixels */
-    const added  = type === 'large' ? 10 : (type === 'support' ? 0 : 5);
-    const user   = pwNormalizeUser(username);
-    const now    = Date.now();
+    /* Table des packs — source de vérité côté serveur */
+    const PW_PACKS = {
+      decouverte: { std: 25, gold: 7  },
+      middle:     { std: 40, gold: 9  },
+      giga:       { std: 55, gold: 12 },
+    };
+    const user = pwNormalizeUser(username);
+    const now  = Date.now();
 
-    if (added > 0) {
-      let player = await db.collection('pixelwar_players').findOne({ username: user });
-      let { stock } = player ? pwCalcStock(player) : { stock: PW_STOCK_DEFAULT };
-      const newStock = Math.min(PW_STOCK_CAP, stock + added);
+    if (PW_PACKS[type]) {
+      /* Pack réservoir : créditer std + gold + stocker tank en base */
+      const pack   = PW_PACKS[type];
+      const player = await db.collection('pixelwar_players').findOne({ username: user });
+      const { stock: curStock } = player ? pwCalcStock(player) : { stock: PW_STOCK_DEFAULT };
+      const newStock    = Math.min(PW_STOCK_CAP, curStock + pack.std);
+      const tankExpiry  = now + 7 * 24 * 60 * 60 * 1000; // 7 jours depuis maintenant
       await db.collection('pixelwar_players').updateOne(
         { username: user },
-        { $set: { stock: newStock, rechargeTs: now } },
+        { $set: { stock: newStock, goldStock: pack.gold, rechargeTs: now,
+                  tankType: type, tankExpiry } },
         { upsert: true }
       );
-      return res.json({ ok: true, stock: newStock });
+      return res.json({ ok: true, stock: newStock, goldStock: pack.gold, tankType: type, tankExpiry });
     }
+
+    /* Don : pas de crédit pixels */
     res.json({ ok: true, stock: null });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
@@ -2532,12 +2559,15 @@ app.use(express.static(path.join(__dirname)));
 // ══════════════════════════════════════════════════════════════
 
 /* Dimensions courantes du canvas — déclarées en haut du fichier */
-const EXPAND_THRESHOLD = 0.65;
-const EXPAND_FACTOR    = 1.5;  // +50% surface
+const EXPAND_THRESHOLD = 0.10;  // 10% → atteignable (500×500 = 250k → 25k pixels)
+const EXPAND_FACTOR    = 1.5;   // +50% surface → dim × √1.5 ≈ ×1.22
 
-/* Cooldown d'expansion : évite les déclenchements en boucle */
-let _gpLastExpand = 0;
+/* Cooldown d'expansion */
+let _gpLastExpand  = 0;
 const EXPAND_COOLDOWN_MS = 60000; // 60s entre deux expansions
+
+/* Compteur en mémoire — évite countDocuments() à chaque pixel */
+let _gpPixelCount  = 0;  // initialisé au démarrage dans ensurePixelwarIndexes
 
 io.on('connection', (socket) => {
   console.log(`[GP Socket] Client connecté : ${socket.id}`);
@@ -2576,72 +2606,92 @@ io.on('connection', (socket) => {
       const user = pwNormalizeUser(username);
       const now  = Date.now();
 
-      // Vérifier et décrémenter le stock
-      let player = await db.collection('pixelwar_players').findOne({ username: user });
-      if (!player) {
-        player = { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0 };
-        await db.collection('pixelwar_players').insertOne(player);
+      /* ── Rate limiting par socket : 1 pixel / 500ms max ── */
+      if (!socket._gpLastPixel) socket._gpLastPixel = 0;
+      if (now - socket._gpLastPixel < 500) {
+        socket.emit('pixel:ack', { col, row, ok: false, error: 'Trop rapide — attends un peu' });
+        return;
+      }
+      socket._gpLastPixel = now;
+
+      /* ── Décrémenter le stock de façon ATOMIQUE (anti-race condition) ── */
+      /* Créer d'abord le joueur s'il n'existe pas */
+      await db.collection('pixelwar_players').updateOne(
+        { username: user },
+        { $setOnInsert: { username: user, stock: PW_STOCK_DEFAULT, rechargeTs: now, lastPixelTs: 0, totalPlaced: 0, covered: 0 } },
+        { upsert: true }
+      );
+
+      /* Recalculer le stock reçu (recharge écoulée depuis dernière màj) */
+      const playerNow = await db.collection('pixelwar_players').findOne({ username: user });
+      const { stock: currentStock, rechargeLeft, rechargeTs } = pwCalcStock(playerNow);
+
+      /* Si la recharge a crédité des pixels, les appliquer d'abord en base */
+      if (currentStock !== playerNow.stock) {
+        await db.collection('pixelwar_players').updateOne(
+          { username: user },
+          { $set: { stock: currentStock, rechargeTs } }
+        );
       }
 
-      const { stock, rechargeLeft, rechargeTs } = pwCalcStock(player);
-
-      if (stock <= 0) {
+      if (currentStock <= 0) {
         socket.emit('pixel:ack', { col, row, ok: false, error: `Stock vide — +1 dans ${rechargeLeft}s`, stock: 0 });
         return;
       }
 
-      // Pixel recouvert ?
+      /* Décrémentation atomique avec condition (stock > 0) */
+      const decResult = await db.collection('pixelwar_players').findOneAndUpdate(
+        { username: user, stock: { $gt: 0 } },
+        { $inc: { stock: -1, totalPlaced: 1 }, $set: { lastPixelTs: now } },
+        { returnDocument: 'after' }
+      );
+      if (!decResult) {
+        socket.emit('pixel:ack', { col, row, ok: false, error: 'Stock vide', stock: 0 });
+        return;
+      }
+      const newStock = decResult.stock;
+
+      /* Pixel recouvert ? */
       const existing = await db.collection('pixelwar_grid').findOne({ col, row }, { projection: { user:1 } });
       const coveredUser = (existing && existing.user && existing.user !== '@' + user) ? existing.user : null;
+      if (coveredUser) {
+        await db.collection('pixelwar_players').updateOne({ username: user }, { $inc: { covered: 1 } });
+      }
 
-      // Stocker le pixel
+      /* Poser le pixel */
+      const isNew = !existing;
       await db.collection('pixelwar_grid').updateOne(
         { col, row },
         { $set: { col, row, color, user: '@' + user, ts: now } },
         { upsert: true }
       );
+      if (isNew) _gpPixelCount++;
 
-      // Mettre à jour le stock
-      const newStock      = stock - 1;
-      const newRechargeTs = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
-      await db.collection('pixelwar_players').updateOne(
-        { username: user },
-        {
-          $set: { stock: newStock, rechargeTs: newRechargeTs, lastPixelTs: now },
-          $inc: { totalPlaced: 1, ...(coveredUser ? { covered: 1 } : {}) },
-        }
-      );
-
+      /* Calculer rechargeLeft pour l'ACK */
+      const newRechargeTs   = newStock < PW_STOCK_DEFAULT ? (rechargeTs || now) : now;
       const newRechargeLeft = newStock >= PW_STOCK_DEFAULT
         ? 0
         : Math.max(0, Math.ceil((newRechargeTs + PW_RECHARGE_MS - now) / 1000));
 
-      // ACK au poseur
+      /* ACK au poseur */
       socket.emit('pixel:ack', { col, row, ok: true, stock: newStock, rechargeLeft: newRechargeLeft });
 
-      // Broadcast à TOUS les autres clients
-      socket.broadcast.emit('pixel:update', {
-        col, row, color,
-        user: '@' + user,
-        ts: now,
-      });
+      /* Broadcast à TOUS les autres clients */
+      socket.broadcast.emit('pixel:update', { col, row, color, user: '@' + user, ts: now });
 
-      // Vérifier si expansion nécessaire
-      const totalPixels = await db.collection('pixelwar_grid').countDocuments();
-      const totalCells  = _gpCanvasW * _gpCanvasH;
-      const ratio       = totalPixels / totalCells;
-      const cooldownOk  = Date.now() - _gpLastExpand > EXPAND_COOLDOWN_MS;
+      /* ── Expansion : compteur mémoire, pas de countDocuments ── */
+      const ratio      = _gpPixelCount / (_gpCanvasW * _gpCanvasH);
+      const cooldownOk = Date.now() - _gpLastExpand > EXPAND_COOLDOWN_MS;
 
       if (ratio >= EXPAND_THRESHOLD && cooldownOk) {
         _gpLastExpand = Date.now();
-        const factor = Math.sqrt(EXPAND_FACTOR);
-        const newW   = Math.round(_gpCanvasW * factor);
-        const newH   = Math.round(_gpCanvasH * factor);
-        _gpCanvasW   = newW;
-        _gpCanvasH   = newH;
-        // Broadcaster l'expansion à TOUS les clients (y compris le poseur)
+        const factor  = Math.sqrt(EXPAND_FACTOR);
+        const newW    = Math.round(_gpCanvasW * factor);
+        const newH    = Math.round(_gpCanvasH * factor);
+        _gpCanvasW    = newW;
+        _gpCanvasH    = newH;
         io.emit('canvas:expanded', { newW, newH, ts: Date.now() });
-        console.log(`[GP] Canvas étendu : ${newW}×${newH}`);
+        console.log(`[GP] Canvas étendu : ${newW}×${newH} (${_gpPixelCount} pixels)`);
       }
 
     } catch (e) {
