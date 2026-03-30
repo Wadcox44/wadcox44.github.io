@@ -353,24 +353,28 @@ html, body {
 .zoom-btn:active { background:rgba(245,200,66,.22); transform:scale(.92); }
 
 
-/* ── Zone canvas centrale ── */
+/* ── Zone canvas centrale ──
+   Layout : canvasContainer prend tout l'espace restant entre
+   hud-left et hud-right. Le canvas est position:absolute pour
+   que transform:translate+scale fonctionne librement sans
+   perturber le flux. ── */
 #canvasContainer {
-  flex:1 1 0; min-width:0; min-height:0;
-  position:relative; overflow:hidden;
+  flex:1 1 0;
+  min-width:0; min-height:0;
+  position:relative;
+  overflow:hidden;
   background:#0a0612;
-  /* Garantit que le container prend TOUT l'espace entre hud-left et hud-right */
   align-self:stretch;
 }
 #gameCanvas {
   display:block;
-  position:absolute;           /* indispensable pour translate+scale libre */
+  position:absolute;
   top:0; left:0;
   border:2px solid var(--gold);
   box-shadow:0 0 18px rgba(245,200,66,.35), 0 0 40px rgba(245,200,66,.1);
   image-rendering:pixelated; image-rendering:crisp-edges;
-  transform-origin:0 0;        /* zoom depuis coin haut-gauche */
+  transform-origin:0 0;
   cursor:crosshair;
-  /* box-sizing retiré : n'affecte pas le buffer canvas */
 }
 #gameCanvas.expanding {
   animation:frameExpand .8s ease-out;
@@ -1145,6 +1149,14 @@ html, body {
         <div class="sh-sup-title">💛 Soutenir le jeu</div>
         <div class="sh-sup-sub">Aide à financer les serveurs<br>et les mises à jour</div>
 
+        <div class="don-btn" onclick="shopBuy('don_0_5')">
+          <span class="don-ico">💛</span>
+          <div>
+            <div class="don-amt">0.5 Pi</div>
+            <div class="don-lbl">Coup de pouce</div>
+          </div>
+        </div>
+
         <div class="don-btn" onclick="shopBuy('don_1')">
           <span class="don-ico">🟡</span>
           <div>
@@ -1153,19 +1165,11 @@ html, body {
           </div>
         </div>
 
-        <div class="don-btn" onclick="shopBuy('don_3')">
+        <div class="don-btn" onclick="shopBuy('don_2')">
           <span class="don-ico">🟠</span>
           <div>
-            <div class="don-amt">3 Pi</div>
+            <div class="don-amt">2 Pi</div>
             <div class="don-lbl">Soutien moyen</div>
-          </div>
-        </div>
-
-        <div class="don-btn" onclick="shopBuy('don_5')">
-          <span class="don-ico">🔴</span>
-          <div>
-            <div class="don-amt">5 Pi</div>
-            <div class="don-lbl">Grand soutien</div>
           </div>
         </div>
 
@@ -1584,10 +1588,12 @@ function shopBuy(type) {
     decouverte: { price:1, label:'Pack Découverte',   std:25, gold:7,  isPack:true  },
     middle:     { price:2, label:'Middle Pack',        std:40, gold:9,  isPack:true  },
     giga:       { price:4, label:'Giga Pack',          std:55, gold:12, isPack:true  },
-    don_1:      { price:1, label:'Don 1 Pi',           std:0,  gold:0,  isPack:false },
-    don_3:      { price:3, label:'Don 3 Pi',           std:0,  gold:0,  isPack:false },
-    don_5:      { price:5, label:'Don 5 Pi',           std:0,  gold:0,  isPack:false },
-    don_libre:  { price:1, label:'Don libre',          std:0,  gold:0,  isPack:false },
+    don_0_5:    { price:.5, label:'Don 0.5 Pi',          std:0,  gold:0,  isPack:false },
+    don_1:      { price:1, label:'Don 1 Pi',            std:0,  gold:0,  isPack:false },
+    don_2:      { price:2, label:'Don 2 Pi',            std:0,  gold:0,  isPack:false },
+    don_3:      { price:3, label:'Don 3 Pi',            std:0,  gold:0,  isPack:false },
+    don_5:      { price:5, label:'Don 5 Pi',            std:0,  gold:0,  isPack:false },
+    don_libre:  { price:1, label:'Don libre',           std:0,  gold:0,  isPack:false },
   };
   const item = tanks[type]; if (!item) return;
   if (item.isPack && tankType !== 'base') {
