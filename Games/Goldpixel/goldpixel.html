@@ -284,22 +284,28 @@ html, body {
   width:36px; height:36px; border-radius:6px; flex-shrink:0;
   border:2px solid rgba(255,255,255,.55);
   box-shadow:0 0 6px rgba(0,0,0,.5);
-  background:#3690ea;              /* mis à jour dynamiquement par l'engine */
+  background:#3690ea;
   transition:background .1s;
   cursor:default;
 }
 
-/* Bouton Gold — légèrement plus grand que swatch, compact */
+/* ── Ligne Gold + Undo côte à côte ── */
+#gold-undo-row {
+  display:flex; flex-direction:row; align-items:center;
+  gap:4px; width:100%; flex-shrink:0;
+}
+
+/* Bouton Gold — compact, côte à côte avec undo */
 #btn-gold {
-  width:84px; height:38px; border-radius:6px; flex-shrink:0;
+  flex:1; height:36px; border-radius:6px; flex-shrink:0;
   background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
   background-size:200% auto;
   border:2px solid #ffd700; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  font-size:.88rem; font-weight:900; color:#000;
+  font-size:.82rem; font-weight:900; color:#000;
   animation:goldSpin 3s linear infinite, goldGlow 1.8s ease-in-out infinite;
   touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-  user-select:none;
+  user-select:none; min-width:0;
 }
 @keyframes goldSpin { 0%{background-position:0% center;} 100%{background-position:200% center;} }
 @keyframes goldGlow {
@@ -309,14 +315,14 @@ html, body {
 #btn-gold.active { border-color:#fff; box-shadow:0 0 14px #ffd700; }
 #btn-gold.empty  { opacity:.35; animation:none; }
 
-/* Bouton Undo — discret, compact */
+/* Bouton Undo — discret, même hauteur que gold, côte à côte */
 #btn-undo {
-  width:84px; height:28px; border-radius:5px; flex-shrink:0;
+  flex:1; height:36px; border-radius:5px; flex-shrink:0;
   background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.15);
-  color:rgba(255,255,255,.45); font-size:.75rem; letter-spacing:.02em;
-  display:flex; align-items:center; justify-content:center; gap:4px;
+  color:rgba(255,255,255,.45); font-size:.62rem; letter-spacing:.01em;
+  display:flex; align-items:center; justify-content:center; gap:2px;
   cursor:pointer; touch-action:manipulation; user-select:none;
-  -webkit-tap-highlight-color:transparent; transition:all .15s;
+  -webkit-tap-highlight-color:transparent; transition:all .15s; min-width:0;
 }
 #btn-undo.active {
   background:rgba(232,60,80,.18); border-color:#e83c50; color:#e83c50;
@@ -458,8 +464,8 @@ html, body {
   position:relative; overflow:visible;
   background:rgba(56,212,138,.08);
   transition:border-color .3s, background .3s, color .3s;
-  /* Séparation du groupe zoom → 12px de margin-top */
-  margin-top:12px;
+  /* Séparation du groupe zoom → espace sous la sentinelle */
+  margin-bottom:12px;
 }
 #btn-sentinel:active { transform:scale(.92); }
 
@@ -1012,9 +1018,11 @@ html, body {
       <div id="color-preview" title="Couleur sélectionnée"></div>
       <div id="palette-grid"></div>
       <div class="hud-sep"></div>
-      <div id="btn-gold" title="Pixel Gold (✦)" onclick="GP.pickGold()">✦</div>
-      <div class="hud-sep"></div>
-      <div id="btn-undo" title="Annuler (30s)" onclick="GP.undo()">↩ annuler</div>
+      <!-- Gold + Undo sur la même ligne -->
+      <div id="gold-undo-row">
+        <div id="btn-gold" title="Pixel Gold (✦)" onclick="GP.pickGold()">✦</div>
+        <div id="btn-undo" title="Annuler (30s)" onclick="GP.undo()">↩</div>
+      </div>
     </div>
 
     <!-- ── Centre : zone de jeu ── -->
@@ -1026,14 +1034,14 @@ html, body {
     
     <!-- ── Droite : zoom + sentinelle ── -->
     <div id="hud-right">
-      <div class="zoom-btn" onclick="GP.zoomIn()"  title="Zoom +">＋</div>
-      <div class="zoom-btn" onclick="GP.zoomOut()" title="Zoom −">－</div>
-      <div class="zoom-btn" style="font-size:.88rem;" onclick="GP.resetView()" title="Centrer">⊙</div>
-      <!-- Sentinelle en bas du groupe zoom, margin-top géré par CSS -->
+      <!-- Sentinelle EN HAUT, margin-bottom crée l'espace avec zoom -->
       <div id="btn-sentinel" class="sentinel-idle" onclick="SENTINEL.openLog()" title="Sentinelle">
         👁️
         <div id="sentinel-badge"></div>
       </div>
+      <div class="zoom-btn" onclick="GP.zoomIn()"  title="Zoom +">＋</div>
+      <div class="zoom-btn" onclick="GP.zoomOut()" title="Zoom −">－</div>
+      <div class="zoom-btn" style="font-size:.88rem;" onclick="GP.resetView()" title="Centrer">⊙</div>
     </div>
 
   </div>
