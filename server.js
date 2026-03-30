@@ -70,8 +70,8 @@ const ShopRoutes = require('./goldpixel-backend/shop/routes');
 // ║    GAME_CONFIG.<SYSTEM>.enabled = true    → système actif et opérationnel
 // ╚═══════════════════════════════════════════════════════════════
 /* Canvas Gold Pixel — dimensions courantes (modifiées au runtime via Socket.io) */
-let _gpCanvasW = 500;
-let _gpCanvasH = 500;
+let _gpCanvasW = 3000;
+let _gpCanvasH = 3000;
 
 const GAME_CONFIG = {
 
@@ -2559,7 +2559,7 @@ app.use(express.static(path.join(__dirname)));
 // ══════════════════════════════════════════════════════════════
 
 /* Dimensions courantes du canvas — déclarées en haut du fichier */
-const EXPAND_THRESHOLD = 0.10;  // 10% → atteignable (500×500 = 250k → 25k pixels)
+const EXPAND_THRESHOLD = 0.01;  // 1% de 9M = 90k pixels → atteignable en production
 const EXPAND_FACTOR    = 1.5;   // +50% surface → dim × √1.5 ≈ ×1.22
 
 /* Cooldown d'expansion */
