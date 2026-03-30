@@ -689,6 +689,12 @@ const GP = (() => {
   /* ══════════════════════════════════════════════════════════════
      API PUBLIQUE
   ══════════════════════════════════════════════════════════════ */
+  /* Exposer _localStock sur window pour que updateStockUI puisse le lire */
+  Object.defineProperty(window, '_localStock', {
+    get: () => _localStock,
+    configurable: true,
+  });
+
   return {
     startEngine,
     pick:       _pick,
