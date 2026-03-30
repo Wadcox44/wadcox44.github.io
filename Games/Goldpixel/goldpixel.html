@@ -1626,18 +1626,7 @@ function loadLSState() {
   } catch (_) {}
 }
 
-/* ════════════════════════════
-   PALETTE — couleurs conservées
-   pour le futur moteur
-════════════════════════════ */
-function pickColor(c) {
-  if (c === GOLD_COLOR) { pickGoldColor(); return; }
-  activeColor = c;
-}
-function pickGoldColor() {
-  if (goldStock <= 0) { showToast('✦ Stock Gold épuisé !'); return; }
-  activeColor = GOLD_COLOR;
-}
+
 
 /* ════════════════════════════
    RÉGLAGES — DROITIER / GAUCHER
