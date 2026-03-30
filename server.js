@@ -2500,6 +2500,116 @@ app.post('/api/pixelwar/player/country', async (req, res) => {
   }
 });
 
+
+/* ─────────────────────────────────────────────────────────────
+   GET /api/pixelwar/archive
+   Retourne la liste des archives mensuelles disponibles.
+   Chaque archive = { label, ts, pixelCount }
+───────────────────────────────────────────────────────────── */
+app.get('/api/pixelwar/archive', async (req, res) => {
+  try {
+    /* Lister les collections archive_YYYY_MM */
+    const cols = await db.listCollections().toArray();
+    const archives = cols
+      .filter(c => /^archive_\d{4}_\d{2}$/.test(c.name))
+      .map(c => ({ label: c.name.replace('archive_', '') }));
+
+    /* Enrichir avec le nombre de pixels si disponible */
+    const enriched = await Promise.all(archives.map(async a => {
+      try {
+        const count = await db.collection(`archive_${a.label}`).countDocuments();
+        const meta  = await db.collection('pixelwar_archive_meta')
+          .findOne({ label: a.label }, { projection: { ts:1 } });
+        return { label: a.label, pixelCount: count, ts: meta?.ts || null };
+      } catch (_) {
+        return { label: a.label, pixelCount: 0, ts: null };
+      }
+    }));
+
+    res.json({ ok: true, archives: enriched.sort((a, b) => (b.label > a.label ? 1 : -1)) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   POST /api/pixelwar/reset
+   Reset mensuel du canvas Gold Pixel.
+   Protégé par x-admin-secret.
+   Corps : { force: bool }  — force=true passe le cooldown 28j
+
+   Étapes :
+   1. Vérifie le cooldown (min 28 jours depuis dernier reset)
+   2. Copie pixelwar_grid → archive_YYYY_MM
+   3. Enregistre les métadonnées d'archive
+   4. Vide pixelwar_grid
+   5. Remet _gpPixelCount à 0
+───────────────────────────────────────────────────────────── */
+app.post('/api/pixelwar/reset', async (req, res) => {
+  try {
+    /* Vérification admin */
+    const secret = req.headers['x-admin-secret'] || req.body?.secret;
+    if (!secret || secret !== ADMIN_SECRET) {
+      return res.status(403).json({ ok: false, error: 'Non autorisé' });
+    }
+
+    const { force } = req.body || {};
+    const now       = Date.now();
+
+    /* Cooldown 28 jours (sauf si force=true) */
+    if (!force) {
+      const lastReset = await db.collection('pixelwar_archive_meta')
+        .findOne({}, { sort: { ts: -1 }, projection: { ts: 1 } });
+      if (lastReset && now - lastReset.ts < 28 * 24 * 3600 * 1000) {
+        const joursRestants = Math.ceil((28 * 24 * 3600 * 1000 - (now - lastReset.ts)) / 86400000);
+        return res.status(400).json({
+          ok: false,
+          error: `Reset trop tôt — prochain reset dans ${joursRestants} jour(s)`,
+        });
+      }
+    }
+
+    /* Label de l'archive : YYYY_MM */
+    const d     = new Date(now);
+    const label = `${d.getFullYear()}_${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const col_  = `archive_${label}`;
+
+    /* Copier la grille dans l'archive */
+    const pixels = await db.collection('pixelwar_grid').find({}).toArray();
+    if (pixels.length > 0) {
+      /* Supprimer l'ancienne archive du même mois si elle existe */
+      await db.collection(col_).drop().catch(() => {});
+      await db.collection(col_).insertMany(pixels);
+    }
+
+    /* Sauvegarder les métadonnées */
+    await db.collection('pixelwar_archive_meta').insertOne({
+      label, ts: now, pixelCount: pixels.length,
+      canvasW: _gpCanvasW, canvasH: _gpCanvasH,
+    });
+
+    /* Vider la grille */
+    await db.collection('pixelwar_grid').deleteMany({});
+
+    /* Remettre le canvas et les compteurs à zéro */
+    _gpCanvasW    = 3000;
+    _gpCanvasH    = 3000;
+    _gpPixelCount = 0;
+
+    /* Notifier tous les clients connectés */
+    io.emit('canvas:reset', {
+      label, ts: now,
+      msg: '🔄 Canvas réinitialisé pour la nouvelle saison !',
+    });
+
+    console.log(`[GP] Reset mensuel : ${pixels.length} pixels archivés → ${col_}`);
+    res.json({ ok: true, label, pixelCount: pixels.length, ts: now });
+  } catch (e) {
+    console.error('[GP] Reset error:', e.message);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // ══════════════════════════════════════════════════════════════════
 //  ROUTES JEUX — assets statiques + HTML entry point
 //  app.use sert les assets du dossier (CSS, JS, images, sons…)
