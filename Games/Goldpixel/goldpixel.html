@@ -1601,8 +1601,11 @@ function shopBuy(type) {
         .then(d => {
           if (d && d.ok) {
             if (item.isPack) {
-              setTank(type, Date.now() + TANK_DURATION_MS);
+              setTank(type, d.tankExpiry || (Date.now() + TANK_DURATION_MS));
+              /* Synchroniser goldStock depuis la réponse serveur */
+              if (typeof d.goldStock === 'number') goldStock = d.goldStock;
               saveLSState();
+              updateStockUI();
               showToast('Pack ' + item.label + ' actif — ' + item.std + ' std / ' + item.gold + ' gold — 7 jours !');
             } else {
               showToast('Merci pour ton soutien de ' + item.price + ' Pi !');
