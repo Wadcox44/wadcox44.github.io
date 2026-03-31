@@ -236,23 +236,15 @@ button {
 }
 
 /* ── 7. CANVAS ────────────────────────────────────────────── */
-/* FIX 1 — canvas-wrap prend tout l'espace horizontal disponible.
-   overflow:auto maintient le scroll pour le zoom.
-   Le padding minimal (4px) laisse respirer le cadre doré. */
 #canvas-wrap {
   flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:auto;
   background:#0a0612; align-self:stretch;
   display:flex;
-  padding:4px;
+  padding:16px; /* léger espace visuel pour éviter le bord à bord brutal */
 }
 
-/* FIX 3 — canvas-inner : taille initiale définie avant le JS
-   pour éviter le flash. fitToScreen() la surcharge immédiatement.
-   max-width:100% garantit qu'il ne dépasse jamais le wrap
-   quelle que soit la taille de l'écran. */
 #canvas-inner {
   position:relative; margin:auto; flex-shrink:0;
-  max-width:100%;   /* ne jamais dépasser le wrap */
   border: 4px solid #ffd700;
   border-radius: 6px;
   box-shadow: 
@@ -277,15 +269,17 @@ button {
 #hud-left {
   flex-shrink:0; width:var(--hud-l-w);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:4px; padding:4px 3px;
+  gap:3px; padding:0 3px 4px; /* padding-top:0 — le margin-top de color-preview gère l'espace */
   background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden;
 }
 
 #color-preview {
-  width:36px; height:36px; border-radius:6px; flex-shrink:0;
-  border:2px solid rgba(255,255,255,.58);
+  width:34px; height:34px; border-radius:7px; flex-shrink:0;
+  border:2px solid rgba(255,255,255,.55);
   box-shadow:0 0 8px rgba(0,0,0,.6);
   transition:background .1s; cursor:default;
+  margin-top:6px;           /* espace avec la topbar */
+  align-self:center;        /* centré horizontalement dans la colonne */
 }
 
 #palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; width:100%; }
@@ -304,60 +298,88 @@ button {
 
 .hud-sep { width:80%; height:1px; background:var(--border); flex-shrink:0; margin:1px 0; }
 
-#gold-undo-row { display:flex; flex-direction:row; align-items:center; gap:3px; width:100%; flex-shrink:0; }
+/* ── Ligne Gold + Undo : flex côte à côte, même hauteur ── */
+#gold-undo-row {
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;   /* même hauteur garantie */
+  gap:4px;
+  width:100%;
+  flex-shrink:0;
+}
 
+/* Gold — prend exactement la moitié */
 #btn-gold {
-  flex:1; height:34px; border-radius:6px;
+  flex:1;
+  height:30px;           /* réduit vs l'ancien 34px */
+  border-radius:6px;
   background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
-  background-size:200% auto; border:2px solid #ffd700;
+  background-size:200% auto;
+  border:2px solid #ffd700;
   display:flex; align-items:center; justify-content:center;
-  font-size:.82rem; font-weight:900; color:#000;
-  animation:goldSpin 3s linear infinite,goldGlow 2s ease-in-out infinite;
-  touch-action:manipulation; min-width:0;
+  font-size:.78rem; font-weight:900; color:#000;
+  animation:goldSpin 3s linear infinite, goldGlow 2s ease-in-out infinite;
+  touch-action:manipulation;
+  min-width:0;
 }
 @keyframes goldSpin { from{background-position:0% center;} to{background-position:200% center;} }
 @keyframes goldGlow {
-  0%,100%{ box-shadow:0 0 5px #ffd700,0 0 10px rgba(255,215,0,.3); }
-  50%    { box-shadow:0 0 10px #ffd700,0 0 20px rgba(255,215,0,.5); }
+  0%,100%{ box-shadow:0 0 5px #ffd700, 0 0 10px rgba(255,215,0,.3); }
+  50%    { box-shadow:0 0 10px #ffd700, 0 0 20px rgba(255,215,0,.5); }
 }
-#btn-gold.active { 
-  border-color:#fff; 
-  box-shadow:0 0 16px #ffd700, 0 0 30px rgba(255,215,0,.6); 
-  transform:scale(1.05); 
+#btn-gold.active {
+  border-color:#fff;
+  box-shadow:0 0 16px #ffd700, 0 0 30px rgba(255,215,0,.6);
+  transform:scale(1.05);
 }
-#btn-gold.empty  { opacity:.35; animation:none; }
+#btn-gold.empty { opacity:.35; animation:none; }
 
-/* Undo — agrandi, rouge visible, largeur pleine */
+/* Undo — même flex:1 que gold → largeur identique */
 #btn-undo {
-  width:100%; height:40px; border-radius:7px; flex-shrink:0;
-  background:rgba(232,60,80,.18);
-  border:2px solid rgba(232,60,80,.5);
-  color:var(--red); font-size:.64rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:5px;
-  touch-action:manipulation; transition:all .14s;
+  flex:1;
+  height:30px;           /* identique à btn-gold */
+  border-radius:6px;
+  flex-shrink:0;
+  background:rgba(232,60,80,.15);
+  border:1.5px solid rgba(232,60,80,.45);
+  color:var(--red);
+  display:flex; align-items:center; justify-content:center; gap:3px;
+  touch-action:manipulation;
+  transition:all .14s;
+  min-width:0;
 }
-#btn-undo .undo-ico { font-size:.9rem; font-weight:900; }
-#btn-undo .undo-lbl { font-size:.54rem; letter-spacing:.03em; }
+#btn-undo .undo-ico { font-size:.78rem; font-weight:900; }
+#btn-undo .undo-lbl { font-size:.48rem; letter-spacing:.02em; font-weight:700; }
 #btn-undo.active {
-  background:rgba(232,60,80,.35); border-color:var(--red);
+  background:rgba(232,60,80,.32);
+  border-color:var(--red);
   animation:undoPulse .5s ease-in-out infinite alternate;
 }
-@keyframes undoPulse { to { box-shadow:0 0 12px var(--red); } }
-#btn-undo:active { transform:scale(.93); background:rgba(232,60,80,.4); }
+@keyframes undoPulse { to { box-shadow:0 0 10px var(--red); } }
+#btn-undo:active { transform:scale(.93); background:rgba(232,60,80,.38); }
 
 /* ── 9. HUD DROITE ────────────────────────────────────────── */
 #hud-right {
   flex-shrink:0; width:var(--hud-r-w);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:flex-start; /* flex-start pour que sentinel-wrap flex:1 fonctionne */
   gap:0; padding:0 4px;
   background:rgba(0,0,0,.4); border-left:1px solid var(--border);
 }
 
-/* Wrap sentinelle — padding-top pour que l'anneau soit visible */
+/* Wrap sentinelle — flex:1 sur la partie haute pour centrer
+   visuellement le bouton entre la topbar et le séparateur.
+   overflow:visible indispensable pour que l'anneau radar
+   ne soit pas coupé. */
 .sentinel-wrap {
-  display:flex; align-items:center; justify-content:center;
-  width:100%; padding:12px 0 6px;
-  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  flex:1;                 /* prend tout l'espace dispo au-dessus du séparateur */
+  min-height:0;
+  overflow:visible;       /* anneau radar visible même hors limites du wrap */
+  padding-top:8px;        /* espace supplémentaire pour l'anneau */
 }
 
 .hud-sep-v {
