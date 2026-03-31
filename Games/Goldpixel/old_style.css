@@ -126,7 +126,7 @@ button {
 
 /* ── 5. APP SHELL + TOPBAR ────────────────────────────────── */
 #app {
-  display:none; width:100dvw; height:100dvh;
+  display:none; width:100%; height:100%;
   flex-direction:column; overflow:hidden;
 }
 #app.visible { display:flex; }
@@ -237,46 +237,48 @@ button {
 
 /* ── 7. CANVAS ────────────────────────────────────────────── */
 #canvas-wrap {
-  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:hidden;
+  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:auto;
   background:#0a0612; align-self:stretch;
+  display:flex;
+}
+
+#canvas-inner {
+  position:relative; margin:auto; flex-shrink:0;
+  border: 4px solid #ffd700;
+  border-radius: 6px;
+  box-shadow: 
+    0 0 0 2px #150e00,
+    0 0 0 4px #b8860b,
+    0 0 25px rgba(255, 215, 0, 0.45),
+    inset 0 0 20px rgba(255, 215, 0, 0.15);
+  box-sizing: content-box;
 }
 
 #gameCanvas {
-  display:block; position:absolute; top:0; left:0;
-  transform-origin:0 0;
+  width:100%; height:100%; display:block;
   image-rendering:pixelated; image-rendering:crisp-edges;
   cursor:crosshair;
-  border:2px solid var(--gold);
-  box-shadow:0 0 18px rgba(245,200,66,.35),0 0 40px rgba(245,200,66,.1);
 }
 
-#gameCanvas.expanding { animation:frameExpand .8s ease-out; }
-@keyframes frameExpand {
-  0%  { box-shadow:0 0 18px rgba(245,200,66,.35); }
-  45% { box-shadow:0 0 60px rgba(245,200,66,.9),0 0 120px rgba(245,200,66,.4); }
-  100%{ box-shadow:0 0 18px rgba(245,200,66,.35); }
+#grid-overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; z-index:2; display:none;
 }
 
-#px-coords {
-  position:absolute; bottom:5px; left:50%; transform:translateX(-50%);
-  font-family:'Space Mono',monospace; font-size:.4rem; color:rgba(245,200,66,.42);
-  pointer-events:none; white-space:nowrap; z-index:5;
-  background:rgba(0,0,0,.55); padding:2px 6px; border-radius:4px;
-}
-
-/* ── 8. HUD GAUCHE ────────────────────────────────────────── */
 #hud-left {
   flex-shrink:0; width:var(--hud-l-w);
-  display:flex; flex-direction:column; align-items:center;
-  gap:4px; padding:4px 3px;
-  background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; padding:0 3px 4px; /* padding-top:0 — le margin-top de color-preview gère l'espace */
+  background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden;
 }
 
 #color-preview {
-  width:36px; height:36px; border-radius:6px; flex-shrink:0;
-  border:2px solid rgba(255,255,255,.58);
+  width:34px; height:34px; border-radius:7px; flex-shrink:0;
+  border:2px solid rgba(255,255,255,.55);
   box-shadow:0 0 8px rgba(0,0,0,.6);
   transition:background .1s; cursor:default;
+  margin-top:6px;           /* espace avec la topbar */
+  align-self:center;        /* centré horizontalement dans la colonne */
 }
 
 #palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; width:100%; }
@@ -289,62 +291,94 @@ button {
 .px-swatch:active { transform:scale(.82); }
 .px-swatch.active {
   border-color:#fff; transform:scale(1.15);
-  box-shadow:0 0 0 2px #fff,0 0 8px rgba(255,255,255,.5);
+  box-shadow:0 0 0 2px #fff,0 0 12px rgba(255,255,255,.8),0 0 20px rgba(0,229,255,.4);
   z-index:1; position:relative;
 }
 
 .hud-sep { width:80%; height:1px; background:var(--border); flex-shrink:0; margin:1px 0; }
 
-#gold-undo-row { display:flex; flex-direction:row; align-items:center; gap:3px; width:100%; flex-shrink:0; }
+/* ── Ligne Gold + Undo : flex côte à côte, même hauteur ── */
+#gold-undo-row {
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;   /* même hauteur garantie */
+  gap:4px;
+  width:100%;
+  flex-shrink:0;
+}
 
+/* Gold — prend exactement la moitié */
 #btn-gold {
-  flex:1; height:34px; border-radius:6px;
+  flex:1;
+  height:30px;           /* réduit vs l'ancien 34px */
+  border-radius:6px;
   background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
-  background-size:200% auto; border:2px solid #ffd700;
+  background-size:200% auto;
+  border:2px solid #ffd700;
   display:flex; align-items:center; justify-content:center;
-  font-size:.82rem; font-weight:900; color:#000;
-  animation:goldSpin 3s linear infinite,goldGlow 2s ease-in-out infinite;
-  touch-action:manipulation; min-width:0;
+  font-size:.78rem; font-weight:900; color:#000;
+  animation:goldSpin 3s linear infinite, goldGlow 2s ease-in-out infinite;
+  touch-action:manipulation;
+  min-width:0;
 }
 @keyframes goldSpin { from{background-position:0% center;} to{background-position:200% center;} }
 @keyframes goldGlow {
-  0%,100%{ box-shadow:0 0 5px #ffd700,0 0 10px rgba(255,215,0,.3); }
-  50%    { box-shadow:0 0 10px #ffd700,0 0 20px rgba(255,215,0,.5); }
+  0%,100%{ box-shadow:0 0 5px #ffd700, 0 0 10px rgba(255,215,0,.3); }
+  50%    { box-shadow:0 0 10px #ffd700, 0 0 20px rgba(255,215,0,.5); }
 }
-#btn-gold.active { border-color:#fff; box-shadow:0 0 16px #ffd700; }
-#btn-gold.empty  { opacity:.35; animation:none; }
+#btn-gold.active {
+  border-color:#fff;
+  box-shadow:0 0 16px #ffd700, 0 0 30px rgba(255,215,0,.6);
+  transform:scale(1.05);
+}
+#btn-gold.empty { opacity:.35; animation:none; }
 
-/* Undo — agrandi, rouge visible, largeur pleine */
+/* Undo — même flex:1 que gold → largeur identique */
 #btn-undo {
-  width:100%; height:40px; border-radius:7px; flex-shrink:0;
-  background:rgba(232,60,80,.18);
-  border:2px solid rgba(232,60,80,.5);
-  color:var(--red); font-size:.64rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:5px;
-  touch-action:manipulation; transition:all .14s;
+  flex:1;
+  height:30px;           /* identique à btn-gold */
+  border-radius:6px;
+  flex-shrink:0;
+  background:rgba(232,60,80,.15);
+  border:1.5px solid rgba(232,60,80,.45);
+  color:var(--red);
+  display:flex; align-items:center; justify-content:center; gap:3px;
+  touch-action:manipulation;
+  transition:all .14s;
+  min-width:0;
 }
-#btn-undo .undo-ico { font-size:.9rem; font-weight:900; }
-#btn-undo .undo-lbl { font-size:.54rem; letter-spacing:.03em; }
+#btn-undo .undo-ico { font-size:.78rem; font-weight:900; }
+#btn-undo .undo-lbl { font-size:.48rem; letter-spacing:.02em; font-weight:700; }
 #btn-undo.active {
-  background:rgba(232,60,80,.35); border-color:var(--red);
+  background:rgba(232,60,80,.32);
+  border-color:var(--red);
   animation:undoPulse .5s ease-in-out infinite alternate;
 }
-@keyframes undoPulse { to { box-shadow:0 0 12px var(--red); } }
-#btn-undo:active { transform:scale(.93); background:rgba(232,60,80,.4); }
+@keyframes undoPulse { to { box-shadow:0 0 10px var(--red); } }
+#btn-undo:active { transform:scale(.93); background:rgba(232,60,80,.38); }
 
 /* ── 9. HUD DROITE ────────────────────────────────────────── */
 #hud-right {
   flex-shrink:0; width:var(--hud-r-w);
   display:flex; flex-direction:column; align-items:center;
+  justify-content:flex-start; /* flex-start pour que sentinel-wrap flex:1 fonctionne */
   gap:0; padding:0 4px;
   background:rgba(0,0,0,.4); border-left:1px solid var(--border);
 }
 
-/* Wrap sentinelle — padding-top pour que l'anneau soit visible */
+/* Wrap sentinelle — flex:1 sur la partie haute pour centrer
+   visuellement le bouton entre la topbar et le séparateur.
+   overflow:visible indispensable pour que l'anneau radar
+   ne soit pas coupé. */
 .sentinel-wrap {
-  display:flex; align-items:center; justify-content:center;
-  width:100%; padding:12px 0 6px;
-  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  flex:1;                 /* prend tout l'espace dispo au-dessus du séparateur */
+  min-height:0;
+  overflow:visible;       /* anneau radar visible même hors limites du wrap */
+  padding-top:8px;        /* espace supplémentaire pour l'anneau */
 }
 
 .hud-sep-v {
