@@ -240,7 +240,6 @@ button {
   flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:auto;
   background:#0a0612; align-self:stretch;
   display:flex;
-  padding:16px; /* léger espace visuel pour éviter le bord à bord brutal */
 }
 
 #canvas-inner {
