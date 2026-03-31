@@ -127,10 +127,16 @@ const GP = (() => {
   function fitToScreen() {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    // Le ratio remplit exactement la largeur du conteneur (UI gauche/droite touchées)
-    const scaleX = wrap.clientWidth / CANVAS_W;
-    cssScale = scaleX;
-    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1; // Pas de flou si l'image est petite
+    
+    // On retire une petite marge (10px de chaque côté) pour que le fin liseré doré reste visible
+    const padding = 20;
+    
+    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
+    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
+    
+    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
+    cssScale = Math.min(scaleX, scaleY);
+    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
     _applyZoom();
   }
 
