@@ -142,18 +142,21 @@
       <div id="color-preview" title="Couleur active"></div>
       <div id="palette-grid"></div>
       <div class="hud-sep"></div>
+      <!-- Gold + Undo côte à côte -->
       <div id="gold-undo-row">
         <button id="btn-gold" title="Pixel Gold ✦" onclick="GP.pickGold()">✦</button>
+        <button id="btn-undo" title="Annuler dernier pixel (30s)" onclick="GP.undo()">
+          <span class="undo-ico">✕</span><span class="undo-lbl">Annuler</span>
+        </button>
       </div>
-      <button id="btn-undo" title="Annuler dernier pixel (30s)" onclick="GP.undo()">
-        <span class="undo-ico">✕</span><span class="undo-lbl">Annuler</span>
-      </button>
     </aside>
 
     <!-- CANVAS CENTRAL -->
     <div id="canvas-wrap">
-      <canvas id="gameCanvas"></canvas>
-      <div id="px-coords">—</div>
+      <div id="canvas-inner">
+        <canvas id="gameCanvas"></canvas>
+        <div id="grid-overlay"></div>
+      </div>
     </div>
 
     <!-- HUD DROITE : sentinelle + navigation -->
@@ -771,7 +774,8 @@ const SENTINEL = (() => {
   function onToastClick() {
     const el = document.getElementById('sentinel-toast');
     if (el) el.classList.remove('on');
-    if (_lastPos && typeof GP !== 'undefined') GP.zoomToCell(_lastPos.col, _lastPos.row);
+    // CANVAS REMOVED
+    // if (_lastPos && typeof GP !== 'undefined') GP.zoomToCell(_lastPos.col, _lastPos.row);
   }
 
   function openLog() {
@@ -798,7 +802,8 @@ const SENTINEL = (() => {
           + `<span class="sl-time">${t}</span>`;
         d.addEventListener('click', () => {
           closeModal('modal-sentinel');
-          if (typeof GP !== 'undefined') GP.zoomToCell(e.col, e.row);
+          // CANVAS REMOVED
+          // if (typeof GP !== 'undefined') GP.zoomToCell(e.col, e.row);
         });
         list.appendChild(d);
       });
@@ -1015,15 +1020,9 @@ function applyPseudoTitle() {
 /* ── Zones favorites ── */
 function saveFavZone() {
   if (_favZones.length >= 5) { showToast('📌 5 zones max — supprime-en une'); return; }
-  const canvas = document.getElementById('gameCanvas');
-  const rect   = canvas?.getBoundingClientRect();
-  if (!rect) return;
-  // Récupérer centre visible
-  const wrap = document.getElementById('canvas-wrap');
-  const cx   = wrap ? Math.round(wrap.clientWidth / 2) : 500;
-  const cy   = wrap ? Math.round(wrap.clientHeight / 2) : 300;
+  // CANVAS REMOVED
   const ts   = Date.now();
-  _favZones.push({ label: 'Zone #' + (ts % 1000), ts, cx, cy });
+  _favZones.push({ label: 'Zone #' + (ts % 1000), ts, cx: 500, cy: 300 });
   localStorage.setItem('gp_favzones', JSON.stringify(_favZones));
   _renderFavZones();
   showToast('📌 Zone sauvegardée');
@@ -1050,22 +1049,7 @@ function _renderFavZones() {
 
 function teleportFav(i) {
   const z = _favZones[i]; if (!z) return;
-  // Zoom vers le centre sauvegardé via GP.zoomToCell approx
-  if (typeof GP !== 'undefined') {
-    const wrap = document.getElementById('canvas-wrap');
-    const vw   = wrap?.clientWidth  || 800;
-    const vh   = wrap?.clientHeight || 500;
-    // col/row approx depuis cx/cy
-    const canvas = document.getElementById('gameCanvas');
-    const r      = canvas?.getBoundingClientRect();
-    if (r) {
-      const rx = (r.width - 4)  / 3000;
-      const ry = (r.height - 4) / 3000;
-      const col = Math.floor((z.cx - 4) / rx);
-      const row = Math.floor((z.cy - 4) / ry);
-      GP.zoomToCell(Math.max(0, col), Math.max(0, row));
-    }
-  }
+  // CANVAS REMOVED
   closeModal('modal-shop');
   showToast('📌 Téléportation vers ' + z.label);
 }
