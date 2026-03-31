@@ -112,12 +112,20 @@ const GP = (() => {
      INPUTS & ZOOM
   ══════════════════════════════════════════════════════════════ */
   function _onCanvasClick(e) {
-    if (!cv || !innerWrap) return;
-    const rect = innerWrap.getBoundingClientRect();
-    
-    // Le clic est calculé proportionnellement au niveau de zoom !
-    const col = Math.floor((e.clientX - rect.left) / cssScale);
-    const row = Math.floor((e.clientY - rect.top) / cssScale);
+    if (!cv) return;
+
+    // FIX 2 — Utiliser getBoundingClientRect() directement sur le <canvas>
+    // (pas sur innerWrap qui inclut la border de canvas-inner).
+    // Le canvas CSS est redimensionné via width/height en px sur innerWrap,
+    // donc sa rect reflète exactement sa taille visuelle.
+    // ratioX/Y = taille logique / taille CSS → conversion sans arrondi intermédiaire.
+    const rect  = cv.getBoundingClientRect();
+    const ratioX = CANVAS_W / rect.width;   // px logique par px CSS
+    const ratioY = CANVAS_H / rect.height;
+
+    // snap to grid : Math.floor pour tomber dans la bonne cellule
+    const col = Math.floor((e.clientX - rect.left) * ratioX);
+    const row = Math.floor((e.clientY - rect.top)  * ratioY);
 
     if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
       placePixel(col, row);
@@ -127,16 +135,23 @@ const GP = (() => {
   function fitToScreen() {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    
-    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
-    const padding = 40;
-    
-    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
-    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
-    
-    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
-    cssScale = Math.min(scaleX, scaleY);
-    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
+
+    // Marge légère pour que le cadre doré et son halo respirent
+    const padH = 16; // marge horizontale (gauche + droite)
+    const padV = 12; // marge verticale (haut + bas)
+
+    // FIX 1 — le canvas occupe presque toute la LARGEUR disponible
+    const scaleX = (wrap.clientWidth  - padH) / CANVAS_W;
+    const scaleY = (wrap.clientHeight - padV) / CANVAS_H;
+
+    // FIX 3 — zoom initial lisible : on prend scaleX (largeur) comme base
+    // mais on ne dépasse pas scaleY pour éviter un débordement vertical.
+    // INITIAL_ZOOM_FACTOR booste le zoom par défaut (1.0 = fit exact,
+    // >1 = pixels plus grands, ici on sature à scaleY si nécessaire).
+    const INITIAL_ZOOM_FACTOR = 1.0; // ajuster entre 1.0 et 2.0 selon le canvas
+    cssScale = Math.min(scaleX * INITIAL_ZOOM_FACTOR, scaleY);
+    cssScale = Math.max(cssScale, 0.01);
+
     _applyZoom();
   }
 
@@ -172,9 +187,9 @@ const GP = (() => {
       const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       const rect = wrap.getBoundingClientRect();
       
-      // Coordonnées logiques
+      // FIX 2b — coordonnées logiques via ratio (cohérent avec _onCanvasClick)
       const lx = (cx - rect.left + wrap.scrollLeft) / cssScale;
-      const ly = (cy - rect.top + wrap.scrollTop) / cssScale;
+      const ly = (cy - rect.top  + wrap.scrollTop)  / cssScale;
 
       cssScale = newScale;
       _applyZoom();
