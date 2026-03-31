@@ -1,71 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════
-   GP ENGINE v4 — Gold Pixel  (reset total Partie 2)
+   GP ENGINE v6 — Gold Pixel (Canvas Fluide + Undo + Grille)
    Games/Goldpixel/gp-engine.js
-
-   RÈGLES STRICTES :
-   ─ Canvas 3000×3000  |  1 cellule = 1 px réel
-   ─ fillRect(col, row, 1, 1) exclusivement en live
-   ─ Fond : fillRect(0,0,W,H) uniquement dans init() et _expand()
-   ─ Zoom : CSS transform uniquement, transform-origin:0 0
-   ─ Coords : cv.getBoundingClientRect() + correction border
-   ─ Polling : GET /api/pixelwar/grid?since=ts toutes les 3s
-   ─ Socket.io : broadcast instantané (complète le polling)
-   ─ 1 seul jeu de listeners, posé dans _bindEvents()
-   ─ Cooldown : 30s côté client, 5 pixels max
-
-   Interface window (injectée par goldpixel.html) :
-     COLORS, GOLD_COLOR, activeColor, stock, goldStock
-     rechargeLeft, pixelsPlaced, piUsername, piConnected
-     STOCK_CAP, GOLD_MAX_ACTIVE, updateStockUI, saveLSState
-     showToast, apiFetch, getRechargeS, SENTINEL
 ═══════════════════════════════════════════════════════════════ */
 
 const GP = (() => {
   'use strict';
 
   /* ── CONFIG ────────────────────────────────────────────────── */
-  const CANVAS_W_INIT = 3000;
-  const CANVAS_H_INIT = 3000;
-  const BG            = '#f5f0e8';
-  const BORDER_PX     = 2;         // border CSS du canvas (px)
-  const POLL_MS       = 3000;      // polling delta
-  const UNDO_MS       = 30000;     // 30s pour annuler
-  const STOCK_MAX     = 5;         // max pixels locaux
-  const COOLDOWN_MS   = 30000;     // 30s entre pixels
+  const POLL_MS       = 3000;
+  const STOCK_MAX     = 999999; // ILLIMITÉ (Demande de test)
+  const COOLDOWN_MS   = 30000;
+  const BG_COLOR      = '#f5f0e8';
 
   /* ── ÉTAT ──────────────────────────────────────────────────── */
-  let CANVAS_W = CANVAS_W_INIT;
-  let CANVAS_H = CANVAS_H_INIT;
+  let CANVAS_W = 100; // Mis à jour via API
+  let CANVAS_H = 100;
+  let cv, ctx, innerWrap, gridOverlay;
+  
+  // Echelle visuelle (CSS Pixel)
+  let cssScale = 1;
 
-  // DOM
-  let cv, ctx, wrap;
+  const _pix = new Map(); // "col,row" → { color, user }
 
-  // Transform
-  let scale = 1, panX = 0, panY = 0;
+  // Cooldown
+  let _localStock   = STOCK_MAX;
+  let _cooldownLeft = 0;
 
-  // Touch
-  let _t1       = null;   // { x, y, panX0, panY0 }
-  let _tMoved   = false;
-  let _isPan    = false;
-  let _pinch0   = null;
-  let _pinchS0  = 1;
-
-  // Mouse
-  let _mDown = false, _mPan = false;
-  let _mX0 = 0, _mY0 = 0, _mPX0 = 0, _mPY0 = 0;
-
-  // Pixels
-  const _pix = new Map();   // "col,row" → { color, user }
-  let _filled = 0;
-
-  // Cooldown local (30s, 5 pixels max)
-  let _localStock    = STOCK_MAX;
-  let _cooldownTimer = null;
-  let _cooldownLeft  = 0;
-
-  // Undo
-  let _undo     = null;   // { col, row, prevColor, prevUser, wasGold }
-  let _undoT    = null;
+  // Undo system
+  let _undo  = null;
+  let _undoT = null;
 
   // Réseau
   let _lastTs     = 0;
@@ -78,133 +41,201 @@ const GP = (() => {
      INIT
   ══════════════════════════════════════════════════════════════ */
   function init() {
-    cv   = document.getElementById('gameCanvas');
-    ctx  = cv.getContext('2d');
-    wrap = document.getElementById('canvas-wrap');
+    cv = document.getElementById('gameCanvas');
+    innerWrap = document.getElementById('canvas-inner');
+    gridOverlay = document.getElementById('grid-overlay');
 
-    cv.width  = CANVAS_W;
-    cv.height = CANVAS_H;
+    if (cv) {
+      ctx = cv.getContext('2d');
+      // Pour éviter les bugs drag, on desactive sur l'innerWrap
+      if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
+      cv.addEventListener('pointerdown', _onCanvasClick);
+    }
+    
+    const wrap = document.getElementById('canvas-wrap');
+    if (wrap) {
+      wrap.addEventListener('touchstart', _onTouchStart, { passive: false });
+      wrap.addEventListener('touchmove', _onTouchMove, { passive: false });
+    }
 
-    _drawBg(0, 0, CANVAS_W, CANVAS_H);
     _buildPalette();
-    _bindEvents();
     _startCooldownTick();
-    requestAnimationFrame(resetView);
-  }
-
-  /* ── Fond pur ── */
-  function _drawBg(x, y, w, h) {
-    ctx.fillStyle = BG;
-    ctx.fillRect(x, y, w, h);
   }
 
   /* ══════════════════════════════════════════════════════════════
-     RESET VIEW — fit exact dans le container via rAF
+     CANVAS RENDU
   ══════════════════════════════════════════════════════════════ */
-  function resetView() {
-    if (!wrap) return;
-    const vw = wrap.clientWidth  || wrap.offsetWidth  || 1;
-    const vh = wrap.clientHeight || wrap.offsetHeight || 1;
-
-    // Marge = border + 2px pour qu'elle soit visible
-    const m  = BORDER_PX + 2;
-    const s  = Math.min((vw - m * 2) / CANVAS_W, (vh - m * 2) / CANVAS_H);
-    scale    = Math.max(s, 0.005);
-    panX     = Math.round((vw - CANVAS_W * scale) / 2);
-    panY     = Math.round((vh - CANVAS_H * scale) / 2);
-    _applyT();
+  function _expand(w, h) {
+    if (w <= CANVAS_W && h <= CANVAS_H && _gridLoaded) return;
+    CANVAS_W = w || CANVAS_W;
+    CANVAS_H = h || CANVAS_H;
+    
+    if (cv) {
+      cv.width = CANVAS_W;
+      cv.height = CANVAS_H;
+      ctx.fillStyle = BG_COLOR;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+      _pix.forEach((v, k) => {
+        const [col, row] = k.split(',').map(Number);
+        _px(col, row, v.color);
+      });
+      // Met à l'échelle idéale de base (fit l'écran au besoin)
+      fitToScreen();
+    }
   }
 
-  function _applyT() {
-    if (cv) cv.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     ZOOM
-  ══════════════════════════════════════════════════════════════ */
-  function zoomIn()  { _zoom(1.35); }
-  function zoomOut() { _zoom(0.75); }
-
-  function _zoom(f, px, py) {
-    if (!wrap) return;
-    const vw = wrap.clientWidth, vh = wrap.clientHeight;
-    if (px === undefined) px = vw / 2;
-    if (py === undefined) py = vh / 2;
-    const ns = Math.min(Math.max(scale * f, 0.005), 80);
-    const r  = ns / scale;
-    panX  = px - (px - panX) * r;
-    panY  = py - (py - panY) * r;
-    scale = ns;
-    _applyT();
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     COORDONNÉES  écran → cellule canvas
-     getBoundingClientRect() du canvas après transform CSS
-     = position réelle sans décalage quoi qu'il arrive
-  ══════════════════════════════════════════════════════════════ */
-  function _s2c(sx, sy) {
-    const r  = cv.getBoundingClientRect();
-    // ratio = taille visuelle CSS du buffer / taille buffer (= scale effectif)
-    // on soustrait les borders pour tomber exactement sur la cellule
-    const rx = (r.width  - BORDER_PX * 2) / CANVAS_W;
-    const ry = (r.height - BORDER_PX * 2) / CANVAS_H;
-    return {
-      col: Math.floor((sx - r.left - BORDER_PX) / rx),
-      row: Math.floor((sy - r.top  - BORDER_PX) / ry),
-    };
-  }
-
-  function _ok(col, row) {
-    return col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H;
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     DESSIN  ─  fillRect(col, row, 1, 1) exclusivement
-  ══════════════════════════════════════════════════════════════ */
   function _px(col, row, color) {
+    if (!ctx) return;
     ctx.fillStyle = color;
     ctx.fillRect(col, row, 1, 1);
   }
 
-  function _erase(col, row) {
-    ctx.fillStyle = BG;
-    ctx.fillRect(col, row, 1, 1);
-  }
-
-  /* Pop-in : alpha 0→1 en 6 frames ≈ 100ms */
-  function _pxAnim(col, row, color) {
-    let step = 0;
-    const run = () => {
-      step++;
-      ctx.globalAlpha = step / 6;
-      ctx.fillStyle   = color;
-      ctx.fillRect(col, row, 1, 1);
-      ctx.globalAlpha = 1;
-      if (step < 6) requestAnimationFrame(run);
-    };
-    requestAnimationFrame(run);
-  }
-
-  /* Flash de remplacement (overwrite) : bref éclair blanc puis couleur */
-  function _pxOverwrite(col, row, color) {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(col, row, 1, 1);
-    setTimeout(() => { ctx.fillStyle = color; ctx.fillRect(col, row, 1, 1); }, 80);
-  }
-
-  function _applyPx(col, row, color, user, anim) {
-    const key    = `${col},${row}`;
-    const isNew  = !_pix.has(key);
-    const wasOld = !isNew;
-    _pix.set(key, { color, user });
-    if (isNew) _filled++;
-    if (anim) {
-      if (wasOld) _pxOverwrite(col, row, color);
-      else        _pxAnim(col, row, color);
+  function _applyPx(col, row, color, user, recordUndo = false) {
+    if (recordUndo) {
+      const prev = _pix.get(`${col},${row}`);
+      _undo = { col, row, prevColor: prev ? prev.color : null, prevUser: prev ? prev.user : null };
+      clearTimeout(_undoT);
+      _undoT = setTimeout(() => { _undo = null; _updateUndoUI(); }, 30000);
+      _updateUndoUI();
+    }
+    
+    if (color === BG_COLOR || color === null) {
+      _pix.delete(`${col},${row}`);
+      _px(col, row, BG_COLOR); // Effacement physique
     } else {
+      _pix.set(`${col},${row}`, { color, user });
       _px(col, row, color);
     }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     INPUTS & ZOOM
+  ══════════════════════════════════════════════════════════════ */
+  function _onCanvasClick(e) {
+    if (!cv || !innerWrap) return;
+    const rect = innerWrap.getBoundingClientRect();
+    
+    // Le clic est calculé proportionnellement au niveau de zoom !
+    const col = Math.floor((e.clientX - rect.left) / cssScale);
+    const row = Math.floor((e.clientY - rect.top) / cssScale);
+
+    if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
+      placePixel(col, row);
+    }
+  }
+
+  function fitToScreen() {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
+    
+    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
+    const padding = 40;
+    
+    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
+    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
+    
+    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
+    cssScale = Math.min(scaleX, scaleY);
+    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
+    _applyZoom();
+  }
+
+  /* ── PINCH TO ZOOM MOBILE ── */
+  let _touchStartDist = 0;
+  let _touchStartScale = 1;
+
+  function _onTouchStart(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      _touchStartDist = Math.sqrt(dx*dx + dy*dy);
+      _touchStartScale = cssScale;
+    }
+  }
+
+  function _onTouchMove(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const wrap = document.getElementById('canvas-wrap');
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      
+      const factor = dist / _touchStartDist;
+      let newScale = _touchStartScale * factor;
+      if (newScale < 0.05) newScale = 0.05;
+      if (newScale > 30) newScale = 30;
+
+      // Centrage logique sous les deux doigts
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const rect = wrap.getBoundingClientRect();
+      
+      // Coordonnées logiques
+      const lx = (cx - rect.left + wrap.scrollLeft) / cssScale;
+      const ly = (cy - rect.top + wrap.scrollTop) / cssScale;
+
+      cssScale = newScale;
+      _applyZoom();
+
+      // Ajuster le scroll pour rester au centre du pincement
+      wrap.scrollLeft = (lx * cssScale) - (cx - rect.left);
+      wrap.scrollTop = (ly * cssScale) - (cy - rect.top);
+    }
+  }
+
+  function zoomIn() {
+    // Si on est vraiment dézoomé, on accélère le pas
+    const step = cssScale < 1 ? 0.2 : (cssScale < 5 ? 1 : 2);
+    cssScale = Math.min(cssScale + step, 20); // max 20x pour bien voir les pixels
+    _applyZoom();
+  }
+
+  function zoomOut() {
+    const step = cssScale <= 1 ? 0.2 : (cssScale <= 5 ? 1 : 2);
+    cssScale = Math.max(cssScale - step, 0.1);
+    _applyZoom();
+  }
+
+  function resetView() {
+    fitToScreen();
+  }
+
+  function _applyZoom() {
+    if (!innerWrap) return;
+    const w = Math.round(CANVAS_W * cssScale);
+    const h = Math.round(CANVAS_H * cssScale);
+    innerWrap.style.width = w + 'px';
+    innerWrap.style.height = h + 'px';
+
+    // Grille visible uniquement si on a zoomé assez pour voir les cases
+    if (gridOverlay) {
+      if (cssScale > 3) {
+        gridOverlay.style.display = 'block';
+        gridOverlay.style.backgroundImage = `
+          linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px)
+        `;
+        gridOverlay.style.backgroundSize = `${cssScale}px ${cssScale}px`;
+      } else {
+        gridOverlay.style.display = 'none';
+      }
+    }
+  }
+
+  function zoomToCell(col, row) {
+    // Zoom direct
+    cssScale = Math.max(cssScale, 10);
+    _applyZoom();
+
+    // Pan sur col, row
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
+    const px = Math.round(col * cssScale);
+    const py = Math.round(row * cssScale);
+    wrap.scrollLeft = px - wrap.clientWidth / 2;
+    wrap.scrollTop  = py - wrap.clientHeight / 2;
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -217,8 +248,9 @@ const GP = (() => {
     const colors = (window.COLORS || []).filter(c => c !== window.GOLD_COLOR);
     colors.forEach(c => {
       const el = document.createElement('div');
-      el.className        = 'px-swatch' + (c === window.activeColor ? ' active' : '');
+      el.className = 'px-swatch' + (c === window.activeColor ? ' active' : '');
       el.style.background = c;
+      el.dataset.color = c; // Sauvegarde la couleur brute (#HEX)
       el.addEventListener('click', () => _pick(c));
       el.addEventListener('touchstart', e => { e.preventDefault(); _pick(c); }, { passive: false });
       grid.appendChild(el);
@@ -231,17 +263,14 @@ const GP = (() => {
     if (c === window.GOLD_COLOR) { pickGold(); return; }
     window.activeColor = c;
     document.querySelectorAll('.px-swatch').forEach(el =>
-      el.classList.toggle('active',
-        el.style.backgroundColor === c || el.style.background === c)
+      // Utilise dataset.color car style.backgroundColor convertit en rgb(...)
+      el.classList.toggle('active', el.dataset.color === c)
     );
     document.getElementById('btn-gold')?.classList.remove('active');
     _updatePreview(c);
   }
 
   function pickGold() {
-    if ((window.goldStock || 0) <= 0) {
-      window.showToast?.('✦ Stock Gold épuisé !'); return;
-    }
     window.activeColor = window.GOLD_COLOR;
     document.querySelectorAll('.px-swatch').forEach(el => el.classList.remove('active'));
     _syncGold();
@@ -252,7 +281,7 @@ const GP = (() => {
     const gb = document.getElementById('btn-gold');
     if (!gb) return;
     gb.classList.toggle('active', window.activeColor === window.GOLD_COLOR);
-    gb.classList.toggle('empty',  (window.goldStock || 0) <= 0);
+    gb.classList.remove('empty'); 
   }
 
   function _updatePreview(color) {
@@ -261,9 +290,7 @@ const GP = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════════
-     COOLDOWN LOCAL  (30s, 5 pixels max)
-     Gestion côté client uniquement — le serveur a ses propres règles.
-     Affiche le compte à rebours dans #tb-cooldown.
+     COOLDOWN
   ══════════════════════════════════════════════════════════════ */
   function _startCooldownTick() {
     setInterval(() => {
@@ -284,6 +311,7 @@ const GP = (() => {
     const s1 = document.getElementById('tb-stock-val');
     if (s1) s1.textContent = _localStock;
     if (!el) return;
+    
     if (_cooldownLeft <= 0 || _localStock >= STOCK_MAX) {
       el.textContent = '✓';
       el.classList.add('ready');
@@ -294,183 +322,97 @@ const GP = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════════
-     PLACE PIXEL
+     ACTIONS JOUEURS (Placer et Annuler)
   ══════════════════════════════════════════════════════════════ */
   function placePixel(col, row) {
-    if (!_ok(col, row)) return;
-
     const isGold = window.activeColor === window.GOLD_COLOR;
 
-    // Vérification stock local
+    // Seul le pixel standard est soumis au stock visuel restreint
     if (!isGold && _localStock <= 0) {
-      window.showToast?.(`⏳ +1 pixel dans ${_cooldownLeft}s`); return;
-    }
-    if (isGold && (window.goldStock || 0) <= 0) {
-      window.showToast?.('✦ Stock Gold épuisé !'); return;
+      window.showToast?.(`⏳ +1 pixel dans ${_cooldownLeft}s`);
+      return;
     }
 
     const color = window.activeColor;
-    const key   = `${col},${row}`;
-    const prev  = _pix.get(key) || null;
-
-    // Sauvegarder pour undo
-    _undo = { col, row, prevColor: prev?.color || null, prevUser: prev?.user || null, wasGold: isGold };
-    _startUndoTimer();
-
-    // Mise à jour optimiste
     _applyPx(col, row, color, '@' + (window.piUsername || 'anon'), true);
 
-    // Décrémenter stock
-    if (isGold) {
-      window.goldStock = Math.max(0, (window.goldStock || 0) - 1);
-      _syncGold();
-    } else {
+    if (!isGold) {
       _localStock = Math.max(0, _localStock - 1);
       if (_cooldownLeft <= 0) _cooldownLeft = COOLDOWN_MS / 1000;
+      _updateCooldownUI();
     }
-    _updateCooldownUI();
+    
     window.pixelsPlaced = (window.pixelsPlaced || 0) + 1;
     window.updateStockUI?.();
-    window.saveLSState?.();
 
-    // Flash
-    const fl = document.getElementById('px-flash');
-    if (fl) { fl.classList.add('on'); setTimeout(() => fl.classList.remove('on'), 80); }
-
-    // Envoi réseau
-    _send(col, row, color, isGold, prev);
-    _checkExpand();
-  }
-
-  function _send(col, row, color, isGold, prevPx) {
     if (_sockReady && _sock) {
       _sock.emit('pixel:place', { col, row, color, username: window.piUsername || 'anonyme' });
     } else if (window.apiFetch) {
-      window.apiFetch('/api/pixelwar/place', 'POST', {
-        col, row, color, username: window.piUsername,
-      }).then(d => {
-        if (d && !d.ok) _rollback(col, row, prevPx, isGold);
-      }).catch(() => {});
+      window.apiFetch('/api/pixelwar/place', 'POST', { col, row, color, username: window.piUsername }).catch(() => {});
     }
   }
 
-  function _rollback(col, row, prevPx, wasGold) {
-    if (prevPx) {
-      _applyPx(col, row, prevPx.color, prevPx.user, false);
-    } else {
-      _pix.delete(`${col},${row}`);
-      _filled = Math.max(0, _filled - 1);
-      _erase(col, row);
-    }
-    if (wasGold) window.goldStock = Math.min(window.GOLD_MAX_ACTIVE || 12, (window.goldStock || 0) + 1);
-    else         { _localStock = Math.min(STOCK_MAX, _localStock + 1); _updateCooldownUI(); }
-    window.updateStockUI?.();
-    window.showToast?.('❌ Pixel refusé');
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     UNDO  (30s)
-  ══════════════════════════════════════════════════════════════ */
   function undo() {
     if (!_undo) { window.showToast?.('Rien à annuler'); return; }
-    const { col, row, prevColor, prevUser, wasGold } = _undo;
+    const { col, row, prevColor, prevUser } = _undo;
+    
     clearTimeout(_undoT);
     _undo = null;
-    document.getElementById('btn-undo')?.classList.remove('active');
+    _updateUndoUI();
 
-    if (prevColor) {
-      _applyPx(col, row, prevColor, prevUser, false);
-      if (_sockReady && _sock)
-        _sock.emit('pixel:place', { col, row, color: prevColor, username: window.piUsername || 'anonyme' });
-      else if (window.apiFetch)
-        window.apiFetch('/api/pixelwar/place', 'POST', { col, row, color: prevColor, username: window.piUsername }).catch(() => {});
-    } else {
-      _pix.delete(`${col},${row}`);
-      _filled = Math.max(0, _filled - 1);
-      _erase(col, row);
+    // Effacement si c'était vide, sinon restauration de la vieille couleur
+    const targetColor = prevColor || BG_COLOR;
+    _applyPx(col, row, targetColor, prevUser, false);
+    
+    // Rendre un jeton
+    if (_localStock < STOCK_MAX) {
+      _localStock++;
+      _updateCooldownUI();
     }
-
-    if (wasGold) window.goldStock = Math.min(window.GOLD_MAX_ACTIVE || 12, (window.goldStock || 0) + 1);
-    else         { _localStock = Math.min(STOCK_MAX, _localStock + 1); _updateCooldownUI(); }
-    window.updateStockUI?.();
-    window.showToast?.('↩ Pixel annulé !');
-    window.saveLSState?.();
+    
+    // Annulation côté serveur
+    if (_sockReady && _sock) {
+      _sock.emit('pixel:place', { col, row, color: targetColor, username: window.piUsername || 'anonyme' });
+    } else if (window.apiFetch) {
+      window.apiFetch('/api/pixelwar/place', 'POST', { col, row, color: targetColor, username: window.piUsername }).catch(() => {});
+    }
   }
 
-  function _startUndoTimer() {
-    clearTimeout(_undoT);
-    document.getElementById('btn-undo')?.classList.add('active');
-    _undoT = setTimeout(() => {
-      _undo = null;
-      document.getElementById('btn-undo')?.classList.remove('active');
-    }, UNDO_MS);
+  function _updateUndoUI() {
+    const b = document.getElementById('btn-undo');
+    if (!b) return;
+    b.classList.toggle('active', !!_undo);
   }
 
   /* ══════════════════════════════════════════════════════════════
-     EXPANSION CANVAS
-  ══════════════════════════════════════════════════════════════ */
-  function _checkExpand() {
-    if (_filled / (CANVAS_W * CANVAS_H) < 0.65) return;
-    if (_sockReady && _sock)
-      _sock.emit('canvas:expand', { currentW: CANVAS_W, currentH: CANVAS_H });
-  }
-
-  function _expand(newW, newH) {
-    if (newW <= CANVAS_W || newH <= CANVAS_H) return;
-
-    const tmp = document.createElement('canvas');
-    tmp.width  = CANVAS_W;
-    tmp.height = CANVAS_H;
-    tmp.getContext('2d').drawImage(cv, 0, 0);
-
-    CANVAS_W = newW;
-    CANVAS_H = newH;
-    cv.width  = newW;
-    cv.height = newH;
-
-    _drawBg(0, 0, newW, newH);
-    ctx.drawImage(tmp, 0, 0);
-
-    // Conserver la vue si raisonnable, sinon fit
-    const vw = wrap.clientWidth, vh = wrap.clientHeight;
-    const m  = BORDER_PX + 2;
-    const fs = Math.min((vw - m * 2) / newW, (vh - m * 2) / newH);
-    if (scale < fs * 0.25) {
-      scale = fs;
-      panX  = Math.round((vw - newW * scale) / 2);
-      panY  = Math.round((vh - newH * scale) / 2);
-    }
-    _applyT();
-
-    cv.classList.add('expanding');
-    setTimeout(() => cv.classList.remove('expanding'), 900);
-    window.showToast?.(`📐 Canvas étendu : ${newW}×${newH}`);
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     RÉSEAU  — polling HTTP delta + socket
+     RÉSEAU
   ══════════════════════════════════════════════════════════════ */
   async function _loadGrid() {
     if (!window.apiFetch) return;
     try {
       const d = await window.apiFetch('/api/pixelwar/grid', 'GET');
-      if (!d?.pixels) return;
-      if (d.canvasW && d.canvasH) _expand(d.canvasW, d.canvasH);
-      d.pixels.forEach(({ col, row, color, user }) => {
-        if (_ok(col, row)) _applyPx(col, row, color, user, false);
-      });
-      // Indexer pixels du joueur pour la Sentinelle
-      if (window.SENTINEL && window.piUsername) {
-        d.pixels
-          .filter(p => p.user === '@' + window.piUsername)
-          .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
+      if (d?.canvasW && d?.canvasH) {
+        _expand(d.canvasW, d.canvasH);
+      } else {
+        _expand(3000, 3000); 
       }
-      if (d.ts) _lastTs = d.ts;
+
+      if (d?.pixels) {
+        d.pixels.forEach(p => _applyPx(p.col, p.row, p.color, p.user, false));
+        if (window.SENTINEL && window.piUsername) {
+          d.pixels
+            .filter(p => p.user === '@' + window.piUsername)
+            .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
+        }
+      }
+      
+      if (d?.ts) _lastTs = d.ts;
       _gridLoaded = true;
-      requestAnimationFrame(resetView);
+      
+      // Dessiner l'oeuvre centrale demandée
+      _drawMasterpiece();
     } catch (e) {
-      console.error('[GP] loadGrid:', e);
-      window.showToast?.('⚠ Connexion en cours...');
+      console.warn('[GP] loadGrid:', e);
     }
   }
 
@@ -479,20 +421,15 @@ const GP = (() => {
     try {
       const d = await window.apiFetch(`/api/pixelwar/grid?since=${_lastTs}`, 'GET');
       if (!d?.pixels?.length) { if (d?.ts) _lastTs = d.ts; return; }
-      d.pixels.forEach(({ col, row, color, user }) => {
-        if (!_ok(col, row)) return;
-        // Ignorer ses propres pixels (déjà appliqués en optimiste)
-        if (user === '@' + window.piUsername) return;
-        window.SENTINEL?.checkIncoming(col, row, user || '?');
-        _applyPx(col, row, color, user, true);
+      d.pixels.forEach(p => {
+        if (p.user === '@' + window.piUsername) return;
+        _applyPx(p.col, p.row, p.color, p.user, false);
+        window.SENTINEL?.checkIncoming(p.col, p.row, p.user || '?');
       });
       if (d.ts) _lastTs = d.ts;
     } catch (_) {}
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     SOCKET.IO  — broadcast instantané (complète le polling)
-  ══════════════════════════════════════════════════════════════ */
   function _initSocket() {
     if (typeof io === 'undefined') return;
     _sock = io({ transports: ['websocket', 'polling'], reconnectionAttempts: 8 });
@@ -500,184 +437,51 @@ const GP = (() => {
     _sock.on('connect',    () => { _sockReady = true; });
     _sock.on('disconnect', () => { _sockReady = false; });
 
-    // État initial via socket (ignoré si HTTP déjà fait)
     _sock.on('canvas:state', ({ pixels, canvasW, canvasH }) => {
-      if (_gridLoaded) {
-        if (canvasW > CANVAS_W || canvasH > CANVAS_H) _expand(canvasW, canvasH);
-        return;
+      if (!_gridLoaded) {
+        _expand(canvasW || 3000, canvasH || 3000);
+        if (Array.isArray(pixels)) {
+          pixels.forEach(p => _applyPx(p.col, p.row, p.color, p.user, false));
+          if (window.SENTINEL && window.piUsername) {
+            pixels.filter(p => p.user === '@' + window.piUsername)
+                  .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
+          }
+        }
+        _gridLoaded = true;
       }
-      if (canvasW && canvasH) _expand(canvasW, canvasH);
-      if (!Array.isArray(pixels)) return;
-      pixels.forEach(({ col, row, color, user }) => {
-        if (_ok(col, row)) _applyPx(col, row, color, user, false);
-      });
-      if (window.SENTINEL && window.piUsername) {
-        pixels
-          .filter(p => p.user === '@' + window.piUsername)
-          .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
-      }
-      _gridLoaded = true;
-      requestAnimationFrame(resetView);
     });
 
-    // Pixel entrant d'un autre joueur
-    _sock.on('pixel:update', ({ col, row, color, user }) => {
-      if (!_ok(col, row)) return;
-      if (user === '@' + window.piUsername) return;
-      window.SENTINEL?.checkIncoming(col, row, user || '?');
-      _applyPx(col, row, color, user, true);
+    _sock.on('pixel:update', (p) => {
+      _applyPx(p.col, p.row, p.color, p.user, false);
+      if (p.user !== '@' + window.piUsername) {
+        window.SENTINEL?.checkIncoming(p.col, p.row, p.user || '?');
+      }
     });
 
-    // ACK pixel posé par soi
     _sock.on('pixel:ack', ({ col, row, ok, error, stock }) => {
       if (!ok) {
-        const wasGold = _undo?.wasGold ?? false;
-        const prev    = _undo ? { color: _undo.prevColor, user: _undo.prevUser } : null;
-        _rollback(col, row, prev, wasGold);
+        _applyPx(col, row, BG_COLOR, null, false);
         window.showToast?.('❌ ' + (error || 'Refusé'));
       } else if (typeof stock === 'number') {
-        // Synchroniser avec le stock serveur
         window.stock = stock;
         window.updateStockUI?.();
       }
     });
 
-    // Expansion
-    _sock.on('canvas:expanded', ({ newW, newH }) => _expand(newW, newH));
-
-    // Reset mensuel
     _sock.on('canvas:reset', ({ msg }) => {
-      _pix.clear();
-      _filled = 0;
-      CANVAS_W = CANVAS_W_INIT;
-      CANVAS_H = CANVAS_H_INIT;
-      cv.width  = CANVAS_W;
-      cv.height = CANVAS_H;
-      _drawBg(0, 0, CANVAS_W, CANVAS_H);
-      _lastTs     = 0;
+      _lastTs = 0;
       _gridLoaded = false;
-      requestAnimationFrame(resetView);
+      _pix.clear();
+      if (ctx) {
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+      }
       window.showToast?.(msg || '🔄 Nouveau mois — canvas réinitialisé !');
     });
   }
 
   /* ══════════════════════════════════════════════════════════════
-     ZOOM TO CELL  (Sentinelle)
-  ══════════════════════════════════════════════════════════════ */
-  function zoomToCell(col, row) {
-    if (!wrap) return;
-    const vw = wrap.clientWidth, vh = wrap.clientHeight;
-    const ts = Math.min(Math.max(scale * 2, 6), 20);
-    panX  = Math.round(vw / 2 - col * ts);
-    panY  = Math.round(vh / 2 - row * ts);
-    scale = ts;
-    _applyT();
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     EVENT LISTENERS  — UN seul jeu dans _bindEvents()
-  ══════════════════════════════════════════════════════════════ */
-  function _bindEvents() {
-    // Touch
-    wrap.addEventListener('touchstart', _onTS, { passive: false });
-    wrap.addEventListener('touchmove',  _onTM, { passive: false });
-    wrap.addEventListener('touchend',   _onTE, { passive: false });
-    // Mouse
-    wrap.addEventListener('mousedown', _onMD);
-    window.addEventListener('mousemove', _onMM);
-    window.addEventListener('mouseup',   _onMU);
-    // Wheel
-    wrap.addEventListener('wheel', _onW, { passive: false });
-    // Resize
-    window.addEventListener('resize', () => {
-      clearTimeout(window._gpRT);
-      window._gpRT = setTimeout(resetView, 80);
-    });
-  }
-
-  /* ── Touch ── */
-  function _onTS(e) {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-      _t1     = { x: e.touches[0].clientX, y: e.touches[0].clientY, panX0: panX, panY0: panY };
-      _tMoved = false; _isPan = false;
-    } else if (e.touches.length === 2) {
-      _pinch0  = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY);
-      _pinchS0 = scale;
-      _tMoved  = true;
-    }
-  }
-
-  function _onTM(e) {
-    e.preventDefault();
-    if (e.touches.length === 1 && _t1) {
-      const dx = e.touches[0].clientX - _t1.x;
-      const dy = e.touches[0].clientY - _t1.y;
-      if (!_isPan && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) { _isPan = true; _tMoved = true; }
-      if (_isPan) { panX = _t1.panX0 + dx; panY = _t1.panY0 + dy; _applyT(); }
-      _coords(e.touches[0].clientX, e.touches[0].clientY);
-    } else if (e.touches.length === 2 && _pinch0 !== null) {
-      _tMoved = true;
-      const d  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
-                             e.touches[0].clientY - e.touches[1].clientY);
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      const ns = Math.min(Math.max(_pinchS0 * (d / _pinch0), 0.005), 80);
-      const r  = ns / scale;
-      panX = cx - (cx - panX) * r; panY = cy - (cy - panY) * r; scale = ns;
-      _applyT();
-    }
-  }
-
-  function _onTE(e) {
-    e.preventDefault();
-    if (e.touches.length === 0 && !_tMoved && _t1) {
-      const t = e.changedTouches[0];
-      const { col, row } = _s2c(t.clientX, t.clientY);
-      placePixel(col, row);
-    }
-    if (e.touches.length < 2) _pinch0 = null;
-    if (e.touches.length === 0) _t1 = null;
-  }
-
-  /* ── Mouse ── */
-  function _onMD(e) {
-    _mDown = true; _mPan = false;
-    _mX0 = e.clientX; _mY0 = e.clientY; _mPX0 = panX; _mPY0 = panY;
-  }
-  function _onMM(e) {
-    if (!_mDown) return;
-    const dx = e.clientX - _mX0, dy = e.clientY - _mY0;
-    if (!_mPan && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) _mPan = true;
-    if (_mPan) { panX = _mPX0 + dx; panY = _mPY0 + dy; _applyT(); }
-    _coords(e.clientX, e.clientY);
-  }
-  function _onMU(e) {
-    if (!_mPan && _mDown) {
-      const { col, row } = _s2c(e.clientX, e.clientY);
-      placePixel(col, row);
-    }
-    _mDown = false; _mPan = false;
-  }
-
-  /* ── Wheel ── */
-  function _onW(e) {
-    e.preventDefault();
-    _zoom(e.deltaY < 0 ? 1.2 : 0.83, e.clientX, e.clientY);
-  }
-
-  /* ── Coords overlay ── */
-  function _coords(sx, sy) {
-    const el = document.getElementById('px-coords');
-    if (!el) return;
-    const { col, row } = _s2c(sx, sy);
-    el.textContent = _ok(col, row) ? `X:${col}  Y:${row}` : '—';
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     START ENGINE
+     BOOTSTRAP
   ══════════════════════════════════════════════════════════════ */
   async function startEngine() {
     init();
@@ -687,23 +491,61 @@ const GP = (() => {
   }
 
   /* ══════════════════════════════════════════════════════════════
-     API PUBLIQUE
+     OEUVRE D'ART LOCALE POUR TEST
   ══════════════════════════════════════════════════════════════ */
-  /* Exposer _localStock sur window pour que updateStockUI puisse le lire */
-  Object.defineProperty(window, '_localStock', {
-    get: () => _localStock,
-    configurable: true,
-  });
+  function _drawMasterpiece() {
+    const art = [
+      "....Y.......Y.......Y....",
+      "...YYY.....YYY.....YYY...",
+      "..YYYYY...YYYYY...YYYYY..",
+      "..YYRYY...YYBYY...YYGYY..",
+      "..YYYYY..YYYYYYY..YYYYY..",
+      "...YYYYY.YYYYYYY.YYYYY...",
+      "...YYYYYYYYYYYYYYYYYYY...",
+      "....YYYYYYYYYYYYYYYYY....",
+      "......YYYYYYYYYYYYYY.....",
+      ".......YYYYYYYYYYYY......",
+      ".........................",
+      ".........................",
+      "....GGGGGG......PPPPPP...",
+      "...GGGGGGGG....PPPPPPPP..",
+      "..GG......GG..PP......PP.",
+      "..GG..........PP......PP.",
+      "..GG...GGGGG..PPPPPPPPPP.",
+      "..GG......GG..PP.........",
+      "...GGGGGGGG...PP.........",
+      "....GGGGGG....PP........."
+    ];
+    
+    // Y=Gold, R=Red, B=Blue, G=Green(Logo), P=Purple(Logo)
+    const colors = {
+      'Y': '#ffd700', 'R': '#e83c50', 'B': '#3690ea', 
+      'G': '#42d48a', 'P': '#9b59b6' 
+    };
+    
+    const pixelScale = 15; // Agrandissement pour visibilité
+    const artW = art[0].length * pixelScale;
+    const artH = art.length * pixelScale;
+    const startX = Math.floor(CANVAS_W / 2 - artW / 2);
+    const startY = Math.floor(CANVAS_H / 2 - artH / 2);
 
-  return {
-    startEngine,
-    pick:       _pick,
-    pickGold,
-    zoomIn,
-    zoomOut,
-    resetView,
-    undo,
-    zoomToCell,
-  };
+    for (let r = 0; r < art.length; r++) {
+      for (let c = 0; c < art[r].length; c++) {
+        const char = art[r][c];
+        if (colors[char]) {
+          // On le dessine sans encombrer le Socket
+          for (let dy = 0; dy < pixelScale; dy++) {
+            for (let dx = 0; dx < pixelScale; dx++) {
+              _applyPx(startX + c * pixelScale + dx, startY + r * pixelScale + dy, colors[char], '@Antigravity', false);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
+
+  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel };
 
 })();
