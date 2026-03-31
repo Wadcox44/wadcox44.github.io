@@ -243,7 +243,7 @@ button {
 }
 
 #canvas-inner {
-  position:relative; margin:auto;
+  position:relative; margin:auto; flex-shrink:0;
 }
 
 #gameCanvas {
