@@ -128,8 +128,8 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
     
-    // On retire une petite marge (10px de chaque côté) pour que le fin liseré doré reste visible
-    const padding = 20;
+    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
+    const padding = 40;
     
     const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
     const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
