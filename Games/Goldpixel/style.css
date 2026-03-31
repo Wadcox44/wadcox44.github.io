@@ -265,11 +265,10 @@ button {
   pointer-events:none; z-index:2; display:none;
 }
 
-/* ── 8. HUD GAUCHE ────────────────────────────────────────── */
 #hud-left {
   flex-shrink:0; width:var(--hud-l-w);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:4px; padding:4px 3px;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  gap:10px; padding:25px 6px 15px 6px;
   background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden;
 }
 
@@ -296,14 +295,14 @@ button {
 
 .hud-sep { width:80%; height:1px; background:var(--border); flex-shrink:0; margin:1px 0; }
 
-#gold-undo-row { display:flex; flex-direction:row; align-items:center; gap:3px; width:100%; flex-shrink:0; }
+#gold-undo-row { display:flex; flex-direction:row; align-items:stretch; justify-content:space-between; gap:6px; width:100%; flex-shrink:0; }
 
 #btn-gold {
   flex:1; height:34px; border-radius:6px;
   background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
   background-size:200% auto; border:2px solid #ffd700;
   display:flex; align-items:center; justify-content:center;
-  font-size:.82rem; font-weight:900; color:#000;
+  font-size:1rem; font-weight:900; color:#000;
   animation:goldSpin 3s linear infinite,goldGlow 2s ease-in-out infinite;
   touch-action:manipulation; min-width:0;
 }
@@ -319,17 +318,16 @@ button {
 }
 #btn-gold.empty  { opacity:.35; animation:none; }
 
-/* Undo — agrandi, rouge visible, largeur pleine */
+/* Undo — côte à côte avec Gold */
 #btn-undo {
-  width:100%; height:40px; border-radius:7px; flex-shrink:0;
+  flex:1; height:34px; border-radius:6px; flex-shrink:0;
   background:rgba(232,60,80,.18);
   border:2px solid rgba(232,60,80,.5);
-  color:var(--red); font-size:.64rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:5px;
+  color:var(--red); font-size:1.1rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
   touch-action:manipulation; transition:all .14s;
 }
-#btn-undo .undo-ico { font-size:.9rem; font-weight:900; }
-#btn-undo .undo-lbl { font-size:.54rem; letter-spacing:.03em; }
+#btn-undo .undo-ico { font-weight:900; }
 #btn-undo.active {
   background:rgba(232,60,80,.35); border-color:var(--red);
   animation:undoPulse .5s ease-in-out infinite alternate;
