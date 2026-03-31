@@ -8,7 +8,7 @@ const GP = (() => {
 
   /* ── CONFIG ────────────────────────────────────────────────── */
   const POLL_MS       = 3000;
-  const STOCK_MAX     = 5;
+  const STOCK_MAX     = 999999; // ILLIMITÉ (Demande de test)
   const COOLDOWN_MS   = 30000;
   const BG_COLOR      = '#f5f0e8';
 
@@ -402,6 +402,9 @@ const GP = (() => {
       
       if (d?.ts) _lastTs = d.ts;
       _gridLoaded = true;
+      
+      // Dessiner l'oeuvre centrale demandée
+      _drawMasterpiece();
     } catch (e) {
       console.warn('[GP] loadGrid:', e);
     }
@@ -479,6 +482,60 @@ const GP = (() => {
     _initSocket();
     await _loadGrid();
     _pollTimer = setInterval(_poll, POLL_MS);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     OEUVRE D'ART LOCALE POUR TEST
+  ══════════════════════════════════════════════════════════════ */
+  function _drawMasterpiece() {
+    const art = [
+      "....Y.......Y.......Y....",
+      "...YYY.....YYY.....YYY...",
+      "..YYYYY...YYYYY...YYYYY..",
+      "..YYRYY...YYBYY...YYGYY..",
+      "..YYYYY..YYYYYYY..YYYYY..",
+      "...YYYYY.YYYYYYY.YYYYY...",
+      "...YYYYYYYYYYYYYYYYYYY...",
+      "....YYYYYYYYYYYYYYYYY....",
+      "......YYYYYYYYYYYYYY.....",
+      ".......YYYYYYYYYYYY......",
+      ".........................",
+      ".........................",
+      "....GGGGGG......PPPPPP...",
+      "...GGGGGGGG....PPPPPPPP..",
+      "..GG......GG..PP......PP.",
+      "..GG..........PP......PP.",
+      "..GG...GGGGG..PPPPPPPPPP.",
+      "..GG......GG..PP.........",
+      "...GGGGGGGG...PP.........",
+      "....GGGGGG....PP........."
+    ];
+    
+    // Y=Gold, R=Red, B=Blue, G=Green(Logo), P=Purple(Logo)
+    const colors = {
+      'Y': '#ffd700', 'R': '#e83c50', 'B': '#3690ea', 
+      'G': '#42d48a', 'P': '#9b59b6' 
+    };
+    
+    const pixelScale = 15; // Agrandissement pour visibilité
+    const artW = art[0].length * pixelScale;
+    const artH = art.length * pixelScale;
+    const startX = Math.floor(CANVAS_W / 2 - artW / 2);
+    const startY = Math.floor(CANVAS_H / 2 - artH / 2);
+
+    for (let r = 0; r < art.length; r++) {
+      for (let c = 0; c < art[r].length; c++) {
+        const char = art[r][c];
+        if (colors[char]) {
+          // On le dessine sans encombrer le Socket
+          for (let dy = 0; dy < pixelScale; dy++) {
+            for (let dx = 0; dx < pixelScale; dx++) {
+              _applyPx(startX + c * pixelScale + dx, startY + r * pixelScale + dy, colors[char], '@Antigravity', false);
+            }
+          }
+        }
+      }
+    }
   }
 
   Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
