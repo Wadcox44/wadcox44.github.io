@@ -11,7 +11,6 @@ const GP = (() => {
   const STOCK_MAX     = 999999; // ILLIMITÉ (Demande de test)
   const COOLDOWN_MS   = 30000;
   const BG_COLOR      = '#f5f0e8';
-  const CELL_SIZE     = 12; // Taille native (12px = 1 pixel)
 
   /* ── ÉTAT ──────────────────────────────────────────────────── */
   let CANVAS_W = 100; // Mis à jour via API
@@ -68,31 +67,14 @@ const GP = (() => {
   ══════════════════════════════════════════════════════════════ */
   function _expand(w, h) {
     if (w <= CANVAS_W && h <= CANVAS_H && _gridLoaded) return;
-    
-    // Remplacement du 3000x3000 par un canvas "pano" adaptatif, 
-    // qui occupe tout l'espace disponible (hauteur max 100).
-    let targetW = w;
-    let targetH = h;
-    if (w === 3000 && h === 3000) {
-      targetH = 100; // Garder la hauteur actuelle
-      const wrap = document.getElementById('canvas-wrap');
-      if (wrap) {
-        // Ratio exact pour occuper parfaitement l'espace (bord à bord)
-        const ratio = wrap.clientWidth / wrap.clientHeight;
-        targetW = Math.round(targetH * ratio);
-      } else {
-        targetW = 150;
-      }
-    }
-
-    CANVAS_W = targetW || CANVAS_W;
-    CANVAS_H = targetH || CANVAS_H;
+    CANVAS_W = w || CANVAS_W;
+    CANVAS_H = h || CANVAS_H;
     
     if (cv) {
-      cv.width = CANVAS_W * CELL_SIZE;
-      cv.height = CANVAS_H * CELL_SIZE;
+      cv.width = CANVAS_W;
+      cv.height = CANVAS_H;
       ctx.fillStyle = BG_COLOR;
-      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
       _pix.forEach((v, k) => {
         const [col, row] = k.split(',').map(Number);
         _px(col, row, v.color);
@@ -105,7 +87,7 @@ const GP = (() => {
   function _px(col, row, color) {
     if (!ctx) return;
     ctx.fillStyle = color;
-    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    ctx.fillRect(col, row, 1, 1);
   }
 
   function _applyPx(col, row, color, user, recordUndo = false) {
@@ -131,21 +113,11 @@ const GP = (() => {
   ══════════════════════════════════════════════════════════════ */
   function _onCanvasClick(e) {
     if (!cv || !innerWrap) return;
-    // On calcule par rapport à cv (canvas pur) pour ignorer les bordures CSS !
-    const rect = cv.getBoundingClientRect();
+    const rect = innerWrap.getBoundingClientRect();
     
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // On trouve le ratio réel d'affichage du canvas
-    const scaleX = rect.width / (CANVAS_W * CELL_SIZE);
-    
-    // Taille apparente d'une seule cellule (zoom compris)
-    const apparentSize = CELL_SIZE * scaleX;
-
-    // Précision chirurgicale : snap to grid
-    const col = Math.floor(x / apparentSize);
-    const row = Math.floor(y / apparentSize);
+    // Le clic est calculé proportionnellement au niveau de zoom !
+    const col = Math.floor((e.clientX - rect.left) / cssScale);
+    const row = Math.floor((e.clientY - rect.top) / cssScale);
 
     if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
       placePixel(col, row);
@@ -156,20 +128,15 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
     
-    // On retire une padding légère
-    const padding = 32;
+    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
+    const padding = 40;
     
-    const nativeW = CANVAS_W * CELL_SIZE;
-    const nativeH = CANVAS_H * CELL_SIZE;
+    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
+    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
     
-    const scaleX = (wrap.clientWidth - padding) / nativeW;
-    const scaleY = (wrap.clientHeight - padding) / nativeH;
-    
+    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
     cssScale = Math.min(scaleX, scaleY);
-    
-    // Lisibilité renforcée par défaut (on garde les pixels visibles)
-    if (cssScale > 1.5) cssScale = 1.5;
-    if (cssScale < 0.6) cssScale = 0.6; 
+    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
     _applyZoom();
   }
 
@@ -219,13 +186,14 @@ const GP = (() => {
   }
 
   function zoomIn() {
-    const step = cssScale < 0.5 ? 0.1 : 0.2;
-    cssScale = Math.min(cssScale + step, 4); 
+    // Si on est vraiment dézoomé, on accélère le pas
+    const step = cssScale < 1 ? 0.2 : (cssScale < 5 ? 1 : 2);
+    cssScale = Math.min(cssScale + step, 20); // max 20x pour bien voir les pixels
     _applyZoom();
   }
 
   function zoomOut() {
-    const step = cssScale <= 0.5 ? 0.1 : 0.2;
+    const step = cssScale <= 1 ? 0.2 : (cssScale <= 5 ? 1 : 2);
     cssScale = Math.max(cssScale - step, 0.1);
     _applyZoom();
   }
@@ -236,8 +204,8 @@ const GP = (() => {
 
   function _applyZoom() {
     if (!innerWrap) return;
-    const w = Math.round(CANVAS_W * CELL_SIZE * cssScale);
-    const h = Math.round(CANVAS_H * CELL_SIZE * cssScale);
+    const w = Math.round(CANVAS_W * cssScale);
+    const h = Math.round(CANVAS_H * cssScale);
     innerWrap.style.width = w + 'px';
     innerWrap.style.height = h + 'px';
 
@@ -258,14 +226,14 @@ const GP = (() => {
 
   function zoomToCell(col, row) {
     // Zoom direct
-    cssScale = Math.max(cssScale, 1.5);
+    cssScale = Math.max(cssScale, 10);
     _applyZoom();
 
     // Pan sur col, row
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    const px = Math.round(col * CELL_SIZE * cssScale);
-    const py = Math.round(row * CELL_SIZE * cssScale);
+    const px = Math.round(col * cssScale);
+    const py = Math.round(row * cssScale);
     wrap.scrollLeft = px - wrap.clientWidth / 2;
     wrap.scrollTop  = py - wrap.clientHeight / 2;
   }
@@ -506,7 +474,7 @@ const GP = (() => {
       _pix.clear();
       if (ctx) {
         ctx.fillStyle = BG_COLOR;
-        ctx.fillRect(0, 0, cv.width, cv.height);
+        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
       }
       window.showToast?.(msg || '🔄 Nouveau mois — canvas réinitialisé !');
     });
@@ -555,7 +523,7 @@ const GP = (() => {
       'G': '#42d48a', 'P': '#9b59b6' 
     };
     
-    const pixelScale = 1; // Ajusté pour visibilité (puisqu'on a CELL_SIZE=12)
+    const pixelScale = 15; // Agrandissement pour visibilité
     const artW = art[0].length * pixelScale;
     const artH = art.length * pixelScale;
     const startX = Math.floor(CANVAS_W / 2 - artW / 2);
