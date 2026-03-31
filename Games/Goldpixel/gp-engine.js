@@ -51,6 +51,13 @@ const GP = (() => {
       if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
       cv.addEventListener('pointerdown', _onCanvasClick);
     }
+    
+    const wrap = document.getElementById('canvas-wrap');
+    if (wrap) {
+      wrap.addEventListener('touchstart', _onTouchStart, { passive: false });
+      wrap.addEventListener('touchmove', _onTouchMove, { passive: false });
+    }
+
     _buildPalette();
     _startCooldownTick();
   }
@@ -120,12 +127,56 @@ const GP = (() => {
   function fitToScreen() {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    const padding = 20;
-    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
-    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
-    cssScale = Math.min(scaleX, scaleY);
-    if (cssScale > 1) cssScale = 1; // max de base sans pixeliser
+    // Le ratio remplit exactement la largeur du conteneur (UI gauche/droite touchées)
+    const scaleX = wrap.clientWidth / CANVAS_W;
+    cssScale = scaleX;
+    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1; // Pas de flou si l'image est petite
     _applyZoom();
+  }
+
+  /* ── PINCH TO ZOOM MOBILE ── */
+  let _touchStartDist = 0;
+  let _touchStartScale = 1;
+
+  function _onTouchStart(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      _touchStartDist = Math.sqrt(dx*dx + dy*dy);
+      _touchStartScale = cssScale;
+    }
+  }
+
+  function _onTouchMove(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const wrap = document.getElementById('canvas-wrap');
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      
+      const factor = dist / _touchStartDist;
+      let newScale = _touchStartScale * factor;
+      if (newScale < 0.05) newScale = 0.05;
+      if (newScale > 30) newScale = 30;
+
+      // Centrage logique sous les deux doigts
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const rect = wrap.getBoundingClientRect();
+      
+      // Coordonnées logiques
+      const lx = (cx - rect.left + wrap.scrollLeft) / cssScale;
+      const ly = (cy - rect.top + wrap.scrollTop) / cssScale;
+
+      cssScale = newScale;
+      _applyZoom();
+
+      // Ajuster le scroll pour rester au centre du pincement
+      wrap.scrollLeft = (lx * cssScale) - (cx - rect.left);
+      wrap.scrollTop = (ly * cssScale) - (cy - rect.top);
+    }
   }
 
   function zoomIn() {
@@ -193,6 +244,7 @@ const GP = (() => {
       const el = document.createElement('div');
       el.className = 'px-swatch' + (c === window.activeColor ? ' active' : '');
       el.style.background = c;
+      el.dataset.color = c; // Sauvegarde la couleur brute (#HEX)
       el.addEventListener('click', () => _pick(c));
       el.addEventListener('touchstart', e => { e.preventDefault(); _pick(c); }, { passive: false });
       grid.appendChild(el);
@@ -205,7 +257,8 @@ const GP = (() => {
     if (c === window.GOLD_COLOR) { pickGold(); return; }
     window.activeColor = c;
     document.querySelectorAll('.px-swatch').forEach(el =>
-      el.classList.toggle('active', el.style.backgroundColor === c || el.style.background === c)
+      // Utilise dataset.color car style.backgroundColor convertit en rgb(...)
+      el.classList.toggle('active', el.dataset.color === c)
     );
     document.getElementById('btn-gold')?.classList.remove('active');
     _updatePreview(c);
