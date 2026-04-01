@@ -816,16 +816,38 @@ const SENTINEL = (() => {
 })();
 
 /* ════════════════════════════════════════════════════════
-   PLEIN ÉCRAN + ORIENTATION
+   PLEIN ÉCRAN + ORIENTATION (Spécial Pi Browser)
 ════════════════════════════════════════════════════════ */
+let _forceUnblock = false;
+
+function checkOrientation() {
+  if (!gameStarted || _forceUnblock) return;
+  
+  // 1. Détection hybride fiable (innerWidth vs innerHeight + media match)
+  const isLandscape = window.innerWidth > window.innerHeight || 
+                      window.matchMedia("(orientation: landscape)").matches;
+                      
+  if (!isLandscape) {
+    document.body.classList.add('portrait-blocked');
+  } else {
+    document.body.classList.remove('portrait-blocked');
+  }
+}
+
+// 2. Écoute des évènements (Mise à jour dynamique de la fenêtre)
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+
 async function requestFullscreen() {
   try {
     const el = document.documentElement;
-    const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-    if (fn) await fn.call(el).catch(() => {});
-  } catch (_) {}
-  try {
-    if (screen.orientation?.lock) await screen.orientation.lock('landscape');
+    // Tenter toutes les versions vendor du plein écran au tap (3. Plein Écran)
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+    if (req) await req.call(el).catch(() => {});
+    
+    if (screen.orientation?.lock) {
+       await screen.orientation.lock('landscape').catch(() => {});
+    }
   } catch (_) {}
 }
 
@@ -835,9 +857,26 @@ async function requestFullscreen() {
 async function startGame() {
   // Masquer écran welcome
   document.getElementById('screen-welcome').classList.add('hidden');
+  
+  // Exécuter la demande plein écran (Légitime car originaire d'un clic UX)
   await requestFullscreen();
   gameStarted = true;
   document.body.classList.add('game-active');
+  
+  // On amorce la barrière portrait 
+  checkOrientation();
+
+  // 4. Fallback intelligent (Timeout d'urgence)
+  // Même si l'orientation échoue (clavier ouvert, Pi Browser forcé), on le laisse jouer
+  setTimeout(() => {
+    _forceUnblock = true;
+    document.body.classList.remove('portrait-blocked');
+    
+    // 5. Overlay Display:None obligatoire pour tuer le noeud fantôme
+    const plock = document.getElementById('portrait-lock');
+    if (plock) plock.style.setProperty('display', 'none', 'important');
+  }, 2500);
+
   loadLSState();
   updateStockUI();
   document.getElementById('app').classList.add('visible');
