@@ -7,10 +7,13 @@ const GP = (() => {
   'use strict';
 
   /* ── CONFIG ────────────────────────────────────────────────── */
+  const DEV_MODE      = true; // ACTIVÉ: Stock illimité (Étape 8)
   const POLL_MS       = 3000;
-  const STOCK_MAX     = 999999; // ILLIMITÉ (Demande de test)
-  const COOLDOWN_MS   = 30000;
+  const STOCK_MAX     = DEV_MODE ? 999999 : 5;
+  const COOLDOWN_MS   = DEV_MODE ? 0 : 30000;
   const BG_COLOR      = '#f5f0e8';
+  
+  if (DEV_MODE) window.DEV_MODE = true;
 
   /* ── ÉTAT ──────────────────────────────────────────────────── */
   let CANVAS_W = 100; // Mis à jour via API
@@ -142,6 +145,16 @@ const GP = (() => {
     ctx.fillRect(col, row, 1, 1);
   }
 
+  function _redrawFull() {
+    if (!ctx) return;
+    ctx.fillStyle = BG_COLOR;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    _pix.forEach((v, k) => {
+      const parts = k.split(',');
+      _px(Number(parts[0]), Number(parts[1]), v.color);
+    });
+  }
+
   function _applyPx(col, row, color, user, recordUndo = false) {
     if (recordUndo) {
       const prev = _pix.get(`${col},${row}`);
@@ -153,11 +166,19 @@ const GP = (() => {
     
     if (color === BG_COLOR || color === null) {
       _pix.delete(`${col},${row}`);
-      _px(col, row, BG_COLOR); // Effacement physique
     } else {
       _pix.set(`${col},${row}`, { color, user });
-      _px(col, row, color);
     }
+    
+    // Rendu Stable (Étape 4) : Redraw complet du tableau dynamique
+    _redrawFull();
+  }
+  
+  // Reset Canvas (Étape 5)
+  function resetCanvas() {
+    _pix.clear();
+    _redrawFull();
+    window.showToast?.('🧹 Canvas remis à blanc !');
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -256,22 +277,36 @@ const GP = (() => {
     _applyZoom();
   }
 
+  // Zoom HUD / Centré sur Viewport (Étape 3)
   function zoomIn() {
-    // Va au palier supérieur le plus proche
     const next = ZOOM_LEVELS.find(lvl => lvl > cssScale + 0.1);
-    if (next) cssScale = next;
-    _applyZoom();
+    if (next) _zoomAndCenterScreen(next);
   }
 
   function zoomOut() {
-    // Va au palier inférieur le plus proche
     const prev = [...ZOOM_LEVELS].reverse().find(lvl => lvl < cssScale - 0.1);
     if (prev) {
-      cssScale = prev;
-      _applyZoom();
+      _zoomAndCenterScreen(prev);
     } else {
       fitToScreen(); // Fallback panoramique pur
     }
+  }
+
+  function _zoomAndCenterScreen(newScale) {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
+
+    // 1. Point central actuel du contenant, mappé dans l'espace logique global (col, row approx)
+    const cx = (wrap.scrollLeft + wrap.clientWidth / 2) / cssScale;
+    const cy = (wrap.scrollTop  + wrap.clientHeight / 2) / cssScale;
+
+    // 2. Modifie l'échelle
+    cssScale = newScale;
+    _applyZoom();
+
+    // 3. Ajuste les scrollbars pour retomber sur le même centre cible
+    wrap.scrollLeft = (cx * cssScale) - (wrap.clientWidth / 2);
+    wrap.scrollTop  = (cy * cssScale) - (wrap.clientHeight / 2);
   }
 
   function resetView() {
@@ -630,6 +665,6 @@ const GP = (() => {
 
   Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
 
-  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel };
+  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel, resetCanvas };
 
 })();
