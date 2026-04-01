@@ -53,43 +53,69 @@ const GP = (() => {
       ctx = cv.getContext('2d');
       // Pour éviter les bugs drag, on desactive sur l'innerWrap
       if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
-      // 1. Détecter le nombre de doigts :
+      // --- Détection précise (drag vs tap) : OBLIGATOIRE ---
       let _isPinching = false;
       let _touchCount = 0;
+      let _touchStartX = 0;
+      let _touchStartY = 0;
+      let _touchDistance = 0;
 
       cv.addEventListener('touchstart', e => {
+        _lastInputType = 'touch';
         _touchCount = e.touches.length;
-        if (_touchCount > 1) _isPinching = true; // Si > 1 : verrouillé
+        
+        if (_touchCount > 1) {
+          _isPinching = true; // Multi-touch = bloque direct
+          return;
+        }
+        
+        // 1 doigt : amorcer le tracking
+        _touchStartX = e.touches[0].clientX;
+        _touchStartY = e.touches[0].clientY;
+        _touchDistance = 0;
+        _isPinching = false;
+      }, { passive: true });
+
+      cv.addEventListener('touchmove', e => {
+        if (_touchCount > 1) return;
+        
+        // Suivre la distance exacte du drag (Pan)
+        const dx = e.touches[0].clientX - _touchStartX;
+        const dy = e.touches[0].clientY - _touchStartY;
+        _touchDistance = Math.hypot(dx, dy);
       }, { passive: true });
 
       cv.addEventListener('touchend', e => {
         _touchCount = e.touches.length;
-        // Déverrouille avec un léger délai pour que le clic de fin ne passe pas
-        if (_touchCount === 0) {
-          setTimeout(() => { _isPinching = false; }, 100);
+        
+        if (_isPinching) {
+          if (_touchCount === 0) setTimeout(() => { _isPinching = false; }, 100);
+          return;
         }
-      });
 
-      // Variables pour la souris/le doigt
-      let _lastInputType = 'mouse';
-      window.addEventListener('touchstart', () => _lastInputType = 'touch', { passive: true });
-      window.addEventListener('mousemove', () => _lastInputType = 'mouse', { passive: true });
+        if (_touchCount === 0) {
+          // 2. TAP (Action) -> Relâchement rapide et <= 5px
+          if (_touchDistance <= 5) {
+            _onCanvasClick(e.changedTouches[0], 'touch');
+          }
+          // Si > 5px, c'est identifié comme DRAG : aucune action déclenchée.
+        }
+      }, { passive: true });
 
-      // L'effet de survol (uniquement si souris détectée, évitant de forcer inutilement sur mobile)
+      // L'effet de survol souris reste en marche
       cv.addEventListener('pointermove', e => {
         if (e.pointerType === 'mouse') {
+          _lastInputType = 'mouse';
           const coords = _resolveCoords(e);
           if (coords) _updateGhost(coords.col, coords.row);
         }
       });
-      
-      // On cache le fantôme en sortant
       cv.addEventListener('pointerleave', () => _updateGhost(null, null));
 
-      // 2. Bloquer toute action de placement inutile :
+      // Neutraliser le clic natif venant du mobile (pour éviter le double déclenchement)
       cv.addEventListener('click', e => {
-        if (_isPinching || _touchCount > 1) return; 
-        _onCanvasClick(e, _lastInputType);
+        if (_isPinching || _lastInputType === 'touch') return; 
+        _onCanvasClick(e, 'mouse');
       });
     }
     
@@ -100,41 +126,19 @@ const GP = (() => {
   /* ══════════════════════════════════════════════════════════════
      CANVAS RENDU
   ══════════════════════════════════════════════════════════════ */
-  function _expand(w, h) {
-    if (w <= CANVAS_W && h <= CANVAS_H && _gridLoaded) return;
-    
-    // Remplacement du format 3000x3000 absurde par défaut par un RECTANGLE adaptatif.
-    // L'objectif est d'occuper presque toute la largeur disponible.
-    let targetW = w;
-    let targetH = h;
-    if (w === 3000 && h === 3000) {
-      targetH = 100; // Garde la hauteur actuelle
-      const wrap = document.getElementById('canvas-wrap');
-      if (wrap) {
-        // Enlève l'encombrement des paddings
-        const availW = wrap.clientWidth - 34;
-        const availH = wrap.clientHeight - 34;
-        const ratio = availW / availH;
-        // Élargissement du domaine visuel du canvas : FORMAT RECTANGLE
-        targetW = Math.round(targetH * ratio);
-      } else {
-        targetW = 180;
-      }
-    }
+  function _expand() {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
 
-    CANVAS_W = targetW || CANVAS_W;
-    CANVAS_H = targetH || CANVAS_H;
+    // 2. & 3. Format RECTANGLE et positionnement avec léger espace (marge fine)
+    const margin = 20; // 10px de chaque côté
+    CANVAS_W = Math.max(wrap.clientWidth - margin, 100);
+    CANVAS_H = Math.max(wrap.clientHeight - margin, 100);
     
     if (cv) {
       cv.width = CANVAS_W;
       cv.height = CANVAS_H;
-      ctx.fillStyle = BG_COLOR;
-      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-      _pix.forEach((v, k) => {
-        const [col, row] = k.split(',').map(Number);
-        _px(col, row, v.color);
-      });
-      // Met à l'échelle idéale de base (fit l'écran au besoin)
+      _redrawFull();
       fitToScreen();
     }
   }
@@ -209,10 +213,12 @@ const GP = (() => {
     if (col === null || row === null) {
       ghostEl.style.display = 'none';
       _ghostCell = null;
+      document.getElementById('coord-display').textContent = 'X: -- | Y: --';
       return;
     }
     
     _ghostCell = { col, row };
+    document.getElementById('coord-display').textContent = `X: ${col} | Y: ${row}`;
     ghostEl.style.display = 'block';
     
     // Pourcentage parfait : aucun problème de redimensionnement dynamique
@@ -229,27 +235,19 @@ const GP = (() => {
     if (!coords) return;
     const { col, row } = coords;
 
-    // 1. Smart Tap : Zoom automatique si nécessaire
+    // 1. Zoom (Smart Tap) : S'active si on est pas au niveau de zoom maximal.
     if (cssScale < ZOOM_LEVELS[2] * 0.9) {
       zoomToCell(col, row);
       window.showToast?.('🔍 Zoom sur cible. Re-touche pour peindre !');
-      _updateGhost(col, row); // Pré-lock le fantôme sur la cible fraîchement zoomée
+      // Pose un tracker visuel mais "Ne pas poser de pixel immédiatement"
+      _updateGhost(col, row); 
       return; 
     }
 
-    // 2. Mobile (Tactile) -> Double-Validation
-    if (inputType === 'touch') {
-       if (!_ghostCell || _ghostCell.col !== col || _ghostCell.row !== row) {
-          // Premier Touch ("Tap 1") : On plante juste le fantôme
-          _updateGhost(col, row);
-          return;
-       }
-    }
-
-    // 3. Pose effective (Tap 2 ou Click Souris Direct)
+    // 2. Pose de pixel confirmée UNIQUEMENT si on était déjà zoomé
     placePixel(col, row);
     
-    // Nettoyage immédiat pour mobile, pour éviter qu'il ne reste affiché
+    // Nettoyage immédiat
     if (inputType === 'touch') {
        _updateGhost(null, null);
     }
@@ -259,20 +257,12 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
     
-    // On retire l'espace alloué au CSS padding de 16px (16*2=32) + marges d'erreur (3) = 35
-    const padding = 35;
+    // Échelle initiale à 1 puisque _expand() s'est ajusté pile poil au conteneur !
+    cssScale = 1;
     
-    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
-    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
-    
-    // Grâce au format rectangle, on détermine le scale idéal (Vue panoramique)
-    cssScale = Math.min(scaleX, scaleY);
-    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
-    
-    // Déclarer intelligemment les 3 niveaux de zoom basés sur le device
-    ZOOM_LEVELS[0] = Math.max(cssScale, 0.1);           // Vue globale
-    ZOOM_LEVELS[1] = Math.max(cssScale * 4, 3);         // Vue moyenne
-    ZOOM_LEVELS[2] = Math.max(cssScale * 12, 12);       // Vue précision (Pixel art)
+    ZOOM_LEVELS[0] = 1;           // Vue globale
+    ZOOM_LEVELS[1] = 4;           // Vue moyenne
+    ZOOM_LEVELS[2] = 12;          // Vue précision (Pixel art)
 
     _applyZoom();
   }
@@ -351,6 +341,23 @@ const GP = (() => {
     // On glisse les barres de défilement pour centrer la coordonnée à l'écran
     wrap.scrollLeft = px - wrap.clientWidth / 2;
     wrap.scrollTop  = py - wrap.clientHeight / 2;
+  }
+
+  function goToInputCoords() {
+    const elX = document.getElementById('coord-x');
+    const elY = document.getElementById('coord-y');
+    if (!elX || !elY) return;
+
+    const x = parseInt(elX.value, 10);
+    const y = parseInt(elY.value, 10);
+
+    if (isNaN(x) || isNaN(y)) return;
+    if (x >= 0 && x < CANVAS_W && y >= 0 && y < CANVAS_H) {
+      zoomToCell(x, y);
+      _updateGhost(x, y);
+    } else {
+      window.showToast?.('⚠️ Coordonnées hors limites !');
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -507,29 +514,13 @@ const GP = (() => {
      RÉSEAU
   ══════════════════════════════════════════════════════════════ */
   async function _loadGrid() {
-    if (!window.apiFetch) return;
     try {
-      const d = await window.apiFetch('/api/pixelwar/grid', 'GET');
-      if (d?.canvasW && d?.canvasH) {
-        _expand(d.canvasW, d.canvasH);
-      } else {
-        _expand(3000, 3000); 
-      }
-
-      if (d?.pixels) {
-        d.pixels.forEach(p => _applyPx(p.col, p.row, p.color, p.user, false));
-        if (window.SENTINEL && window.piUsername) {
-          d.pixels
-            .filter(p => p.user === '@' + window.piUsername)
-            .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
-        }
-      }
+      _expand();
       
-      if (d?.ts) _lastTs = d.ts;
+      // 1. Vider complétement le canvas (Aucun dessin d'oeuvre d'art ou de pixels)
       _gridLoaded = true;
-      
-      // Dessiner l'oeuvre centrale demandée
-      _drawMasterpiece();
+      _pix.clear();
+      _redrawFull();
     } catch (e) {
       console.warn('[GP] loadGrid:', e);
     }
@@ -665,6 +656,6 @@ const GP = (() => {
 
   Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
 
-  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel, resetCanvas };
+  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel, resetCanvas, goToInputCoords };
 
 })();
