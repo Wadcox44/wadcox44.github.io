@@ -430,6 +430,16 @@ let piConnected   = false;
 let gameStarted = false;
 
 /* ════════════════════════════════════════════════════════
+   DEV MODE (Passerelle avec gp-engine.js)
+════════════════════════════════════════════════════════ */
+function _checkDevMode() {
+  if (window.DEV_MODE) {
+    GOLD_MAX_ACTIVE = 999999;
+    goldStock = 999999;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
    HAPPY HOUR
 ════════════════════════════════════════════════════════ */
 function isHappyHour() { return new Date().getHours() >= 12 && new Date().getHours() < 14; }
@@ -878,6 +888,7 @@ async function startGame() {
   }, 2500);
 
   loadLSState();
+  _checkDevMode(); // 3. Injection stock illimité si Mode DEV actif
   updateStockUI();
   document.getElementById('app').classList.add('visible');
   await GP.startEngine();
