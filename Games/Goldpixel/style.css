@@ -279,23 +279,23 @@ body.portrait-blocked #portrait-lock { display:flex; }
 #hud-left {
   flex-shrink:0; width:var(--hud-l-w);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:2px; padding:0 3px 2px;
+  gap:2px; padding:0 3px 3px;
   background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden;
 }
 
 #color-preview {
-  width:28px; height:28px; border-radius:6px; flex-shrink:0;
-  border:2px solid rgba(255,255,255,.55);
-  box-shadow:0 0 8px rgba(0,0,0,.6);
+  width:24px; height:24px; border-radius:5px; flex-shrink:0;
+  border:2px solid rgba(255,255,255,.52);
+  box-shadow:0 0 6px rgba(0,0,0,.55);
   transition:background .1s; cursor:default;
-  margin-top:4px;
+  margin-top:3px;
   align-self:center;
 }
 
 #palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; width:100%; }
 
 .px-swatch {
-  width:100%; aspect-ratio:1; min-width:20px; min-height:20px;
+  width:100%; aspect-ratio:1; min-width:18px; min-height:18px;
   border-radius:3px; border:1.5px solid transparent; cursor:pointer;
   touch-action:manipulation; flex-shrink:0; transition:transform .1s;
 }
@@ -321,7 +321,7 @@ body.portrait-blocked #portrait-lock { display:flex; }
 /* Gold — prend exactement la moitié */
 #btn-gold {
   flex:1;
-  height:30px;           /* réduit vs l'ancien 34px */
+  height:26px;           /* légèrement réduit pour libérer place aux coordonnées */
   border-radius:6px;
   background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
   background-size:200% auto;
@@ -346,8 +346,8 @@ body.portrait-blocked #portrait-lock { display:flex; }
 
 /* Undo — même flex:1 que gold → largeur identique */
 #btn-undo {
-  width:30px;            /* Bouton légèrement réduit, de forme carrée */
-  height:30px;
+  width:26px;            /* aligné avec btn-gold */
+  height:26px;
   border-radius:6px;
   flex-shrink:0;
   background:rgba(232,60,80,.15);
@@ -372,33 +372,64 @@ body.portrait-blocked #portrait-lock { display:flex; }
 
 /* ── COORDONNÉES PANEL ── */
 #coord-panel {
-  display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px;
-  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-  border-radius:6px; width:100%; margin-top:4px; margin-bottom:4px;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:5px 4px 4px;
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(245,200,66,.2);
+  border-radius:6px; width:100%;
+  flex-shrink:0;
 }
+
+/* Affichage X/Y en temps réel — gros et lisible */
 #coord-display {
-  font-family:'Space Mono', monospace; font-size:0.65rem; color:#fff;
-  font-weight:bold; letter-spacing:0.5px;
+  font-family:'Space Mono', monospace;
+  font-size:0.72rem;          /* lisible sans zoom */
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.04em;
+  width:100%; text-align:center;
+  line-height:1.2;
 }
+
+/* Ligne de saisie manuelle */
 .coord-input-row {
-  display:flex; align-items:center; gap:3px; width:100%;
+  display:flex; align-items:center; gap:2px; width:100%;
 }
+
+/* Labels X / Y */
+.coord-input-row .coord-lbl {
+  font-size:0.48rem; font-weight:700;
+  color:var(--dim); line-height:1; flex-shrink:0;
+  font-family:'Space Mono', monospace;
+}
+
 .coord-input-row input {
-  width:28px; height:20px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);
-  color:#fff; font-family:monospace; font-size:0.55rem; text-align:center; border-radius:3px;
-  outline:none; padding:0; margin:0; -moz-appearance:textfield; appearance:textfield;
+  flex:1; min-width:0;
+  height:22px;
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff; font-family:'Space Mono', monospace;
+  font-size:0.56rem; text-align:center;
+  border-radius:4px; outline:none;
+  padding:0; margin:0;
+  -moz-appearance:textfield; appearance:textfield;
 }
 .coord-input-row input::-webkit-outer-spin-button,
 .coord-input-row input::-webkit-inner-spin-button {
   -webkit-appearance:none; margin:0;
 }
 .coord-input-row input:focus { border-color:var(--gold); }
+
 #btn-go-coord {
-  height:20px; flex:1; background:rgba(245,200,66,0.15); border:1px solid var(--gold);
-  color:var(--gold); border-radius:3px; font-size:0.55rem; font-weight:bold;
+  height:22px; padding:0 5px;
+  background:rgba(245,200,66,.15); border:1px solid var(--gold);
+  color:var(--gold); border-radius:4px;
+  font-family:'Chakra Petch', sans-serif;
+  font-size:0.52rem; font-weight:700;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:background .12s;
 }
-#btn-go-coord:active { background:rgba(245,200,66,0.3); transform:scale(0.95); }
+#btn-go-coord:active { background:rgba(245,200,66,.32); transform:scale(.95); }
 
 /* ── 9. HUD DROITE ────────────────────────────────────────── */
 #hud-right {
@@ -436,14 +467,14 @@ body.portrait-blocked #portrait-lock { display:flex; }
 }
 
 .nav-btn {
-  width:46px; height:40px; border-radius:7px;
+  width:42px; height:36px; border-radius:7px; /* légèrement réduit */
   background:rgba(245,200,66,.07); border:1.5px solid var(--gold-dim);
-  color:var(--gold); font-size:1.1rem; font-weight:700;
+  color:var(--gold); font-size:1rem; font-weight:700;
   display:flex; align-items:center; justify-content:center;
   touch-action:manipulation; flex-shrink:0; transition:background .1s,transform .1s;
 }
 .nav-btn:active { background:rgba(245,200,66,.2); transform:scale(.92); }
-.nav-btn-sm { font-size:.88rem; height:36px; }
+.nav-btn-sm { font-size:.82rem; height:32px; }
 
 /* SENTINELLE */
 #btn-sentinel {
