@@ -34,6 +34,9 @@ const GP = (() => {
   let _undo  = null;
   let _undoT = null;
 
+  // Input
+  let _lastInputType = 'mouse'; // 'mouse' | 'touch'
+
   // Réseau
   let _lastTs     = 0;
   let _pollTimer  = null;
@@ -45,80 +48,98 @@ const GP = (() => {
      INIT
   ══════════════════════════════════════════════════════════════ */
   function init() {
-    cv = document.getElementById('gameCanvas');
+    cv        = document.getElementById('gameCanvas');
     innerWrap = document.getElementById('canvas-inner');
     gridOverlay = document.getElementById('grid-overlay');
 
     if (cv) {
       ctx = cv.getContext('2d');
-      // Pour éviter les bugs drag, on desactive sur l'innerWrap
       if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
-      // --- Détection précise (drag vs tap) : OBLIGATOIRE ---
-      let _isPinching = false;
-      let _touchCount = 0;
-      let _touchStartX = 0;
-      let _touchStartY = 0;
-      let _touchDistance = 0;
+    }
 
-      cv.addEventListener('touchstart', e => {
+    /* ── TOUCH : 1 doigt = drag (pan), tap sans mouvement = interaction ──
+       Listeners sur canvas-wrap (le conteneur scrollable), pas sur le canvas,
+       pour que scrollLeft/scrollTop soient directement manipulables.
+       Le seuil de 5px distingue un tap d'un drag sans ambiguïté. ── */
+    const wrap = document.getElementById('canvas-wrap');
+    if (wrap) {
+      // État du geste courant (scope local, une seule source de vérité)
+      let _t0x = 0;          // clientX au touchstart
+      let _t0y = 0;          // clientY au touchstart
+      let _scrollX0 = 0;     // scrollLeft au touchstart
+      let _scrollY0 = 0;     // scrollTop  au touchstart
+      let _isDragging = false; // true dès que déplacement > DRAG_THRESHOLD
+      let _hasMoved = false;  // true si le doigt a bougé (bloque la pose au touchend)
+
+      const DRAG_THRESHOLD = 5; // px — même valeur que l'ancien code
+
+      wrap.addEventListener('touchstart', e => {
+        // Ignorer multi-touch (pinch) — pas de zoom demandé
+        if (e.touches.length !== 1) { _hasMoved = true; return; }
+
         _lastInputType = 'touch';
-        _touchCount = e.touches.length;
-        
-        if (_touchCount > 1) {
-          _isPinching = true; // Multi-touch = bloque direct
-          return;
-        }
-        
-        // 1 doigt : amorcer le tracking
-        _touchStartX = e.touches[0].clientX;
-        _touchStartY = e.touches[0].clientY;
-        _touchDistance = 0;
-        _isPinching = false;
+        const t = e.touches[0];
+        _t0x      = t.clientX;
+        _t0y      = t.clientY;
+        _scrollX0 = wrap.scrollLeft;
+        _scrollY0 = wrap.scrollTop;
+        _isDragging = false;
+        _hasMoved   = false;
       }, { passive: true });
 
-      cv.addEventListener('touchmove', e => {
-        if (_touchCount > 1) return;
-        
-        // Suivre la distance exacte du drag (Pan)
-        const dx = e.touches[0].clientX - _touchStartX;
-        const dy = e.touches[0].clientY - _touchStartY;
-        _touchDistance = Math.hypot(dx, dy);
-      }, { passive: true });
+      wrap.addEventListener('touchmove', e => {
+        if (e.touches.length !== 1) return;
+        const t  = e.touches[0];
+        const dx = t.clientX - _t0x;
+        const dy = t.clientY - _t0y;
 
-      cv.addEventListener('touchend', e => {
-        _touchCount = e.touches.length;
-        
-        if (_isPinching) {
-          if (_touchCount === 0) setTimeout(() => { _isPinching = false; }, 100);
-          return;
+        if (!_isDragging && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+          _isDragging = true;
+          _hasMoved   = true; // pose bloquée pour ce geste
         }
 
-        if (_touchCount === 0) {
-          // 2. TAP (Action) -> Relâchement rapide et <= 5px
-          if (_touchDistance <= 5) {
-            _onCanvasClick(e.changedTouches[0], 'touch');
-          }
-          // Si > 5px, c'est identifié comme DRAG : aucune action déclenchée.
+        if (_isDragging) {
+          // Déplacer le viewport en soustrayant le delta (sens naturel)
+          wrap.scrollLeft = _scrollX0 - dx;
+          wrap.scrollTop  = _scrollY0 - dy;
+          // Cacher le fantôme pendant le drag
+          _updateGhost(null, null);
         }
       }, { passive: true });
 
-      // L'effet de survol souris reste en marche
+      wrap.addEventListener('touchend', e => {
+        if (e.touches.length !== 0) return; // encore des doigts → attendre
+
+        if (!_hasMoved) {
+          // TAP propre : aucun mouvement détecté → poser un pixel
+          const t = e.changedTouches[0];
+          _onCanvasClick(t, 'touch');
+        }
+
+        _isDragging = false;
+        _hasMoved   = false;
+      }, { passive: true });
+    }
+
+    /* ── SOURIS : survol (ghost) + clic (pose) — inchangé ── */
+    if (cv) {
       cv.addEventListener('pointermove', e => {
         if (e.pointerType === 'mouse') {
           _lastInputType = 'mouse';
           const coords = _resolveCoords(e);
           if (coords) _updateGhost(coords.col, coords.row);
+          else        _updateGhost(null, null);
         }
       });
       cv.addEventListener('pointerleave', () => _updateGhost(null, null));
 
-      // Neutraliser le clic natif venant du mobile (pour éviter le double déclenchement)
       cv.addEventListener('click', e => {
-        if (_isPinching || _lastInputType === 'touch') return; 
+        // Ignorer si le dernier geste était tactile (évite le ghost-click mobile)
+        if (_lastInputType === 'touch') return;
         _onCanvasClick(e, 'mouse');
       });
     }
-    
+
     _buildPalette();
     _startCooldownTick();
   }
@@ -130,10 +151,14 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
 
-    // 2. & 3. Format RECTANGLE et positionnement avec léger espace (marge fine)
-    const margin = 20; // 10px de chaque côté
-    CANVAS_W = Math.max(wrap.clientWidth - margin, 100);
-    CANVAS_H = Math.max(wrap.clientHeight - margin, 100);
+    // 2. Format RECTANGLE HORIZONTAL (largeur > hauteur STRICTEMENT)
+    const margin = 20;
+    const w = wrap.clientWidth - margin;
+    const h = wrap.clientHeight - margin;
+
+    CANVAS_W = Math.max(w, 100);
+    // On force la hauteur à être proportionnellement horizontale (60% de la largeur max)
+    CANVAS_H = Math.max(Math.min(h, Math.floor(CANVAS_W * 0.6)), 50);
     
     if (cv) {
       cv.width = CANVAS_W;
@@ -595,63 +620,13 @@ const GP = (() => {
   ══════════════════════════════════════════════════════════════ */
   async function startEngine() {
     init();
-    _initSocket();
-    await _loadGrid();
-    _pollTimer = setInterval(_poll, POLL_MS);
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     OEUVRE D'ART LOCALE POUR TEST
-  ══════════════════════════════════════════════════════════════ */
-  function _drawMasterpiece() {
-    const art = [
-      "....Y.......Y.......Y....",
-      "...YYY.....YYY.....YYY...",
-      "..YYYYY...YYYYY...YYYYY..",
-      "..YYRYY...YYBYY...YYGYY..",
-      "..YYYYY..YYYYYYY..YYYYY..",
-      "...YYYYY.YYYYYYY.YYYYY...",
-      "...YYYYYYYYYYYYYYYYYYY...",
-      "....YYYYYYYYYYYYYYYYY....",
-      "......YYYYYYYYYYYYYY.....",
-      ".......YYYYYYYYYYYY......",
-      ".........................",
-      ".........................",
-      "....GGGGGG......PPPPPP...",
-      "...GGGGGGGG....PPPPPPPP..",
-      "..GG......GG..PP......PP.",
-      "..GG..........PP......PP.",
-      "..GG...GGGGG..PPPPPPPPPP.",
-      "..GG......GG..PP.........",
-      "...GGGGGGGG...PP.........",
-      "....GGGGGG....PP........."
-    ];
     
-    // Y=Gold, R=Red, B=Blue, G=Green(Logo), P=Purple(Logo)
-    const colors = {
-      'Y': '#ffd700', 'R': '#e83c50', 'B': '#3690ea', 
-      'G': '#42d48a', 'P': '#9b59b6' 
-    };
-    
-    const pixelScale = 15; // Agrandissement pour visibilité
-    const artW = art[0].length * pixelScale;
-    const artH = art.length * pixelScale;
-    const startX = Math.floor(CANVAS_W / 2 - artW / 2);
-    const startY = Math.floor(CANVAS_H / 2 - artH / 2);
-
-    for (let r = 0; r < art.length; r++) {
-      for (let c = 0; c < art[r].length; c++) {
-        const char = art[r][c];
-        if (colors[char]) {
-          // On le dessine sans encombrer le Socket
-          for (let dy = 0; dy < pixelScale; dy++) {
-            for (let dx = 0; dx < pixelScale; dx++) {
-              _applyPx(startX + c * pixelScale + dx, startY + r * pixelScale + dy, colors[char], '@Antigravity', false);
-            }
-          }
-        }
-      }
-    }
+    // 3. NETTOYAGE ENGINE - Démarrage complet à vide
+    // AUCUN chargement de contenu pré-chargé ni fetch
+    _gridLoaded = true;
+    _expand();
+    _pix.clear();
+    _redrawFull();
   }
 
   Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
