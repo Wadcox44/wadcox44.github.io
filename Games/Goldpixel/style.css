@@ -240,17 +240,20 @@ button {
   flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:auto;
   background:#0a0612; align-self:stretch;
   display:flex;
+  align-items:center;     /* Centrage vertical propre */
+  justify-content:center; /* Centrage horizontal propre */
+  padding:16px;           /* Espace visuel avec UI (gauche/droite) */
 }
 
 #canvas-inner {
-  position:relative; margin:auto; flex-shrink:0;
-  border: 4px solid #ffd700;
-  border-radius: 6px;
+  position:relative; flex-shrink:0; 
+  /* Cadre propre et design premium */
+  border: 1.5px solid rgba(245, 200, 66, 0.45); 
+  border-radius: 8px;
   box-shadow: 
-    0 0 0 2px #150e00,
-    0 0 0 4px #b8860b,
-    0 0 25px rgba(255, 215, 0, 0.45),
-    inset 0 0 20px rgba(255, 215, 0, 0.15);
+    0 12px 35px rgba(0, 0, 0, 0.7),          /* Ombre portée douce mais marquée */
+    0 0 15px rgba(245, 200, 66, 0.15),       /* Glow léger externe */
+    inset 0 0 10px rgba(245, 200, 66, 0.08); /* Glow léger interne */
   box-sizing: content-box;
 }
 
@@ -263,6 +266,15 @@ button {
 #grid-overlay {
   position:absolute; top:0; left:0; width:100%; height:100%;
   pointer-events:none; z-index:2; display:none;
+}
+
+#ghost-pixel {
+  position:absolute; pointer-events:none; z-index:10; display:none;
+  border:1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(0,0,0,0.4);
+  opacity:0.65;
+  transition: top 0.05s ease-out, left 0.05s ease-out, background-color 0.1s ease;
+  box-sizing: border-box;
 }
 
 #hud-left {
