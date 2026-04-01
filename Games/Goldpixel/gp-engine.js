@@ -19,6 +19,7 @@ const GP = (() => {
   
   // Echelle visuelle (CSS Pixel)
   let cssScale = 1;
+  let ZOOM_LEVELS = [1, 5, 12]; // [Panoramique, Intermédiaire, Précision]
 
   const _pix = new Map(); // "col,row" → { color, user }
 
@@ -49,15 +50,46 @@ const GP = (() => {
       ctx = cv.getContext('2d');
       // Pour éviter les bugs drag, on desactive sur l'innerWrap
       if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
-      cv.addEventListener('pointerdown', _onCanvasClick);
+      // 1. Détecter le nombre de doigts :
+      let _isPinching = false;
+      let _touchCount = 0;
+
+      cv.addEventListener('touchstart', e => {
+        _touchCount = e.touches.length;
+        if (_touchCount > 1) _isPinching = true; // Si > 1 : verrouillé
+      }, { passive: true });
+
+      cv.addEventListener('touchend', e => {
+        _touchCount = e.touches.length;
+        // Déverrouille avec un léger délai pour que le clic de fin ne passe pas
+        if (_touchCount === 0) {
+          setTimeout(() => { _isPinching = false; }, 100);
+        }
+      });
+
+      // Variables pour la souris/le doigt
+      let _lastInputType = 'mouse';
+      window.addEventListener('touchstart', () => _lastInputType = 'touch', { passive: true });
+      window.addEventListener('mousemove', () => _lastInputType = 'mouse', { passive: true });
+
+      // L'effet de survol (uniquement si souris détectée, évitant de forcer inutilement sur mobile)
+      cv.addEventListener('pointermove', e => {
+        if (e.pointerType === 'mouse') {
+          const coords = _resolveCoords(e);
+          if (coords) _updateGhost(coords.col, coords.row);
+        }
+      });
+      
+      // On cache le fantôme en sortant
+      cv.addEventListener('pointerleave', () => _updateGhost(null, null));
+
+      // 2. Bloquer toute action de placement inutile :
+      cv.addEventListener('click', e => {
+        if (_isPinching || _touchCount > 1) return; 
+        _onCanvasClick(e, _lastInputType);
+      });
     }
     
-    const wrap = document.getElementById('canvas-wrap');
-    if (wrap) {
-      wrap.addEventListener('touchstart', _onTouchStart, { passive: false });
-      wrap.addEventListener('touchmove', _onTouchMove, { passive: false });
-    }
-
     _buildPalette();
     _startCooldownTick();
   }
@@ -67,8 +99,28 @@ const GP = (() => {
   ══════════════════════════════════════════════════════════════ */
   function _expand(w, h) {
     if (w <= CANVAS_W && h <= CANVAS_H && _gridLoaded) return;
-    CANVAS_W = w || CANVAS_W;
-    CANVAS_H = h || CANVAS_H;
+    
+    // Remplacement du format 3000x3000 absurde par défaut par un RECTANGLE adaptatif.
+    // L'objectif est d'occuper presque toute la largeur disponible.
+    let targetW = w;
+    let targetH = h;
+    if (w === 3000 && h === 3000) {
+      targetH = 100; // Garde la hauteur actuelle
+      const wrap = document.getElementById('canvas-wrap');
+      if (wrap) {
+        // Enlève l'encombrement des paddings
+        const availW = wrap.clientWidth - 34;
+        const availH = wrap.clientHeight - 34;
+        const ratio = availW / availH;
+        // Élargissement du domaine visuel du canvas : FORMAT RECTANGLE
+        targetW = Math.round(targetH * ratio);
+      } else {
+        targetW = 180;
+      }
+    }
+
+    CANVAS_W = targetW || CANVAS_W;
+    CANVAS_H = targetH || CANVAS_H;
     
     if (cv) {
       cv.width = CANVAS_W;
@@ -111,16 +163,74 @@ const GP = (() => {
   /* ══════════════════════════════════════════════════════════════
      INPUTS & ZOOM
   ══════════════════════════════════════════════════════════════ */
-  function _onCanvasClick(e) {
-    if (!cv || !innerWrap) return;
-    const rect = innerWrap.getBoundingClientRect();
-    
-    // Le clic est calculé proportionnellement au niveau de zoom !
-    const col = Math.floor((e.clientX - rect.left) / cssScale);
-    const row = Math.floor((e.clientY - rect.top) / cssScale);
+  let ghostEl;
+  let _ghostCell = null;
 
+  function _resolveCoords(e) {
+    if (!cv || !innerWrap) return null;
+    const rect = cv.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cellSize = rect.width / CANVAS_W;
+    const col = Math.floor(x / cellSize);
+    const row = Math.floor(y / cellSize);
+    
     if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
-      placePixel(col, row);
+      return { col, row };
+    }
+    return null; // Hors-limites
+  }
+
+  function _updateGhost(col, row) {
+    if (!ghostEl) ghostEl = document.getElementById('ghost-pixel');
+    if (!ghostEl) return;
+    
+    if (col === null || row === null) {
+      ghostEl.style.display = 'none';
+      _ghostCell = null;
+      return;
+    }
+    
+    _ghostCell = { col, row };
+    ghostEl.style.display = 'block';
+    
+    // Pourcentage parfait : aucun problème de redimensionnement dynamique
+    ghostEl.style.width  = (100 / CANVAS_W) + '%';
+    ghostEl.style.height = (100 / CANVAS_H) + '%';
+    ghostEl.style.left   = ((col / CANVAS_W) * 100) + '%';
+    ghostEl.style.top    = ((row / CANVAS_H) * 100) + '%';
+    
+    ghostEl.style.backgroundColor = window.activeColor || BG_COLOR;
+  }
+
+  function _onCanvasClick(e, inputType) {
+    const coords = _resolveCoords(e);
+    if (!coords) return;
+    const { col, row } = coords;
+
+    // 1. Smart Tap : Zoom automatique si nécessaire
+    if (cssScale < ZOOM_LEVELS[2] * 0.9) {
+      zoomToCell(col, row);
+      window.showToast?.('🔍 Zoom sur cible. Re-touche pour peindre !');
+      _updateGhost(col, row); // Pré-lock le fantôme sur la cible fraîchement zoomée
+      return; 
+    }
+
+    // 2. Mobile (Tactile) -> Double-Validation
+    if (inputType === 'touch') {
+       if (!_ghostCell || _ghostCell.col !== col || _ghostCell.row !== row) {
+          // Premier Touch ("Tap 1") : On plante juste le fantôme
+          _updateGhost(col, row);
+          return;
+       }
+    }
+
+    // 3. Pose effective (Tap 2 ou Click Souris Direct)
+    placePixel(col, row);
+    
+    // Nettoyage immédiat pour mobile, pour éviter qu'il ne reste affiché
+    if (inputType === 'touch') {
+       _updateGhost(null, null);
     }
   }
 
@@ -128,74 +238,40 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
     
-    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
-    const padding = 40;
+    // On retire l'espace alloué au CSS padding de 16px (16*2=32) + marges d'erreur (3) = 35
+    const padding = 35;
     
     const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
     const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
     
-    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
+    // Grâce au format rectangle, on détermine le scale idéal (Vue panoramique)
     cssScale = Math.min(scaleX, scaleY);
     if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
+    
+    // Déclarer intelligemment les 3 niveaux de zoom basés sur le device
+    ZOOM_LEVELS[0] = Math.max(cssScale, 0.1);           // Vue globale
+    ZOOM_LEVELS[1] = Math.max(cssScale * 4, 3);         // Vue moyenne
+    ZOOM_LEVELS[2] = Math.max(cssScale * 12, 12);       // Vue précision (Pixel art)
+
     _applyZoom();
   }
 
-  /* ── PINCH TO ZOOM MOBILE ── */
-  let _touchStartDist = 0;
-  let _touchStartScale = 1;
-
-  function _onTouchStart(e) {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      _touchStartDist = Math.sqrt(dx*dx + dy*dy);
-      _touchStartScale = cssScale;
-    }
-  }
-
-  function _onTouchMove(e) {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const wrap = document.getElementById('canvas-wrap');
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      
-      const factor = dist / _touchStartDist;
-      let newScale = _touchStartScale * factor;
-      if (newScale < 0.05) newScale = 0.05;
-      if (newScale > 30) newScale = 30;
-
-      // Centrage logique sous les deux doigts
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      const rect = wrap.getBoundingClientRect();
-      
-      // Coordonnées logiques
-      const lx = (cx - rect.left + wrap.scrollLeft) / cssScale;
-      const ly = (cy - rect.top + wrap.scrollTop) / cssScale;
-
-      cssScale = newScale;
-      _applyZoom();
-
-      // Ajuster le scroll pour rester au centre du pincement
-      wrap.scrollLeft = (lx * cssScale) - (cx - rect.left);
-      wrap.scrollTop = (ly * cssScale) - (cy - rect.top);
-    }
-  }
-
   function zoomIn() {
-    // Si on est vraiment dézoomé, on accélère le pas
-    const step = cssScale < 1 ? 0.2 : (cssScale < 5 ? 1 : 2);
-    cssScale = Math.min(cssScale + step, 20); // max 20x pour bien voir les pixels
+    // Va au palier supérieur le plus proche
+    const next = ZOOM_LEVELS.find(lvl => lvl > cssScale + 0.1);
+    if (next) cssScale = next;
     _applyZoom();
   }
 
   function zoomOut() {
-    const step = cssScale <= 1 ? 0.2 : (cssScale <= 5 ? 1 : 2);
-    cssScale = Math.max(cssScale - step, 0.1);
-    _applyZoom();
+    // Va au palier inférieur le plus proche
+    const prev = [...ZOOM_LEVELS].reverse().find(lvl => lvl < cssScale - 0.1);
+    if (prev) {
+      cssScale = prev;
+      _applyZoom();
+    } else {
+      fitToScreen(); // Fallback panoramique pur
+    }
   }
 
   function resetView() {
@@ -225,15 +301,19 @@ const GP = (() => {
   }
 
   function zoomToCell(col, row) {
-    // Zoom direct
-    cssScale = Math.max(cssScale, 10);
+    // Zoom direct absolu au niveau de PRÉCISION
+    cssScale = ZOOM_LEVELS[2];
     _applyZoom();
 
     // Pan sur col, row
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    const px = Math.round(col * cssScale);
-    const py = Math.round(row * cssScale);
+    
+    // Position idéale : centre du pixel choisi (col + 0.5) mutiplié par l'échelle d'affichage
+    const px = Math.round((col + 0.5) * cssScale);
+    const py = Math.round((row + 0.5) * cssScale);
+    
+    // On glisse les barres de défilement pour centrer la coordonnée à l'écran
     wrap.scrollLeft = px - wrap.clientWidth / 2;
     wrap.scrollTop  = py - wrap.clientHeight / 2;
   }
@@ -287,6 +367,10 @@ const GP = (() => {
   function _updatePreview(color) {
     const el = document.getElementById('color-preview');
     if (el) el.style.background = color || '#3690ea';
+    // Le fantôme change instantanément de couleur quand on choisit la palette (s'il était affiché)
+    if (_ghostCell) {
+       _updateGhost(_ghostCell.col, _ghostCell.row);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
