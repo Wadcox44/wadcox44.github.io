@@ -1,1183 +1,1304 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0612">
-<title>Gold Pixel — JeuxVideo.Pi</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-
-<!-- Firebase (notifications push) -->
-<script type="module">
-  import { initializeApp }               from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
-  const FCM_CONFIG = {
-    apiKey:            "AIzaSyCrnYa3VYKZlZer1R1H-k7IcTLmGaho3Qs",
-    authDomain:        "gold-pixel.firebaseapp.com",
-    projectId:         "gold-pixel",
-    storageBucket:     "gold-pixel.firebasestorage.app",
-    messagingSenderId: "483082801795",
-    appId:             "1:483082801795:web:96e6ba329bab67e53841b6",
-  };
-  const VAPID = "BKGUW6lT2RGM6cxUFRdwELKrf5UAfnf2hIpm39PF29ZpM7qdQJFTFboxSAwVI3tM9ikuWmAxec55mbVfmv2bwCQ";
-  try {
-    const app = initializeApp(FCM_CONFIG);
-    const msg = getMessaging(app);
-    onMessage(msg, p => {
-      const body = p.notification?.body || p.notification?.title || '';
-      if (body && typeof showToast === 'function') showToast(body);
-    });
-    window._fcmMsg    = msg;
-    window._fcmVapid  = VAPID;
-  } catch(e) { console.warn('[FCM]', e.message); }
-</script>
-
-<!-- Pi Network SDK -->
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<!-- Socket.io (servi par Node) -->
-<script src="/socket.io/socket.io.js"></script>
-
-<!-- Moteur canvas Gold Pixel -->
-<script src="gp-engine.js"></script>
-</head>
-
-<body>
-
-<!-- ══════════ PORTRAIT LOCK ══════════ -->
-<div id="portrait-lock">
-  <div class="portrait-icon">📱</div>
-  <h2>TOURNE TON ÉCRAN</h2>
-  <p>Gold Pixel se joue en mode <strong>paysage</strong></p>
-</div>
-
-<!-- ══════════ ÉCRAN CHARGEMENT ══════════ -->
-<div id="screen-loading">
-  <div class="loading-logo">✦ GOLD PIXEL<span>JeuxVideo.Pi</span></div>
-  <div class="loading-spinner"></div>
-</div>
-
-<!-- ══════════ ÉCRAN WELCOME ══════════ -->
-<div id="screen-welcome" class="hidden">
-  <div class="welcome-box">
-    <div class="welcome-logo">✦ GOLD PIXEL</div>
-    <div class="welcome-sub">JeuxVideo.Pi — Canvas collaboratif</div>
-
-    <div class="welcome-rules">
-      <div class="rule-item"><span class="ico">🎨</span><span>Pose des pixels sur le canvas partagé — chaque clic = 1 cellule exacte</span></div>
-      <div class="rule-item"><span class="ico">⏳</span><span><strong>5 pixels max</strong>, 1 recharge toutes les <strong>30 secondes</strong></span></div>
-      <div class="rule-item"><span class="ico">↩</span><span><strong>30 secondes</strong> pour annuler ton dernier pixel</span></div>
-      <div class="rule-item"><span class="ico">✦</span><span>Pixels <strong>Gold</strong> — rares, lumineux, distinctifs</span></div>
-      <div class="rule-item"><span class="ico">⚔️</span><span>Recouvre les pixels adverses pour conquérir du territoire</span></div>
-      <div class="rule-item"><span class="ico">👁️</span><span><strong style="color:#00e5ff">La Sentinelle</strong> surveille et t'alerte si un ennemi s'approche</span></div>
-      <div class="rule-item"><span class="ico">🌐</span><span>Canvas partagé en <strong>temps réel</strong> avec tous les joueurs</span></div>
-    </div>
-
-    <button class="btn-play" onclick="startGame()">▶ JOUER MAINTENANT →</button>
-  </div>
-</div>
-
-<!-- ══════════ APP PRINCIPALE ══════════ -->
-<div id="app">
-
-  <!-- Happy Hour -->
-  <div id="happy-hour-bar">🔥 HAPPY HOUR — Recharge 2× plus rapide jusqu'à 14h !</div>
-
-  <!-- TOPBAR -->
-  <header id="topbar">
-
-    <!-- Gauche : titre + profil -->
-    <div class="tb-left">
-      <div class="tb-logo">
-        <span class="tb-logo-main">GOLD PIXEL</span>
-        <span class="tb-logo-sub">JeuxVideo.Pi</span>
-      </div>
-      <button class="tb-profile-btn" id="btn-profile" onclick="openPiAuth()" title="Connexion Pi">👤</button>
-    </div>
-
-    <!-- Centre : barres de stock -->
-    <div id="tb-center">
-
-      <!-- Barre pixels standard -->
-      <div class="tb-bar-wrap">
-        <div class="tb-bar-track tb-bar-std" id="tb-bar-std-track">
-          <div class="tb-bar-fill" id="tb-bar-std-fill"></div>
-          <span class="tb-bar-label" id="tb-bar-std-label">5 / 5 pixels</span>
-        </div>
-        <div class="tb-bar-sub" id="tb-cooldown">✓ Prêt</div>
-      </div>
-
-      <!-- Barre Gold -->
-      <div class="tb-bar-wrap">
-        <div class="tb-bar-track tb-bar-gold" id="tb-bar-gold-track">
-          <div class="tb-bar-fill" id="tb-bar-gold-fill"></div>
-          <span class="tb-bar-label" id="tb-bar-gold-label">✦ 5 / 5</span>
-        </div>
-        <div class="tb-bar-sub" id="tb-gold-sub">✓ Gold prêt</div>
-      </div>
-
-    </div><!-- /tb-center -->
-
-    <div class="tb-right">
-      <a class="tb-action-btn tb-portal" href="https://jeuxvideo.onrender.com/" title="Retour portail">🏠</a>
-      <button class="tb-action-btn" onclick="GP.resetCanvas()" title="Tout effacer (Reset)">🧹</button>
-      <button class="tb-action-btn" onclick="openLB()" title="Classement">🏆</button>
-      <button class="tb-action-btn tb-shop-btn" onclick="openModal('modal-shop')" title="Boutique">🛒</button>
-      <button class="tb-action-btn" onclick="openModal('modal-settings')" title="Réglages">⚙</button>
-    </div>
-
-  </header><!-- /topbar -->
-
-  <!-- ZONE DE JEU -->
-  <main id="game-area">
-
-    <!-- HUD GAUCHE : palette + or + undo -->
-    <aside id="hud-left">
-      <div id="color-preview" title="Couleur active"></div>
-      
-      <!-- Coordonnées en direct -->
-      <div id="coord-panel">
-        <div id="coord-display">X: -- | Y: --</div>
-        <div class="coord-input-row">
-          <input type="number" id="coord-x" placeholder="X">
-          <input type="number" id="coord-y" placeholder="Y">
-          <button id="btn-go-coord" onclick="GP.goToInputCoords()">Go</button>
-        </div>
-      </div>
-
-      <div id="palette-grid"></div>
-      <div class="hud-sep"></div>
-      <!-- Gold + Undo/Reset -->
-      <div id="gold-undo-row">
-        <button id="btn-gold" title="Pixel Gold ✦" onclick="GP.pickGold()">✦</button>
-        <button id="btn-undo" title="Annuler" onclick="GP.resetCanvas()" class="active">
-          <span class="undo-ico">⟲</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- CANVAS CENTRAL -->
-    <div id="canvas-wrap">
-      <div id="canvas-inner">
-        <canvas id="gameCanvas"></canvas>
-        <div id="ghost-pixel"></div>
-        <div id="grid-overlay"></div>
-      </div>
-    </div>
-
-    <!-- HUD DROITE : sentinelle + navigation -->
-    <aside id="hud-right">
-      <!-- Sentinelle — espace top pour que l'anneau radar soit visible -->
-      <div class="sentinel-wrap">
-        <button id="btn-sentinel" class="sentinel-idle" onclick="SENTINEL.openLog()" title="Sentinelle">
-          👁️
-          <div id="sentinel-badge"></div>
-        </button>
-      </div>
-
-      <div class="hud-sep-v"></div>
-
-      <!-- Navigation — légèrement centrée vers le bas -->
-      <div class="nav-group">
-        <button class="nav-btn" onclick="GP.zoomIn()"   title="Zoom +">＋</button>
-        <button class="nav-btn" onclick="GP.zoomOut()"  title="Zoom −">－</button>
-        <button class="nav-btn nav-btn-sm" onclick="GP.resetView()" title="Centrer">⊙</button>
-      </div>
-    </aside>
-
-  </main><!-- /game-area -->
-
-  <!-- Toast global -->
-  <div id="toast"></div>
-
-  <!-- Toast Sentinelle -->
-  <div id="sentinel-toast" onclick="SENTINEL.onToastClick()"></div>
-
-  <!-- Flash pixel -->
-  <div id="px-flash"></div>
-
-</div><!-- /app -->
-
-
-<!-- ══════════ MODALES ══════════ -->
-
-<!-- Classement -->
-<div class="modal-bg" id="modal-lb">
-  <div class="modal-box">
-    <div class="modal-title">🏆 CLASSEMENT</div>
-    <div class="lb-tabs">
-      <div class="lb-tab on" id="lb-tab-players"   onclick="switchLbTab('players')">👤 Joueurs</div>
-      <div class="lb-tab"    id="lb-tab-countries" onclick="switchLbTab('countries')">🌍 Pays</div>
-    </div>
-    <div class="lb-panel on" id="lb-panel-players">
-      <div class="lb-list" id="lb-list-players"></div>
-    </div>
-    <div class="lb-panel" id="lb-panel-countries">
-      <div class="lb-list" id="lb-list-countries"></div>
-    </div>
-    <button class="btn-modal-close" onclick="closeModal('modal-lb')">FERMER</button>
-  </div>
-</div>
-
-<!-- Réglages -->
-<div class="modal-bg" id="modal-settings">
-  <div class="modal-box" style="max-width:340px;">
-    <div class="modal-title">⚙ RÉGLAGES</div>
-    <div class="setting-row">
-      <div>
-        <div class="setting-label">🖐 Mode Gaucher</div>
-        <div class="setting-sub">Palette à droite · Navigation à gauche</div>
-      </div>
-      <div class="toggle-wrap">
-        <div class="toggle-track" id="toggle-hand" onclick="toggleHandedness()">
-          <div class="toggle-thumb"></div>
-        </div>
-      </div>
-    </div>
-    <div class="setting-row">
-      <div>
-        <div class="setting-label">🔔 Notifications</div>
-        <div class="setting-sub">Alertes pixel en temps réel</div>
-      </div>
-      <div class="toggle-wrap">
-        <div class="toggle-track" id="toggle-notif" onclick="toggleNotif()">
-          <div class="toggle-thumb"></div>
-        </div>
-      </div>
-    </div>
-    <button class="btn-modal-close" onclick="closeModal('modal-settings')">FERMER</button>
-  </div>
-</div>
-
-<!-- Sentinelle log -->
-<div class="modal-bg" id="modal-sentinel">
-  <div class="modal-box" style="max-width:380px;">
-    <div class="modal-title" style="color:#00e5ff;">👁️ SENTINELLE</div>
-    <p class="modal-p">Alertes sur tes pixels en cours de partie.</p>
-    <div class="sentinel-log-list" id="sentinel-log-list"></div>
-    <button class="btn-modal-close" onclick="closeModal('modal-sentinel')">FERMER</button>
-  </div>
-</div>
-
-<!-- Sélection pays -->
-<div class="modal-bg" id="modal-country">
-  <div class="modal-box">
-    <div class="modal-title">🌍 TON PAYS</div>
-    <p class="modal-p">Choisis ton pays pour participer au classement territorial.</p>
-    <div class="country-grid" id="country-grid"></div>
-    <button class="btn-modal-close" onclick="closeModal('modal-country')">IGNORER</button>
-  </div>
-</div>
-
-
-<!-- ══════════ MODAL BOUTIQUE — 2 colonnes, pas de scroll ══════════ -->
-<div class="modal-bg" id="modal-shop">
-  <div class="shop2-box">
-
-    <!-- Header compact -->
-    <div class="shop2-header">
-      <span class="shop2-title">🛒 BOUTIQUE</span>
-      <span class="shop2-subtitle">Aucun avantage gameplay · Tout cosmétique</span>
-      <button class="shop2-close" onclick="closeModal('modal-shop')">✕</button>
-    </div>
-
-    <!-- Corps 2 colonnes -->
-    <div class="shop2-body">
-
-      <!-- ── COL GAUCHE : Identité & Styles ── -->
-      <div class="shop2-col shop2-col-left">
-        <div class="shop2-col-title">🎨 Identité & Styles</div>
-
-        <!-- Signature -->
-        <div class="shop2-item" id="style-signature" onclick="buyCosmetique('signature')">
-          <div class="shop2-item-left">
-            <span class="shop2-item-ico">✍️</span>
-            <div>
-              <div class="shop2-item-name">Signature d'œuvre</div>
-              <div class="shop2-item-desc">Ton pseudo visible au zoom sur tes pixels</div>
-            </div>
-          </div>
-          <div class="shop2-price-tag">0.5 Pi<div class="cos-lock" id="sig-lock">🔒</div></div>
-        </div>
-
-        <div class="shop2-divider"></div>
-        <div class="shop2-col-label">Palettes premium</div>
-
-        <!-- Neon Pulse -->
-        <div class="shop2-item" id="style-neon" onclick="buyCosmetique('neon')">
-          <div class="shop2-item-left">
-            <span class="shop2-item-ico cos-neon shop2-ico-large">■</span>
-            <div>
-              <div class="shop2-item-name">🌌 Neon Pulse</div>
-              <div class="shop2-item-desc">Couleurs vibrantes · Glow animé</div>
-            </div>
-          </div>
-          <div class="shop2-price-tag">1.5 Pi<div class="cos-lock" id="neon-lock">🔒</div></div>
-        </div>
-
-        <!-- Ink Stone -->
-        <div class="shop2-item" id="style-ink" onclick="buyCosmetique('ink')">
-          <div class="shop2-item-left">
-            <span class="shop2-item-ico cos-ink shop2-ico-large">■</span>
-            <div>
-              <div class="shop2-item-name">🪨 Ink / Stone Pro</div>
-              <div class="shop2-item-desc">Style gravé · Rendu premium</div>
-            </div>
-          </div>
-          <div class="shop2-price-tag">1.5 Pi<div class="cos-lock" id="ink-lock">🔒</div></div>
-        </div>
-
-        <!-- Pack -->
-        <button class="shop2-pack-btn" onclick="shopBuy('pack_styles')">
-          <span>⭐ Pack 2 palettes</span>
-          <span class="shop2-pack-price"><s style="opacity:.4;font-size:.6em">3 Pi</s> 2.5 Pi</span>
-        </button>
-
-        <!-- Style actif -->
-        <div class="shop2-active-style">
-          Style actif :
-          <button class="shop2-style-chip" id="chip-default"  onclick="applyPixelStyle('default')">Standard</button>
-          <button class="shop2-style-chip" id="chip-neon"     onclick="applyPixelStyle('neon')">Neon</button>
-          <button class="shop2-style-chip" id="chip-ink"      onclick="applyPixelStyle('ink')">Ink</button>
-        </div>
-      </div>
-
-      <!-- ── COL DROITE : Dons ── -->
-      <div class="shop2-col shop2-col-right">
-        <div class="shop2-col-title">❤️ Soutenir Gold Pixel</div>
-        <p class="shop2-don-msg">Soutenez l'hébergement et l'évolution du jeu. 💎<br>
-          <span class="shop2-don-reward">Badge <strong>Supporter ★</strong> + halo doré offerts</span>
-        </p>
-
-        <div class="shop2-don-grid">
-          <button class="shop2-don-btn" onclick="shopBuy('don_1')">
-            <div class="shop2-don-amt">1 Pi</div>
-            <div class="shop2-don-lbl">Coup de pouce</div>
-          </button>
-          <button class="shop2-don-btn" onclick="shopBuy('don_2')">
-            <div class="shop2-don-amt">2 Pi</div>
-            <div class="shop2-don-lbl">Soutien</div>
-          </button>
-          <button class="shop2-don-btn shop2-don-featured" onclick="shopBuy('don_5')">
-            <div class="shop2-don-badge">⭐</div>
-            <div class="shop2-don-amt">5 Pi</div>
-            <div class="shop2-don-lbl">Grand soutien</div>
-          </button>
-        </div>
-
-        <!-- Montant libre -->
-        <div class="shop2-libre-row">
-          <input id="don-libre-amount" type="number" min="0.5" step="0.5" value="1"
-            class="shop2-libre-input" placeholder="Pi">
-          <button class="shop2-libre-btn" onclick="shopBuy('don_libre')">Donner librement</button>
-        </div>
-
-        <div class="shop2-divider"></div>
-
-        <!-- Supporters -->
-        <div class="shop2-sup-title">🌟 Supporters récents</div>
-        <div id="supporters-list" class="shop2-sup-list"></div>
-      </div>
-
-    </div><!-- /shop2-body -->
-  </div><!-- /shop2-box -->
-</div>
-
-
-<!-- ══════════ SCRIPT PRINCIPAL ══════════ -->
-<script>
-'use strict';
-
-/* ════════════════════════════════════════════════════════
-   CONFIG
-════════════════════════════════════════════════════════ */
-const GOLD_COLOR  = '#ffd700';
-const GOLD_MAX    = 5;
-
-const COLORS = [
-  '#6d001a','#be0039','#ff4500','#ffa800','#ffd635','#fff8b8',
-  '#00a368','#00cc78','#7eed56','#00756f','#009eaa','#00ccc0',
-  '#2450a4','#3690ea','#51e9f4','#493ac1','#6a5cff','#94b3ff',
-  '#811e9f','#b44ac0','#e4abff','#de107f','#ff3881','#ff99aa',
-  '#6d482f','#9c6926','#ffb470','#000000','#515252','#898d90',
-  '#d4d7d9','#ffffff',
-];
-
-const COUNTRIES = [
-  {code:'FR',flag:'🇫🇷',name:'France'},{code:'US',flag:'🇺🇸',name:'USA'},
-  {code:'GB',flag:'🇬🇧',name:'UK'},{code:'DE',flag:'🇩🇪',name:'Allemagne'},
-  {code:'ES',flag:'🇪🇸',name:'Espagne'},{code:'IT',flag:'🇮🇹',name:'Italie'},
-  {code:'BR',flag:'🇧🇷',name:'Brésil'},{code:'CN',flag:'🇨🇳',name:'Chine'},
-  {code:'JP',flag:'🇯🇵',name:'Japon'},{code:'KR',flag:'🇰🇷',name:'Corée'},
-  {code:'IN',flag:'🇮🇳',name:'Inde'},{code:'NG',flag:'🇳🇬',name:'Nigéria'},
-  {code:'GH',flag:'🇬🇭',name:'Ghana'},{code:'KE',flag:'🇰🇪',name:'Kenya'},
-  {code:'PH',flag:'🇵🇭',name:'Philippines'},{code:'VN',flag:'🇻🇳',name:'Vietnam'},
-  {code:'MA',flag:'🇲🇦',name:'Maroc'},{code:'DZ',flag:'🇩🇿',name:'Algérie'},
-  {code:'SN',flag:'🇸🇳',name:'Sénégal'},{code:'TN',flag:'🇹🇳',name:'Tunisie'},
-  {code:'MX',flag:'🇲🇽',name:'Mexique'},{code:'AR',flag:'🇦🇷',name:'Argentine'},
-  {code:'CO',flag:'🇨🇴',name:'Colombie'},{code:'TR',flag:'🇹🇷',name:'Turquie'},
-  {code:'PL',flag:'🇵🇱',name:'Pologne'},{code:'PT',flag:'🇵🇹',name:'Portugal'},
-  {code:'ZA',flag:'🇿🇦',name:'Afrique du Sud'},
-];
-
-/* ════════════════════════════════════════════════════════
-   ÉTAT GLOBAL
-════════════════════════════════════════════════════════ */
-let activeColor   = '#3690ea';
-let goldStock     = GOLD_MAX;
-let GOLD_MAX_ACTIVE = GOLD_MAX;
-let pixelsPlaced  = 0;
-let piUsername    = 'Explorateur';
-let piCountry     = null;
-let piConnected   = false;
-// stock et rechargeLeft gérés dans gp-engine (cooldown 30s)
-
-let gameStarted = false;
-
-/* ════════════════════════════════════════════════════════
-   DEV MODE (Passerelle avec gp-engine.js)
-════════════════════════════════════════════════════════ */
-function _checkDevMode() {
-  if (window.DEV_MODE) {
-    GOLD_MAX_ACTIVE = 999999;
-    goldStock = 999999;
-  }
+/* ═══════════════════════════════════════════════════════════════
+   GOLD PIXEL — style.css  (reset total Partie 2)
+   1. Variables  2. Reset  3. Portrait lock  4. Screens
+   5. App + Topbar  6. Game area  7. Canvas  8. HUD gauche
+   9. HUD droite + Sentinelle  10. Toast/Flash  11. Modales
+   12. Animations
+═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. VARIABLES ─────────────────────────────────────────── */
+:root {
+  --gold:      #f5c842;
+  --gold-dim:  rgba(245,200,66,.22);
+  --gold-glow: rgba(245,200,66,.5);
+  --bg:        #0a0612;
+  --surface:   #130d1e;
+  --border:    rgba(245,200,66,.18);
+  --text:      #f0ead0;
+  --dim:       rgba(240,234,208,.48);
+  --green:     #38d48a;
+  --red:       #e83c50;
+  --cyan:      #00e5ff;
+  --topbar-h:  52px;
+  --hud-l-w:   108px;
+  --hud-r-w:   60px;
 }
 
-/* ════════════════════════════════════════════════════════
-   HAPPY HOUR
-════════════════════════════════════════════════════════ */
-function isHappyHour() { return new Date().getHours() >= 12 && new Date().getHours() < 14; }
-function getRechargeS() { return isHappyHour() ? 15 : 30; } // 30s base, 15s HH
+/* ── 2. RESET ─────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 
-/* Tick 1s — Happy Hour */
-let _hhNotified = false;
-setInterval(() => {
-  if (!gameStarted) return;
-  const bar = document.getElementById('happy-hour-bar');
-  if (bar) bar.classList.toggle('show', isHappyHour());
-  if (isHappyHour() && !_hhNotified) {
-    _hhNotified = true;
-    showToast('🔥 Happy Hour ! Recharge 2× plus rapide (12h–14h)');
-  } else if (!isHappyHour()) { _hhNotified = false; }
-}, 1000);
-
-/* ════════════════════════════════════════════════════════
-   HUD — updateStockUI
-════════════════════════════════════════════════════════ */
-function updateStockUI() {
-  /* ── Barres stock standard ── */
-  const localStock = typeof _localStock !== 'undefined' ? _localStock : 5;
-  const maxStock   = 5;
-  const stdFill    = document.getElementById('tb-bar-std-fill');
-  const stdLabel   = document.getElementById('tb-bar-std-label');
-  const stdTrack   = document.getElementById('tb-bar-std-track');
-  if (stdFill) stdFill.style.width  = Math.round((localStock / maxStock) * 100) + '%';
-  if (stdLabel) stdLabel.textContent = localStock + ' / ' + maxStock + ' pixels';
-  if (stdTrack) {
-    stdTrack.classList.toggle('bar-empty', localStock === 0);
-    stdTrack.classList.toggle('bar-full',  localStock === maxStock);
-  }
-
-  /* ── Barre Gold ── */
-  const maxGold  = GOLD_MAX_ACTIVE || 5;
-  const goldFill  = document.getElementById('tb-bar-gold-fill');
-  const goldLabel = document.getElementById('tb-bar-gold-label');
-  if (goldFill)  goldFill.style.width   = Math.round((goldStock / maxGold) * 100) + '%';
-  if (goldLabel) goldLabel.textContent  = '✦ ' + goldStock + ' / ' + maxGold;
+html,body {
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg);
+  font-family:'Chakra Petch',system-ui,sans-serif;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  touch-action:manipulation;
+  user-select:none; -webkit-user-select:none;
 }
 
-/* ════════════════════════════════════════════════════════
-   API
-════════════════════════════════════════════════════════ */
-async function apiFetch(path, method, body) {
-  try {
-    const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(path, opts);
-    return await res.json();
-  } catch (_) { return null; }
+button {
+  font-family:inherit; cursor:pointer; border:none; background:none;
+  -webkit-tap-highlight-color:transparent;
 }
 
-/* ════════════════════════════════════════════════════════
-   PERSISTANCE LOCALE
-════════════════════════════════════════════════════════ */
-const LS_KEY = 'gp_v4';
+/* ── 3. PORTRAIT LOCK ─────────────────────────────────────── */
+#portrait-lock {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:var(--bg);
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:20px; text-align:center; padding:32px;
+}
+/* Remplacement de la Media Query peu fiable (Pi Browser) par la classe state JS */
+body.portrait-blocked #portrait-lock { display:flex; }
+.portrait-icon { font-size:3.5rem; animation:rotatePhone 2s ease-in-out infinite; }
+@keyframes rotatePhone {
+  0%,40%  { transform:rotate(0deg); }
+  60%,100%{ transform:rotate(90deg); }
+}
+#portrait-lock h2 { font-size:.9rem; font-weight:700; color:var(--gold); letter-spacing:.06em; }
+#portrait-lock p  { font-size:.65rem; color:var(--dim); line-height:1.6; }
 
-function saveLSState() {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify({
-      goldStock, pixelsPlaced, piUsername, piCountry, ts: Date.now(), style: _pixelStyle, title: _pseudoTitle,
-    }));
-  } catch (_) {}
+/* ── 4. SCREENS ───────────────────────────────────────────── */
+#screen-loading {
+  position:fixed; inset:0; z-index:800;
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  transition:opacity .4s;
+}
+#screen-loading.hidden { opacity:0; pointer-events:none; }
+
+.loading-logo {
+  font-family:'Space Mono',monospace; font-size:1.4rem; font-weight:700;
+  color:var(--gold); letter-spacing:.1em;
+  text-shadow:0 0 20px var(--gold-glow); line-height:1;
+}
+.loading-logo span {
+  display:block; font-size:.45rem; font-weight:400; color:var(--dim);
+  letter-spacing:.1em; margin-top:4px; text-align:center;
+}
+.loading-spinner {
+  width:32px; height:32px;
+  border:3px solid var(--gold-dim); border-top-color:var(--gold);
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+#screen-welcome {
+  position:fixed; inset:0; z-index:700;
+  background:rgba(0,0,0,.82);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center; padding:16px;
+  transition:opacity .28s;
+}
+#screen-welcome.hidden { opacity:0; pointer-events:none; }
+
+.welcome-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:22px 24px; max-width:460px; width:100%; max-height:92vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.7); animation:popIn .25s cubic-bezier(.22,1,.36,1);
 }
 
-function loadLSState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const s = JSON.parse(raw);
-    if (typeof s.goldStock === 'number') goldStock = Math.min(GOLD_MAX, s.goldStock);
-    pixelsPlaced = s.placed || s.pixelsPlaced || 0;
-    if (s.piUsername) piUsername = s.piUsername;
-    if (s.piCountry)  piCountry  = s.piCountry;
-  } catch (_) {}
+.welcome-logo {
+  font-family:'Space Mono',monospace; font-size:1.05rem; font-weight:700;
+  color:var(--gold); letter-spacing:.08em; text-align:center;
+  text-shadow:0 0 14px var(--gold-glow); margin-bottom:4px;
+}
+.welcome-sub {
+  font-size:.44rem; color:var(--dim); text-align:center;
+  letter-spacing:.1em; text-transform:uppercase; margin-bottom:18px;
 }
 
-/* ════════════════════════════════════════════════════════
-   PI SDK AUTH
-════════════════════════════════════════════════════════ */
-function openPiAuth() {
-  if (piConnected) { showToast('Connecté : @' + piUsername); return; }
-  if (!window.Pi)  { showToast('Pi SDK indisponible'); return; }
-  Pi.init({ version: '2.0', sandbox: true });
-  Pi.authenticate(['username'], authOK, authErr);
+.welcome-rules { display:flex; flex-direction:column; gap:9px; margin-bottom:20px; }
+.rule-item { display:flex; align-items:flex-start; gap:10px; font-size:.6rem; color:var(--text); line-height:1.5; }
+.rule-item .ico { font-size:.95rem; flex-shrink:0; margin-top:1px; }
+.rule-item strong { color:var(--gold); }
+
+.btn-play {
+  width:100%; padding:13px; border-radius:10px;
+  background:linear-gradient(135deg,#c8960a,var(--gold));
+  color:#000; font-family:'Chakra Petch',sans-serif;
+  font-size:.76rem; font-weight:700; letter-spacing:.08em;
+  transition:transform .1s; box-shadow:0 4px 18px rgba(245,200,66,.35);
+}
+.btn-play:active { transform:scale(.97); }
+
+/* ── 5. APP SHELL + TOPBAR ────────────────────────────────── */
+#app {
+  display:none; width:100%; height:100%;
+  flex-direction:column; overflow:hidden;
+}
+#app.visible { display:flex; }
+
+/* Happy Hour bar (fine ligne sous topbar) */
+#happy-hour-bar {
+  display:none; flex-shrink:0; width:100%; padding:3px 8px; text-align:center;
+  background:linear-gradient(90deg,#ff6b00,#ffaa00,#ff6b00);
+  background-size:200% auto; animation:hhSlide 2s linear infinite;
+  font-size:.5rem; font-weight:700; color:#000; border-bottom:1.5px solid #ff4400;
+}
+#happy-hour-bar.show { display:block; }
+@keyframes hhSlide { from{background-position:0% center;} to{background-position:200% center;} }
+
+/* ── 5. TOPBAR refonte ─────────────────────────────────────── */
+#topbar {
+  flex-shrink:0; height:var(--topbar-h);
+  display:flex; align-items:center; padding:0 8px; gap:6px;
+  background:linear-gradient(180deg,#150e00 0%,#0a0612 100%);
+  border-bottom:1.5px solid var(--border); z-index:100;
 }
 
-function authOK(result) {
-  piConnected = true;
-  piUsername  = result.user.username;
-  const btn   = document.getElementById('btn-profile');
-  if (btn) { btn.textContent = '👤'; btn.classList.add('connected'); }
-  showToast('✅ @' + piUsername);
-  saveLSState();
-  // Pays
-  const saved = localStorage.getItem('gp_country_' + piUsername);
-  if (saved) piCountry = saved;
-  else openCountryModal();
+/* Gauche : logo + profil */
+.tb-left {
+  display:flex; align-items:center; gap:6px; flex-shrink:0;
+}
+.tb-logo {
+  display:flex; flex-direction:column; gap:0; line-height:1;
+}
+.tb-logo-main {
+  font-family:'Space Mono',monospace; font-size:.82rem; font-weight:700;
+  color:var(--gold); letter-spacing:.07em;
+  text-shadow:0 0 10px var(--gold-glow);
+}
+.tb-logo-sub {
+  font-size:.4rem; font-weight:400; color:var(--dim);
+  letter-spacing:.06em; text-align:center; margin-top:1px;
+}
+/* Bouton profil intégré au logo */
+.tb-profile-btn {
+  height:32px; width:32px; border-radius:8px; flex-shrink:0;
+  border:1.5px solid rgba(245,200,66,.3); background:rgba(245,200,66,.07);
+  color:var(--gold); font-size:.9rem; display:flex; align-items:center; justify-content:center;
+  transition:background .12s; touch-action:manipulation;
+}
+.tb-profile-btn:active { background:rgba(245,200,66,.18); }
+.tb-profile-btn.connected { border-color:rgba(56,212,138,.5); color:var(--green); }
+
+/* Centre : barres de stock */
+#tb-center {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:10px; min-width:0;
 }
 
-function authErr(err) { console.error('[Pi]', err); showToast('Erreur connexion Pi'); }
+/* Barre wrap */
+.tb-bar-wrap {
+  display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; max-width:140px;
+}
+.tb-bar-track {
+  position:relative; height:22px; border-radius:11px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+  overflow:hidden; width:100%;
+}
+.tb-bar-fill {
+  position:absolute; inset:0; right:auto;
+  border-radius:11px; transition:width .4s cubic-bezier(.22,1,.36,1);
+}
+.tb-bar-std .tb-bar-fill  { background:linear-gradient(90deg,#8a6a00,var(--gold)); }
+.tb-bar-gold .tb-bar-fill { background:linear-gradient(90deg,#7a5000,#ffd700,#ffe87a); animation:goldPulse 2.5s ease-in-out infinite; }
+@keyframes goldPulse {
+  0%,100%{ box-shadow:0 0 4px rgba(255,215,0,.15); }
+  50%    { box-shadow:0 0 10px rgba(255,215,0,.35); }
+}
+.tb-bar-track.bar-empty .tb-bar-fill { background:rgba(232,60,80,.5); }
+.tb-bar-track.bar-full  { border-color:rgba(56,212,138,.4); }
+.tb-bar-label {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:.48rem; font-weight:700;
+  color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.8); pointer-events:none; white-space:nowrap;
+}
+.tb-bar-sub {
+  font-family:'Space Mono',monospace; font-size:.4rem; color:var(--dim);
+  text-align:center; transition:color .2s; line-height:1;
+}
+.tb-bar-sub.ready { color:var(--green); }
 
-/* ════════════════════════════════════════════════════════
-   PAYS
-════════════════════════════════════════════════════════ */
-function openCountryModal() {
-  const grid = document.getElementById('country-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  COUNTRIES.forEach(c => {
-    const btn = document.createElement('div');
-    btn.className   = 'country-btn' + (c.code === piCountry ? ' on' : '');
-    btn.textContent = c.flag + ' ' + c.name;
-    btn.addEventListener('click', () => {
-      piCountry = c.code;
-      localStorage.setItem('gp_country_' + piUsername, c.code);
-      apiFetch('/api/pixelwar/player/country', 'POST', { username: piUsername, country: c.code });
-      closeModal('modal-country');
-      showToast('🌍 ' + c.flag + ' ' + c.name);
-    });
-    grid.appendChild(btn);
-  });
-  openModal('modal-country');
+/* Alias pour compatibilité JS */
+#tb-cooldown { font-family:'Space Mono',monospace; font-size:.4rem; color:var(--dim); text-align:center; transition:color .2s; }
+#tb-cooldown.ready { color:var(--green); }
+
+/* Droite : boutons d'action — bien contrastés */
+.tb-right { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.tb-action-btn {
+  height:34px; min-width:34px; padding:0 9px; border-radius:7px;
+  border:1.5px solid rgba(245,200,66,.4);
+  background:rgba(245,200,66,.12);
+  color:var(--gold); font-size:.9rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .12s; touch-action:manipulation;
+  font-weight:600;
+}
+.tb-action-btn:active { background:rgba(245,200,66,.28); transform:scale(.93); }
+.tb-action-btn.connected { border-color:rgba(56,212,138,.55); color:var(--green); background:rgba(56,212,138,.1); }
+
+/* ── 6. ZONE DE JEU ───────────────────────────────────────── */
+#game-area {
+  flex:1 1 0; min-height:0; display:flex; flex-direction:row; overflow:hidden; background:var(--bg);
 }
 
-/* ════════════════════════════════════════════════════════
-   CLASSEMENT
-════════════════════════════════════════════════════════ */
-let _lbTab = 'players';
-function switchLbTab(t) {
-  _lbTab = t;
-  ['players','countries'].forEach(x => {
-    document.getElementById('lb-tab-'   + x).classList.toggle('on', x === t);
-    document.getElementById('lb-panel-' + x).classList.toggle('on', x === t);
-  });
+/* ── 7. CANVAS ────────────────────────────────────────────── */
+#canvas-wrap {
+  flex:1 1 0; min-width:0; min-height:0; position:relative; overflow:auto;
+  background:#0a0612; align-self:stretch;
+  display:flex;
+  align-items:center;     /* Centrage vertical propre */
+  justify-content:center; /* Centrage horizontal propre */
+  padding:16px;           /* Espace visuel avec UI (gauche/droite) */
 }
 
-async function openLB() {
-  openModal('modal-lb');
-  const medals = ['🥇','🥈','🥉'];
-  const [pd, cd] = await Promise.all([
-    apiFetch('/api/pixelwar/leaderboard'),
-    apiFetch('/api/pixelwar/leaderboard/countries'),
-  ]);
-
-  const pl = document.getElementById('lb-list-players');
-  pl.innerHTML = '';
-  const players = pd?.leaderboard || [];
-  players.forEach((e, i) => {
-    const isMe = e.user === '@' + piUsername;
-    const d = document.createElement('div');
-    d.className = 'lb-row';
-    d.innerHTML = `<span class="lb-rank">${medals[i] || '#'+(i+1)}</span>`
-      + `<span class="lb-name" style="${isMe ? 'color:var(--gold);font-weight:700' : ''}">${e.user}${isMe ? ' ★' : ''}</span>`
-      + `<span class="lb-px">${e.pixels||0}px · ${e.covered||0}⚔</span>`;
-    pl.appendChild(d);
-  });
-  if (!players.length) pl.innerHTML = '<div style="font-size:.54rem;color:var(--dim);padding:10px 0;text-align:center">Aucune donnée</div>';
-
-  const cl = document.getElementById('lb-list-countries');
-  cl.innerHTML = '';
-  const countries = cd?.leaderboard || [];
-  countries.forEach((e, i) => {
-    const found = COUNTRIES.find(c => c.code === e.country);
-    const d = document.createElement('div');
-    d.className = 'lb-row';
-    d.innerHTML = `<span class="lb-rank">${medals[i] || '#'+(i+1)}</span>`
-      + `<span class="lb-name">${found ? found.flag+' '+found.name : e.country}</span>`
-      + `<span class="lb-px">${e.pixels||0}px</span>`;
-    cl.appendChild(d);
-  });
-  if (!countries.length) cl.innerHTML = '<div style="font-size:.54rem;color:var(--dim);padding:10px 0;text-align:center">Aucune donnée</div>';
+#canvas-inner {
+  position:relative; flex-shrink:0; 
+  /* Cadre propre et design premium */
+  border: 1.5px solid rgba(245, 200, 66, 0.45); 
+  border-radius: 8px;
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.7),          /* Ombre portée douce mais marquée */
+    0 0 15px rgba(245, 200, 66, 0.15),       /* Glow léger externe */
+    inset 0 0 10px rgba(245, 200, 66, 0.08); /* Glow léger interne */
+  box-sizing: content-box;
 }
 
-/* ════════════════════════════════════════════════════════
-   TOAST
-════════════════════════════════════════════════════════ */
-let _toastT = null;
-function showToast(msg, ms) {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('on');
-  clearTimeout(_toastT);
-  _toastT = setTimeout(() => el.classList.remove('on'), ms || 2400);
+#gameCanvas {
+  width:100%; height:100%; display:block;
+  image-rendering:pixelated; image-rendering:crisp-edges;
+  cursor:crosshair;
 }
 
-/* ════════════════════════════════════════════════════════
-   MODALES
-════════════════════════════════════════════════════════ */
-function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
-function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
-
-/* ════════════════════════════════════════════════════════
-   NOTIFICATIONS
-════════════════════════════════════════════════════════ */
-let _notifOn = localStorage.getItem('gp_notif') === '1';
-
-function updateNotifBtn() {
-  const btn = document.getElementById('btn-notif');
-  if (btn) { btn.textContent = _notifOn ? '🔔' : '🔕'; btn.classList.toggle('connected', _notifOn); }
-  /* Toggle dans Settings */
-  const tr = document.getElementById('toggle-notif');
-  if (tr) tr.classList.toggle('on', _notifOn);
+#grid-overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; z-index:2; display:none;
 }
 
-async function toggleNotif() {
-  if (_notifOn) {
-    _notifOn = false;
-    localStorage.setItem('gp_notif', '0');
-    updateNotifBtn();
-    showToast('🔕 Notifications désactivées');
-    return;
-  }
-  try {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') { showToast('Notifications refusées'); return; }
-    if ('serviceWorker' in navigator)
-      await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    if (window._fcmMsg && window._fcmVapid) {
-      const { getToken } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js');
-      const tok = await getToken(window._fcmMsg, { vapidKey: window._fcmVapid });
-      if (tok) localStorage.setItem('gp_fcm_token', tok);
-    }
-    _notifOn = true;
-    localStorage.setItem('gp_notif', '1');
-    updateNotifBtn();
-    showToast('🔔 Notifications activées !');
-  } catch(e) { showToast('Notifications non disponibles'); }
+#ghost-pixel {
+  position:absolute; pointer-events:none; z-index:10; display:none;
+  border:1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(0,0,0,0.4);
+  opacity:0.65;
+  transition: top 0.05s ease-out, left 0.05s ease-out, background-color 0.1s ease;
+  box-sizing: border-box;
 }
 
-/* ════════════════════════════════════════════════════════
-   RÉGLAGES — DROITIER / GAUCHER
-════════════════════════════════════════════════════════ */
-let _leftHand = localStorage.getItem('gp_lh') === '1';
-
-function _applyHandedness() {
-  const ga = document.getElementById('game-area');
-  const tg = document.getElementById('toggle-hand');
-  if (ga) ga.style.flexDirection = _leftHand ? 'row-reverse' : 'row';
-  if (tg) tg.classList.toggle('on', _leftHand);
+#hud-left {
+  flex-shrink:0; width:var(--hud-l-w);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; padding:0 3px 2px;
+  background:rgba(0,0,0,.4); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden;
 }
 
-function toggleHandedness() {
-  _leftHand = !_leftHand;
-  localStorage.setItem('gp_lh', _leftHand ? '1' : '0');
-  _applyHandedness();
-  showToast(_leftHand ? '🤛 Mode Gaucher' : '🤜 Mode Droitier');
+#color-preview {
+  width:28px; height:28px; border-radius:6px; flex-shrink:0;
+  border:2px solid rgba(255,255,255,.55);
+  box-shadow:0 0 8px rgba(0,0,0,.6);
+  transition:background .1s; cursor:default;
+  margin-top:4px;
+  align-self:center;
 }
 
-/* ════════════════════════════════════════════════════════
-   SENTINELLE
-   Détecte pixels proches / écrasements.
-   Bascule btn-sentinel idle ↔ alert.
-════════════════════════════════════════════════════════ */
-const SENTINEL = (() => {
-  const AGG_MS    = 8000;   // agrégation 8s
-  const CD_MS     = 45000;  // cooldown par zone
-  const ZONE_R    = 12;     // rayon en cellules
+#palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; width:100%; }
 
-  let _log     = [];
-  _log.sorted  = false;
-  let _myPx    = {};   // "col,row" → true
-  let _pending = {};   // zoneKey → { events, timer, col, row, isAttack }
-  let _cd      = {};   // zoneKey → timestamp
-  let _lastPos = null;
-
-  function registerMyPixel(col, row)   { _myPx[col + ',' + row] = true; }
-  function unregisterMyPixel(col, row) { delete _myPx[col + ',' + row]; }
-
-  function checkIncoming(col, row, attacker) {
-    if (!piConnected) return;
-    const key   = col + ',' + row;
-    const isHit = !!_myPx[key];
-    let isNear  = false;
-    if (!isHit) {
-      outer:
-      for (let dc = -1; dc <= 1; dc++) {
-        for (let dr = -1; dr <= 1; dr++) {
-          if (!dc && !dr) continue;
-          if (_myPx[(col+dc) + ',' + (row+dr)]) { isNear = true; break outer; }
-        }
-      }
-    }
-    if (!isHit && !isNear) return;
-
-    const zk  = Math.floor(col/ZONE_R) + ':' + Math.floor(row/ZONE_R);
-    const now = Date.now();
-    if (_cd[zk] && now - _cd[zk] < CD_MS) return;
-
-    if (!_pending[zk]) _pending[zk] = { events:[], timer:null, col, row, isAttack: false };
-    _pending[zk].events.push({ col, row, attacker, type: isHit ? 'attack' : 'approach' });
-    if (isHit) _pending[zk].isAttack = true;
-
-    clearTimeout(_pending[zk].timer);
-    _pending[zk].timer = setTimeout(() => _flush(zk), AGG_MS);
-  }
-
-  function _flush(zk) {
-    const p = _pending[zk]; if (!p) return;
-    delete _pending[zk];
-    _cd[zk] = Date.now();
-
-    const count    = p.events.length;
-    const attacker = p.events[0].attacker || '?';
-    const msg      = p.isAttack
-      ? `🛡️ ATTAQUE ! ${attacker} écrase ${count > 1 ? count + ' pixels' : 'ton pixel'} !`
-      : `👁️ ${attacker} s'approche de ton œuvre !`;
-
-    _lastPos = { col: p.col, row: p.row };
-    _log.unshift({ msg, col: p.col, row: p.row, ts: Date.now(), isAttack: p.isAttack, read: false });
-    if (_log.length > 40) _log.pop();
-
-    _showSentToast(msg);
-    _badge();
-  }
-
-  function _showSentToast(msg) {
-    const el = document.getElementById('sentinel-toast');
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.add('on');
-    clearTimeout(_showSentToast._t);
-    _showSentToast._t = setTimeout(() => el.classList.remove('on'), 5500);
-  }
-
-  function _badge() {
-    const btn   = document.getElementById('btn-sentinel');
-    const badge = document.getElementById('sentinel-badge');
-    if (btn) {
-      btn.classList.remove('sentinel-idle');
-      btn.classList.add('sentinel-alert', 'alert');
-    }
-    if (badge) {
-      const n = _log.filter(e => !e.read).length;
-      badge.textContent = n > 9 ? '9+' : String(n);
-      badge.classList.add('show');
-    }
-  }
-
-  function onToastClick() {
-    const el = document.getElementById('sentinel-toast');
-    if (el) el.classList.remove('on');
-    // CANVAS REMOVED
-    // if (_lastPos && typeof GP !== 'undefined') GP.zoomToCell(_lastPos.col, _lastPos.row);
-  }
-
-  function openLog() {
-    // Réinitialiser alerte
-    const btn   = document.getElementById('btn-sentinel');
-    const badge = document.getElementById('sentinel-badge');
-    if (btn)   { btn.classList.remove('sentinel-alert','alert'); btn.classList.add('sentinel-idle'); }
-    if (badge) badge.classList.remove('show');
-    _log.forEach(e => e.read = true);
-
-    const list = document.getElementById('sentinel-log-list');
-    if (!list) { openModal('modal-sentinel'); return; }
-    list.innerHTML = '';
-    if (!_log.length) {
-      list.innerHTML = '<div style="font-size:.52rem;color:var(--dim);text-align:center;padding:12px 0">Aucune alerte</div>';
-    } else {
-      _log.forEach(e => {
-        const ago = Math.round((Date.now() - e.ts) / 1000);
-        const t   = ago < 60 ? ago + 's' : Math.round(ago/60) + 'min';
-        const d   = document.createElement('div');
-        d.className = 'sl-item';
-        d.innerHTML = `<span class="sl-ico">${e.isAttack ? '⚔️' : '👁️'}</span>`
-          + `<span class="sl-msg">${e.msg}</span>`
-          + `<span class="sl-time">${t}</span>`;
-        d.addEventListener('click', () => {
-          closeModal('modal-sentinel');
-          // CANVAS REMOVED
-          // if (typeof GP !== 'undefined') GP.zoomToCell(e.col, e.row);
-        });
-        list.appendChild(d);
-      });
-    }
-    openModal('modal-sentinel');
-  }
-
-  return { checkIncoming, registerMyPixel, unregisterMyPixel, openLog, onToastClick };
-})();
-
-/* ════════════════════════════════════════════════════════
-   PLEIN ÉCRAN + ORIENTATION (Spécial Pi Browser)
-════════════════════════════════════════════════════════ */
-let _forceUnblock = false;
-
-function checkOrientation() {
-  if (!gameStarted || _forceUnblock) return;
-  
-  // 1. Détection hybride fiable (innerWidth vs innerHeight + media match)
-  const isLandscape = window.innerWidth > window.innerHeight || 
-                      window.matchMedia("(orientation: landscape)").matches;
-                      
-  if (!isLandscape) {
-    document.body.classList.add('portrait-blocked');
-  } else {
-    document.body.classList.remove('portrait-blocked');
-  }
+.px-swatch {
+  width:100%; aspect-ratio:1; min-width:20px; min-height:20px;
+  border-radius:3px; border:1.5px solid transparent; cursor:pointer;
+  touch-action:manipulation; flex-shrink:0; transition:transform .1s;
+}
+.px-swatch:active { transform:scale(.82); }
+.px-swatch.active {
+  border-color:#fff; transform:scale(1.15);
+  box-shadow:0 0 0 2px #fff,0 0 12px rgba(255,255,255,.8),0 0 20px rgba(0,229,255,.4);
+  z-index:1; position:relative;
 }
 
-// 2. Écoute des évènements (Mise à jour dynamique de la fenêtre)
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', checkOrientation);
+.hud-sep { width:80%; height:1px; background:var(--border); flex-shrink:0; margin:1px 0; }
 
-async function requestFullscreen() {
-  try {
-    const el = document.documentElement;
-    // Tenter toutes les versions vendor du plein écran au tap (3. Plein Écran)
-    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-    if (req) await req.call(el).catch(() => {});
-    
-    if (screen.orientation?.lock) {
-       await screen.orientation.lock('landscape').catch(() => {});
-    }
-  } catch (_) {}
+/* ── Ligne Gold + Undo : flex côte à côte, même hauteur ── */
+#gold-undo-row {
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;   /* même hauteur garantie */
+  gap:4px;
+  width:100%;
+  flex-shrink:0;
 }
 
-/* ════════════════════════════════════════════════════════
-   START GAME
-════════════════════════════════════════════════════════ */
-async function startGame() {
-  // Masquer écran welcome
-  document.getElementById('screen-welcome').classList.add('hidden');
-  
-  // Exécuter la demande plein écran (Légitime car originaire d'un clic UX)
-  await requestFullscreen();
-  gameStarted = true;
-  document.body.classList.add('game-active');
-  
-  // On amorce la barrière portrait 
-  checkOrientation();
+/* Gold — prend exactement la moitié */
+#btn-gold {
+  flex:1;
+  height:30px;           /* réduit vs l'ancien 34px */
+  border-radius:6px;
+  background:linear-gradient(135deg,#b8860b,#ffd700,#fff8a0,#ffd700,#b8860b);
+  background-size:200% auto;
+  border:2px solid #ffd700;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.78rem; font-weight:900; color:#000;
+  animation:goldSpin 3s linear infinite, goldGlow 2s ease-in-out infinite;
+  touch-action:manipulation;
+  min-width:0;
+}
+@keyframes goldSpin { from{background-position:0% center;} to{background-position:200% center;} }
+@keyframes goldGlow {
+  0%,100%{ box-shadow:0 0 5px #ffd700, 0 0 10px rgba(255,215,0,.3); }
+  50%    { box-shadow:0 0 10px #ffd700, 0 0 20px rgba(255,215,0,.5); }
+}
+#btn-gold.active {
+  border-color:#fff;
+  box-shadow:0 0 16px #ffd700, 0 0 30px rgba(255,215,0,.6);
+  transform:scale(1.05);
+}
+#btn-gold.empty { opacity:.35; animation:none; }
 
-  // 4. Fallback intelligent (Timeout d'urgence)
-  // Même si l'orientation échoue (clavier ouvert, Pi Browser forcé), on le laisse jouer
-  setTimeout(() => {
-    _forceUnblock = true;
-    document.body.classList.remove('portrait-blocked');
-    
-    // 5. Overlay Display:None obligatoire pour tuer le noeud fantôme
-    const plock = document.getElementById('portrait-lock');
-    if (plock) plock.style.setProperty('display', 'none', 'important');
-  }, 2500);
+/* Undo — même flex:1 que gold → largeur identique */
+#btn-undo {
+  width:30px;            /* Bouton légèrement réduit, de forme carrée */
+  height:30px;
+  border-radius:6px;
+  flex-shrink:0;
+  background:rgba(232,60,80,.15);
+  border:1.5px solid rgba(232,60,80,.45);
+  color:var(--red);
+  display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation;
+  transition:all .14s;
+  padding:0;
+}
+#btn-undo .undo-ico {
+  font-size:1.15rem; font-weight:900; line-height:1; 
+  display:flex; align-items:center; justify-content:center;
+}
+#btn-undo.active {
+  background:rgba(232,60,80,.32);
+  border-color:var(--red);
+  animation:undoPulse .5s ease-in-out infinite alternate;
+}
+@keyframes undoPulse { to { box-shadow:0 0 10px var(--red); } }
+#btn-undo:active { transform:scale(.93); background:rgba(232,60,80,.38); }
 
-  loadLSState();
-  _checkDevMode(); // 3. Injection stock illimité si Mode DEV actif
-  updateStockUI();
-  document.getElementById('app').classList.add('visible');
-  await GP.startEngine();
-  showToast('✦ Bienvenue sur Gold Pixel !');
+/* ── COORDONNÉES PANEL ── */
+#coord-panel {
+  display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+  border-radius:6px; width:100%; margin-top:4px; margin-bottom:4px;
+}
+#coord-display {
+  font-family:'Space Mono', monospace; font-size:0.65rem; color:#fff;
+  font-weight:bold; letter-spacing:0.5px;
+}
+.coord-input-row {
+  display:flex; align-items:center; gap:3px; width:100%;
+}
+.coord-input-row input {
+  width:28px; height:20px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);
+  color:#fff; font-family:monospace; font-size:0.55rem; text-align:center; border-radius:3px;
+  outline:none; padding:0; margin:0; -moz-appearance:textfield; appearance:textfield;
+}
+.coord-input-row input::-webkit-outer-spin-button,
+.coord-input-row input::-webkit-inner-spin-button {
+  -webkit-appearance:none; margin:0;
+}
+.coord-input-row input:focus { border-color:var(--gold); }
+#btn-go-coord {
+  height:20px; flex:1; background:rgba(245,200,66,0.15); border:1px solid var(--gold);
+  color:var(--gold); border-radius:3px; font-size:0.55rem; font-weight:bold;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+#btn-go-coord:active { background:rgba(245,200,66,0.3); transform:scale(0.95); }
+
+/* ── 9. HUD DROITE ────────────────────────────────────────── */
+#hud-right {
+  flex-shrink:0; width:var(--hud-r-w);
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:flex-start; /* flex-start pour que sentinel-wrap flex:1 fonctionne */
+  gap:0; padding:0 4px;
+  background:rgba(0,0,0,.4); border-left:1px solid var(--border);
 }
 
-/* ════════════════════════════════════════════════════════
-   INIT DOM
-════════════════════════════════════════════════════════ */
-/* ════════════════════════════════════════════════════════
-   BOUTIQUE — Shop Pi
-   Aucun avantage gameplay. Tout est cosmétique / soutien.
-════════════════════════════════════════════════════════ */
-
-/* ── État boutique ── */
-let _shopUnlocked  = JSON.parse(localStorage.getItem('gp_shop') || '{}');
-  // { neon:true, pastel:true, supporter:true, ... }
-let _pixelStyle    = localStorage.getItem('gp_style') || 'default';
-let _pseudoTitle   = localStorage.getItem('gp_title') || '';
-let _isSentinelPro = !!_shopUnlocked.sentinel_premium;
-let _favZones      = JSON.parse(localStorage.getItem('gp_favzones') || '[]');
-  // [{ label, panX, panY, scale }]
-
-function _saveShop() { localStorage.setItem('gp_shop', JSON.stringify(_shopUnlocked)); }
-
-/* ── Onglets ── */
-function shopTab(tab) {
-  document.querySelectorAll('.shop-tab')   .forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
-  document.querySelectorAll('.shop-panel') .forEach(p => p.classList.toggle('on', p.id === 'shop-panel-' + tab));
-  if (tab === 'social')   _renderBadges();
-  if (tab === 'confort')  _renderFavZones();
-  if (tab === 'don')      _loadSupporters();
+/* Wrap sentinelle — flex:1 sur la partie haute pour centrer
+   visuellement le bouton entre la topbar et le séparateur.
+   overflow:visible indispensable pour que l'anneau radar
+   ne soit pas coupé. */
+.sentinel-wrap {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  flex:1;                 /* prend tout l'espace dispo au-dessus du séparateur */
+  min-height:0;
+  overflow:visible;       /* anneau radar visible même hors limites du wrap */
+  padding-top:8px;        /* espace supplémentaire pour l'anneau */
 }
 
-/* ── DON ── */
-async function shopBuy(type) {
-  if (!window.Pi || !piConnected) {
-    showToast('Connecte-toi à Pi pour acheter'); openPiAuth(); return;
-  }
-  const ITEMS = {
-    don_1:    { price: 1,   label: 'Don 1 Pi',     isDon: true  },
-    don_2:    { price: 2,   label: 'Don 2 Pi',     isDon: true  },
-    don_5:    { price: 5,   label: 'Don 5 Pi',     isDon: true  },
-    don_libre:{ price: parseFloat(document.getElementById('don-libre-amount')?.value || '1'), label: 'Don libre', isDon: true },
-    pack_styles: { price: 2.5, label: 'Pack 2 palettes', isDon: false, isBundle: true },
-    neon:          { price: 0.5, label: 'Style Néon',          isDon: false },
-    pastel:        { price: 0.5, label: 'Style Pastel',        isDon: false },
-    metal:         { price: 1,   label: 'Style Métal',         isDon: false },
-    glitch:        { price: 1,   label: 'Style Glitch',        isDon: false },
-    ink:           { price: 1,   label: 'Style Ink',           isDon: false },
-    signature:     { price: 1,   label: 'Signature pixel',     isDon: false },
-    sentinel_premium: { price: 2, label: 'Sentinelle Premium', isDon: false },
-  };
-  const item = ITEMS[type];
-  if (!item || item.price <= 0) return;
-
-  Pi.createPayment(
-    { amount: item.price, memo: 'Gold Pixel — ' + item.label, metadata: { type, username: piUsername } },
-    {
-      onReadyForServerApproval: id =>
-        apiFetch('/api/pixelwar/shop/approve', 'POST', { paymentId: id }),
-      onReadyForServerCompletion: (id, txid) =>
-        apiFetch('/api/pixelwar/shop/complete', 'POST', { paymentId: id, txid, type, username: piUsername })
-        .then(d => {
-          if (!d?.ok) return;
-          if (item.isDon) {
-            _shopUnlocked.supporter = true;
-            _saveShop(); _applyBadgeSupporter();
-            showToast('❤️ Merci pour ton soutien ! Badge Supporter activé ★');
-          } else if (item.isBundle) {
-            _shopUnlocked.neon = true; _shopUnlocked.ink = true;
-            _saveShop(); _applyCosmetique('neon');
-            showToast('⭐ Pack 2 palettes déverrouillé !');
-            _refreshShopChips();
-          } else {
-            _shopUnlocked[type] = true;
-            _saveShop(); _applyCosmetique(type);
-            showToast('✅ ' + item.label + ' déverrouillé !');
-          }
-          closeModal('modal-shop');
-        }),
-      onCancel: () => showToast('Achat annulé'),
-      onError:  () => showToast('Erreur paiement Pi'),
-    }
-  );
+.hud-sep-v {
+  width:70%; height:1px; background:var(--border); flex-shrink:0; margin:2px 0;
 }
 
-function buyCosmetique(type) {
-  if (_shopUnlocked[type]) { applyPixelStyle(type); return; }
-  shopBuy(type);
+/* Groupe navigation — poussé vers le bas */
+.nav-group {
+  display:flex; flex-direction:column; align-items:center;
+  gap:5px; padding:6px 0 8px; flex:1;
+  justify-content:center;
 }
 
-/* ── Styles pixel ── */
-function applyPixelStyle(style) {
-  if (style !== 'default' && !_shopUnlocked[style]) {
-    showToast('🔒 Achète ce style d\'abord'); return;
-  }
-  _pixelStyle = style;
-  localStorage.setItem('gp_style', style);
-  document.querySelectorAll('.cosmetique-card').forEach(c => c.classList.remove('active-style'));
-  document.getElementById('style-' + style)?.classList.add('active-style');
-  showToast('🎨 Style ' + style + ' activé');
+.nav-btn {
+  width:46px; height:40px; border-radius:7px;
+  background:rgba(245,200,66,.07); border:1.5px solid var(--gold-dim);
+  color:var(--gold); font-size:1.1rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation; flex-shrink:0; transition:background .1s,transform .1s;
+}
+.nav-btn:active { background:rgba(245,200,66,.2); transform:scale(.92); }
+.nav-btn-sm { font-size:.88rem; height:36px; }
+
+/* SENTINELLE */
+#btn-sentinel {
+  width:46px; height:46px; border-radius:50%; flex-shrink:0;
+  border:2px solid var(--green); color:var(--green); font-size:1rem;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:visible;
+  background:rgba(56,212,138,.08); touch-action:manipulation;
+  transition:border-color .3s,background .3s,color .3s;
+}
+#btn-sentinel:active { transform:scale(.92); }
+
+#btn-sentinel::before,
+#btn-sentinel::after {
+  content:''; position:absolute; border-radius:50%;
+  border:1.5px solid var(--green); opacity:0;
+  top:50%; left:50%; transform:translate(-50%,-50%) scale(1);
+  pointer-events:none; width:100%; height:100%;
 }
 
-function _applyCosmetique(type) {
-  const card = document.getElementById('style-' + type);
-  if (card) { card.classList.remove('locked'); card.querySelector('.cos-lock')?.remove(); }
-  if (type === 'sentinel_premium') {
-    _isSentinelPro = true;
-    document.getElementById('sentinel-premium')?.classList.remove('locked');
-    document.getElementById('sentinel-premium')?.querySelector('.cos-lock')?.remove();
-  }
-  applyPixelStyle(type);
+#btn-sentinel.sentinel-idle { animation:sentinelScan 3s ease-out infinite; }
+#btn-sentinel.sentinel-idle::before { animation:radarRing 3s ease-out infinite; }
+#btn-sentinel.sentinel-idle::after  { animation:radarRing 3s ease-out infinite .9s; }
+
+@keyframes sentinelScan {
+  0%,100%{ box-shadow:0 0 4px rgba(56,212,138,.2); }
+  50%    { box-shadow:0 0 10px rgba(56,212,138,.45); }
+}
+@keyframes radarRing {
+  0%   { opacity:.7; transform:translate(-50%,-50%) scale(1); }
+  100% { opacity:0;  transform:translate(-50%,-50%) scale(2.6); }
 }
 
-function _initShopUI() {
-  // Déverrouiller les items déjà achetés
-  Object.keys(_shopUnlocked).forEach(k => {
-    if (!_shopUnlocked[k]) return;
-    const lockId = k + '-lock';
-    const lockEl = document.getElementById(lockId);
-    if (lockEl) lockEl.remove();
-    const card = document.getElementById('style-' + k);
-    if (card) card.classList.remove('locked');
-  });
-  // Chips style actif
-  _refreshShopChips();
-  // Badge supporter
-  if (_shopUnlocked.supporter) _applyBadgeSupporter();
-  // Titre pseudo
-  const ti = document.getElementById('pseudo-title-input');
-  if (ti && _pseudoTitle) ti.value = _pseudoTitle;
+#btn-sentinel.alert,
+#btn-sentinel.sentinel-alert {
+  border-color:var(--red); color:var(--red); background:rgba(232,60,80,.15);
+  animation:sentinelAlert .5s ease-in-out infinite alternate;
+}
+#btn-sentinel.alert::before,
+#btn-sentinel.sentinel-alert::before {
+  border-color:var(--red); animation:radarRingAlert .5s ease-in-out infinite;
+}
+#btn-sentinel.alert::after,
+#btn-sentinel.sentinel-alert::after { display:none; }
+
+@keyframes sentinelAlert {
+  from{ box-shadow:0 0 8px rgba(232,60,80,.5); }
+  to  { box-shadow:0 0 24px rgba(232,60,80,.9),0 0 40px rgba(232,60,80,.3); }
+}
+@keyframes radarRingAlert {
+  0%  { opacity:.9; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0;  transform:translate(-50%,-50%) scale(2.2); }
 }
 
-function _refreshShopChips() {
-  ['default','neon','ink'].forEach(s => {
-    const el = document.getElementById('chip-' + s);
-    if (!el) return;
-    const isUnlocked = s === 'default' || !!_shopUnlocked[s];
-    el.classList.toggle('chip-locked',   !isUnlocked);
-    el.classList.toggle('chip-active',    s === _pixelStyle);
-  });
+#sentinel-badge {
+  position:absolute; top:-5px; right:-5px;
+  width:17px; height:17px; border-radius:50%;
+  background:var(--red); color:#fff;
+  font-family:'Space Mono',monospace; font-size:.38rem; font-weight:700;
+  display:none; align-items:center; justify-content:center;
+  border:1.5px solid var(--bg);
+}
+#sentinel-badge.show { display:flex; }
+
+/* ── 10. TOAST + FLASH ────────────────────────────────────── */
+#toast {
+  position:fixed; bottom:20px; left:50%;
+  transform:translateX(-50%) translateY(6px);
+  padding:7px 16px; border-radius:20px;
+  background:rgba(10,6,18,.95); border:1px solid var(--border);
+  font-size:.58rem; color:var(--text); white-space:nowrap;
+  z-index:600; pointer-events:none;
+  opacity:0; transition:opacity .18s,transform .18s;
+  box-shadow:0 3px 16px rgba(0,0,0,.5);
+  max-width:90vw; text-align:center;
+}
+#toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+
+#sentinel-toast {
+  position:fixed; top:calc(var(--topbar-h) + 8px); left:50%;
+  transform:translateX(-50%) translateY(-8px);
+  padding:10px 18px; border-radius:12px;
+  background:rgba(0,18,28,.96); border:1.5px solid var(--cyan);
+  font-size:.6rem; color:var(--cyan); white-space:nowrap;
+  z-index:650; opacity:0; transition:opacity .22s,transform .22s;
+  box-shadow:0 0 20px rgba(0,229,255,.22);
+  max-width:90vw; text-align:center;
+  cursor:pointer; pointer-events:none;
+}
+#sentinel-toast.on { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:all; }
+
+#px-flash {
+  position:fixed; inset:0; pointer-events:none; opacity:0; z-index:300;
+  background:radial-gradient(ellipse at center,rgba(245,200,66,.2) 0%,transparent 65%);
+  transition:opacity .06s;
+}
+#px-flash.on { opacity:1; transition:none; }
+
+.sentinel-hl {
+  position:absolute; pointer-events:none; z-index:10;
+  border:2px solid var(--cyan); box-shadow:0 0 8px rgba(0,229,255,.7);
+  border-radius:2px; animation:hlFade 3s ease-out forwards;
+}
+@keyframes hlFade { 0%,70%{opacity:1;} 100%{opacity:0;} }
+
+/* ── 11. MODALES ─────────────────────────────────────────── */
+.modal-bg {
+  position:fixed; inset:0; z-index:500;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none; transition:opacity .22s;
+}
+.modal-bg.open { opacity:1; pointer-events:all; }
+
+.modal-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:20px 18px; max-width:min(460px,92vw); max-height:88vh; overflow-y:auto;
+  width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.8);
+  animation:popIn .22s cubic-bezier(.22,1,.36,1);
+}
+@keyframes popIn {
+  from{ transform:scale(.94) translateY(10px); opacity:0; }
+  to  { transform:scale(1)   translateY(0);    opacity:1; }
 }
 
-/* ── Badge Supporter ── */
-function _applyBadgeSupporter() {
-  // Halo visuel sur le logo pseudo dans la topbar
-  const profBtn = document.getElementById('btn-profile');
-  if (profBtn) profBtn.style.boxShadow = '0 0 10px rgba(255,215,0,.7)';
-  // Mettre à jour badge-card
-  const s = document.getElementById('badge-supporter-status');
-  if (s) { s.textContent = '✅ Obtenu'; s.classList.remove('locked-badge'); s.classList.add('unlocked-badge'); }
+.modal-title {
+  font-family:'Space Mono',monospace; font-size:.88rem; font-weight:700;
+  letter-spacing:.06em;
+  background:linear-gradient(135deg,#f5c842,#ffd700);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:12px;
+}
+.modal-p { font-size:.6rem; color:var(--dim); line-height:1.6; margin-bottom:14px; }
+
+.btn-modal-close {
+  width:100%; padding:9px; border-radius:8px;
+  border:1px solid var(--border); background:rgba(255,255,255,.04);
+  color:var(--dim); font-family:'Chakra Petch',sans-serif;
+  font-size:.62rem; font-weight:600; margin-top:8px; transition:background .12s;
+}
+.btn-modal-close:active { background:rgba(255,255,255,.1); }
+
+/* Classement */
+.lb-tabs { display:flex; gap:4px; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+.lb-tab { flex:1; padding:5px; border-radius:6px; font-size:.56rem; font-weight:600; color:var(--dim); border:1px solid transparent; cursor:pointer; transition:all .14s; }
+.lb-tab.on { background:rgba(112,40,200,.18); border-color:var(--border); color:var(--text); }
+.lb-panel { display:none; }
+.lb-panel.on { display:block; }
+.lb-list { display:flex; flex-direction:column; gap:3px; max-height:180px; overflow-y:auto; margin-bottom:8px; }
+.lb-row { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; background:rgba(255,255,255,.04); font-size:.54rem; }
+.lb-rank { width:20px; text-align:center; font-weight:700; flex-shrink:0; }
+.lb-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb-px   { font-family:'Space Mono',monospace; color:var(--dim); font-size:.48rem; }
+
+/* Sentinelle log */
+.sentinel-log-list { display:flex; flex-direction:column; gap:5px; max-height:200px; overflow-y:auto; margin-bottom:10px; }
+.sl-item { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:7px; background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.15); cursor:pointer; transition:background .1s; }
+.sl-item:active { background:rgba(0,229,255,.12); }
+.sl-ico  { font-size:.88rem; flex-shrink:0; }
+.sl-msg  { flex:1; font-size:.5rem; color:var(--text); line-height:1.4; text-align:left; }
+.sl-time { font-size:.42rem; color:var(--dim); flex-shrink:0; }
+
+/* Réglages */
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid rgba(245,200,66,.1); }
+.setting-row:last-of-type { border-bottom:none; }
+.setting-label { font-size:.66rem; font-weight:600; color:var(--text); }
+.setting-sub   { font-size:.48rem; color:var(--dim); margin-top:2px; }
+.toggle-wrap   { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+.toggle-track  { width:46px; height:24px; border-radius:12px; position:relative; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.15); cursor:pointer; transition:background .2s,border-color .2s; flex-shrink:0; }
+.toggle-track.on { background:rgba(245,200,66,.25); border-color:var(--gold); }
+.toggle-thumb  { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.45); transition:transform .2s,background .2s; }
+.toggle-track.on .toggle-thumb { transform:translateX(22px); background:var(--gold); }
+
+/* Pays */
+.country-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-bottom:10px; max-height:190px; overflow-y:auto; }
+.country-btn  { padding:5px 2px; border-radius:6px; cursor:pointer; background:rgba(255,255,255,.04); border:1px solid var(--border); font-size:.5rem; color:var(--text); text-align:center; transition:background .1s; line-height:1.4; }
+.country-btn:active { background:rgba(112,40,200,.2); border-color:#b44ac0; }
+.country-btn.on     { background:rgba(112,40,200,.2); border-color:#b44ac0; color:#d4a0ff; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   BOUTIQUE — style.css additions
+   Ajouter à la suite du fichier existant
+══════════════════════════════════════════════════════════════ */
+
+/* ── Topbar boutique + portail ─────────────────────────────── */
+.tb-portal {
+  text-decoration: none;
+  font-size: .72rem;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s;
+}
+.tb-portal:hover { color: var(--text); }
+
+.tb-shop-btn {
+  border-color: rgba(245,200,66,.35) !important;
+  color: var(--gold) !important;
+  background: rgba(245,200,66,.08) !important;
+}
+.tb-shop-btn:active { background: rgba(245,200,66,.2) !important; }
+
+/* ── Modal boutique ────────────────────────────────────────── */
+.shop-box { max-width: 520px; padding: 18px 16px; }
+
+.shop-header { margin-bottom: 12px; }
+.shop-tagline { font-size: .58rem; }
+
+/* Onglets boutique */
+.shop-tabs {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 14px;
+  background: rgba(0,0,0,.3);
+  border-radius: 9px;
+  padding: 3px;
+}
+.shop-tab {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 7px;
+  font-size: .52rem;
+  font-weight: 600;
+  font-family: 'Chakra Petch', sans-serif;
+  color: var(--dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.shop-tab.on {
+  background: rgba(245,200,66,.15);
+  color: var(--gold);
+  box-shadow: 0 0 8px rgba(245,200,66,.15);
 }
 
-/* ── Badges ── */
-function _renderBadges() {
-  // Builder : 100 pixels
-  if (pixelsPlaced >= 100) {
-    const s = document.getElementById('badge-builder-status');
-    if (s) { s.textContent = '✅ Obtenu'; s.classList.remove('locked-badge'); s.classList.add('unlocked-badge'); }
-  }
-  if (_shopUnlocked.supporter) {
-    const s = document.getElementById('badge-supporter-status');
-    if (s) { s.textContent = '✅ Obtenu'; s.classList.remove('locked-badge'); s.classList.add('unlocked-badge'); }
-  }
-  // Titre pseudo
-  const inp = document.getElementById('pseudo-title-input');
-  if (inp) inp.value = _pseudoTitle;
+.shop-panel { display: none; }
+.shop-panel.on { display: block; }
+
+.shop-section-title {
+  font-size: .62rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .05em;
+  margin-bottom: 6px;
+  margin-top: 2px;
 }
 
-/* ── Pseudo personnalisé ── */
-function applyPseudoTitle() {
-  const inp = document.getElementById('pseudo-title-input');
-  if (!inp) return;
-  _pseudoTitle = inp.value.trim().slice(0, 20);
-  localStorage.setItem('gp_title', _pseudoTitle);
-  showToast(_pseudoTitle ? '✅ Titre appliqué : ' + _pseudoTitle : '✅ Titre supprimé');
+.shop-desc {
+  font-size: .54rem;
+  color: var(--dim);
+  line-height: 1.55;
+  margin-bottom: 12px;
 }
 
-/* ── Zones favorites ── */
-function saveFavZone() {
-  if (_favZones.length >= 5) { showToast('📌 5 zones max — supprime-en une'); return; }
-  // CANVAS REMOVED
-  const ts   = Date.now();
-  _favZones.push({ label: 'Zone #' + (ts % 1000), ts, cx: 500, cy: 300 });
-  localStorage.setItem('gp_favzones', JSON.stringify(_favZones));
-  _renderFavZones();
-  showToast('📌 Zone sauvegardée');
+/* ── Grille dons ────────────────────────────────────────────── */
+.don-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
 }
 
-function _renderFavZones() {
-  const list = document.getElementById('fav-zones-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!_favZones.length) {
-    list.innerHTML = '<div class="fav-empty">Aucune zone sauvegardée.<br>Navigue vers une zone et clique "Sauvegarder".</div>';
-    return;
-  }
-  _favZones.forEach((z, i) => {
-    const d   = document.createElement('div');
-    d.className = 'fav-zone-row';
-    d.innerHTML = `<span class="fav-ico">📌</span>`
-      + `<span class="fav-label">${z.label}</span>`
-      + `<button class="fav-go" onclick="teleportFav(${i})">→ Aller</button>`
-      + `<button class="fav-del" onclick="deleteFav(${i})">✕</button>`;
-    list.appendChild(d);
-  });
+.don-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.1);
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  font-family: 'Chakra Petch', sans-serif;
+}
+.don-card:active { transform: scale(.95); }
+.don-card:hover  { border-color: rgba(245,200,66,.4); background: rgba(245,200,66,.06); }
+
+.don-card.featured {
+  border-color: var(--gold);
+  background: rgba(245,200,66,.1);
+  box-shadow: 0 0 14px rgba(245,200,66,.2);
 }
 
-function teleportFav(i) {
-  const z = _favZones[i]; if (!z) return;
-  // CANVAS REMOVED
-  closeModal('modal-shop');
-  showToast('📌 Téléportation vers ' + z.label);
+.don-badge-top {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #000;
+  font-size: .36rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
-function deleteFav(i) {
-  _favZones.splice(i, 1);
-  localStorage.setItem('gp_favzones', JSON.stringify(_favZones));
-  _renderFavZones();
+.don-ico     { font-size: 1.4rem; line-height: 1; }
+.don-amount  { font-family: 'Space Mono', monospace; font-size: .7rem; font-weight: 700; color: var(--gold); }
+.don-label   { font-size: .44rem; color: var(--dim); }
+
+.don-libre-card .don-amount-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.don-libre-card .don-amount-input input {
+  width: 44px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 4px;
+  color: var(--gold);
+  font-family: 'Space Mono', monospace;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 2px 4px;
+  text-align: center;
+}
+.don-libre-card .don-amount-input span { font-size: .52rem; color: var(--dim); }
+
+/* Supporters list */
+.supporters-wrap { margin-top: 10px; }
+.supporters-title { font-size: .52rem; color: var(--dim); font-weight: 600; letter-spacing: .05em; margin-bottom: 6px; }
+.supporters-list  { display: flex; flex-wrap: wrap; gap: 5px; min-height: 28px; }
+
+.supporter-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(255,215,0,.08);
+  border: 1px solid rgba(255,215,0,.2);
+  font-size: .5rem;
+}
+.sup-star { color: #ffd700; }
+.sup-name { color: var(--text); }
+.no-supporters { font-size: .52rem; color: var(--dim); font-style: italic; padding: 6px 0; }
+
+/* ── Cosmétiques ────────────────────────────────────────────── */
+.cosmetique-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-/* ── Liste supporters (optionnel) ── */
-async function _loadSupporters() {
-  const list = document.getElementById('supporters-list');
-  if (!list) return;
-  list.innerHTML = '<div style="font-size:.48rem;color:var(--dim);text-align:center;padding:6px 0">Chargement…</div>';
-  try {
-    const d = await apiFetch('/api/pixelwar/supporters', 'GET');
-    const supporters = d?.supporters || [];
-    if (!supporters.length) {
-      list.innerHTML = '<div class="no-supporters">Sois le premier à soutenir ! ❤️</div>'; return;
-    }
-    list.innerHTML = '';
-    supporters.slice(0, 10).forEach(s => {
-      const d2 = document.createElement('div');
-      d2.className = 'supporter-item';
-      d2.innerHTML = `<span class="sup-star">★</span><span class="sup-name">@${s.username}</span>`;
-      list.appendChild(d2);
-    });
-  } catch(_) {
-    list.innerHTML = '<div class="no-supporters">Sois le premier à soutenir ! ❤️</div>';
-  }
+.cosmetique-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.1);
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  font-family: 'Chakra Petch', sans-serif;
+}
+.cosmetique-card:active { transform: scale(.96); }
+.cosmetique-card:hover:not(.locked) { border-color: rgba(245,200,66,.4); }
+.cosmetique-card.locked { opacity: .7; }
+.cosmetique-card.active-style { border-color: var(--gold); background: rgba(245,200,66,.12); }
+
+.cos-preview {
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 0px transparent);
+}
+/* Aperçus styles */
+.cos-default { color: #3690ea; }
+.cos-neon    { color: #00ff88; filter: drop-shadow(0 0 4px #00ff88); }
+.cos-pastel  { color: #ffb3c8; }
+.cos-metal   { color: #c0c0c0; filter: drop-shadow(0 0 2px rgba(255,255,255,.4)); }
+.cos-glitch  { color: #ff00ff; animation: glitchPreview 1.2s ease-in-out infinite; }
+.cos-ink     { color: #1a1a2e; -webkit-text-stroke: 1px rgba(255,255,255,.4); }
+
+@keyframes glitchPreview {
+  0%,100%{ transform:translateX(0); opacity:1; }
+  20%    { transform:translateX(-1px); opacity:.7; color:#00ffff; }
+  40%    { transform:translateX(1px);  opacity:.9; color:#ff00ff; }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  updateNotifBtn();
-  _applyHandedness();
+.cos-name  { font-size: .52rem; font-weight: 600; color: var(--text); }
+.cos-price { font-size: .46rem; color: var(--dim); }
+.cos-lock  { position: absolute; top: 6px; right: 6px; font-size: .72rem; opacity: .6; }
+.free-badge { color: var(--green) !important; font-weight: 700; }
 
-  /* ── Exposition sur window pour gp-engine.js ── */
-  window.COLORS       = COLORS;
-  window.GOLD_COLOR   = GOLD_COLOR;
+.signature-row { width: 100%; }
 
-  Object.defineProperties(window, {
-    activeColor:    { get: () => activeColor,    set: v => { activeColor    = v; }, configurable: true },
-    goldStock:      { get: () => goldStock,      set: v => { goldStock      = v; }, configurable: true },
-    pixelsPlaced:   { get: () => pixelsPlaced,   set: v => { pixelsPlaced   = v; }, configurable: true },
-    piUsername:     { get: () => piUsername,     set: v => { piUsername     = v; }, configurable: true },
-    piConnected:    { get: () => piConnected,    set: v => { piConnected    = v; }, configurable: true },
-    GOLD_MAX_ACTIVE:{ get: () => GOLD_MAX_ACTIVE,set: v => { GOLD_MAX_ACTIVE= v; }, configurable: true },
-    STOCK_CAP:      { get: () => 60,             configurable: true }, // compat gp-engine rollback
-  });
+/* ── Zones favorites ────────────────────────────────────────── */
+.fav-zones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  min-height: 40px;
+}
 
-  window.apiFetch      = apiFetch;
-  window.showToast     = showToast;
-  window.updateStockUI = updateStockUI;
-  window.saveLSState   = saveLSState;
-  window.getRechargeS  = getRechargeS;
-  window.SENTINEL      = SENTINEL;
+.fav-empty {
+  font-size: .52rem;
+  color: var(--dim);
+  text-align: center;
+  padding: 10px 0;
+  line-height: 1.5;
+}
 
-  _initShopUI();
-  /* Masquer l'écran de chargement et afficher le welcome */
-  setTimeout(() => {
-    document.getElementById('screen-loading').classList.add('hidden');
-    document.getElementById('screen-welcome').classList.remove('hidden');
-  }, 600);
-});
-</script>
+.fav-zone-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  font-size: .54rem;
+}
+.fav-ico   { font-size: .8rem; flex-shrink: 0; }
+.fav-label { flex: 1; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-</body>
-</html>
+.fav-go, .fav-del {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: .48rem;
+  font-family: 'Chakra Petch', sans-serif;
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.fav-go  { background: rgba(56,212,138,.15); border: 1px solid rgba(56,212,138,.3); color: var(--green); }
+.fav-del { background: rgba(232,60,80,.12);  border: 1px solid rgba(232,60,80,.25); color: var(--red); }
+.fav-go:active  { background: rgba(56,212,138,.3); }
+.fav-del:active { background: rgba(232,60,80,.25); }
+
+.btn-fav-add {
+  width: 100%;
+  padding: 9px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.05);
+  border: 1.5px dashed rgba(255,255,255,.2);
+  color: var(--dim);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .58rem;
+  transition: all .14s;
+}
+.btn-fav-add:active { background: rgba(255,255,255,.1); }
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.badge-ico   { font-size: 1.6rem; line-height: 1; }
+.badge-name  { font-size: .54rem; font-weight: 700; color: var(--text); }
+.badge-desc  { font-size: .44rem; color: var(--dim); text-align: center; line-height: 1.4; }
+.badge-status { font-size: .44rem; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+.locked-badge   { background: rgba(255,255,255,.07); color: var(--dim); }
+.unlocked-badge { background: rgba(56,212,138,.18); color: var(--green); }
+
+/* ── Pseudo perso ────────────────────────────────────────────── */
+.pseudo-custom-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.pseudo-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.18);
+  color: var(--text);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .6rem;
+}
+.pseudo-input::placeholder { color: var(--dim); }
+.pseudo-input:focus { outline: none; border-color: var(--gold); }
+
+.btn-pseudo-apply {
+  padding: 8px 14px;
+  border-radius: 7px;
+  background: rgba(245,200,66,.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .58rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background .14s;
+}
+.btn-pseudo-apply:active { background: rgba(245,200,66,.3); }
+
+/* ══════════════════════════════════════════════════════════════
+   BOUTIQUE 2 COLONNES — style.css additions Partie 4
+══════════════════════════════════════════════════════════════ */
+
+/* Conteneur pleine largeur, no scroll */
+.shop2-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: min(700px, 96vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8);
+  animation: popIn .22s cubic-bezier(.22,1,.36,1);
+}
+
+/* Header boutique compact */
+.shop2-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.shop2-title {
+  font-family: 'Space Mono', monospace;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .06em;
+}
+.shop2-subtitle {
+  font-size: .46rem;
+  color: var(--dim);
+  flex: 1;
+}
+.shop2-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+  color: var(--dim);
+  font-size: .8rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.shop2-close:active { background: rgba(232,60,80,.25); color: var(--red); }
+
+/* Corps 2 colonnes */
+.shop2-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.shop2-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.shop2-col-left {
+  flex: 1;
+  border-right: 1px solid var(--border);
+}
+
+.shop2-col-right {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.shop2-col-title {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .04em;
+  flex-shrink: 0;
+}
+
+.shop2-col-label {
+  font-size: .48rem;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.shop2-divider {
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* Item boutique (ligne) */
+.shop2-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  cursor: pointer;
+  transition: all .14s;
+  flex-shrink: 0;
+}
+.shop2-item:active { transform: scale(.97); background: rgba(255,255,255,.08); }
+.shop2-item:hover  { border-color: rgba(245,200,66,.35); }
+
+.shop2-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop2-item-ico {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.shop2-ico-large { font-size: 1.3rem; }
+
+.shop2-item-name {
+  font-size: .58rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+.shop2-item-desc {
+  font-size: .44rem;
+  color: var(--dim);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.shop2-price-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: 'Space Mono', monospace;
+  font-size: .62rem;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* Pack bundle */
+.shop2-pack-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(112,40,200,.2), rgba(245,200,66,.1));
+  border: 1.5px solid rgba(245,200,66,.4);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .58rem;
+  font-weight: 700;
+  color: var(--text);
+  flex-shrink: 0;
+  transition: all .14s;
+}
+.shop2-pack-btn:active { transform: scale(.97); background: linear-gradient(135deg, rgba(112,40,200,.35), rgba(245,200,66,.18)); }
+.shop2-pack-price {
+  font-family: 'Space Mono', monospace;
+  color: var(--gold);
+  font-size: .7rem;
+}
+
+/* Chips style actif */
+.shop2-active-style {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .44rem;
+  color: var(--dim);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.shop2-style-chip {
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .46rem;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+  color: var(--dim);
+  cursor: pointer;
+  transition: all .12s;
+}
+.shop2-style-chip.chip-active {
+  border-color: var(--gold);
+  background: rgba(245,200,66,.15);
+  color: var(--gold);
+}
+.shop2-style-chip.chip-locked {
+  opacity: .4;
+  cursor: not-allowed;
+}
+.shop2-style-chip:not(.chip-locked):active { transform: scale(.93); }
+
+/* ── Colonne dons ── */
+.shop2-don-msg {
+  font-size: .52rem;
+  color: var(--dim);
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.shop2-don-reward {
+  display: block;
+  margin-top: 4px;
+  font-size: .5rem;
+  color: var(--text);
+}
+
+.shop2-don-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.shop2-don-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 4px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.1);
+  font-family: 'Chakra Petch', sans-serif;
+  cursor: pointer;
+  transition: all .14s;
+  position: relative;
+}
+.shop2-don-btn:active { transform: scale(.95); }
+.shop2-don-btn:hover  { border-color: rgba(245,200,66,.4); background: rgba(245,200,66,.07); }
+
+.shop2-don-featured {
+  border-color: var(--gold);
+  background: rgba(245,200,66,.1);
+  box-shadow: 0 0 10px rgba(245,200,66,.15);
+}
+.shop2-don-badge {
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: .7rem;
+}
+
+.shop2-don-amt {
+  font-family: 'Space Mono', monospace;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.shop2-don-lbl {
+  font-size: .44rem;
+  color: var(--dim);
+}
+
+/* Montant libre */
+.shop2-libre-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.shop2-libre-input {
+  flex: 1;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.18);
+  color: var(--gold);
+  font-family: 'Space Mono', monospace;
+  font-size: .62rem;
+  font-weight: 700;
+  min-width: 0;
+}
+.shop2-libre-input:focus { outline: none; border-color: var(--gold); }
+.shop2-libre-btn {
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(245,200,66,.15);
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: .54rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.shop2-libre-btn:active { background: rgba(245,200,66,.3); }
+
+/* Supporters */
+.shop2-sup-title {
+  font-size: .48rem;
+  color: var(--dim);
+  font-weight: 600;
+  letter-spacing: .05em;
+  flex-shrink: 0;
+}
+.shop2-sup-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  overflow: hidden;
+}
+
+/* Retour portail + portal */
+.tb-portal {
+  text-decoration: none;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-shop-btn {
+  border-color: rgba(245,200,66,.5) !important;
+  background: rgba(245,200,66,.14) !important;
+}
