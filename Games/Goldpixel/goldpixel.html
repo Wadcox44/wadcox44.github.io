@@ -1166,6 +1166,67 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('screen-welcome').classList.remove('hidden');
   }, 600);
 });
+
+  let MODE = 'NAV'; // NAV ou DRAW
+
+// boutons
+document.getElementById('btn-nav').onclick = () => {
+  MODE = 'NAV';
+  updateModeUI();
+};
+
+document.getElementById('btn-draw').onclick = () => {
+  MODE = 'DRAW';
+  updateModeUI();
+};
+
+function updateModeUI() {
+  document.getElementById('btn-nav').classList.toggle('active', MODE === 'NAV');
+  document.getElementById('btn-draw').classList.toggle('active', MODE === 'DRAW');
+}
+
+// click souris
+canvas.addEventListener('click', (e) => {
+  if (MODE !== 'DRAW') return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor(e.clientX - rect.left);
+  const y = Math.floor(e.clientY - rect.top);
+
+  GP.placePixel(x, y);
+});
+
+// tap mobile sécurisé
+let startX = 0;
+let startY = 0;
+let moved = false;
+
+canvas.addEventListener('touchstart', (e) => {
+  const t = e.touches[0];
+  startX = t.clientX;
+  startY = t.clientY;
+  moved = false;
+}, { passive: true });
+
+canvas.addEventListener('touchmove', (e) => {
+  const t = e.touches[0];
+  if (Math.hypot(t.clientX - startX, t.clientY - startY) > 5) {
+    moved = true;
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchend', (e) => {
+  if (MODE !== 'DRAW') return;
+  if (moved) return;
+
+  const t = e.changedTouches[0];
+  const rect = canvas.getBoundingClientRect();
+
+  const x = Math.floor(t.clientX - rect.left);
+  const y = Math.floor(t.clientY - rect.top);
+
+  GP.placePixel(x, y);
+});
 </script>
 
 </body>
