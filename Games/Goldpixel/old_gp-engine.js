@@ -7,10 +7,13 @@ const GP = (() => {
   'use strict';
 
   /* ── CONFIG ────────────────────────────────────────────────── */
+  const DEV_MODE      = true; // ACTIVÉ: Stock illimité (Étape 8)
   const POLL_MS       = 3000;
-  const STOCK_MAX     = 999999; // ILLIMITÉ (Demande de test)
-  const COOLDOWN_MS   = 30000;
+  const STOCK_MAX     = DEV_MODE ? 999999 : 5;
+  const COOLDOWN_MS   = DEV_MODE ? 0 : 30000;
   const BG_COLOR      = '#f5f0e8';
+  
+  if (DEV_MODE) window.DEV_MODE = true;
 
   /* ── ÉTAT ──────────────────────────────────────────────────── */
   let CANVAS_W = 100; // Mis à jour via API
@@ -19,6 +22,7 @@ const GP = (() => {
   
   // Echelle visuelle (CSS Pixel)
   let cssScale = 1;
+  let ZOOM_LEVELS = [1, 5, 12]; // [Panoramique, Intermédiaire, Précision]
 
   const _pix = new Map(); // "col,row" → { color, user }
 
@@ -29,6 +33,9 @@ const GP = (() => {
   // Undo system
   let _undo  = null;
   let _undoT = null;
+
+  // Input
+  let _lastInputType = 'mouse'; // 'mouse' | 'touch'
 
   // Réseau
   let _lastTs     = 0;
@@ -41,21 +48,96 @@ const GP = (() => {
      INIT
   ══════════════════════════════════════════════════════════════ */
   function init() {
-    cv = document.getElementById('gameCanvas');
+    cv        = document.getElementById('gameCanvas');
     innerWrap = document.getElementById('canvas-inner');
     gridOverlay = document.getElementById('grid-overlay');
 
     if (cv) {
       ctx = cv.getContext('2d');
-      // Pour éviter les bugs drag, on desactive sur l'innerWrap
       if (innerWrap) innerWrap.addEventListener('dragstart', e => e.preventDefault());
-      cv.addEventListener('pointerdown', _onCanvasClick);
     }
-    
+
+    /* ── TOUCH : 1 doigt = drag (pan), tap sans mouvement = interaction ──
+       Listeners sur canvas-wrap (le conteneur scrollable), pas sur le canvas,
+       pour que scrollLeft/scrollTop soient directement manipulables.
+       Le seuil de 5px distingue un tap d'un drag sans ambiguïté. ── */
     const wrap = document.getElementById('canvas-wrap');
     if (wrap) {
-      wrap.addEventListener('touchstart', _onTouchStart, { passive: false });
-      wrap.addEventListener('touchmove', _onTouchMove, { passive: false });
+      // État du geste courant (scope local, une seule source de vérité)
+      let _t0x = 0;          // clientX au touchstart
+      let _t0y = 0;          // clientY au touchstart
+      let _scrollX0 = 0;     // scrollLeft au touchstart
+      let _scrollY0 = 0;     // scrollTop  au touchstart
+      let _isDragging = false; // true dès que déplacement > DRAG_THRESHOLD
+      let _hasMoved = false;  // true si le doigt a bougé (bloque la pose au touchend)
+
+      const DRAG_THRESHOLD = 5; // px — même valeur que l'ancien code
+
+      wrap.addEventListener('touchstart', e => {
+        // Ignorer multi-touch (pinch) — pas de zoom demandé
+        if (e.touches.length !== 1) { _hasMoved = true; return; }
+
+        _lastInputType = 'touch';
+        const t = e.touches[0];
+        _t0x      = t.clientX;
+        _t0y      = t.clientY;
+        _scrollX0 = wrap.scrollLeft;
+        _scrollY0 = wrap.scrollTop;
+        _isDragging = false;
+        _hasMoved   = false;
+      }, { passive: true });
+
+      wrap.addEventListener('touchmove', e => {
+        if (e.touches.length !== 1) return;
+        const t  = e.touches[0];
+        const dx = t.clientX - _t0x;
+        const dy = t.clientY - _t0y;
+
+        if (!_isDragging && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+          _isDragging = true;
+          _hasMoved   = true; // pose bloquée pour ce geste
+        }
+
+        if (_isDragging) {
+          // Déplacer le viewport en soustrayant le delta (sens naturel)
+          wrap.scrollLeft = _scrollX0 - dx;
+          wrap.scrollTop  = _scrollY0 - dy;
+          // Cacher le fantôme pendant le drag
+          _updateGhost(null, null);
+        }
+      }, { passive: true });
+
+      wrap.addEventListener('touchend', e => {
+        if (e.touches.length !== 0) return; // encore des doigts → attendre
+
+        if (!_hasMoved) {
+          // TAP propre : aucun mouvement détecté → poser un pixel
+          const t = e.changedTouches[0];
+          _onCanvasClick(t, 'touch');
+        }
+
+        _isDragging = false;
+        _hasMoved   = false;
+      }, { passive: true });
+    }
+
+    /* ── SOURIS : survol (ghost) + clic (pose) — inchangé ── */
+    if (cv) {
+      cv.addEventListener('pointermove', e => {
+        if (e.pointerType === 'mouse') {
+          _lastInputType = 'mouse';
+          const coords = _resolveCoords(e);
+          if (coords) _updateGhost(coords.col, coords.row);
+          else        _updateGhost(null, null);
+        }
+      });
+      cv.addEventListener('pointerleave', () => _updateGhost(null, null));
+
+      cv.addEventListener('click', e => {
+        // Ignorer si le dernier geste était tactile (évite le ghost-click mobile)
+        if (_lastInputType === 'touch') return;
+        _onCanvasClick(e, 'mouse');
+      });
     }
 
     _buildPalette();
@@ -65,21 +147,23 @@ const GP = (() => {
   /* ══════════════════════════════════════════════════════════════
      CANVAS RENDU
   ══════════════════════════════════════════════════════════════ */
-  function _expand(w, h) {
-    if (w <= CANVAS_W && h <= CANVAS_H && _gridLoaded) return;
-    CANVAS_W = w || CANVAS_W;
-    CANVAS_H = h || CANVAS_H;
+  function _expand() {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
+
+    // 2. Format RECTANGLE HORIZONTAL (largeur > hauteur STRICTEMENT)
+    const margin = 20;
+    const w = wrap.clientWidth - margin;
+    const h = wrap.clientHeight - margin;
+
+    CANVAS_W = Math.max(w, 100);
+    // On force la hauteur à être proportionnellement horizontale (60% de la largeur max)
+    CANVAS_H = Math.max(Math.min(h, Math.floor(CANVAS_W * 0.6)), 50);
     
     if (cv) {
       cv.width = CANVAS_W;
       cv.height = CANVAS_H;
-      ctx.fillStyle = BG_COLOR;
-      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-      _pix.forEach((v, k) => {
-        const [col, row] = k.split(',').map(Number);
-        _px(col, row, v.color);
-      });
-      // Met à l'échelle idéale de base (fit l'écran au besoin)
+      _redrawFull();
       fitToScreen();
     }
   }
@@ -88,6 +172,16 @@ const GP = (() => {
     if (!ctx) return;
     ctx.fillStyle = color;
     ctx.fillRect(col, row, 1, 1);
+  }
+
+  function _redrawFull() {
+    if (!ctx) return;
+    ctx.fillStyle = BG_COLOR;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    _pix.forEach((v, k) => {
+      const parts = k.split(',');
+      _px(Number(parts[0]), Number(parts[1]), v.color);
+    });
   }
 
   function _applyPx(col, row, color, user, recordUndo = false) {
@@ -101,26 +195,86 @@ const GP = (() => {
     
     if (color === BG_COLOR || color === null) {
       _pix.delete(`${col},${row}`);
-      _px(col, row, BG_COLOR); // Effacement physique
     } else {
       _pix.set(`${col},${row}`, { color, user });
-      _px(col, row, color);
     }
+    
+    // Rendu Stable (Étape 4) : Redraw complet du tableau dynamique
+    _redrawFull();
+  }
+  
+  // Reset Canvas (Étape 5)
+  function resetCanvas() {
+    _pix.clear();
+    _redrawFull();
+    window.showToast?.('🧹 Canvas remis à blanc !');
   }
 
   /* ══════════════════════════════════════════════════════════════
      INPUTS & ZOOM
   ══════════════════════════════════════════════════════════════ */
-  function _onCanvasClick(e) {
-    if (!cv || !innerWrap) return;
-    const rect = innerWrap.getBoundingClientRect();
-    
-    // Le clic est calculé proportionnellement au niveau de zoom !
-    const col = Math.floor((e.clientX - rect.left) / cssScale);
-    const row = Math.floor((e.clientY - rect.top) / cssScale);
+  let ghostEl;
+  let _ghostCell = null;
 
+  function _resolveCoords(e) {
+    if (!cv || !innerWrap) return null;
+    const rect = cv.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cellSize = rect.width / CANVAS_W;
+    const col = Math.floor(x / cellSize);
+    const row = Math.floor(y / cellSize);
+    
     if (col >= 0 && col < CANVAS_W && row >= 0 && row < CANVAS_H) {
-      placePixel(col, row);
+      return { col, row };
+    }
+    return null; // Hors-limites
+  }
+
+  function _updateGhost(col, row) {
+    if (!ghostEl) ghostEl = document.getElementById('ghost-pixel');
+    if (!ghostEl) return;
+    
+    if (col === null || row === null) {
+      ghostEl.style.display = 'none';
+      _ghostCell = null;
+      document.getElementById('coord-display').textContent = 'X: -- | Y: --';
+      return;
+    }
+    
+    _ghostCell = { col, row };
+    document.getElementById('coord-display').textContent = `X: ${col} | Y: ${row}`;
+    ghostEl.style.display = 'block';
+    
+    // Pourcentage parfait : aucun problème de redimensionnement dynamique
+    ghostEl.style.width  = (100 / CANVAS_W) + '%';
+    ghostEl.style.height = (100 / CANVAS_H) + '%';
+    ghostEl.style.left   = ((col / CANVAS_W) * 100) + '%';
+    ghostEl.style.top    = ((row / CANVAS_H) * 100) + '%';
+    
+    ghostEl.style.backgroundColor = window.activeColor || BG_COLOR;
+  }
+
+  function _onCanvasClick(e, inputType) {
+    const coords = _resolveCoords(e);
+    if (!coords) return;
+    const { col, row } = coords;
+
+    // 1. Zoom (Smart Tap) : S'active si on est pas au niveau de zoom maximal.
+    if (cssScale < ZOOM_LEVELS[2] * 0.9) {
+      zoomToCell(col, row);
+      window.showToast?.('🔍 Zoom sur cible. Re-touche pour peindre !');
+      // Pose un tracker visuel mais "Ne pas poser de pixel immédiatement"
+      _updateGhost(col, row); 
+      return; 
+    }
+
+    // 2. Pose de pixel confirmée UNIQUEMENT si on était déjà zoomé
+    placePixel(col, row);
+    
+    // Nettoyage immédiat
+    if (inputType === 'touch') {
+       _updateGhost(null, null);
     }
   }
 
@@ -128,74 +282,46 @@ const GP = (() => {
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
     
-    // On retire une petite marge (20px de chaque côté) pour que le cadre et le halo lumineux respirent
-    const padding = 40;
+    // Échelle initiale à 1 puisque _expand() s'est ajusté pile poil au conteneur !
+    cssScale = 1;
     
-    const scaleX = (wrap.clientWidth - padding) / CANVAS_W;
-    const scaleY = (wrap.clientHeight - padding) / CANVAS_H;
-    
-    // Math.min garantit que le canvas rentre ENTIEREMENT en largeur ET en hauteur (aucun bord coupé)
-    cssScale = Math.min(scaleX, scaleY);
-    if (cssScale > 1 && CANVAS_W > wrap.clientWidth) cssScale = 1;
+    ZOOM_LEVELS[0] = 1;           // Vue globale
+    ZOOM_LEVELS[1] = 4;           // Vue moyenne
+    ZOOM_LEVELS[2] = 12;          // Vue précision (Pixel art)
+
     _applyZoom();
   }
 
-  /* ── PINCH TO ZOOM MOBILE ── */
-  let _touchStartDist = 0;
-  let _touchStartScale = 1;
-
-  function _onTouchStart(e) {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      _touchStartDist = Math.sqrt(dx*dx + dy*dy);
-      _touchStartScale = cssScale;
-    }
-  }
-
-  function _onTouchMove(e) {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const wrap = document.getElementById('canvas-wrap');
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      
-      const factor = dist / _touchStartDist;
-      let newScale = _touchStartScale * factor;
-      if (newScale < 0.05) newScale = 0.05;
-      if (newScale > 30) newScale = 30;
-
-      // Centrage logique sous les deux doigts
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      const rect = wrap.getBoundingClientRect();
-      
-      // Coordonnées logiques
-      const lx = (cx - rect.left + wrap.scrollLeft) / cssScale;
-      const ly = (cy - rect.top + wrap.scrollTop) / cssScale;
-
-      cssScale = newScale;
-      _applyZoom();
-
-      // Ajuster le scroll pour rester au centre du pincement
-      wrap.scrollLeft = (lx * cssScale) - (cx - rect.left);
-      wrap.scrollTop = (ly * cssScale) - (cy - rect.top);
-    }
-  }
-
+  // Zoom HUD / Centré sur Viewport (Étape 3)
   function zoomIn() {
-    // Si on est vraiment dézoomé, on accélère le pas
-    const step = cssScale < 1 ? 0.2 : (cssScale < 5 ? 1 : 2);
-    cssScale = Math.min(cssScale + step, 20); // max 20x pour bien voir les pixels
-    _applyZoom();
+    const next = ZOOM_LEVELS.find(lvl => lvl > cssScale + 0.1);
+    if (next) _zoomAndCenterScreen(next);
   }
 
   function zoomOut() {
-    const step = cssScale <= 1 ? 0.2 : (cssScale <= 5 ? 1 : 2);
-    cssScale = Math.max(cssScale - step, 0.1);
+    const prev = [...ZOOM_LEVELS].reverse().find(lvl => lvl < cssScale - 0.1);
+    if (prev) {
+      _zoomAndCenterScreen(prev);
+    } else {
+      fitToScreen(); // Fallback panoramique pur
+    }
+  }
+
+  function _zoomAndCenterScreen(newScale) {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!wrap) return;
+
+    // 1. Point central actuel du contenant, mappé dans l'espace logique global (col, row approx)
+    const cx = (wrap.scrollLeft + wrap.clientWidth / 2) / cssScale;
+    const cy = (wrap.scrollTop  + wrap.clientHeight / 2) / cssScale;
+
+    // 2. Modifie l'échelle
+    cssScale = newScale;
     _applyZoom();
+
+    // 3. Ajuste les scrollbars pour retomber sur le même centre cible
+    wrap.scrollLeft = (cx * cssScale) - (wrap.clientWidth / 2);
+    wrap.scrollTop  = (cy * cssScale) - (wrap.clientHeight / 2);
   }
 
   function resetView() {
@@ -225,17 +351,38 @@ const GP = (() => {
   }
 
   function zoomToCell(col, row) {
-    // Zoom direct
-    cssScale = Math.max(cssScale, 10);
+    // Zoom direct absolu au niveau de PRÉCISION
+    cssScale = ZOOM_LEVELS[2];
     _applyZoom();
 
     // Pan sur col, row
     const wrap = document.getElementById('canvas-wrap');
     if (!wrap) return;
-    const px = Math.round(col * cssScale);
-    const py = Math.round(row * cssScale);
+    
+    // Position idéale : centre du pixel choisi (col + 0.5) mutiplié par l'échelle d'affichage
+    const px = Math.round((col + 0.5) * cssScale);
+    const py = Math.round((row + 0.5) * cssScale);
+    
+    // On glisse les barres de défilement pour centrer la coordonnée à l'écran
     wrap.scrollLeft = px - wrap.clientWidth / 2;
     wrap.scrollTop  = py - wrap.clientHeight / 2;
+  }
+
+  function goToInputCoords() {
+    const elX = document.getElementById('coord-x');
+    const elY = document.getElementById('coord-y');
+    if (!elX || !elY) return;
+
+    const x = parseInt(elX.value, 10);
+    const y = parseInt(elY.value, 10);
+
+    if (isNaN(x) || isNaN(y)) return;
+    if (x >= 0 && x < CANVAS_W && y >= 0 && y < CANVAS_H) {
+      zoomToCell(x, y);
+      _updateGhost(x, y);
+    } else {
+      window.showToast?.('⚠️ Coordonnées hors limites !');
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -287,6 +434,10 @@ const GP = (() => {
   function _updatePreview(color) {
     const el = document.getElementById('color-preview');
     if (el) el.style.background = color || '#3690ea';
+    // Le fantôme change instantanément de couleur quand on choisit la palette (s'il était affiché)
+    if (_ghostCell) {
+       _updateGhost(_ghostCell.col, _ghostCell.row);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -388,29 +539,13 @@ const GP = (() => {
      RÉSEAU
   ══════════════════════════════════════════════════════════════ */
   async function _loadGrid() {
-    if (!window.apiFetch) return;
     try {
-      const d = await window.apiFetch('/api/pixelwar/grid', 'GET');
-      if (d?.canvasW && d?.canvasH) {
-        _expand(d.canvasW, d.canvasH);
-      } else {
-        _expand(3000, 3000); 
-      }
-
-      if (d?.pixels) {
-        d.pixels.forEach(p => _applyPx(p.col, p.row, p.color, p.user, false));
-        if (window.SENTINEL && window.piUsername) {
-          d.pixels
-            .filter(p => p.user === '@' + window.piUsername)
-            .forEach(p => window.SENTINEL.registerMyPixel(p.col, p.row));
-        }
-      }
+      _expand();
       
-      if (d?.ts) _lastTs = d.ts;
+      // 1. Vider complétement le canvas (Aucun dessin d'oeuvre d'art ou de pixels)
       _gridLoaded = true;
-      
-      // Dessiner l'oeuvre centrale demandée
-      _drawMasterpiece();
+      _pix.clear();
+      _redrawFull();
     } catch (e) {
       console.warn('[GP] loadGrid:', e);
     }
@@ -485,67 +620,17 @@ const GP = (() => {
   ══════════════════════════════════════════════════════════════ */
   async function startEngine() {
     init();
-    _initSocket();
-    await _loadGrid();
-    _pollTimer = setInterval(_poll, POLL_MS);
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     OEUVRE D'ART LOCALE POUR TEST
-  ══════════════════════════════════════════════════════════════ */
-  function _drawMasterpiece() {
-    const art = [
-      "....Y.......Y.......Y....",
-      "...YYY.....YYY.....YYY...",
-      "..YYYYY...YYYYY...YYYYY..",
-      "..YYRYY...YYBYY...YYGYY..",
-      "..YYYYY..YYYYYYY..YYYYY..",
-      "...YYYYY.YYYYYYY.YYYYY...",
-      "...YYYYYYYYYYYYYYYYYYY...",
-      "....YYYYYYYYYYYYYYYYY....",
-      "......YYYYYYYYYYYYYY.....",
-      ".......YYYYYYYYYYYY......",
-      ".........................",
-      ".........................",
-      "....GGGGGG......PPPPPP...",
-      "...GGGGGGGG....PPPPPPPP..",
-      "..GG......GG..PP......PP.",
-      "..GG..........PP......PP.",
-      "..GG...GGGGG..PPPPPPPPPP.",
-      "..GG......GG..PP.........",
-      "...GGGGGGGG...PP.........",
-      "....GGGGGG....PP........."
-    ];
     
-    // Y=Gold, R=Red, B=Blue, G=Green(Logo), P=Purple(Logo)
-    const colors = {
-      'Y': '#ffd700', 'R': '#e83c50', 'B': '#3690ea', 
-      'G': '#42d48a', 'P': '#9b59b6' 
-    };
-    
-    const pixelScale = 15; // Agrandissement pour visibilité
-    const artW = art[0].length * pixelScale;
-    const artH = art.length * pixelScale;
-    const startX = Math.floor(CANVAS_W / 2 - artW / 2);
-    const startY = Math.floor(CANVAS_H / 2 - artH / 2);
-
-    for (let r = 0; r < art.length; r++) {
-      for (let c = 0; c < art[r].length; c++) {
-        const char = art[r][c];
-        if (colors[char]) {
-          // On le dessine sans encombrer le Socket
-          for (let dy = 0; dy < pixelScale; dy++) {
-            for (let dx = 0; dx < pixelScale; dx++) {
-              _applyPx(startX + c * pixelScale + dx, startY + r * pixelScale + dy, colors[char], '@Antigravity', false);
-            }
-          }
-        }
-      }
-    }
+    // 3. NETTOYAGE ENGINE - Démarrage complet à vide
+    // AUCUN chargement de contenu pré-chargé ni fetch
+    _gridLoaded = true;
+    _expand();
+    _pix.clear();
+    _redrawFull();
   }
 
   Object.defineProperty(window, '_localStock', { get: () => _localStock, configurable: true });
 
-  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel };
+  return { startEngine, pick: _pick, pickGold, zoomIn, zoomOut, resetView, undo, zoomToCell, placePixel, resetCanvas, goToInputCoords };
 
 })();
